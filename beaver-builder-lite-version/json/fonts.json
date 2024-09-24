@@ -7159,6 +7159,11 @@
     "fallback": "serif"
   }
 }, {
+  "SUSE": {
+    "variants": ["100", "200", "300", "regular", "500", "600", "700", "800"],
+    "fallback": "sans-serif"
+  }
+}, {
   "Sacramento": {
     "variants": ["regular"],
     "fallback": "cursive"

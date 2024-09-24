@@ -9061,6 +9061,7 @@
 					if( 'filter_meta_label' == preview && ! previewText ) {
 						previewText = settings[ 'filter_meta_key' ];
 					}
+					previewText = FLBuilderSettingsForms.escapeHTML( previewText );
 					link.siblings( '.fl-form-field-preview-text' ).html( previewText );
 				}
 

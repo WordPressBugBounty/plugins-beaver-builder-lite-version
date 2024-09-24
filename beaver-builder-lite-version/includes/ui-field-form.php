@@ -84,7 +84,7 @@ text = previewData.value;
 				}
 			}
 		}
-
+		text = FLBuilderSettingsForms.escapeHTML(text)
 		#>
 		{{{text}}}
 	</div>
