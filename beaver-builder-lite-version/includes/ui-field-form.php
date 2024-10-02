@@ -36,7 +36,7 @@ function getPeviewData( form, preview, values ) {
 			}
 		}
 	}
-	
+
 	return prevData;
 }
 
@@ -66,7 +66,7 @@ text = previewData.value;
 
 						if ( 'icon' === field.type ) {
 							if ( '' !== data.value[ data.field.preview_text ] ) {
-								text = '<i class="' + data.value[ data.field.preview_text ] + '"></i>';
+								text = '<i class="' + FLBuilderSettingsForms.escapeHTML( data.value[ data.field.preview_text ] ) + '"></i>';
 							}
 						} else if ( 'select' === field.type ) {
 							text = field.options[ data.value[ data.field.preview_text ] ];
@@ -75,16 +75,15 @@ text = previewData.value;
 							text = data.value[ data.field.preview_text ].toString().replace( /&#39;/g, "'" );
 							tmp.innerHTML = text;
 							text = ( tmp.textContent || tmp.innerText || '' ).replace( /^(.{35}[^\s]*).*/, "$1" )  + '...';
+							text = FLBuilderSettingsForms.escapeHTML( text );
 						}
 					}
 					if( '' === text && 'filter_meta_label' === data.field.preview_text ) {
-						text = data.value['filter_meta_key'];
+						text = FLBuilderSettingsForms.escapeHTML( data.value['filter_meta_key'] );
 					}
-
 				}
 			}
 		}
-		text = FLBuilderSettingsForms.escapeHTML(text)
 		#>
 		{{{text}}}
 	</div>

@@ -9052,16 +9052,16 @@
 			if ( valid ) {
 				if ( typeof preview !== 'undefined' && typeof previewText !== 'undefined' ) {
 					if ( 'icon' === previewField?.data( 'type' ) ) {
-						previewText = '<i class="' + previewText + '"></i>';
+						previewText = '<i class="' + FLBuilderSettingsForms.escapeHTML( previewText ) + '"></i>';
 					}
 					else if ( previewText.length > 35 ) {
 						tmp.innerHTML = previewText;
 						previewText = ( tmp.textContent || tmp.innerText || '' ).replace( /^(.{35}[^\s]*).*/, "$1" ) + '...';
+						previewText = FLBuilderSettingsForms.escapeHTML( previewText );
 					}
 					if( 'filter_meta_label' == preview && ! previewText ) {
-						previewText = settings[ 'filter_meta_key' ];
+						previewText = FLBuilderSettingsForms.escapeHTML( settings[ 'filter_meta_key' ] );
 					}
-					previewText = FLBuilderSettingsForms.escapeHTML( previewText );
 					link.siblings( '.fl-form-field-preview-text' ).html( previewText );
 				}
 

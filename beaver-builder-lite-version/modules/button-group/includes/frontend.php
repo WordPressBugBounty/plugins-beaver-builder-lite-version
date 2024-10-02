@@ -1,4 +1,4 @@
-<div class="fl-button-group fl-button-group-layout-<?php echo $settings->layout; ?> fl-button-group-width-<?php echo $settings->width; ?>">
+<div class="fl-button-group fl-button-group-layout-<?php echo FLBuilderUtils::sanitize_html_class( $settings->layout ); ?> fl-button-group-width-<?php echo FLBuilderUtils::sanitize_html_class( $settings->width ); ?>">
 	<div class="fl-button-group-buttons" role="group" aria-label="<?php echo esc_attr( $settings->button_group_label ); ?>">
 		<?php
 		$button_group_node = "fl-node-$id";

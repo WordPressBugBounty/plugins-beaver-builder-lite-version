@@ -4,7 +4,7 @@ Tags: page builder, beaver builder, landing page, front-end builder, drag and dr
 Requires at least: 4.6
 Tested up to: 6.6
 Requires PHP: 7.0
-Stable tag: 2.8.3.7
+Stable tag: 2.8.3.9
 License: GPL2+
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -16,7 +16,7 @@ The best drag and drop WordPress Page Builder. Easily build beautiful home pages
 
 Beaver Builder is a flexible drag and drop page builder that works on the front end of your WordPress website. Whether you're a beginner or a professional, you're going to love taking control of your website. Stop writing HTML or wrestling with confusing shortcodes. With Beaver Builder, building beautiful, professional WordPress pages is as easy as dragging and dropping.
 
-Watch the video below or <a href="https://www.wpbeaverbuilder.com/go/demo?utm_medium=bb-lite&utm_source=repo-readme&utm_campaign=repo-demo-link" title="Beaver Builder Live Demo" target="_blank">try out the demo</a> to see it in action!
+Watch the video below or [try out the demo](https://www.wpbeaverbuilder.com/go/demo?utm_medium=bb-lite&utm_source=repo-readme&utm_campaign=repo-demo-link "Beaver Builder Live Demo") to see it in action!
 
 [youtube https://youtu.be/WUGyahZ5D2s?si=Xcbq2oPmV6P3KoD2]
 
@@ -49,8 +49,6 @@ There is a huge colony (_yeah, that's the term for a group of beavers_) of "Beav
 = Premium Features =
 
 *   Additional modules: Contact Form, Tabs, Slider, Pricing Table, Map, Blog Posts, Subscribe Form and many more.
-*   Beaver Themer Theme Builder.
-*   Beaver Builder Theme.
 *   Expert support from our world-class support team.
 *   Beautiful pre-made layout templates.
 *   Save, export, and reuse full-page layouts, rows, and modules.
@@ -102,7 +100,10 @@ For more information, please visit our [Knowledge Base](https://docs.wpbeaverbui
 
 == Frequently Asked Questions ==
 
+
 For information on using Beaver Builder, please visit our [Knowledge Base](https://docs.wpbeaverbuilder.com/?utm_medium=bb-lite&utm_source=repo-readme&utm_campaign=repo-install-kb-link "Beaver Builder Knowledge Base").
+
+For general questions or questions about purchasing a license, check out our [Frequently Asked Questions](https://www.wpbeaverbuilder.com/frequently-asked-questions/?utm_medium=bb-lite&utm_source=repo-readme&utm_campaign=repo-faq-link "Beaver Builder FAQs") page.
 
 == Screenshots ==
 
@@ -110,7 +111,7 @@ For information on using Beaver Builder, please visit our [Knowledge Base](https
 2. Drag and Drop modules rows and columns to build layouts
 3. Images can easily be modified to fit your needs, both inline and background
 4. Stylize heading and paragraph text using module settings
-5. You'll love our ready made responsive design features and straightforward responsive editor
+5. You'll love  our ready made responsive design features and straightforward responsive editor
 6. Access templates from the Beaver Builder interface and find more on Assistant.Pro
 
 == Changelog ==
@@ -119,4 +120,4 @@ Visit our [changelog page](https://www.wpbeaverbuilder.com/change-logs/?utm_medi
 
 == Upgrade Notice ==
 
-Visit our [changelog page](https://www.wpbeaverbuilder.com/change-logs/?utm_medium=bb-lite&utm_source=repo-readme&utm_campaign=repo-changelog-page "Beaver Builder Changelog") for up-to-date information on what has been going on with the development of Beaver Builder.
+Visit our [changelog page](https://www.wpbeaverbuilder.com/change-logs/?utm_medium=bb-lite&utm_source=repo-readme&utm_campaign=repo-upgrade-page) for up-to-date information on what has been going on with the development of Beaver Builder.

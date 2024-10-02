@@ -69,6 +69,11 @@
     "fallback": "sans-serif"
   }
 }, {
+  "Afacad Flux": {
+    "variants": ["100", "200", "300", "regular", "500", "600", "700", "800", "900"],
+    "fallback": "sans-serif"
+  }
+}, {
   "Agbalumo": {
     "variants": ["regular"],
     "fallback": "sans-serif"
@@ -1957,6 +1962,16 @@
   "Eczar": {
     "variants": ["regular", "500", "600", "700", "800"],
     "fallback": "serif"
+  }
+}, {
+  "Edu AU VIC WA NT Dots": {
+    "variants": ["regular", "500", "600", "700"],
+    "fallback": "cursive"
+  }
+}, {
+  "Edu AU VIC WA NT Guides": {
+    "variants": ["regular", "500", "600", "700"],
+    "fallback": "cursive"
   }
 }, {
   "Edu AU VIC WA NT Hand": {
@@ -7485,6 +7500,11 @@
   }
 }, {
   "Sixtyfour": {
+    "variants": ["regular"],
+    "fallback": "monospace"
+  }
+}, {
+  "Sixtyfour Convergence": {
     "variants": ["regular"],
     "fallback": "monospace"
   }

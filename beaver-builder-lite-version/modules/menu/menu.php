@@ -443,7 +443,7 @@ class FLMenuModule extends FLBuilderModule {
 	 * @return array
 	 */
 	public function woo_menu_cart_ajax_fragments( $fragments ) {
-		if ( ! defined( 'WOOCOMMERCE_CART' ) ) {
+		if ( defined( 'WC_VERSION' ) && version_compare( WC_VERSION, '9.3', '<=' ) && ! defined( 'WOOCOMMERCE_CART' ) ) {
 			define( 'WOOCOMMERCE_CART', true );
 		}
 
