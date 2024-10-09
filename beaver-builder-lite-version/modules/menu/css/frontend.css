@@ -81,6 +81,10 @@
 	color: #333;
 	border-radius: 0;
 }
+.fl-menu .fl-menu-mobile-toggle:focus-visible {
+	outline: 2px auto Highlight;
+	outline: 2px auto -webkit-focus-ring-color;
+}
 .fl-menu .fl-menu-mobile-toggle.text{
 	width: 100%;
 	text-align: center;
@@ -181,5 +185,9 @@ ul.fl-menu-horizontal li.mega-menu > ul.sub-menu ul.sub-menu {
 	border: 0 none;
 	color: inherit;
 	font-size: 18px;
-	padding: 10px 6px 10px 14px;
+	padding: 10px 6px;
+}
+.fl-menu-mobile-close:focus-visible {
+	outline: 2px auto Highlight;
+	outline: 2px auto -webkit-focus-ring-color;
 }

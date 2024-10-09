@@ -37,6 +37,11 @@
  				this._clickOrHover();
 			}
 
+			this._resizeFlyoutMenuPanel();
+		}, this ) );
+
+		$( window ).on( 'scroll', $.proxy( function( e ) {
+			this._resizeFlyoutMenuPanel();
 		}, this ) );
 
 		$( 'body' ).on( 'click', $.proxy( function( e ) {
@@ -727,14 +732,7 @@
 				winHeight	= $(window).height(),
 				fixedHeader	= $('header, header > div');
 
-			if ( button.hasClass( 'fl-active' ) ) {
-				posAttr[ position ]  = '0px';
-				posAttr[ 'height' ]  = winHeight + 'px';
-			} else {
-				posAttr[ position ]  = '-267px';
-			}
-
-			wrapFlyout.css( posAttr );
+			this._resizeFlyoutMenuPanel();
 
 			// Fix the push menu when builder ui panel is pinned.
 			if ( $( '.fl-builder-ui-pinned-content-transform' ).length > 0 && ! $( 'body' ).hasClass( 'fl-builder-edit' ) ) {
@@ -767,6 +765,54 @@
 			else {
 				opacity.hide();
 			}
+		},
+
+		/**
+		 * Resize or reposition the Flyout Menu Panel.
+		 * 
+		 * @since 2.8.1
+		 * @returns void
+		 */
+		_resizeFlyoutMenuPanel: function(){
+			const wrapper    = $( this.wrapperClass );
+			const wrapFlyout = wrapper.find( '.fl-menu-mobile-flyout' );
+				
+			if ( wrapFlyout.length > 0 ) {
+				wrapFlyout.css( this._getFlyoutMenuPanelPosition() );
+			}
+		},
+
+		/**
+		 * Compute the Flyout Menu Panel's position on the screen.
+		 * 
+		 * @since 2.8.1
+		 * @returns object
+		 */
+		_getFlyoutMenuPanelPosition: function() {
+			var wrapper        = $( this.wrapperClass ),
+				button         = wrapper.find( '.fl-menu-mobile-toggle' ),
+				wrapFlyout     = wrapper.find( '.fl-menu-mobile-flyout' ),
+				side           = wrapper.hasClass( 'fl-flyout-right' ) ? 'right' : 'left',
+				winHeight      = $(window).outerHeight(),
+				winTop         = $(window).scrollTop(),
+				adminBarHeight = $( '#wpadminbar' ).length ? $( '#wpadminbar' ).height() : 0,
+				flyoutPosition = {};
+
+			flyoutPosition[ side ]  = '-267px';
+			if ( ! button.hasClass( 'fl-active' ) ) {
+				return flyoutPosition;
+			}
+
+			flyoutPosition[ side ]  = '0px';
+			flyoutPosition[ 'height' ]  = winHeight + 'px';
+			flyoutPosition[ 'top' ] = '0px';
+			
+			if ( adminBarHeight > 0 ) {
+				const diff = adminBarHeight - winTop;
+				flyoutPosition[ 'top' ] = diff <= 0 ? '0px' : (diff) + 'px';
+			}
+
+			return flyoutPosition;
 		},
 
 		/**

@@ -95,6 +95,8 @@ FLBuilder::register_settings_form('global', array(
 								'px',
 								'em',
 								'%',
+								'vw',
+								'vh',
 							),
 							'responsive' => array(
 								'default_unit' => array(

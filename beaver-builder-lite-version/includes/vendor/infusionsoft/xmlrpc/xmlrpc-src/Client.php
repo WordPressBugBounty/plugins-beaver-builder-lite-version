@@ -948,6 +948,10 @@ class Client
         }
         // extra headers
         $headers = array('Content-Type: ' . $req->content_type, 'Accept-Charset: ' . implode(',', $this->accepted_charset_encodings));
+
+        $patOrSak  = $req->params[0]->me['string'];
+        $headers[] = 'X-Keap-API-Key: ' . $patOrSak;
+
         // if no keepalive is wanted, let the server know it in advance
         if (!$keepAlive) {
             $headers[] = 'Connection: close';

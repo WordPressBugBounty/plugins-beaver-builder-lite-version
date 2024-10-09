@@ -10,15 +10,15 @@
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "Arrow": () => (/* binding */ Arrow),
-/* harmony export */   "DEFAULT_OPTIONS": () => (/* binding */ DEFAULT_OPTIONS),
-/* harmony export */   "PLACEMENT_TYPES": () => (/* binding */ PLACEMENT_TYPES),
-/* harmony export */   "Transition": () => (/* binding */ Transition),
-/* harmony export */   "mergeRefs": () => (/* binding */ mergeRefs),
-/* harmony export */   "setGlobalContainer": () => (/* binding */ setGlobalContainer),
-/* harmony export */   "useHover": () => (/* binding */ useHover),
-/* harmony export */   "useLayer": () => (/* binding */ useLayer),
-/* harmony export */   "useMousePositionAsTrigger": () => (/* binding */ useMousePositionAsTrigger)
+/* harmony export */   Arrow: () => (/* binding */ Arrow),
+/* harmony export */   DEFAULT_OPTIONS: () => (/* binding */ DEFAULT_OPTIONS),
+/* harmony export */   PLACEMENT_TYPES: () => (/* binding */ PLACEMENT_TYPES),
+/* harmony export */   Transition: () => (/* binding */ Transition),
+/* harmony export */   mergeRefs: () => (/* binding */ mergeRefs),
+/* harmony export */   setGlobalContainer: () => (/* binding */ setGlobalContainer),
+/* harmony export */   useHover: () => (/* binding */ useHover),
+/* harmony export */   useLayer: () => (/* binding */ useLayer),
+/* harmony export */   useMousePositionAsTrigger: () => (/* binding */ useMousePositionAsTrigger)
 /* harmony export */ });
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "react");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
@@ -1094,11 +1094,15 @@ var Bounds = /*#__PURE__*/function () {
   ;
 
   Bounds.fromWindow = function fromWindow(environment) {
-    var _ref2 = environment || {},
-        _ref2$innerWidth = _ref2.innerWidth,
-        width = _ref2$innerWidth === void 0 ? 0 : _ref2$innerWidth,
-        _ref2$innerHeight = _ref2.innerHeight,
-        height = _ref2$innerHeight === void 0 ? 0 : _ref2$innerHeight;
+    var _environment$document;
+
+    var scrollingElement = (_environment$document = environment == null ? void 0 : environment.document.scrollingElement) != null ? _environment$document : environment == null ? void 0 : environment.document.documentElement;
+
+    var _ref2 = scrollingElement != null ? scrollingElement : {},
+        _ref2$clientWidth = _ref2.clientWidth,
+        width = _ref2$clientWidth === void 0 ? 0 : _ref2$clientWidth,
+        _ref2$clientHeight = _ref2.clientHeight,
+        height = _ref2$clientHeight === void 0 ? 0 : _ref2$clientHeight;
 
     return new Bounds({
       width: width,
@@ -1961,16 +1965,15 @@ function useLayer(_ref) {
   var triggerBoundsRef = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null); // tracks state in order for us to use read inside functions that require dependencies,
   // like `useCallback`, without triggering an update
 
-  var lastState = useLastState(state, isOpen); // keeps track of scheduled animation-frames
+  var lastState = useLastState(state, isOpen); // track invalidations for scheduled position updates
 
-  var raf = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)(null);
+  var repositioningToken = (0,react__WEBPACK_IMPORTED_MODULE_0__.useRef)({
+    cancelled: false
+  });
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
     return function () {
-      // when this hook unmounts, make sure to cancel any scheduled animation-frames
-      if (raf.current) {
-        cancelAnimationFrame(raf.current);
-        raf.current = null;
-      }
+      // when this hook unmounts, make sure to cancel any scheduled position updates
+      repositioningToken.current.cancelled = true;
     };
   }, []); // Most important function regarding positioning
   // It receives boundaries collected by `useTrackElements`, does some calculations,
@@ -2011,19 +2014,20 @@ function useLayer(_ref) {
       lastState.current = newState; // optimistically update lastState to prevent infinite loop
 
       /**
-       * We're using requestAnimationFrame-features here to ensure that position updates will
-       * happen max once per frame.
-       * If during a frame there's already an update scheduled, the existing update will be cancelled
-       * and the new update will take precedence.
+       * Throttle state updates slightly by delaying them using an immediately
+       * resolved promise, only applying them if there is no later update.
+       * This helps for multiple updates that happens synchronously one after another.
        */
 
-      if (raf.current) {
-        cancelAnimationFrame(raf.current);
-      }
-
-      raf.current = requestAnimationFrame(function () {
-        setState(newState);
-        raf.current = null;
+      repositioningToken.current.cancelled = true;
+      var token = {
+        cancelled: false
+      };
+      repositioningToken.current = token;
+      Promise.resolve().then(function () {
+        if (!token.cancelled) {
+          setState(newState);
+        }
       });
     }
 
@@ -2310,18 +2314,9 @@ function useHover(_temp) {
       }
     }
 
-    function onTouchEnd() {
-      if (show) {
-        removeTimeout();
-        setShow(false);
-      }
-    }
-
     window.addEventListener("scroll", onScroll, true);
-    window.addEventListener("touchend", onTouchEnd, true);
     return function () {
       window.removeEventListener("scroll", onScroll, true);
-      window.removeEventListener("touchend", onTouchEnd, true);
 
       if (timeout.current) {
         clearTimeout(timeout.current);

@@ -93,7 +93,7 @@ final class FLBuilderServices {
 		),
 		'infusionsoft'            => array(
 			'type'  => 'autoresponder',
-			'name'  => 'Infusionsoft',
+			'name'  => 'Keap (Formerly InfusionSoft)',
 			'class' => 'FLBuilderServiceInfusionsoft',
 		),
 		'madmimi'                 => array(

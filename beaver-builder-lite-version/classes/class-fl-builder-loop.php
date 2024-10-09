@@ -185,7 +185,8 @@ final class FLBuilderLoop {
 		$users          = empty( $settings->users ) ? '' : $settings->users;
 		$fields         = empty( $settings->fields ) ? '' : $settings->fields;
 		$exclude_self   = '';
-		if ( $post && isset( $settings->exclude_self ) && 'yes' == $settings->exclude_self ) {
+
+		if ( ! is_archive() && $post && isset( $settings->exclude_self ) && 'yes' == $settings->exclude_self ) {
 			$exclude_self = $post->ID;
 		}
 

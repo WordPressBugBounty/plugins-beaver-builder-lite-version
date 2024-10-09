@@ -475,6 +475,10 @@ final class FLBuilderAJAXLayout {
 			}
 		}
 
+		if ( ! is_object( $module ) ) {
+			return false;
+		}
+
 		// Maybe render the module's parent for a partial refresh?
 		if ( $module->partial_refresh ) {
 
@@ -616,10 +620,12 @@ final class FLBuilderAJAXLayout {
 
 				// Check a module for partial refresh.
 				if ( $node && 'module' == $node->type ) {
-					$node            = FLBuilderModel::get_module( $node_id );
-					$node_type       = 'module';
-					$module_type     = $node->settings->type;
-					$partial_refresh = $node->partial_refresh;
+					$node = FLBuilderModel::get_module( $node_id );
+					if ( is_object( $node ) ) {
+						$node_type       = 'module';
+						$module_type     = $node->settings->type;
+						$partial_refresh = $node->partial_refresh;
+					}
 				} elseif ( $node ) {
 					$node_type       = $node->type;
 					$partial_refresh = self::node_modules_support_partial_refresh( $node );

@@ -158,7 +158,7 @@ FLBuilderCSS::rule( array(
 	'selector' => ".fl-node-$id > .fl-col-content:after",
 	'enabled'  => 'none' !== $settings->bg_overlay_type && in_array( $settings->bg_type, array( 'photo' ) ),
 	'props'    => array(
-		'background-color' => 'color' === $settings->bg_overlay_type ? $settings->bg_overlay_color : '',
+		'background-color' => 'color' === $settings->bg_overlay_type ? FLBuilderColor::hex_or_rgb( $settings->bg_overlay_color ) : '',
 		'background-image' => 'gradient' === $settings->bg_overlay_type ? FLBuilderColor::gradient( $settings->bg_overlay_gradient ) : '',
 	),
 ) );

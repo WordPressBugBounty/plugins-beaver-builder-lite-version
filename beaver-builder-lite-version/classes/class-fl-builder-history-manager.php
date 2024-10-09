@@ -5,8 +5,6 @@
  */
 final class FLBuilderHistoryManager {
 
-	static private $states_cache = false;
-
 	/**
 	 * Initialize hooks.
 	 */
@@ -20,8 +18,9 @@ final class FLBuilderHistoryManager {
 		add_filter( 'fl_builder_main_menu', __CLASS__ . '::main_menu_config' );
 
 		// Actions
+		add_action( 'init', __CLASS__ . '::register_post_type' );
 		add_action( 'fl_builder_init_ui', __CLASS__ . '::init_states' );
-		add_action( 'template_redirect', __CLASS__ . '::clean_history_for_post' );
+		add_action( 'template_redirect', __CLASS__ . '::delete_states_for_request' );
 	}
 
 	/**
@@ -125,12 +124,13 @@ final class FLBuilderHistoryManager {
 		);
 
 		$config['history'] = array(
-			'states'   => self::get_state_labels(),
+			'states'   => self::get_states_data(),
 			'position' => self::get_position(),
 			'hooks'    => $hooks,
 			'labels'   => $labels,
-			'enabled'  => (int) self::get_states_max() > 0 ? true : false,
+			'enabled'  => self::get_states_max() > 0 ? true : false,
 		);
+
 		return $config;
 	}
 
@@ -138,7 +138,6 @@ final class FLBuilderHistoryManager {
 	 * Adds history data to the main menu config.
 	 */
 	static public function main_menu_config( $config ) {
-
 		$config['main']['items'][36] = array(
 			'label' => __( 'History', 'fl-builder' ),
 			'type'  => 'view',
@@ -156,93 +155,222 @@ final class FLBuilderHistoryManager {
 	}
 
 	/**
+	 * Registers the post type for storing history.
+	 */
+	static public function register_post_type() {
+		register_post_type( 'fl-builder-history', [
+			'public'              => false,
+			'publicly_queryable'  => false,
+			'exclude_from_search' => true,
+			'show_in_rest'        => false,
+		] );
+	}
+
+	/**
+	 * Inserts the fl-builder-history post that stores
+	 * this layout's history.
+	 */
+	static private function insert_history_post() {
+		$layout_post_id  = FLBuilderModel::get_post_id();
+		$history_post_id = wp_insert_post( array(
+			'post_title'  => $layout_post_id,
+			'post_type'   => 'fl-builder-history',
+			'post_status' => 'publish',
+		) );
+
+		update_post_meta( $history_post_id, '_fl_builder_layout_post_id', $layout_post_id );
+
+		return $history_post_id;
+	}
+
+	/**
+	 * Gets the post ID for the fl-builder-history post that
+	 * stores this layout's history.
+	 */
+	static private function get_history_post_id() {
+		$layout_post_id = FLBuilderModel::get_post_id();
+		$query          = new WP_Query( [
+			'post_type'  => 'fl-builder-history',
+			'meta_query' => [
+				[
+					'key'   => '_fl_builder_layout_post_id',
+					'value' => $layout_post_id,
+				],
+			],
+		] );
+
+		if ( empty( $query->posts ) ) {
+			return self::insert_history_post( $layout_post_id );
+		}
+
+		return $query->posts[0]->ID;
+	}
+
+	/**
 	 * Adds an initial state if no states exist
 	 * when the builder is active.
 	 */
 	static public function init_states() {
-		if ( (int) self::get_states_max() > 0 && ! isset( $_GET['nohistory'] ) ) {
-			$states = self::get_states();
-
-			if ( empty( $states ) ) {
+		if ( self::get_states_max() > 0 && ! isset( $_GET['nohistory'] ) ) {
+			if ( empty( self::get_states_data() ) ) {
 				self::save_current_state( 'draft_created' );
 			}
 		} else {
-			$post_id = FLBuilderModel::get_post_id();
-			self::delete_states( $post_id );
+			self::delete_states();
 		}
+		self::delete_legacy_states();
 	}
 
 	/**
-	 * Returns an array of saved layout states.
+	 * Returns the max states that can be saved.
 	 */
-	static public function get_states() {
-
-		if ( self::$states_cache ) {
-			return self::$states_cache;
-		}
-
-		global $wpdb;
-
-		$post_id = FLBuilderModel::get_post_id();
-		$results = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->postmeta} WHERE meta_key LIKE %s AND post_id = %d ORDER BY meta_id", '%_fl_builder_history_state%', $post_id ) );
-		$states  = array();
-
-		foreach ( $results as $result ) {
-			$value = maybe_unserialize( $result->meta_value );
-			if ( is_array( $value ) ) {
-				$states[] = $value;
-			}
-		}
-		self::$states_cache = $states;
-		return $states;
+	static private function get_states_max() {
+		return (int) apply_filters( 'fl_history_states_max', FL_BUILDER_HISTORY_STATES );
 	}
 
 	/**
-	 * Saves an array of layout states to post meta.
+	 * Returns the saved layout for a single state.
 	 */
-	static public function set_states( $states ) {
-		$post_id = FLBuilderModel::get_post_id();
+	static public function get_state( $position ) {
+		$history_post_id = self::get_history_post_id();
+		return get_post_meta( $history_post_id, "_fl_builder_history_state_{$position}", true );
+	}
 
-		self::delete_states( $post_id );
-		self::$states_cache = false;
+	/**
+	 * Saves layout data for a single state.
+	 */
+	static public function set_state( $state, $position ) {
+		$history_post_id = self::get_history_post_id();
+		update_post_meta( $history_post_id, "_fl_builder_history_state_{$position}", $state );
+	}
 
-		foreach ( $states as $i => $state ) {
-			update_post_meta( $post_id, "_fl_builder_history_state_{$i}", $state );
-		}
+	/**
+	 * Deletes a history state at the given position.
+	 */
+	static public function delete_state( $position ) {
+		$history_post_id = self::get_history_post_id();
+		delete_post_meta( $history_post_id, "_fl_builder_history_state_$position" );
+		self::delete_state_data( $position );
+		self::renumber_states();
 	}
 
 	/**
 	 * Deletes all history states for a post.
 	 */
-	static public function delete_states( $post_id ) {
+	static public function delete_states() {
 		global $wpdb;
 
-		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->postmeta} WHERE meta_key LIKE %s AND post_id = %d", '%_fl_builder_history_state%', $post_id ) );
+		$history_post_id = self::get_history_post_id();
+		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->postmeta} WHERE meta_key LIKE %s AND post_id = %d", '%_fl_builder_history_state%', $history_post_id ) );
 
 		self::set_position( 0 );
+		self::delete_states_data();
 	}
 
 	/**
-	 * Returns an array of saved layout states.
+	 * Deletes old history states that were stored in the layout's
+	 * post meta instead of a CPT.
 	 */
-	static public function get_state_labels() {
-		$states = self::get_states();
-		$labels = array();
-		foreach ( $states as $state ) {
-			$labels[] = array(
-				'label'      => $state['label'],
-				'moduleType' => isset( $state['module_type'] ) ? $state['module_type'] : null,
+	static public function delete_legacy_states() {
+		global $wpdb;
+
+		$layout_post_id = FLBuilderModel::get_post_id();
+
+		if ( metadata_exists( 'post', $layout_post_id, '_fl_builder_history_position' ) ) {
+			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->postmeta} WHERE meta_key LIKE %s AND post_id = %d", '%_fl_builder_history%', $layout_post_id ) );
+		}
+	}
+
+	/**
+	 * Deletes all history states for a "nohistory" request.
+	 */
+	static public function delete_states_for_request() {
+		if ( FLBuilderModel::is_builder_active() && isset( $_GET['nohistory'] ) && isset( $_GET['delete'] ) ) {
+			self::delete_states();
+		}
+	}
+
+	/**
+	 * Renumbers state entries in the database.
+	 */
+	static public function renumber_states() {
+		global $wpdb;
+
+		$history_post_id = self::get_history_post_id();
+		$states          = $wpdb->get_results( $wpdb->prepare( "SELECT meta_id FROM {$wpdb->postmeta} WHERE meta_key LIKE %s AND post_id = %d ORDER BY meta_id", '%_fl_builder_history_state%', $history_post_id ) );
+
+		foreach ( $states as $i => $state ) {
+			$wpdb->update(
+				$wpdb->postmeta,
+				[
+					'meta_key' => "_fl_builder_history_state_{$i}",
+				],
+				[
+					'post_id' => $history_post_id,
+					'meta_id' => $state->meta_id,
+				],
+				[ '%s' ],
+				[ '%d', '%d' ]
 			);
 		}
-		return $labels;
+	}
+
+	/**
+	 * Updates state data for a single state. This is only the data
+	 * needed to show states in the UI. Not the layout data.
+	 */
+	static public function set_state_data( $state, $position ) {
+		$history_post_id = self::get_history_post_id();
+		$data            = array_slice( self::get_states_data(), 0, $position );
+
+		$data[] = [
+			'label'      => $state['label'],
+			'moduleType' => isset( $state['module_type'] ) ? $state['module_type'] : null,
+		];
+
+		update_post_meta( $history_post_id, '_fl_builder_history_data', $data );
+	}
+
+	/**
+	 * Deletes the state data for a single state.
+	 */
+	static public function delete_state_data( $position ) {
+		$history_post_id = self::get_history_post_id();
+		$data            = self::get_states_data();
+
+		unset( $data[ $position ] );
+		update_post_meta( $history_post_id, '_fl_builder_history_data', array_values( $data ) );
+	}
+
+	/**
+	 * Returns only the data necessary for working with history,
+	 * NOT the layout data itself.
+	 */
+	static public function get_states_data() {
+		$history_post_id = self::get_history_post_id();
+		$data            = get_post_meta( $history_post_id, '_fl_builder_history_data', true );
+
+		if ( ! $data ) {
+			return [];
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Deletes all the states data for this layout.
+	 */
+	static public function delete_states_data() {
+		$history_post_id = self::get_history_post_id();
+		update_post_meta( $history_post_id, '_fl_builder_history_data', [] );
 	}
 
 	/**
 	 * Returns the current history position.
 	 */
 	static public function get_position() {
-		$post_id  = FLBuilderModel::get_post_id();
-		$position = get_post_meta( $post_id, '_fl_builder_history_position', true );
+		$history_post_id = self::get_history_post_id();
+		$position        = get_post_meta( $history_post_id, '_fl_builder_history_position', true );
 		return $position ? $position : 0;
 	}
 
@@ -250,8 +378,8 @@ final class FLBuilderHistoryManager {
 	 * Saves the current history position to post meta.
 	 */
 	static public function set_position( $position ) {
-		$post_id = FLBuilderModel::get_post_id();
-		update_post_meta( $post_id, '_fl_builder_history_position', $position );
+		$history_post_id = self::get_history_post_id();
+		update_post_meta( $history_post_id, '_fl_builder_history_position', $position );
 	}
 
 	/**
@@ -260,9 +388,9 @@ final class FLBuilderHistoryManager {
 	 * the last state isn't the current.
 	 */
 	static public function save_current_state( $label, $module_type = null ) {
-		$position = self::get_position();
-		$states   = array_slice( self::get_states(), 0, $position + 1 );
-		$states[] = array(
+		$data     = self::get_states_data();
+		$position = count( array_slice( $data, 0, self::get_position() + 1 ) );
+		$state    = array(
 			'label'       => $label,
 			'module_type' => $module_type,
 			'nodes'       => FLBuilderModel::get_layout_data( 'draft' ),
@@ -272,15 +400,21 @@ final class FLBuilderHistoryManager {
 			),
 		);
 
-		if ( count( $states ) > (int) self::get_states_max() ) {
-			array_shift( $states );
+		if ( $position + 1 > self::get_states_max() ) {
+			$position -= 1;
+			self::delete_state( 0 );
+		} elseif ( $position < count( $data ) ) {
+			for ( $i = $position; $i < count( $data ); $i++ ) {
+				self::delete_state( $i );
+			}
 		}
 
-		self::set_states( $states );
-		self::set_position( count( $states ) - 1 );
+		self::set_state( $state, $position );
+		self::set_state_data( $state, $position );
+		self::set_position( $position );
 
 		return array(
-			'states'   => self::get_state_labels(),
+			'states'   => self::get_states_data(),
 			'position' => self::get_position(),
 		);
 	}
@@ -289,24 +423,25 @@ final class FLBuilderHistoryManager {
 	 * Renders the layout for the state at the given position.
 	 */
 	static public function render_state( $new_position = 0 ) {
-		$states   = self::get_states();
 		$position = self::get_position();
+		$data     = self::get_states_data();
 
 		if ( 'prev' === $new_position ) {
 			$position = $position <= 0 ? 0 : $position - 1;
 		} elseif ( 'next' === $new_position ) {
-			$position = $position >= count( $states ) - 1 ? count( $states ) - 1 : $position + 1;
+			$position = $position >= count( $data ) - 1 ? count( $data ) - 1 : $position + 1;
 		} else {
 			$position = $new_position < 0 || ! is_numeric( $new_position ) ? 0 : $new_position;
 		}
 
-		if ( ! isset( $states[ $position ] ) ) {
+		$state = self::get_state( $position );
+
+		if ( ! $state ) {
 			return array(
 				'error' => true,
 			);
 		}
 
-		$state = $states[ $position ];
 		self::set_position( $position );
 		FLBuilderModel::save_global_settings( (array) $state['settings']['global'] );
 		FLBuilderModel::update_layout_settings( (array) $state['settings']['layout'], 'draft' );
@@ -322,17 +457,6 @@ final class FLBuilderHistoryManager {
 			),
 			'newNodes' => FLBuilderModel::get_layout_data(),
 		);
-	}
-
-	static private function get_states_max() {
-		return apply_filters( 'fl_history_states_max', FL_BUILDER_HISTORY_STATES );
-	}
-
-	static public function clean_history_for_post() {
-		if ( FLBuilderModel::is_builder_active() && isset( $_GET['nohistory'] ) && isset( $_GET['delete'] ) ) {
-			global $post;
-			self::delete_states( $post->ID );
-		}
 	}
 }
 

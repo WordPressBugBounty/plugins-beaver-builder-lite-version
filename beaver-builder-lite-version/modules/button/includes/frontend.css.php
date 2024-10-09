@@ -70,12 +70,50 @@ if ( 'gradient' === $settings->style ) {
 	$bg_gradient_hover_color_start = FLBuilderColor::adjust_brightness( $bg_gradient_hover_color, 30, 'lighten' );
 }
 
+
+// Border - Default
+FLBuilderCSS::rule( array(
+	'selector' => array(
+		".fl-builder-content .fl-node-$id a.fl-button, .fl-builder-content .fl-node-$id a.fl-button:visited",
+		".fl-page .fl-builder-content .fl-node-$id a.fl-button, .fl-page .fl-builder-content .fl-node-$id a.fl-button:visited",
+	),
+	'enabled'  => $module->use_default_border() && ! empty( $settings->bg_color ) && 'adv-gradient' !== $settings->style,
+	'props'    => array(
+		'border' => '1px solid ' . FLBuilderColor::hex_or_rgb( FLBuilderColor::adjust_brightness( $settings->bg_color, 12, 'darken' ) ),
+	),
+) );
+
+// Border - Hover Default
+FLBuilderCSS::rule( array(
+	'selector' => array(
+		".fl-builder-content .fl-node-$id a.fl-button:hover, .fl-builder-content .fl-node-$id a.fl-button:focus",
+		".fl-page .fl-builder-content .fl-node-$id a.fl-button:hover, .fl-page .fl-builder-content .fl-node-$id a.fl-button:focus",
+	),
+	'enabled'  => $module->use_default_border_hover() && ! empty( $settings->bg_hover_color ) && 'adv-gradient' !== $settings->style,
+	'props'    => array(
+		'border' => '1px solid ' . FLBuilderColor::hex_or_rgb( FLBuilderColor::adjust_brightness( $settings->bg_hover_color, 12, 'darken' ) ),
+	),
+) );
+
+$border_color_backup = '';
+if ( 'adv-gradient' === $settings->style ) {
+	if ( empty( $settings->border['color'] ) ) {
+		$settings->border['color'] = FLBuilderColor::hex_or_rgb( FLBuilderColor::adjust_brightness( 'a3a3a3', 12, 'darken' ) );
+	} else {
+		$border_color_backup = $settings->border['color'];
+	}
+}
+
 // Border - Settings
 FLBuilderCSS::border_field_rule( array(
 	'settings'     => $settings,
 	'setting_name' => 'border',
 	'selector'     => ".fl-builder-content .fl-node-$id a.fl-button, .fl-builder-content .fl-node-$id a.fl-button:visited, .fl-builder-content .fl-node-$id a.fl-button:hover, .fl-builder-content .fl-node-$id a.fl-button:focus, .fl-page .fl-builder-content .fl-node-$id a.fl-button, .fl-page .fl-builder-content .fl-node-$id a.fl-button:visited, .fl-page .fl-builder-content .fl-node-$id a.fl-button:hover, .fl-page .fl-builder-content .fl-node-$id a.fl-button:focus",
 ) );
+
+if ( 'adv-gradient' === $settings->style ) {
+	$settings->border['color'] = $border_color_backup;
+}
 
 // Border - Hover Settings
 FLBuilderCSS::rule( array(

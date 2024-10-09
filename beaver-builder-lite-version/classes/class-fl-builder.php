@@ -619,14 +619,14 @@ final class FLBuilder {
 						}
 					}
 				}
-				if ( is_array( $row->settings->animation ) && ! empty( $row->settings->animation['style'] ) ) {
+				if ( isset( $row->settings->animation ) && is_array( $row->settings->animation ) && ! empty( $row->settings->animation['style'] ) ) {
 					wp_enqueue_script( 'jquery-waypoints' );
 				}
 			}
 
 			// Enqueue required column CSS and JS
 			foreach ( $nodes['columns'] as $col ) {
-				if ( is_array( $col->settings->animation ) && ! empty( $col->settings->animation['style'] ) ) {
+				if ( isset( $col->settings->animation ) && is_array( $col->settings->animation ) && ! empty( $col->settings->animation['style'] ) ) {
 					wp_enqueue_script( 'jquery-waypoints' );
 				}
 			}
@@ -648,7 +648,7 @@ final class FLBuilder {
 				foreach ( $module->js as $handle => $props ) {
 					wp_enqueue_script( $handle, $props[0], $props[1], $props[2], $props[3] );
 				}
-				if ( is_array( $module->settings->animation ) && ! empty( $module->settings->animation['style'] ) ) {
+				if ( isset( $module->settings->animation ) && is_array( $module->settings->animation ) && ! empty( $module->settings->animation['style'] ) ) {
 					wp_enqueue_script( 'jquery-waypoints' );
 				}
 			}
@@ -1238,6 +1238,10 @@ final class FLBuilder {
 
 		//versions
 		$builder = FL_BUILDER_VERSION;
+
+		if ( true === FL_BUILDER_LITE ) {
+			$builder = 'lite-' . $builder;
+		}
 
 		if ( '{FL_BUILDER_VERSION}' === $builder ) {
 			$classes[] = 'fl-builder-git';
@@ -2622,7 +2626,7 @@ final class FLBuilder {
 				}
 			}
 		}
-		if ( is_array( $row->settings->animation ) && ! empty( $row->settings->animation['style'] ) ) {
+		if ( isset( $row->settings->animation ) && is_array( $row->settings->animation ) && ! empty( $row->settings->animation['style'] ) ) {
 			$attrs['class'][]                = 'fl-animation fl-' . $row->settings->animation['style'];
 			$attrs['data-animation-delay'][] = $row->settings->animation['delay'];
 			if ( isset( $row->settings->animation['duration'] ) ) {
@@ -2882,6 +2886,7 @@ final class FLBuilder {
 			'class'     => array(
 				'fl-col',
 				'fl-node-' . $col->node,
+				'fl-col-bg-' . $col->settings->bg_type,
 			),
 			'data-node' => $col->node,
 			'style'     => array(),
@@ -2920,7 +2925,7 @@ final class FLBuilder {
 				}
 			}
 		}
-		if ( is_array( $col->settings->animation ) && ! empty( $col->settings->animation['style'] ) ) {
+		if ( isset( $col->settings->animation ) && is_array( $col->settings->animation ) && ! empty( $col->settings->animation['style'] ) ) {
 			$attrs['class'][]                = 'fl-animation fl-' . $col->settings->animation['style'];
 			$attrs['data-animation-delay'][] = $col->settings->animation['delay'];
 			if ( isset( $col->settings->animation['duration'] ) ) {
@@ -2946,7 +2951,6 @@ final class FLBuilder {
 
 		// bg
 		if ( 'photo' === $col->settings->bg_type ) {
-			$attrs['class'][] = 'fl-col-bg-photo';
 			if ( 'fixed' === $col->settings->bg_attachment ) {
 				$attrs['class'][] = 'fl-col-bg-fixed';
 			}
@@ -3141,7 +3145,7 @@ final class FLBuilder {
 		}
 
 		// Animation
-		if ( is_array( $module->settings->animation ) && ! empty( $module->settings->animation['style'] ) ) {
+		if ( isset( $module->settings->animation ) && is_array( $module->settings->animation ) && ! empty( $module->settings->animation['style'] ) ) {
 			$attrs['class'][]                = 'fl-animation fl-' . $module->settings->animation['style'];
 			$attrs['data-animation-delay'][] = $module->settings->animation['delay'];
 			if ( isset( $module->settings->animation['duration'] ) ) {
@@ -3374,6 +3378,10 @@ final class FLBuilder {
 
 		// Loop through the modules.
 		foreach ( $nodes['modules'] as $module ) {
+
+			if ( ! $module ) {
+				continue;
+			}
 
 			/**
 			 * Filter each modules settings before rendering CSS
@@ -3975,7 +3983,7 @@ final class FLBuilder {
 	static public function render_node_animation_css( $settings ) {
 		$css = '';
 
-		if ( ! is_array( $settings->animation ) || empty( $settings->animation ) ) {
+		if ( ! isset( $settings->animation ) || ! is_array( $settings->animation ) || empty( $settings->animation ) ) {
 			return $css;
 		} elseif ( in_array( 'animation-' . $settings->animation['style'], self::$enqueued_global_assets ) ) {
 			return $css;
@@ -4271,6 +4279,10 @@ final class FLBuilder {
 		$module          = is_object( $module_id ) ? $module_id : FLBuilderModel::get_module( $module_id );
 		$global_settings = FLBuilderModel::get_global_settings();
 		$js              = '';
+
+		if ( ! $module ) {
+			return $js;
+		}
 
 		// Global module JS
 		$file = $module->dir . 'js/frontend.js';

@@ -4,7 +4,7 @@ Tags: page builder, beaver builder, landing page, front-end builder, drag and dr
 Requires at least: 4.6
 Tested up to: 6.6
 Requires PHP: 7.0
-Stable tag: 2.8.3.9
+Stable tag: 2.8.4.1
 License: GPL2+
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -49,6 +49,8 @@ There is a huge colony (_yeah, that's the term for a group of beavers_) of "Beav
 = Premium Features =
 
 *   Additional modules: Contact Form, Tabs, Slider, Pricing Table, Map, Blog Posts, Subscribe Form and many more.
+*   Beaver Themer Theme Builder.
+*   Beaver Builder Theme.
 *   Expert support from our world-class support team.
 *   Beautiful pre-made layout templates.
 *   Save, export, and reuse full-page layouts, rows, and modules.
@@ -100,10 +102,7 @@ For more information, please visit our [Knowledge Base](https://docs.wpbeaverbui
 
 == Frequently Asked Questions ==
 
-
 For information on using Beaver Builder, please visit our [Knowledge Base](https://docs.wpbeaverbuilder.com/?utm_medium=bb-lite&utm_source=repo-readme&utm_campaign=repo-install-kb-link "Beaver Builder Knowledge Base").
-
-For general questions or questions about purchasing a license, check out our [Frequently Asked Questions](https://www.wpbeaverbuilder.com/frequently-asked-questions/?utm_medium=bb-lite&utm_source=repo-readme&utm_campaign=repo-faq-link "Beaver Builder FAQs") page.
 
 == Screenshots ==
 
@@ -120,4 +119,4 @@ Visit our [changelog page](https://www.wpbeaverbuilder.com/change-logs/?utm_medi
 
 == Upgrade Notice ==
 
-Visit our [changelog page](https://www.wpbeaverbuilder.com/change-logs/?utm_medium=bb-lite&utm_source=repo-readme&utm_campaign=repo-upgrade-page) for up-to-date information on what has been going on with the development of Beaver Builder.
+Visit our [changelog page](https://www.wpbeaverbuilder.com/change-logs/?utm_medium=bb-lite&utm_source=repo-readme&utm_campaign=repo-changelog-page "Beaver Builder Changelog") for up-to-date information on what has been going on with the development of Beaver Builder.

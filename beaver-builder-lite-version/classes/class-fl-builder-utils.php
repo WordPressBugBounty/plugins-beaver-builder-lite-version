@@ -456,6 +456,7 @@ final class FLBuilderUtils {
 			'li',
 			'ul',
 			'ol',
+			'p',
 			'article',
 			'section',
 			'aside',

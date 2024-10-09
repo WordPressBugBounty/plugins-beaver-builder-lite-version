@@ -320,11 +320,12 @@ FLBuilder::register_settings_form('col', array(
 							),
 						),
 						'bg_overlay_color'    => array(
-							'type'       => 'color',
-							'label'      => __( 'Overlay Color', 'fl-builder' ),
-							'show_reset' => true,
-							'show_alpha' => true,
-							'preview'    => array(
+							'type'        => 'color',
+							'label'       => __( 'Overlay Color', 'fl-builder' ),
+							'show_reset'  => true,
+							'show_alpha'  => true,
+							'connections' => array( 'color' ),
+							'preview'     => array(
 								'type' => 'none',
 							),
 						),

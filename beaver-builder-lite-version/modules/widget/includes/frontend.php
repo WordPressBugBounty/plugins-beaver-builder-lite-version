@@ -1,17 +1,7 @@
 <div class="fl-widget">
 <?php
 
-// Get builder post data.
-$post_data = FLBuilderModel::get_post_data();
-
-// Widget class
-$widget_class = '';
-if ( isset( $settings->widget ) ) {
-	$widget_class = urldecode( $settings->widget );
-} elseif ( isset( $post_data['widget'] ) && FLBuilderModel::is_builder_active() ) {
-	$widget_class = urldecode( $post_data['widget'] );
-}
-$widget_class = esc_attr( $widget_class );
+$widget_class = $module::extract_class( $settings );
 
 if ( isset( $widget_class ) && class_exists( $widget_class ) ) {
 	global $wp_widget_factory;
@@ -51,8 +41,8 @@ if ( isset( $widget_class ) && class_exists( $widget_class ) ) {
 } elseif ( isset( $widget_class ) && FLBuilderModel::is_builder_active() ) {
 
 	// Widget doesn't exist!
-	/* translators: %s: widget slug */
-	printf( _x( '%s no longer exists.', '%s stands for widget slug.', 'fl-builder' ), $widget_class );
+	/* translators: %s: widget title */
+	printf( _x( '%s no longer exists.', '%s stands for widget slug.', 'fl-builder' ), isset( $settings->widget_title ) ? $settings->widget_title : $widget_class );
 
 }
 

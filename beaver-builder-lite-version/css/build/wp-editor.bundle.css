@@ -3,7 +3,8 @@
 .wp-block[data-type="fl-builder/layout"] .components-placeholder.components-placeholder {
   text-align: center;
   justify-content: center;
-  align-items: center; }
+  align-items: center;
+}
 
 /**
  * We don't want this stuff for our block, ever.
@@ -13,7 +14,8 @@ body.fl-builder-layout-enabled .block-editor-block-list__insertion-point-inserte
 body.fl-builder-layout-enabled .block-editor-rich-text__editable,
 body.fl-builder-layout-enabled .block-editor-default-block-appender,
 body.fl-builder-layout-enabled .block-editor-block-contextual-toolbar {
-  display: none !important; }
+  display: none !important;
+}
 
 /**
  * Lock down the block editor when the layout block is active.
@@ -27,26 +29,28 @@ body.fl-builder-layout-enabled .block-editor-block-contextual-toolbar {
 .fl-builder-layout-enabled .editor-block-mover,
 .fl-builder-layout-enabled .editor-block-list__breadcrumb,
 .fl-builder-layout-enabled .editor-block-list__block:not([data-type="fl-builder/layout"]) {
-  display: none !important; }
-
+  display: none !important;
+}
 .fl-builder-layout-enabled .editor-block-list__block-edit:before {
-  outline: none !important; }
+  outline: none !important;
+}
 
 /**
  * Launch View
  */
 .fl-builder-layout-launch-view .components-button {
-  margin: 0 5px; }
-
+  margin: 0 5px;
+}
 .fl-builder-layout-launch-view .components-placeholder__fieldset {
-  max-width: none; }
+  max-width: none;
+}
 
 /**
  * Loading View
  */
 .fl-builder-layout-loading-view .spinner {
-  float: left; }
-
+  float: left;
+}
 /**
  * This should be removed when the API supports proper click
  * events on more menu items.
@@ -57,6 +61,6 @@ body.fl-builder-layout-enabled .block-editor-block-contextual-toolbar {
   right: 0;
   bottom: 0;
   left: 0;
-  z-index: 1; }
-
+  z-index: 1;
+}
 

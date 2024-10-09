@@ -15,6 +15,7 @@ class iSDKException extends Exception
 {
 }
 
+#[\AllowDynamicProperties]
 class iSDK
 {
 
@@ -58,7 +59,7 @@ class iSDK
                 if (!isset($appname)) {
                     $appname = $name;
                 }
-                $this->client = new xmlrpc_client("https://$appname.infusionsoft.com/api/xmlrpc");
+                $this->client = new xmlrpc_client("https://api.infusionsoft.com/crm/xmlrpc/v1");
                 break;
         }
 
@@ -99,7 +100,7 @@ class iSDK
 
         if ($key != "" && $key != "on" && $key != "off" && $key != 'kill' && $key != 'throw') {
             if ($type == "i") {
-                $this->client = new xmlrpc_client("https://$name.infusionsoft.com/api/xmlrpc");
+                $this->client = new xmlrpc_client("https://api.infusionsoft.com/crm/xmlrpc/v1");
             } else if ($type == "m") {
                 $this->client = new xmlrpc_client("https://$name.mortgageprocrm.com/api/xmlrpc");
             } else {
@@ -114,8 +115,7 @@ class iSDK
             }
             if (!empty($details[$name])) {
                 if ($details[$name][2] == "i") {
-                    $this->client = new xmlrpc_client("https://" . $details[$name][1] .
-                    ".infusionsoft.com/api/xmlrpc");
+                    $this->client = new xmlrpc_client("https://api.infusionsoft.com/crm/xmlrpc/v1");
                 } elseif ($details[$name][2] == "m") {
                     $this->client = new xmlrpc_client("https://" . $details[$name][1] .
                     ".mortgageprocrm.com/api/xmlrpc");

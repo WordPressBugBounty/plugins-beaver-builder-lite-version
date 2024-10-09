@@ -37,10 +37,36 @@ class FLVideoModule extends FLBuilderModule {
 
 			if ( ! $this->data && isset( $this->settings->data ) ) {
 				$this->data = $this->settings->data;
+			} else {
+				$data            = new stdClass;
+				$data->url       = '';
+				$data->extension = '';
+
+				if ( ! empty( $this->settings->connections['video'] ) || ! empty( $this->settings->connections['video_webm'] ) ) {
+					$data->url       = ! empty( $this->settings->video ) ? $this->settings->video : $this->settings->video_webm;
+					$data->extension = ! empty( $this->settings->video ) ? 'mp4' : 'webm';
+				} elseif ( ! empty( $this->settings->data->url ) ) {
+					$data->url       = $this->settings->data->url;
+					$data->extension = 'mp4';
+				}
+
+				$this->data = $data;
 			}
+
 			if ( $this->data ) {
-				$parts                 = explode( '.', $this->data->filename );
-				$this->data->extension = array_pop( $parts );
+				$parts     = ! empty( $this->data->filename ) ? explode( '.', $this->data->filename ) : [];
+				$extension = '';
+				if ( isset( $this->data->extension ) ) {
+					$extension = $this->data->extension;
+				} elseif ( ! empty( $parts ) ) {
+					$extension = array_pop( $parts );
+				}
+
+				/**
+				 * Set video file extension.
+				 * @see fl_builder_video_module_extension
+				 */
+				$this->data->extension = apply_filters( 'fl_builder_video_module_extension', $extension, $this->settings );
 				$this->data->poster    = isset( $this->settings->poster_src ) ? $this->settings->poster_src : '';
 				$this->data->loop      = isset( $this->settings->loop ) && $this->settings->loop ? ' loop="yes"' : '';
 				$this->data->autoplay  = isset( $this->settings->autoplay ) && $this->settings->autoplay ? ' autoplay="yes"' : '';
@@ -49,6 +75,9 @@ class FLVideoModule extends FLBuilderModule {
 				$webm_data              = FLBuilderPhoto::get_attachment_data( $this->settings->video_webm );
 				$this->data->video_webm = isset( $this->settings->video_webm ) && $webm_data ? ' webm="' . $webm_data->url . '"' : '';
 
+				if ( $webm_data && empty( $this->data->url ) ) {
+					$this->data->url = $webm_data->url;
+				}
 			}
 		}
 
@@ -337,6 +366,7 @@ FLBuilder::register_module('FLVideoModule', array(
 					'video'            => array(
 						'type'        => 'video',
 						'label'       => __( 'Video (MP4)', 'fl-builder' ),
+						'connections' => array( 'custom_field' ),
 						'help'        => __( 'A video in the MP4 format. Most modern browsers support this format.', 'fl-builder' ),
 						'show_remove' => true,
 					),
@@ -344,6 +374,7 @@ FLBuilder::register_module('FLVideoModule', array(
 						'type'        => 'video',
 						'show_remove' => true,
 						'label'       => __( 'Video (WebM)', 'fl-builder' ),
+						'connections' => array( 'custom_field' ),
 						'help'        => __( 'A video in the WebM format to use as fallback. This format is required to support browsers such as FireFox and Opera.', 'fl-builder' ),
 						'preview'     => array(
 							'type' => 'none',

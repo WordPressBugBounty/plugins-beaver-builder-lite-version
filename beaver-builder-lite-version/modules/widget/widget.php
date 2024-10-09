@@ -20,38 +20,82 @@ class FLWidgetModule extends FLBuilderModule {
 	}
 
 	/**
+	 * @method extract_class to get the widget class with backward compatibility
+	 */
+	public static function extract_class( $settings ) {
+		// Get builder post data.
+		$post_data = FLBuilderModel::get_post_data();
+		// Widget slug
+		$widget_class = null;
+		if ( isset( $settings->widget ) ) {
+			$widget_class = $settings->widget;
+		} elseif ( isset( $settings->widget_class ) ) {
+			$widget_class = $settings->widget_class;
+		} elseif ( isset( $post_data['widget'] ) ) {
+			$widget_class = $post_data['widget'];
+		} elseif ( isset( $post_data['widget_class'] ) ) {
+			$widget_class = $post_data['widget_class'];
+		}
+		return esc_attr( urldecode( $widget_class ) );
+	}
+
+		/**
+		 * @method check_class validate class variable for backward compatibility
+		 */
+	public static function check_class( $settings ) {
+		if ( isset( $settings->widget ) && class_exists( urldecode( $settings->widget ) ) ) {
+			return 'widget';
+		} elseif ( isset( $settings->widget_class ) && class_exists( urldecode( $settings->widget_class ) ) ) {
+			return 'widget_class';
+		} else {
+			return false;
+		}
+	}
+
+		/**
+		 * @method filter_raw_settings for checking widget settings compatibility for old pages
+		 */
+	public function filter_raw_settings( $settings ) {
+		if ( FLWidgetModule::check_class( $settings ) === 'widget' ) {
+			$widget_class           = FLWidgetModule::extract_class( $settings );
+			$instance               = new $widget_class();
+			$settings->widget_class = $widget_class;
+			$settings->widget_title = $instance->name;
+			$settings->widget_key   = 'widget-' . $instance->id_base;
+		}
+		return $settings;
+	}
+
+	/**
 	 * @return void
 	 */
 	public function update( $settings ) {
 		// Make sure we have a widget.
-		if ( ! isset( $settings->widget ) || ! class_exists( $settings->widget ) ) {
+		$class_name = FLWidgetModule::check_class( $settings );
+		if ( false === $class_name ) {
 			return $settings;
 		}
+		$widget_class = urldecode( $settings->$class_name );
 
 		// Get the widget instance.
-		$class    = $settings->widget;
-		$instance = new $class();
+		$instance = new $widget_class();
+
+		// Populate widget information.
+		$settings->widget_class = $widget_class;
+		$settings->widget_title = $instance->name;
+		$settings->widget_key   = 'widget-' . $instance->id_base;
 
 		// Get the widget settings.
 		$settings_key    = 'widget-' . $instance->id_base;
-		$widget_settings = array();
-
-		if ( isset( $settings->$settings_key ) ) {
-			$widget_settings = (array) $settings->$settings_key;
-		}
+		$widget_settings = isset( $settings->$settings_key ) ? (array) $settings->$settings_key : array();
 
 		// Run the widget update method.
 		$widget_settings = $instance->update( $widget_settings, array() );
 
-		// Save the widget settings as an object.
-		if ( is_array( $widget_settings ) ) {
-			$settings->$settings_key = (object) $widget_settings;
-		}
-
 		// Delete the WordPress cache for this widget.
-		wp_cache_delete( $settings->widget, 'widget' );
+		wp_cache_delete( $widget_class, 'widget' );
 
-		$settings->widget = urlencode( $settings->widget );
+		$settings->widget_class = urlencode( $widget_class );
 
 		// Return the settings.
 		return $settings;

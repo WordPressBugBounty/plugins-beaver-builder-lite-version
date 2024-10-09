@@ -271,9 +271,19 @@ class FLPhotoModule extends FLBuilderModule {
 				} else {
 					$url = $this->crop();
 					$src = $url ? $url : $src;
+					/**
+					 * @see fl_builder_photo_module_cropped_url
+					 * @since 2.8.3
+					 */
+					$src = apply_filters( 'fl_builder_photo_module_cropped_url', $src, $cropped_path, $this );
 				}
 			}
 		}
+		/**
+		 * @see fl_builder_photo_module_url
+		 * @since 2.8.3
+		 */
+		$src = apply_filters( 'fl_builder_photo_module_url', $src, $this );
 		return esc_url( do_shortcode( $src ) );
 	}
 

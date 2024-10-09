@@ -1,8 +1,48 @@
-<h4>2.8.3.8 - 10/01/2024</h4>
+<h4>2.8.4.1 - 10/09/2024</h4>
 <p><strong>Hotfix</strong></p>
 <ul>
-	<li>Ensure fields that use HTML in preview render as expected (#3654)</li>
-	<li>Fix conflict with some themes that display cart in menu or header (#3633)</li>
+	<li>Fix fatal error with old versions of Themer (#3690)</li>
+	<li>Posts Module: Fix auto suggest filter fields not finding any posts (#3696)</li>
+	<li>Fix syntax error when using PHP 7.2 (#3673)</li>
+</ul>
+
+<h4>2.8.4 - 10/3/2024</h4>
+<strong>Security</strong>
+<ul>
+	<li>Security: Fix potential XSS issue with layout field in the Button Group module (#3660)</li>
+</ul>
+
+<strong>Enhancements</strong>
+<ul>
+	<li>Performance: Optimize history storage to use less memory(#3592)</li>
+	<li>Column Settings: Add field connection for background overlay setting (#219)</li>
+	<li>Video Module: add field connection when using the media library (#1569)</li>
+	<li>Global Settings: Add additional units for Row padding (#3575)</li>
+	<li>Columns: add column class for different background types (#3608)</li>
+	<li>Update Dash Icons(#3572)</li>
+	<li>Subscribe Module: Update Keap (InfusionSoft) integration so that non-legacy keys can be used (#3562)</li>
+	<li>(A11y) Post Module: Add p tag as an option for Post Title tag (#3553)</li>
+</ul>
+
+<strong>Bug Fixes</strong>
+<ul>
+	<li>Outline Panel: Fix issue with Fluent Forms widget and ACF blocks causing a JS error (#3597 & #3612)</li>
+	<li>Fix fatal PHP error if a saved module no longer exists (#3423)</li>
+	<li>Accordion Module: Fix module9 not rendering all posts of a CPT when inside a Themer Archive layout (#3004)</li>
+	<li>(A11y) Menu Module: Fix flyout menu not opening when tabbing through the page (#1663)</li>
+	<li>Menu Module: Fix flyout menu being too short on Safari when scrolling (#3308)</li>
+	<li>Fix border added to button module when not using BB theme (#3284)</li>
+	<li>Icon Group Module: Fix alignment changes not live previewing (#461)</li>
+	<li>Fix installer on license tab for the child theme (#3475)</li>
+	<li>Fix row heading color overriding Post Carousel Module Title Color (#3565)</li>
+	<li>Fix settings form buttons not fitting in modal when modal is in thin mode (#3527)</li>
+	<li>Fix PHP warning when using Fashion Freaks Template (#3614)</li>
+	 <li>Fix conflict with some themes that display cart in menu or header (#3633)</li>
+</ul>
+
+<strong>Developer</strong>
+<ul>
+	<li>Add filter to allow plugins to modify photo paths/URLs (#3437)</li>
 </ul>
 
 <h4>2.8.3.7 - 09/24/2024</h4>

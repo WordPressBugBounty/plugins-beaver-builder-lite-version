@@ -323,6 +323,7 @@ echo 'FLBuilderStrings             = ' . FLBuilderUtils::json_encode( apply_filt
 	'uncategorized'                  => esc_attr__( 'Uncategorized', 'fl-builder' ),
 	'uploadBlocked'                  => esc_attr__( 'Uploading files is disabled for this user role', 'fl-builder' ),
 	'yesPlease'                      => esc_attr__( 'Yes Please!', 'fl-builder' ),
+	'savedModuleNotExists'           => esc_attr__( 'Error: module used in Saved module no longer exists.', 'fl-builder' ),
 	'noScriptWarn'                   => array(
 		'heading' => esc_attr__( 'Settings could not be saved.', 'fl-builder' ),
 		// translators: %s : User Role

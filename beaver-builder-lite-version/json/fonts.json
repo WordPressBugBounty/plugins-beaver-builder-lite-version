@@ -69,11 +69,6 @@
     "fallback": "sans-serif"
   }
 }, {
-  "Afacad Flux": {
-    "variants": ["100", "200", "300", "regular", "500", "600", "700", "800", "900"],
-    "fallback": "sans-serif"
-  }
-}, {
   "Agbalumo": {
     "variants": ["regular"],
     "fallback": "sans-serif"
@@ -7500,11 +7495,6 @@
   }
 }, {
   "Sixtyfour": {
-    "variants": ["regular"],
-    "fallback": "monospace"
-  }
-}, {
-  "Sixtyfour Convergence": {
     "variants": ["regular"],
     "fallback": "monospace"
   }

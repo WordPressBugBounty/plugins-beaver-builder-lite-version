@@ -5520,6 +5520,12 @@
 			var data             = FLBuilder._jsonParse( response ),
 			    showSettingsForm = false;
 
+			if ( false === data ) {
+				FLBuilder.alert( FLBuilderStrings.savedModuleNotExists );
+				FLBuilder._newModuleParent.find( '.fl-builder-node-loading-placeholder' ).remove();
+				return false;
+			}
+
 			// Setup a preview layout if we have one.
 			if ( data.layout ) {
 				if ( FLBuilder._newModuleParent ) {
@@ -10265,6 +10271,10 @@
 
 			// Do the ajax call.
 			FLBuilder._ajaxRequest = $.post(FLBuilder._ajaxUrl(), data, function(response) {
+				debugdata = $.parseJSON(response) || false;
+				if ( debugdata && 'undefined' !== typeof debugdata.mem_usage ) {
+					console.log( 'AJAX: ' + debugdata.mem_usage );
+				}
 				if(typeof callback !== 'undefined') {
 					callback.call(this, response);
 				}

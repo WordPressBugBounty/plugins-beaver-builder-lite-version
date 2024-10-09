@@ -3529,7 +3529,7 @@ final class FLBuilderModel {
 	static public function get_module( $node_id ) {
 		$module = is_object( $node_id ) ? $node_id : self::get_node( $node_id );
 
-		if ( self::is_module_registered( $module->settings->type ) ) {
+		if ( isset( $module->settings->type ) && self::is_module_registered( $module->settings->type ) ) {
 
 			$class              = get_class( self::$modules[ $module->settings->type ] );
 			$instance           = new $class();
@@ -3571,7 +3571,7 @@ final class FLBuilderModel {
 
 		foreach ( $modules as $module ) {
 
-			if ( self::is_module_registered( $module->settings->type ) ) {
+			if ( isset( $module->settings->type ) && self::is_module_registered( $module->settings->type ) ) {
 
 				$class                     = get_class( self::$modules[ $module->settings->type ] );
 				$instances[ $i ]           = new $class();
@@ -3674,6 +3674,10 @@ final class FLBuilderModel {
 	static public function add_module_parent( $module, $parent_id = null, $position = null ) {
 		$parent = ! $parent_id ? null : self::get_node( $parent_id );
 		$module = self::get_module( $module );
+
+		if ( ! is_object( $module ) ) {
+			return false;
+		}
 
 		if ( ! $parent ) {
 			// Add a new row if we don't have a parent.
@@ -4932,10 +4936,9 @@ final class FLBuilderModel {
 	 * @return void
 	 */
 	static public function update_layout_data( $data, $status = null, $post_id = null ) {
-		$post_id  = ! $post_id ? self::get_post_id() : $post_id;
-		$status   = ! $status ? self::get_node_status() : $status;
-		$key      = 'published' == $status ? '_fl_builder_data' : '_fl_builder_draft';
-		$raw_data = get_metadata( 'post', $post_id, $key );
+		$post_id = ! $post_id ? self::get_post_id() : $post_id;
+		$status  = ! $status ? self::get_node_status() : $status;
+		$key     = 'published' == $status ? '_fl_builder_data' : '_fl_builder_draft';
 		/**
 		 * @since 2.6
 		 * @see fl_builder_enable_small_data_mode
@@ -4955,11 +4958,7 @@ final class FLBuilderModel {
 		}
 
 		// Update the data.
-		if ( 0 === count( $raw_data ) ) {
-			add_metadata( 'post', $post_id, $key, $data );
-		} else {
-			update_metadata( 'post', $post_id, $key, $data );
-		}
+		update_metadata( 'post', $post_id, $key, $data );
 
 		// Cache the data.
 		if ( 'published' == $status ) {
@@ -5439,6 +5438,10 @@ final class FLBuilderModel {
 
 		$root   = self::get_node_template_root( 'module' );
 		$module = self::get_module( $root );
+
+		if ( ! $module ) {
+			return false;
+		}
 
 		if ( $module->accepts_children() ) {
 			return false;
