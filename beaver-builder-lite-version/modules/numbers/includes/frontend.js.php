@@ -1,8 +1,8 @@
 <?php
 
 	// set defaults
-	$layout       = isset( $settings->layout ) ? $settings->layout : 'default';
-	$type         = isset( $settings->number_type ) ? $settings->number_type : 'percent';
+	$layout       = isset( $settings->layout ) ? esc_js( $settings->layout ) : 'default';
+	$type         = isset( $settings->number_type ) ? esc_js( $settings->number_type ) : 'percent';
 	$speed        = ! empty( $settings->animation_speed ) && is_numeric( $settings->animation_speed ) ? $settings->animation_speed * 1000 : 1000;
 	$delay        = ! empty( $settings->delay ) && is_numeric( $settings->delay ) && $settings->delay > 0 ? $settings->delay : 0;
 	$start_number = isset( $settings->start_number ) && is_numeric( $settings->start_number ) ? $settings->start_number : 0;

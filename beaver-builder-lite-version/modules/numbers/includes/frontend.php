@@ -1,4 +1,4 @@
-<div class="fl-number fl-number-<?php echo $settings->layout; ?>">
+<div class="fl-number fl-number-<?php echo sanitize_html_class( $settings->layout ); ?>">
 <?php if ( 'circle' == $settings->layout ) : ?>
 	<div class="fl-number-circle-container">
 		<div class="fl-number-text">

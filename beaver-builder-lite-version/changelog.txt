@@ -1,3 +1,10 @@
+<h4>2.8.4.4 - 11/14/2024</h4>
+<p><strong>Hotfix</strong></p>
+<ul>
+	<li>Security: Sanitize settings fields that are used in HTML attributes (#3784)</li>
+	<li>Security: Sanitize settings used in JS in the Numbers module (#3784)</li>
+</ul>
+
 <h4>2.8.4.3 - 10/28/2024</h4>
 <p><strong>Hotfix</strong></p>
 <ul>
