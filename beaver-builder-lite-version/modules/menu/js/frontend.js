@@ -181,7 +181,7 @@
 		 */
 		_setupSubmenu: function() {
 			$( this.wrapperClass + ' ul.sub-menu' ).each( function(){
-				$( this ).closest( 'li' ).attr( 'aria-haspopup', 'true' );
+				$( this ).closest( 'li' ).find('a').first().attr( 'aria-haspopup', 'true' );
 			});
 		},
 

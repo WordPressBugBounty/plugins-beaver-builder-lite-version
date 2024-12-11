@@ -1,11 +1,11 @@
 <?php
 
 	// set defaults
-	$type              = isset( $settings->menu_layout ) ? $settings->menu_layout : 'horizontal';
-	$mobile            = isset( $settings->mobile_toggle ) ? $settings->mobile_toggle : 'expanded';
+	$type              = isset( $settings->menu_layout ) ? esc_js( $settings->menu_layout ) : 'horizontal';
+	$mobile            = isset( $settings->mobile_toggle ) ? esc_js( $settings->mobile_toggle ) : 'expanded';
 	$below_row         = 'below' == $settings->mobile_full_width ? 'true' : 'false';
 	$flyout_menu       = $module->is_responsive_menu_flyout() ? 'true' : 'false';
-	$mobile_breakpoint = isset( $settings->mobile_breakpoint ) ? $settings->mobile_breakpoint : 'mobile';
+	$mobile_breakpoint = isset( $settings->mobile_breakpoint ) ? esc_js( $settings->mobile_breakpoint ) : 'mobile';
 	$post_id           = FLBuilderModel::get_post_id();
 	$mobile_stacked    = isset( $settings->mobile_stacked ) && 'no' === $settings->mobile_stacked ? 'false' : 'true';
 ?>

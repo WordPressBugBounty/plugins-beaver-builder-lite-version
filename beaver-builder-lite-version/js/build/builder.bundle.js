@@ -4868,6 +4868,7 @@ var getItemTypeLabel = function getItemTypeLabel(type) {
   return typeLabel;
 };
 var ItemLabel = function ItemLabel(_ref4) {
+  var _settings$settings$wi;
   var type = _ref4.type,
     _ref4$settings = _ref4.settings,
     settings = _ref4$settings === void 0 ? {} : _ref4$settings;
@@ -4916,7 +4917,7 @@ var ItemLabel = function ItemLabel(_ref4) {
         typeLabel = "".concat(typeLabel, ": ").concat(mode);
         break;
       case 'widget':
-        if ((0,_utils__WEBPACK_IMPORTED_MODULE_9__.nodeHasDefinition)(type, settings)) {
+        if ((0,_utils__WEBPACK_IMPORTED_MODULE_9__.nodeHasDefinition)(type, settings) && (_settings$settings$wi = settings[settings.widget_key]) !== null && _settings$settings$wi !== void 0 && _settings$settings$wi.title) {
           description = settings[settings.widget_key].title.trim();
         }
         break;

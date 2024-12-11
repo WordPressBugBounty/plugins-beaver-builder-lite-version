@@ -7,7 +7,7 @@ if ( isset( $settings->id ) && ! empty( $settings->id ) ) {
 }
 
 ?>
-<div class="<?php echo $module->get_classname(); ?>">
+<div class="<?php echo FLBuilderUtils::sanitize_html_class( $module->get_classname() ); ?>">
 	<?php if ( isset( $settings->click_action ) && 'lightbox' == $settings->click_action ) : ?>
 		<a href="<?php echo 'video' == $settings->lightbox_content_type ? esc_url( do_shortcode( $settings->lightbox_video_link ) ) : '#'; ?>" class="fl-button <?php echo $button_node_id; ?> fl-button-lightbox<?php echo ( 'enable' == $settings->icon_animation ) ? ' fl-button-icon-animation' : ''; ?>"<?php echo $module->get_role(); ?>>
 	<?php else : ?>

@@ -95,12 +95,16 @@ final class FLBuilderShortcodes {
 	 * @since 2.4.2
 	 */
 	static public function safe_shortcode( $atts, $content ) {
+		$atts = shortcode_atts( array(
+			'msg' => __( 'Content not rendered while builder is active', 'fl-builder' ),
+		), $atts, 'fl-safe' );
+
 		if ( $content ) {
 			if ( ! FLBuilderModel::is_builder_active() ) {
 				return do_shortcode( $content );
 			} else {
 				$refresh = '<script>jQuery(function(){window.FLBuilderConfig.shouldRefreshOnPublish=true;});</script>';
-				return __( 'Content not rendered while builder is active', 'fl-builder' ) . $refresh;
+				return esc_html( $atts['msg'] ) . $refresh;
 			}
 		}
 	}

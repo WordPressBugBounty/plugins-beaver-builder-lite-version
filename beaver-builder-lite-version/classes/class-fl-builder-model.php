@@ -4378,6 +4378,13 @@ final class FLBuilderModel {
 		// Process the settings.
 		$new_settings = self::process_node_settings( $node, $new_settings );
 
+		/**
+		 * Remove any js setting for users with no unfiltered role
+		 */
+		if ( ! FLBuilderModel::user_has_unfiltered_html() ) {
+			unset( $new_settings->bb_js_code );
+		}
+
 		// Save the settings to the node.
 		$data                       = self::get_layout_data();
 		$data[ $node_id ]->settings = $new_settings;

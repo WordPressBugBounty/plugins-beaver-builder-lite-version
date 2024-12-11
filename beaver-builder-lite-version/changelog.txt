@@ -1,8 +1,50 @@
-<h4>2.8.4.4 - 11/14/2024</h4>
+<h4>2.8.5.3 - 12/05/2024</h4>
 <p><strong>Hotfix</strong></p>
 <ul>
-	<li>Security: Sanitize settings fields that are used in HTML attributes (#3784)</li>
-	<li>Security: Sanitize settings used in JS in the Numbers module (#3784)</li>
+	<li>Security: hardening against XSS in HTML classes (#3800)</li>
+	<li>Node CSS/JS: make sure it's not accessible to the Contributor role and below</li>
+	<li>Additional fixes for layout shifting to below the footer after some actions</li>
+	<li>Heading Module: sanitize title attribute (#3757)</li>
+</ul>
+
+<h4>2.8.5.2 - 12/03/2024</h4>
+<p><strong>Hotfix</strong></p>
+<ul>
+	<li>Fix layout shifting to below the footer after some actions (#3834)</li>
+</ul>
+
+<h4>2.8.5.1 - 11/26/2024</h4>
+<p><strong>Hotfix</strong></p>
+<ul>
+	<li>Rows: Fix vertical alignment being hidden when it shouldn't be (#3779)</li>
+	<li>Always ensure we have a default nodeClass when cleaning new ajax HTML</li>
+</ul>
+
+<h4>2.8.5 - 11/19/2024</h4>
+<strong>Enhancements</strong>
+<ul>
+	<li>Video Module: Add support for WebM as the main video type not just fallback (#1669)</li>
+	<li>Stats: Collect data on usage of iFrame UI and Legacy UI (#3711)</li>
+	<li>Add parameter to <code>[fl-safe]</code> shortcode to allow for a custom message to be displayed in the UI (#3723)</li>
+</ul>
+
+<strong>Bug Fixes</strong>
+<ul>
+	<li>Fixed deleting a blank column causing the dom nodes for the entire layout to be deleted in Themer layouts (#3752)</li>
+	<li>Accordion Module (a11y): Fix issue when FontAwesome plugin is active (#3648)</li>
+	<li>Accordion Module: tweak font CSS so it's not as easily overridden (#1756)</li> 
+	<li>Button Module: Fix background color not working on PHP 7.4 and small issue with border hover color (#3709 & 3729)</li>
+	<li>Border Field: Tweak code to ensure there's proper checking for top right border radius (#3716)</li>
+	<li>List Module: Fix icon not rendering if using shared icon (#3806)</li>
+	<li>Map Module: fix error when using field connections and custom field is left blank (#3505)</li>
+	<li>Menu Module (a11y): fix aria-haspopup being on the wrong element (#3236)</li>
+	<li>Post Carousel & Post Slider Modules: Fix posts displaying if no result when ACF relationship is used (#1323)</li>
+	<li>Slideshow Module: Fix rendering issues with FSE themes (#2967)</li>
+	<li>Video Module: Fix videos not using mp4 or webm extension no longer displaying and fix videos being forced to a 16:9 format (#3733 & 3765)</li>
+	<li>Outline Panel: Fix error when using a Slider Revolution widget (#3706)</li>
+	<li>WooCommerce: Fix compatibility with Restaurant for WooCommerce Plugin (#3724)</li>
+	<li>Multi-Site: ensure error message fires when you try to use an incompatible BB version (#3509)</li>
+	<li>Row settings: Only show vertical align when needed (#2988)</li>
 </ul>
 
 <h4>2.8.4.3 - 10/28/2024</h4>

@@ -35,7 +35,7 @@ class FLVideoModule extends FLBuilderModule {
 
 			$this->data = FLBuilderPhoto::get_attachment_data( $this->settings->video );
 
-			if ( ! $this->data && isset( $this->settings->data ) ) {
+			if ( ! empty( $this->data ) && isset( $this->settings->data ) ) {
 				$this->data = $this->settings->data;
 			} else {
 				$data            = new stdClass;
@@ -43,11 +43,14 @@ class FLVideoModule extends FLBuilderModule {
 				$data->extension = '';
 
 				if ( ! empty( $this->settings->connections['video'] ) || ! empty( $this->settings->connections['video_webm'] ) ) {
-					$data->url       = ! empty( $this->settings->video ) ? $this->settings->video : $this->settings->video_webm;
-					$data->extension = ! empty( $this->settings->video ) ? 'mp4' : 'webm';
+					$data->url = ! empty( $this->settings->video ) ? $this->settings->video : $this->settings->video_webm;
 				} elseif ( ! empty( $this->settings->data->url ) ) {
-					$data->url       = $this->settings->data->url;
-					$data->extension = 'mp4';
+					$data->url = $this->settings->data->url;
+				}
+
+				if ( ! empty( $data->url ) ) {
+					$video_file        = wp_check_filetype( $data->url );
+					$data->extension = $video_file['ext'];
 				}
 
 				$this->data = $data;
@@ -107,7 +110,7 @@ class FLVideoModule extends FLBuilderModule {
 			$video_sc = sprintf( '%s', __( 'Video not specified. Please select one to display.', 'fl-builder' ) );
 
 			if ( ! empty( $vid_data->url ) ) {
-				$video_sc = '[video ' . $vid_data->extension . '="' . preg_replace( '/\/?\?.*/', '', $vid_data->url ) . '"' . $vid_data->video_webm . ' poster="' . $video_poster . '" ' . $vid_data->autoplay . $vid_data->loop . $preload . '][/video]';
+				$video_sc = '[video src="' . preg_replace( '/\/?\?.*/', '', $vid_data->url ) . '" ' . $vid_data->extension . '="' . preg_replace( '/\/?\?.*/', '', $vid_data->url ) . '"' . $vid_data->video_webm . ' poster="' . $video_poster . '" ' . $vid_data->autoplay . $vid_data->loop . $preload . '][/video]';
 			}
 
 			if ( 'yes' === $this->settings->video_lightbox ) {
@@ -365,15 +368,15 @@ FLBuilder::register_module('FLVideoModule', array(
 					),
 					'video'            => array(
 						'type'        => 'video',
-						'label'       => __( 'Video (MP4)', 'fl-builder' ),
+						'label'       => __( 'Main Video (MP4)', 'fl-builder' ),
 						'connections' => array( 'custom_field' ),
-						'help'        => __( 'A video in the MP4 format. Most modern browsers support this format.', 'fl-builder' ),
+						'help'        => __( 'Main video, which could be in mp4, m4v, webm, ogv, or wmv format. Most modern browsers support this format.', 'fl-builder' ),
 						'show_remove' => true,
 					),
 					'video_webm'       => array(
 						'type'        => 'video',
 						'show_remove' => true,
-						'label'       => __( 'Video (WebM)', 'fl-builder' ),
+						'label'       => __( 'Fallback Video (WebM)', 'fl-builder' ),
 						'connections' => array( 'custom_field' ),
 						'help'        => __( 'A video in the WebM format to use as fallback. This format is required to support browsers such as FireFox and Opera.', 'fl-builder' ),
 						'preview'     => array(

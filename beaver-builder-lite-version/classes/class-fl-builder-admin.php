@@ -117,7 +117,7 @@ final class FLBuilderAdmin {
 	static public function show_activate_error( $message ) {
 		deactivate_plugins( FLBuilderModel::plugin_basename(), false, is_network_admin() );
 
-		die( $message );
+		wp_die( $message );
 	}
 
 	/**

@@ -20,7 +20,7 @@ final class FLBuilderColor {
 
 		$hex = self::hex_or_rgb( $hex );
 		// if $hex is empty or false return basic rgb data.
-		if ( ! $hex || strstr( $hex, 'var(--' ) ) {
+		if ( ! $hex || strstr( $hex, 'var(--' ) || strstr( $hex, 'hw' ) ) {
 			return array(
 				'r' => 0,
 				'g' => 0,

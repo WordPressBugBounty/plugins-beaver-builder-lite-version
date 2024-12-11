@@ -340,7 +340,7 @@ final class FLBuilderCSS {
 			if ( isset( $setting['radius']['top_left'] ) && '' !== $setting['radius']['top_left'] ) {
 				$props['border-top-left-radius'] = $setting['radius']['top_left'] . 'px';
 			}
-			if ( '' !== $setting['radius']['top_right'] ) {
+			if ( isset( $setting['radius']['top_right'] ) && '' !== $setting['radius']['top_right'] ) {
 				$props['border-top-right-radius'] = $setting['radius']['top_right'] . 'px';
 			}
 			if ( isset( $setting['radius']['bottom_left'] ) && '' !== $setting['radius']['bottom_left'] ) {

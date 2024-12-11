@@ -1,4 +1,4 @@
-<div class="<?php echo $module->get_classname(); ?>">
+<div class="<?php echo FLBuilderUtils::sanitize_html_class( $module->get_classname() ); ?>">
 	<?php
 
 	// Image left

@@ -62,6 +62,7 @@ final class FLBuilderCompatibility {
 		add_action( 'wp_tiny_mce_init', array( __CLASS__, 'fix_gf_tinymce' ), 9 );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'remove_tour_fix' ) );
 		add_action( 'fl_before_sortable_enqueue', array( __CLASS__, 'fix_classicpress_v2' ) );
+		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'fix_restaurant_woocommerce' ), 20 );
 
 		// Filters
 		add_filter( 'fl_builder_is_post_editable', array( __CLASS__, 'bp_pages_support' ), 11, 2 );
@@ -1364,6 +1365,16 @@ final class FLBuilderCompatibility {
 
 	public static function fix_classicpress_v2_ad_js( $enabled ) {
 		return function_exists( 'classicpress_version' ) ? false : $enabled;
+	}
+
+	public static function fix_restaurant_woocommerce() {
+
+		if ( ! class_exists( 'rms_resaurant_main' ) ) {
+			return false;
+		}
+
+		wp_dequeue_script( 'rms_jquery_ui_datepicker_script' );
+
 	}
 }
 FLBuilderCompatibility::init();

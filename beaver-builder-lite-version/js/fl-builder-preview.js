@@ -1428,7 +1428,8 @@
 				maxContentWidthUnit : $(this.classes.settings + ' select[name=max_content_width_unit]', window.parent.document),
 				height          	: $(this.classes.settings + ' select[name=full_height]', window.parent.document),
 				minHeight          	: $(this.classes.settings + ' input[name=min_height]', window.parent.document),
-				align           	: $(this.classes.settings + ' select[name=content_alignment]', window.parent.document)
+				align           	: $(this.classes.settings + ' select[name=content_alignment]', window.parent.document),
+				aspectRatio         : $(this.classes.settings + ' input[name=aspect_ratio]', window.parent.document)
 			});
 
 			// Events
@@ -1438,6 +1439,7 @@
 			this.elements.maxContentWidthUnit.on(   'change', $.proxy(this._rowMaxContentWidthChange, this));
 			this.elements.height.on(        		'change', $.proxy(this._rowHeightChange, this));
 			this.elements.align.on(         		'change', $.proxy(this._rowHeightChange, this));
+			this.elements.aspectRatio.on(           'input',  $.proxy(this._rowInitContentAlignment, this));
 
 			// Common Elements
 			this._initNodeTextColor();
@@ -1446,6 +1448,7 @@
 			this._initNodeDimensions( 'border' );
 			this._initNodeDimensions( 'margin' );
 			this._initNodeDimensions( 'padding' );
+			this._rowInitContentAlignment();
 		},
 
 		/**
@@ -1569,6 +1572,29 @@
 				row.addClass('fl-row-default-height');
 				row.addClass('fl-row-align-' + this.elements.align.val());
 				this.elements.minHeight.val( '' ).trigger( 'input' );
+			}
+
+			this._rowInitContentAlignment();
+		},
+
+		/**
+		 * Show/hide Content Alignment field when Row Setting Form renders.
+		 *
+		 * @since 2.8.2
+		 * @access private
+		 * @method _rowInitContentAlignment
+		 * @param {Object} e An event object.
+		 */
+		_rowInitContentAlignment: function(e)
+		{
+			const height           = this.elements.height.val().trim();
+			const form             = $( '.fl-builder-settings:visible' );
+			const alignFieldRow    = form.find( '#fl-field-content_alignment' );
+			const aspectValue       = form.find( '#fl-field-aspect_ratio input' ).val();
+			if ( height === 'default' && ! aspectValue ) {
+				alignFieldRow.hide();
+			} else {
+				alignFieldRow.show();
 			}
 		},
 

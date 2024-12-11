@@ -756,9 +756,35 @@ final class FLBuilder {
 			if ( 'css' == $type ) {
 				wp_enqueue_style( $handle, $url, $css_deps, $asset_ver, $css_media );
 			} elseif ( 'js' == $type ) {
-				wp_enqueue_script( $handle, $url, array( 'jquery' ), $asset_ver, true );
+				$deps = self::get_layout_script_enqueue_deps( array( 'jquery' ), $path );
+				$deps = apply_filters( 'fl_builder_layout_script_enqueue_deps', $deps, $path );
+				wp_enqueue_script( $handle, $url, $deps, $asset_ver, true );
 			}
 		}
+	}
+
+	/**
+	 * Sort dependencies for layout.js
+	 *
+	 * @since 2.8.3
+	 * @param array $deps Dependencies for layout js, default is jquery.
+	 * @param string $path Path to layout js file.
+	 * @return array
+	 */
+	static private function get_layout_script_enqueue_deps( $deps, $path ) {
+
+		if ( ! ( function_exists( 'wp_is_block_theme' ) && wp_is_block_theme() ) ) {
+			return $deps;
+		}
+
+		$js = file_get_contents( $path );
+		if ( false !== strpos( $js, 'YUI' ) ) {
+			$deps[] = 'yui3';
+		}
+		if ( false !== strpos( $js, 'fl-slideshow' ) ) {
+			$deps[] = 'fl-slideshow';
+		}
+		return $deps;
 	}
 
 	/**

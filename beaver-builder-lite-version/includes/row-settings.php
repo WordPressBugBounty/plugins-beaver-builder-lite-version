@@ -105,19 +105,6 @@ $row_settings = array(
 								'property' => 'min-height',
 							),
 						),
-						'content_alignment' => array(
-							'type'    => 'select',
-							'label'   => __( 'Vertical Alignment', 'fl-builder' ),
-							'default' => 'center',
-							'options' => array(
-								'top'    => __( 'Top', 'fl-builder' ),
-								'center' => __( 'Center', 'fl-builder' ),
-								'bottom' => __( 'Bottom', 'fl-builder' ),
-							),
-							'preview' => array(
-								'type' => 'none',
-							),
-						),
 						'aspect_ratio'      => array(
 							'type'       => 'text',
 							'label'      => __( 'Aspect Ratio', 'fl-builder' ),
@@ -129,6 +116,19 @@ $row_settings = array(
 								'type'     => 'css',
 								'selector' => '.fl-row-content-wrap',
 								'property' => 'aspect-ratio',
+							),
+						),
+						'content_alignment' => array(
+							'type'    => 'select',
+							'label'   => __( 'Vertical Alignment', 'fl-builder' ),
+							'default' => 'center',
+							'options' => array(
+								'top'    => __( 'Top', 'fl-builder' ),
+								'center' => __( 'Center', 'fl-builder' ),
+								'bottom' => __( 'Bottom', 'fl-builder' ),
+							),
+							'preview' => array(
+								'type' => 'none',
 							),
 						),
 					),

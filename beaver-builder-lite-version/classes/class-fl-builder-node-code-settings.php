@@ -38,7 +38,7 @@ final class FLBuilderNodeCodeSettings {
 
 
 	public static function filter_settings_fields( $form, $slug ) {
-		if ( 'row' === $slug || 'col' === $slug && ( current_user_can( 'delete_others_posts' ) || FLBuilderModel::user_has_unfiltered_html() ) ) {
+		if ( ( 'row' === $slug || 'col' === $slug ) && ( current_user_can( 'delete_others_posts' ) || FLBuilderModel::user_has_unfiltered_html() ) ) {
 			$form['tabs']['advanced']['sections']['bb_css_code'] = self::get_css_field_config();
 			$form['tabs']['advanced']['sections']['bb_js_code']  = self::get_js_field_config();
 		}

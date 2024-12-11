@@ -46,14 +46,14 @@ final class FLBuilderAdminAdvanced {
 				'default'  => 1,
 				'callback' => array( __CLASS__, 'disable_outline' ),
 				'group'    => 'ui',
-				'link'     => 'https://docs.wpbeaverbuilder.com/beaver-builder/getting-started/bb-editor-basics/outline-panel/',
+				'link'     => 'https://docs.wpbeaverbuilder.com/beaver-builder/user-interface/outline-panel/',
 			),
 			'inline_editing_enabled' => array(
 				'label'    => __( 'Inline Editing', 'fl-builder' ),
 				'default'  => 1,
 				'callback' => array( __CLASS__, 'disable_inline_edit' ),
 				'group'    => 'ui',
-				'link'     => 'https://docs.wpbeaverbuilder.com/beaver-builder/getting-started/bb-editor-basics/inline-editing/',
+				'link'     => 'https://docs.wpbeaverbuilder.com/beaver-builder/basics/inline-editing/',
 			),
 			'notifications_enabled'  => array(
 				'label'       => __( 'Notification system', 'fl-builder' ),

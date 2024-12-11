@@ -3668,6 +3668,7 @@
 				}, function() {
 					$( '#fl-field-width select', window.parent.document ).on( 'change', FLBuilder._rowWidthChanged );
 					$( '#fl-field-content_width select', window.parent.document ).on( 'change', FLBuilder._rowWidthChanged );
+					$( '#fl-field-aspect_ratio input', window.parent.document ).on( 'input', FLBuilder._rowToggleContentAlignment );
 				} );
 			}
 		},
@@ -3690,6 +3691,25 @@
 				maxWidth.show();
 			} else {
 				maxWidth.hide();
+			}
+		},
+
+		/**
+		 * Toggles the Content Alignment field based on the value of the Aspect Ratio.
+		 * 
+		 * @since  2.8.2
+		 * @access private
+		 * @param {Object} e An event object.
+		 * @method _rowToggleContentAlignment
+		 */
+		_rowToggleContentAlignment: function(e)
+		{
+			const contentAlignmentField = $( '#fl-field-content_alignment', window.parent.document );
+
+			if ( $( e.target ).val().trim() === '' ) {
+				contentAlignmentField.hide();
+			} else {
+				contentAlignmentField.show();
 			}
 		},
 
@@ -4319,7 +4339,7 @@
 		_getColToDelete: function( initialCol ) {
 			var col            = initialCol,
 			parentGroup        = col.closest( '.fl-col-group' ),
-			parentCol          = col.parents( '.fl-col' ),
+			parentCol          = col.parents( '.fl-col:not(:has(.fl-builder-content-primary))' ),
 			hasParentCol       = parentCol.length > 0,
 			parentChildren     = parentCol.find( '> .fl-col-content > .fl-module, > .fl-col-content > .fl-col-group' ),
 			siblingCols        = col.siblings( '.fl-col' );

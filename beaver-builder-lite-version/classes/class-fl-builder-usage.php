@@ -420,6 +420,8 @@ final class FLBuilderUsage {
 		$data['fl-builder'] = FL_BUILDER_VERSION;
 		$data['fl-theme']   = ( defined( 'FL_THEME_VERSION' ) ) ? FL_THEME_VERSION : false;
 		$data['fl-themer']  = ( defined( 'FL_THEME_BUILDER_VERSION' ) ) ? FL_THEME_BUILDER_VERSION : false;
+		$data['iframe_ui']  = get_option( '_fl_builder_iframe_ui' ) ? 'Enabled' : 'Disabled';
+		$data['flnotify']   = get_option( '_fl_builder_notifications_enabled' ) ? 'Enabled' : 'Disabled';
 
 		$settings_orig = FLBuilderModel::get_global_settings();
 

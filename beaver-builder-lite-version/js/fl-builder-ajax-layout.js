@@ -337,10 +337,10 @@
 			}
 
 			// Setup vars.
-			var html 	 		= $( '<div>' + this._data.html + '</div>' ),
-				nodeClass 		= 'fl-row',
-				scriptsStyles 	= this._data.scriptsStyles,
-				removed 		= '';
+			var html          = $( '<div>' + this._data.html + '</div>' ),
+				nodeClass     = 'fl-row',
+				scriptsStyles = this._data.scriptsStyles,
+				removed       = '';
 
 			// Get the class of the nodes that should be in data.html.
 			if ( this._data.partial ) {
@@ -351,7 +351,7 @@
 					nodeClass = 'fl-col';
 				}
 				else {
-					nodeClass = 'fl-' + this._data.nodeType;
+					nodeClass = this._data.nodeType ? 'fl-' + this._data.nodeType : 'fl-row';
 				}
 			}
 

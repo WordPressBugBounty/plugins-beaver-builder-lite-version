@@ -17,7 +17,7 @@ if ( isset( $settings->menu_search ) && 'show' == $settings->menu_search ) {
 }
 
 ?>
-<div class="<?php echo $menu_classes; ?>">
+<div class="<?php echo FLBuilderUtils::sanitize_html_class( $menu_classes ); ?>">
 	<?php $module->render_toggle_button(); ?>
 	<div class="fl-clear"></div>
 	<?php
