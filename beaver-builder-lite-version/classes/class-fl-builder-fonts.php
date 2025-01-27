@@ -336,6 +336,10 @@ final class FLBuilderFonts {
 		$google = FLBuilderFontFamilies::google();
 		$bold   = false;
 
+		if ( $module instanceof FLRichTextModule || $module instanceof FLListModule ) {
+			$bold = true;
+		}
+
 		foreach ( $fields as $name => $field ) {
 
 			if ( 'font' == $field['type'] && isset( $module->settings->$name ) ) {
@@ -362,9 +366,6 @@ final class FLBuilderFonts {
 					$weight = 'i';
 				}
 
-				if ( $module instanceof FLRichTextModule ) {
-					$bold = true;
-				}
 				self::add_font( array(
 					'family' => $module->settings->{ $name }['font_family'],
 					'weight' => $weight,

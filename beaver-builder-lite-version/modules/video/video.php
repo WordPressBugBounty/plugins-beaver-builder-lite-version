@@ -49,7 +49,7 @@ class FLVideoModule extends FLBuilderModule {
 				}
 
 				if ( ! empty( $data->url ) ) {
-					$video_file        = wp_check_filetype( $data->url );
+					$video_file      = wp_check_filetype( $data->url );
 					$data->extension = $video_file['ext'];
 				}
 

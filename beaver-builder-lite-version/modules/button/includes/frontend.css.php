@@ -111,6 +111,16 @@ FLBuilderCSS::border_field_rule( array(
 	'selector'     => ".fl-builder-content .fl-node-$id a.fl-button, .fl-builder-content .fl-node-$id a.fl-button:visited, .fl-builder-content .fl-node-$id a.fl-button:hover, .fl-builder-content .fl-node-$id a.fl-button:focus, .fl-page .fl-builder-content .fl-node-$id a.fl-button, .fl-page .fl-builder-content .fl-node-$id a.fl-button:visited, .fl-page .fl-builder-content .fl-node-$id a.fl-button:hover, .fl-page .fl-builder-content .fl-node-$id a.fl-button:focus",
 ) );
 
+// theme based borders
+
+FLBuilderCSS::rule( array(
+	'enabled'  => ! empty( FLBuilderUtils::get_bb_theme_option( 'fl-button-border-hover-color' ) ),
+	'selector' => ".fl-builder-content .fl-module-button.fl-node-$id a.fl-button:hover, .fl-builder-content .fl-node-$id a.fl-button:focus, .fl-page .fl-builder-content .fl-module-button.fl-node-$id a.fl-button:hover, .fl-page .fl-builder-content .fl-node-$id a.fl-button:focus",
+	'props'    => array(
+		'border-color' => FLBuilderColor::hex_or_rgb( FLBuilderUtils::get_bb_theme_option( 'fl-button-border-hover-color' ) ),
+	),
+) );
+
 if ( 'adv-gradient' === $settings->style ) {
 	$settings->border['color'] = $border_color_backup;
 }

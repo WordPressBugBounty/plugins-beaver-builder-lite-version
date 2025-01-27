@@ -691,6 +691,7 @@ FLBuilder::register_module('FLPhotoModule', array(
 						'label'         => __( 'Link URL', 'fl-builder' ),
 						'show_target'   => true,
 						'show_nofollow' => true,
+						'show_download' => true,
 						'preview'       => array(
 							'type' => 'none',
 						),

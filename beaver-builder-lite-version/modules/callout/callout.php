@@ -133,11 +133,11 @@ class FLCalloutModule extends FLBuilderModule {
 		echo '<' . $this->settings->title_tag . ' class="fl-callout-title">';
 
 		if ( ! empty( $this->settings->link ) && 'icon' === $this->settings->image_type ) {
-			echo '<a href="' . esc_url( do_shortcode( $this->settings->link ) ) . '" target="' . esc_attr( $this->settings->link_target ) . '" ' . $this->get_rel() . ' class="fl-callout-title-link fl-callout-title-text">';
+			echo '<a href="' . esc_url( do_shortcode( $this->settings->link ) ) . '" ' . ( ( isset( $this->settings->link_download ) && 'yes' === $this->settings->link_download ) ? ' download' : '' ) . ' target="' . esc_attr( $this->settings->link_target ) . '" ' . $this->get_rel() . ' class="fl-callout-title-link fl-callout-title-text">';
 		}
 
 		if ( ! empty( $this->settings->link ) && 'icon' !== $this->settings->image_type ) {
-			echo '<a href="' . esc_url( do_shortcode( $this->settings->link ) ) . '" target="' . esc_attr( $this->settings->link_target ) . '" ' . $this->get_rel() . ' class="fl-callout-title-link fl-callout-title-text">';
+			echo '<a href="' . esc_url( do_shortcode( $this->settings->link ) ) . '"' . ( ( isset( $this->settings->link_download ) && 'yes' === $this->settings->link_download ) ? ' download' : '' ) . ' target="' . esc_attr( $this->settings->link_target ) . '" ' . $this->get_rel() . ' class="fl-callout-title-link fl-callout-title-text">';
 		}
 
 		if ( 'left-title' === $this->settings->icon_position ) {
@@ -200,7 +200,7 @@ class FLCalloutModule extends FLBuilderModule {
 		$html = '';
 
 		if ( 'link' == $this->settings->cta_type ) {
-			$html = '<a href="' . esc_url( do_shortcode( $this->settings->link ) ) . '" ' . $this->get_rel() . ' target="' . esc_attr( $this->settings->link_target ) . '" class="fl-callout-cta-link">' . $this->settings->cta_text . '</a>';
+			$html = '<a href="' . esc_url( do_shortcode( $this->settings->link ) ) . '" ' . ( ( isset( $this->settings->link_download ) && 'yes' === $this->settings->link_download ) ? ' download' : '' ) . '' . $this->get_rel() . ' target="' . esc_attr( $this->settings->link_target ) . '" class="fl-callout-cta-link">' . $this->settings->cta_text . '</a>';
 		}
 		return $html;
 	}
@@ -286,6 +286,7 @@ class FLCalloutModule extends FLBuilderModule {
 			'sr_text'         => $this->settings->sr_text,
 			'link'            => $this->settings->link,
 			'link_target'     => $this->settings->link_target,
+			'link_download'   => isset( $this->settings->link_download ) ? $this->settings->link_download : '',
 			'link_nofollow'   => $this->settings->link_nofollow,
 		);
 
@@ -319,13 +320,14 @@ class FLCalloutModule extends FLBuilderModule {
 		}
 
 		$settings = array(
-			'link_url_target' => $this->settings->link_target,
-			'link_nofollow'   => $this->settings->link_nofollow,
-			'link_type'       => 'url',
-			'link_url'        => $this->settings->link,
-			'photo'           => $photo_data,
-			'photo_src'       => $this->settings->photo_src,
-			'photo_source'    => 'library',
+			'link_url_target'   => $this->settings->link_target,
+			'link_nofollow'     => $this->settings->link_nofollow,
+			'link_url_download' => isset( $this->settings->link_download ) ? $this->settings->link_download : '',
+			'link_type'         => 'url',
+			'link_url'          => $this->settings->link,
+			'photo'             => $photo_data,
+			'photo_src'         => $this->settings->photo_src,
+			'photo_source'      => 'library',
 		);
 
 		foreach ( $this->settings as $key => $value ) {
@@ -770,6 +772,7 @@ FLBuilder::register_module('FLCalloutModule', array(
 						'help'          => __( 'The link applies to the entire module. If choosing a call to action type below, this link will also be used for the text or button.', 'fl-builder' ),
 						'show_target'   => true,
 						'show_nofollow' => true,
+						'show_download' => true,
 						'preview'       => array(
 							'type' => 'none',
 						),

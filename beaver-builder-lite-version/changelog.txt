@@ -1,3 +1,30 @@
+<h4>2.8.6.1 - 01/22/2025</h4>
+<p><strong>Hotfix</strong></p>
+<ul>
+	<li>Callout Module: Fix PHP notice showing after upgrading from previous versions</li>
+</ul>
+
+<h4>2.8.6 - 01/16/2025</h4>
+<strong>Enhancements</strong>
+<ul>
+	<li>Add AVIF image support (#3872)</li>
+	<li>Add force download option to link fields where it is missing (#3767)</li>
+</ul>
+
+<strong>Bug Fixes</strong>
+<ul>
+	<li>Performance: optimize asset files to prevent files being generated when not necessary (#3869)</li>
+	<li>Ensure BB theme button settings still apply when setting some styles in button modules (#3857)</li>
+	<li>Remove update_metadata optimization that isn't needed and is causing issues when duplicating (#3849)</li>
+	<li>Audio Module: fix audio file not being able to be uploaded if you edited a photo module directly before (#3797)</li>
+	<li>Contact Form Module: Fix notice when displayed in the WP Admin (#2779)</li>
+	<li>List Module: Fix strong tag being overridden by font weight option (#2772)</li>
+	<li>Menu Module: Fix Below Row responsive style not working properly on mobile (#3841)</li>
+	<li>Photo Module: fix enabling photo page for the link type not working (#3769)</li>
+	<li>Fix Bugherd menu appearing twice in the UI  (#2870)</li>
+	<li>Login Module: Fix issues with alignment of options on the login form (#2304)</li>
+</ul>
+
 <h4>2.8.5.3 - 12/05/2024</h4>
 <p><strong>Hotfix</strong></p>
 <ul>
@@ -32,7 +59,7 @@
 <ul>
 	<li>Fixed deleting a blank column causing the dom nodes for the entire layout to be deleted in Themer layouts (#3752)</li>
 	<li>Accordion Module (a11y): Fix issue when FontAwesome plugin is active (#3648)</li>
-	<li>Accordion Module: tweak font CSS so it's not as easily overridden (#1756)</li> 
+	<li>Accordion Module: tweak font CSS so it's not as easily overridden (#1756)</li>
 	<li>Button Module: Fix background color not working on PHP 7.4 and small issue with border hover color (#3709 & 3729)</li>
 	<li>Border Field: Tweak code to ensure there's proper checking for top right border radius (#3716)</li>
 	<li>List Module: Fix icon not rendering if using shared icon (#3806)</li>
@@ -1275,7 +1302,7 @@
 	<li>Fix PHP Notice for $tabs undefined variable</li>
 	<li>Remove Google font from Recently Used list if that font is no longer available in the API</li>
 	<li>Content Slider: Fix slides not displaying styling properly when shuffle is enabled</li>
-	<li>Content Slider: Remove clicable areas if navigation is disabled</li>
+	<li>Content Slider: Remove clickable areas if navigation is disabled</li>
 	<li>Menu Module: Fix alignment not working when using horizontal alignment and wrapping items</li>
 	<li>Testimonial Module: Fix partial second slide displaying during responsive editing</li>
 	<li>Style hardening for TwentyTwentyOne Theme</li>

@@ -506,4 +506,16 @@ final class FLBuilderUtils {
 		 */
 		return apply_filters( 'fl_sanitize_html_class', $sanitized, $classname, $fallback );
 	}
+
+	/**
+	 * Get an option from the theme
+	 * @since 2.8.5
+	 */
+	public static function get_bb_theme_option( $option ) {
+		if ( ! class_exists( 'FLCustomizer' ) ) {
+			return '';
+		}
+		$mods = FLCustomizer::get_mods();
+		return isset( $mods[ $option ] ) ? $mods[ $option ] : '';
+	}
 }

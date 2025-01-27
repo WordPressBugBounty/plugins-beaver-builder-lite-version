@@ -521,6 +521,12 @@
 						
 						if ( self.mobileBelowRow ) {
 							targetMenu = $( this ).closest( '.fl-col' ).next( '.fl-menu-mobile-clone' );
+
+							if ( $( this ).closest( '.fl-col-group' ).hasClass( 'fl-col-group-responsive-reversed' ) ) {
+								$( '.fl-menu-mobile-clone' ).css( 'order', -1 );
+							} else {
+								$( '.fl-menu-mobile-clone' ).css( 'order', 2 );
+							}
 						} else {
 							targetMenu = $( this ).closest( '.fl-menu' ).find( 'ul.menu' );
 						}

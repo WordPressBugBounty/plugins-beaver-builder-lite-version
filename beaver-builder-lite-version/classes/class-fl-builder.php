@@ -3517,7 +3517,7 @@ final class FLBuilder {
 		}
 
 		// Save the CSS.
-		if ( 'file' === $enqueuemethod ) {
+		if ( 'file' === $enqueuemethod && $css ) {
 			fl_builder_filesystem()->file_put_contents( $path, $css );
 		}
 
@@ -4141,7 +4141,7 @@ final class FLBuilder {
 			}
 
 			// Save the JS.
-			if ( 'file' === $enqueuemethod ) {
+			if ( 'file' === $enqueuemethod && $js ) {
 				fl_builder_filesystem()->file_put_contents( $path, $js );
 			}
 
@@ -4327,7 +4327,7 @@ final class FLBuilder {
 			self::$enqueued_module_js_assets[] = $id;
 			ob_start();
 			include $file;
-			$js .= ';' . ltrim( ob_get_clean(), ';' );
+			$js .= ltrim( ob_get_clean(), ';' );
 		}
 
 		// Return the JS.
@@ -4410,8 +4410,9 @@ final class FLBuilder {
 		$ext = pathinfo( $file['name'], PATHINFO_EXTENSION );
 
 		$regex = array(
-			'photo' => '#(jpe?g|png|gif|bmp|tiff?|webp)#i',
+			'photo' => '#(jpe?g|png|gif|bmp|tiff?|webp|avif)#i',
 			'video' => '#(mp4|m4v|webm)#i',
+			'audio' => '#(mp3|mpeg|wav|ogg)#i',
 		);
 
 		if ( ! $type ) {

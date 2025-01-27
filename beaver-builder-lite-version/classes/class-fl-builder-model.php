@@ -4943,9 +4943,10 @@ final class FLBuilderModel {
 	 * @return void
 	 */
 	static public function update_layout_data( $data, $status = null, $post_id = null ) {
-		$post_id = ! $post_id ? self::get_post_id() : $post_id;
-		$status  = ! $status ? self::get_node_status() : $status;
-		$key     = 'published' == $status ? '_fl_builder_data' : '_fl_builder_draft';
+		$post_id  = ! $post_id ? self::get_post_id() : $post_id;
+		$status   = ! $status ? self::get_node_status() : $status;
+		$key      = 'published' == $status ? '_fl_builder_data' : '_fl_builder_draft';
+		$raw_data = get_metadata( 'post', $post_id, $key );
 		/**
 		 * @since 2.6
 		 * @see fl_builder_enable_small_data_mode
@@ -4965,7 +4966,11 @@ final class FLBuilderModel {
 		}
 
 		// Update the data.
-		update_metadata( 'post', $post_id, $key, $data );
+		if ( 0 === count( $raw_data ) ) {
+			add_metadata( 'post', $post_id, $key, $data );
+		} else {
+			update_metadata( 'post', $post_id, $key, $data );
+		}
 
 		// Cache the data.
 		if ( 'published' == $status ) {

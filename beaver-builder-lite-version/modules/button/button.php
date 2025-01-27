@@ -186,14 +186,14 @@ class FLButtonModule extends FLBuilderModule {
 		if ( ! class_exists( 'FLBuilderGlobalStyles' ) ) {
 			return true;
 		}
-		return empty( ( FLBuilderGlobalStyles::get_settings() )->button_border['style'] ) || empty( ( FLBuilderGlobalStyles::get_settings() )->button_border['style'] );
+		return empty( ( FLBuilderGlobalStyles::get_settings() )->button_border['style'] ) && empty( FLBuilderUtils::get_bb_theme_option( 'fl-button-border-color' ) );
 	}
 
 	public function use_default_border_hover() {
 		if ( ! class_exists( 'FLBuilderGlobalStyles' ) ) {
 			return true;
 		}
-		return empty( ( FLBuilderGlobalStyles::get_settings() )->button_border_hover_color );
+		return empty( ( FLBuilderGlobalStyles::get_settings() )->button_border_hover_color ) && empty( FLBuilderUtils::get_bb_theme_option( 'fl-button-border-hover-color' ) );
 	}
 
 }

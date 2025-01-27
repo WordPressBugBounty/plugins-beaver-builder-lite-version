@@ -80,6 +80,7 @@ FLBuilder::register_module('FLIconModule', array(
 						'label'         => __( 'Link', 'fl-builder' ),
 						'show_target'   => true,
 						'show_nofollow' => true,
+						'show_download' => true,
 						'connections'   => array( 'url' ),
 					),
 					'sr_text' => array(

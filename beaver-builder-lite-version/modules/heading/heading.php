@@ -179,6 +179,7 @@ FLBuilder::register_module('FLHeadingModule', array(
 						'label'         => __( 'Link', 'fl-builder' ),
 						'show_target'   => true,
 						'show_nofollow' => true,
+						'show_download' => true,
 						'preview'       => array(
 							'type' => 'none',
 						),

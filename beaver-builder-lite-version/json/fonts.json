@@ -84,6 +84,11 @@
     "fallback": "sans-serif"
   }
 }, {
+  "Agu Display": {
+    "variants": ["regular"],
+    "fallback": "sans-serif"
+  }
+}, {
   "Aguafina Script": {
     "variants": ["regular"],
     "fallback": "cursive"
@@ -692,6 +697,11 @@
   "Bad Script": {
     "variants": ["regular"],
     "fallback": "cursive"
+  }
+}, {
+  "Badeen Display": {
+    "variants": ["regular"],
+    "fallback": "sans-serif"
   }
 }, {
   "Bagel Fat One": {
@@ -2889,6 +2899,11 @@
     "fallback": "sans-serif"
   }
 }, {
+  "Hind Mysuru": {
+    "variants": ["300", "regular", "500", "600", "700"],
+    "fallback": "sans-serif"
+  }
+}, {
   "Hind Siliguri": {
     "variants": ["300", "regular", "500", "600", "700"],
     "fallback": "sans-serif"
@@ -4514,6 +4529,11 @@
     "fallback": "sans-serif"
   }
 }, {
+  "Montserrat Underline": {
+    "variants": ["100", "200", "300", "regular", "500", "600", "700", "800", "900", "100italic", "200italic", "300italic", "italic", "500italic", "600italic", "700italic", "800italic", "900italic"],
+    "fallback": "sans-serif"
+  }
+}, {
   "Moo Lah Lah": {
     "variants": ["regular"],
     "fallback": "sans-serif"
@@ -5374,7 +5394,7 @@
     "fallback": "sans-serif"
   }
 }, {
-  "Noto Sans Phags Pa": {
+  "Noto Sans PhagsPa": {
     "variants": ["regular"],
     "fallback": "sans-serif"
   }
@@ -6274,8 +6294,18 @@
     "fallback": "cursive"
   }
 }, {
+  "Playwrite AR Guides": {
+    "variants": ["regular"],
+    "fallback": "cursive"
+  }
+}, {
   "Playwrite AT": {
     "variants": ["100", "200", "300", "regular", "100italic", "200italic", "300italic", "italic"],
+    "fallback": "cursive"
+  }
+}, {
+  "Playwrite AT Guides": {
+    "variants": ["regular", "italic"],
     "fallback": "cursive"
   }
 }, {
@@ -6284,8 +6314,18 @@
     "fallback": "cursive"
   }
 }, {
+  "Playwrite AU NSW Guides": {
+    "variants": ["regular"],
+    "fallback": "cursive"
+  }
+}, {
   "Playwrite AU QLD": {
     "variants": ["100", "200", "300", "regular"],
+    "fallback": "cursive"
+  }
+}, {
+  "Playwrite AU QLD Guides": {
+    "variants": ["regular"],
     "fallback": "cursive"
   }
 }, {
@@ -6294,8 +6334,18 @@
     "fallback": "cursive"
   }
 }, {
+  "Playwrite AU SA Guides": {
+    "variants": ["regular"],
+    "fallback": "cursive"
+  }
+}, {
   "Playwrite AU TAS": {
     "variants": ["100", "200", "300", "regular"],
+    "fallback": "cursive"
+  }
+}, {
+  "Playwrite AU TAS Guides": {
+    "variants": ["regular"],
     "fallback": "cursive"
   }
 }, {
@@ -6304,8 +6354,18 @@
     "fallback": "cursive"
   }
 }, {
+  "Playwrite AU VIC Guides": {
+    "variants": ["regular"],
+    "fallback": "cursive"
+  }
+}, {
   "Playwrite BE VLG": {
     "variants": ["100", "200", "300", "regular"],
+    "fallback": "cursive"
+  }
+}, {
+  "Playwrite BE VLG Guides": {
+    "variants": ["regular"],
     "fallback": "cursive"
   }
 }, {
@@ -6314,8 +6374,18 @@
     "fallback": "cursive"
   }
 }, {
+  "Playwrite BE WAL Guides": {
+    "variants": ["regular"],
+    "fallback": "cursive"
+  }
+}, {
   "Playwrite BR": {
     "variants": ["100", "200", "300", "regular"],
+    "fallback": "cursive"
+  }
+}, {
+  "Playwrite BR Guides": {
+    "variants": ["regular"],
     "fallback": "cursive"
   }
 }, {
@@ -6324,8 +6394,18 @@
     "fallback": "cursive"
   }
 }, {
+  "Playwrite CA Guides": {
+    "variants": ["regular"],
+    "fallback": "cursive"
+  }
+}, {
   "Playwrite CL": {
     "variants": ["100", "200", "300", "regular"],
+    "fallback": "cursive"
+  }
+}, {
+  "Playwrite CL Guides": {
+    "variants": ["regular"],
     "fallback": "cursive"
   }
 }, {
@@ -6334,8 +6414,18 @@
     "fallback": "cursive"
   }
 }, {
+  "Playwrite CO Guides": {
+    "variants": ["regular"],
+    "fallback": "cursive"
+  }
+}, {
   "Playwrite CU": {
     "variants": ["100", "200", "300", "regular"],
+    "fallback": "cursive"
+  }
+}, {
+  "Playwrite CU Guides": {
+    "variants": ["regular"],
     "fallback": "cursive"
   }
 }, {
@@ -6344,8 +6434,18 @@
     "fallback": "cursive"
   }
 }, {
+  "Playwrite CZ Guides": {
+    "variants": ["regular"],
+    "fallback": "cursive"
+  }
+}, {
   "Playwrite DE Grund": {
     "variants": ["100", "200", "300", "regular"],
+    "fallback": "cursive"
+  }
+}, {
+  "Playwrite DE Grund Guides": {
+    "variants": ["regular"],
     "fallback": "cursive"
   }
 }, {
@@ -6354,8 +6454,18 @@
     "fallback": "cursive"
   }
 }, {
+  "Playwrite DE LA Guides": {
+    "variants": ["regular"],
+    "fallback": "cursive"
+  }
+}, {
   "Playwrite DE SAS": {
     "variants": ["100", "200", "300", "regular"],
+    "fallback": "cursive"
+  }
+}, {
+  "Playwrite DE SAS Guides": {
+    "variants": ["regular"],
     "fallback": "cursive"
   }
 }, {
@@ -6364,13 +6474,28 @@
     "fallback": "cursive"
   }
 }, {
+  "Playwrite DE VA Guides": {
+    "variants": ["regular"],
+    "fallback": "cursive"
+  }
+}, {
   "Playwrite DK Loopet": {
     "variants": ["100", "200", "300", "regular"],
     "fallback": "cursive"
   }
 }, {
+  "Playwrite DK Loopet Guides": {
+    "variants": ["regular"],
+    "fallback": "cursive"
+  }
+}, {
   "Playwrite DK Uloopet": {
     "variants": ["100", "200", "300", "regular"],
+    "fallback": "cursive"
+  }
+}, {
+  "Playwrite DK Uloopet Guides": {
+    "variants": ["regular"],
     "fallback": "cursive"
   }
 }, {
@@ -6384,8 +6509,23 @@
     "fallback": "cursive"
   }
 }, {
+  "Playwrite ES Deco Guides": {
+    "variants": ["regular"],
+    "fallback": "cursive"
+  }
+}, {
+  "Playwrite ES Guides": {
+    "variants": ["regular"],
+    "fallback": "cursive"
+  }
+}, {
   "Playwrite FR Moderne": {
     "variants": ["100", "200", "300", "regular"],
+    "fallback": "cursive"
+  }
+}, {
+  "Playwrite FR Moderne Guides": {
+    "variants": ["regular"],
     "fallback": "cursive"
   }
 }, {
@@ -6394,8 +6534,18 @@
     "fallback": "cursive"
   }
 }, {
+  "Playwrite FR Trad Guides": {
+    "variants": ["regular"],
+    "fallback": "cursive"
+  }
+}, {
   "Playwrite GB J": {
     "variants": ["100", "200", "300", "regular", "100italic", "200italic", "300italic", "italic"],
+    "fallback": "cursive"
+  }
+}, {
+  "Playwrite GB J Guides": {
+    "variants": ["regular", "italic"],
     "fallback": "cursive"
   }
 }, {
@@ -6404,8 +6554,18 @@
     "fallback": "cursive"
   }
 }, {
+  "Playwrite GB S Guides": {
+    "variants": ["regular", "italic"],
+    "fallback": "cursive"
+  }
+}, {
   "Playwrite HR": {
     "variants": ["100", "200", "300", "regular"],
+    "fallback": "cursive"
+  }
+}, {
+  "Playwrite HR Guides": {
+    "variants": ["regular"],
     "fallback": "cursive"
   }
 }, {
@@ -6414,8 +6574,18 @@
     "fallback": "cursive"
   }
 }, {
+  "Playwrite HR Lijeva Guides": {
+    "variants": ["regular"],
+    "fallback": "cursive"
+  }
+}, {
   "Playwrite HU": {
     "variants": ["100", "200", "300", "regular"],
+    "fallback": "cursive"
+  }
+}, {
+  "Playwrite HU Guides": {
+    "variants": ["regular"],
     "fallback": "cursive"
   }
 }, {
@@ -6424,8 +6594,18 @@
     "fallback": "cursive"
   }
 }, {
+  "Playwrite ID Guides": {
+    "variants": ["regular"],
+    "fallback": "cursive"
+  }
+}, {
   "Playwrite IE": {
     "variants": ["100", "200", "300", "regular"],
+    "fallback": "cursive"
+  }
+}, {
+  "Playwrite IE Guides": {
+    "variants": ["regular"],
     "fallback": "cursive"
   }
 }, {
@@ -6434,8 +6614,18 @@
     "fallback": "cursive"
   }
 }, {
+  "Playwrite IN Guides": {
+    "variants": ["regular"],
+    "fallback": "cursive"
+  }
+}, {
   "Playwrite IS": {
     "variants": ["100", "200", "300", "regular"],
+    "fallback": "cursive"
+  }
+}, {
+  "Playwrite IS Guides": {
+    "variants": ["regular"],
     "fallback": "cursive"
   }
 }, {
@@ -6444,8 +6634,18 @@
     "fallback": "cursive"
   }
 }, {
+  "Playwrite IT Moderna Guides": {
+    "variants": ["regular"],
+    "fallback": "cursive"
+  }
+}, {
   "Playwrite IT Trad": {
     "variants": ["100", "200", "300", "regular"],
+    "fallback": "cursive"
+  }
+}, {
+  "Playwrite IT Trad Guides": {
+    "variants": ["regular"],
     "fallback": "cursive"
   }
 }, {
@@ -6454,8 +6654,18 @@
     "fallback": "cursive"
   }
 }, {
+  "Playwrite MX Guides": {
+    "variants": ["regular"],
+    "fallback": "cursive"
+  }
+}, {
   "Playwrite NG Modern": {
     "variants": ["100", "200", "300", "regular"],
+    "fallback": "cursive"
+  }
+}, {
+  "Playwrite NG Modern Guides": {
+    "variants": ["regular"],
     "fallback": "cursive"
   }
 }, {
@@ -6464,8 +6674,18 @@
     "fallback": "cursive"
   }
 }, {
+  "Playwrite NL Guides": {
+    "variants": ["regular"],
+    "fallback": "cursive"
+  }
+}, {
   "Playwrite NO": {
     "variants": ["100", "200", "300", "regular"],
+    "fallback": "cursive"
+  }
+}, {
+  "Playwrite NO Guides": {
+    "variants": ["regular"],
     "fallback": "cursive"
   }
 }, {
@@ -6474,8 +6694,18 @@
     "fallback": "cursive"
   }
 }, {
+  "Playwrite NZ Guides": {
+    "variants": ["regular"],
+    "fallback": "cursive"
+  }
+}, {
   "Playwrite PE": {
     "variants": ["100", "200", "300", "regular"],
+    "fallback": "cursive"
+  }
+}, {
+  "Playwrite PE Guides": {
+    "variants": ["regular"],
     "fallback": "cursive"
   }
 }, {
@@ -6484,8 +6714,18 @@
     "fallback": "cursive"
   }
 }, {
+  "Playwrite PL Guides": {
+    "variants": ["regular"],
+    "fallback": "cursive"
+  }
+}, {
   "Playwrite PT": {
     "variants": ["100", "200", "300", "regular"],
+    "fallback": "cursive"
+  }
+}, {
+  "Playwrite PT Guides": {
+    "variants": ["regular"],
     "fallback": "cursive"
   }
 }, {
@@ -6494,8 +6734,18 @@
     "fallback": "cursive"
   }
 }, {
+  "Playwrite RO Guides": {
+    "variants": ["regular"],
+    "fallback": "cursive"
+  }
+}, {
   "Playwrite SK": {
     "variants": ["100", "200", "300", "regular"],
+    "fallback": "cursive"
+  }
+}, {
+  "Playwrite SK Guides": {
+    "variants": ["regular"],
     "fallback": "cursive"
   }
 }, {
@@ -6504,8 +6754,18 @@
     "fallback": "cursive"
   }
 }, {
+  "Playwrite TZ Guides": {
+    "variants": ["regular"],
+    "fallback": "cursive"
+  }
+}, {
   "Playwrite US Modern": {
     "variants": ["100", "200", "300", "regular"],
+    "fallback": "cursive"
+  }
+}, {
+  "Playwrite US Modern Guides": {
+    "variants": ["regular"],
     "fallback": "cursive"
   }
 }, {
@@ -6514,13 +6774,28 @@
     "fallback": "cursive"
   }
 }, {
+  "Playwrite US Trad Guides": {
+    "variants": ["regular"],
+    "fallback": "cursive"
+  }
+}, {
   "Playwrite VN": {
     "variants": ["100", "200", "300", "regular"],
     "fallback": "cursive"
   }
 }, {
+  "Playwrite VN Guides": {
+    "variants": ["regular"],
+    "fallback": "cursive"
+  }
+}, {
   "Playwrite ZA": {
     "variants": ["100", "200", "300", "regular"],
+    "fallback": "cursive"
+  }
+}, {
+  "Playwrite ZA Guides": {
+    "variants": ["regular"],
     "fallback": "cursive"
   }
 }, {
@@ -6970,7 +7245,7 @@
   }
 }, {
   "Roboto": {
-    "variants": ["100", "100italic", "300", "300italic", "regular", "italic", "500", "500italic", "700", "700italic", "900", "900italic"],
+    "variants": ["100", "200", "300", "regular", "500", "600", "700", "800", "900", "100italic", "200italic", "300italic", "italic", "500italic", "600italic", "700italic", "800italic", "900italic"],
     "fallback": "sans-serif"
   }
 }, {

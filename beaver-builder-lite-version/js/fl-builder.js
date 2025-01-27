@@ -8695,6 +8695,8 @@
 				return false;
 			}
 
+			window.parent._wpPluploadSettings['defaults']['multipart_params']['fl_upload_type'] = 'audio';
+
 			attachments = wp.media.playlist.attachments(shortcode);
 
 			selection = new wp.media.model.Selection(attachments.models, {

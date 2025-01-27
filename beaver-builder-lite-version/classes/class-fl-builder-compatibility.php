@@ -59,6 +59,7 @@ final class FLBuilderCompatibility {
 		add_action( 'wp_print_scripts', array( __CLASS__, 'convert_box_bb' ), 20 );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'yith_woocommerce_affiliates' ), 20 );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'fix_jquery_dialog' ) );
+		add_action( 'wp_head', array( __CLASS__, 'fix_bugherd' ), 9 );
 		add_action( 'wp_tiny_mce_init', array( __CLASS__, 'fix_gf_tinymce' ), 9 );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'remove_tour_fix' ) );
 		add_action( 'fl_before_sortable_enqueue', array( __CLASS__, 'fix_classicpress_v2' ) );
@@ -1314,7 +1315,15 @@ final class FLBuilderCompatibility {
 	}
 
 	/**
-	 * Fix admin bar styles in WP 6.4
+	 * Fix Bugherd (2870)
+	 */
+	public static function fix_bugherd() {
+		if ( class_exists( 'FLBuilderModel' ) && FLBuilderUIIFrame::is_ui_request() ) {
+			remove_action( 'wp_head', 'bugherd_do_the_frontend_script' );
+		}
+	}
+
+	/** Fix admin bar styles in WP 6.4
 	 * @since 2.8
 	 */
 	public static function fix_adminbar() {
@@ -1376,5 +1385,6 @@ final class FLBuilderCompatibility {
 		wp_dequeue_script( 'rms_jquery_ui_datepicker_script' );
 
 	}
+
 }
 FLBuilderCompatibility::init();

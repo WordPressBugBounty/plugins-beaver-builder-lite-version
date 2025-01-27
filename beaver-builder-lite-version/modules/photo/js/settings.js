@@ -42,17 +42,19 @@
 		},
 
 		_sourceChanged: function() {
-			var form     = $( '.fl-builder-settings' ),
-				source 	 = form.find( 'select[name=photo_source]' ).val(),
-				linkType = form.find( 'select[name=link_type]' ),
-				crop = form.find( 'select[name=crop]' ),
-				attachment 	= form.find( 'select[name=photo_src]' ),
-				url 		= form.find( 'input[name=photo_url]' );
+			var form                = $( '.fl-builder-settings' ),
+				source       	    = form.find( 'select[name=photo_source]' ).val(),
+				linkType            = form.find( 'select[name=link_type]' ),
+				selectedLinkTypeVal = linkType.val();
 
 			linkType.find( 'option[value=page]' ).remove();
 
-			if( source === 'library' ) {
+			if ( source === 'library' ) {
 				linkType.append( '<option value="page">' + FLBuilderStrings.photoPage + '</option>' );
+
+				if ( linkType.find( 'option[value="' + selectedLinkTypeVal + '"]' ).length ) {
+					linkType.val( selectedLinkTypeVal );
+				}
 			}
 		},
 
