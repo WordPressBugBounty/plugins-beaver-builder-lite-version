@@ -344,10 +344,10 @@ final class FLBuilderAdminAdvanced {
 	 * @since 2.6
 	 */
 	static public function init() {
-		self::register_settings();
+		add_action( 'init', array( __CLASS__, 'register_settings' ) );
 		add_action( 'after_setup_theme', __CLASS__ . '::register_user_access_settings' );
 		add_action( 'wp_ajax_fl_advanced_submit', array( __CLASS__, 'advanced_submit' ) );
-		self::init_hooks();
+		add_action( 'init', array( __CLASS__, 'init_hooks' ), 11 );
 		self::global_styles();
 	}
 
@@ -398,7 +398,7 @@ final class FLBuilderAdminAdvanced {
 	/**
 	 * @since 2.6
 	 */
-	static private function init_hooks() {
+	static public function init_hooks() {
 		foreach ( self::get_settings() as $key => $setting ) {
 			$option = get_option( "_fl_builder_{$key}" );
 			// make sure option is actually set to save db queries.
@@ -416,7 +416,7 @@ final class FLBuilderAdminAdvanced {
 	 * Register the new settings
 	 * @since 2.6
 	 */
-	static private function register_settings() {
+	static public function register_settings() {
 		foreach ( self::get_settings() as $key => $setting ) {
 			FLBuilderAdminSettings::register_setting( '_fl_builder_' . $key );
 		}

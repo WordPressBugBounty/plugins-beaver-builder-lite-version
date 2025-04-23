@@ -56,7 +56,7 @@ final class FLBuilderWPML {
 			$post_id = $translations[ $lang ]->element_id;
 		}
 
-		return $post_id;
+		return (int) $post_id;
 	}
 
 	/**

@@ -12,7 +12,9 @@ class FLBuilderSettingsPresets {
 		 * Register presets action.
 		 * @see fl_register_presets
 		 */
-		do_action( 'fl_register_presets' );
+		add_action( 'init', function () {
+			do_action( 'fl_register_presets' );
+		});
 	}
 
 	/**

@@ -12,10 +12,6 @@ final class FLBuilderNotifications {
 	protected static $seconds = 172800; // 48 hours
 
 	public static function init() {
-
-		if ( FLBuilderModel::is_white_labeled() || true == apply_filters( 'fl_disable_notifications', false ) ) {
-			return false;
-		}
 		add_action( 'init', array( 'FLBuilderNotifications', 'set_schedule' ) );
 		add_action( 'fl_builder_notifications_event', array( 'FLBuilderNotifications', 'fetch_notifications' ) );
 		FLBuilderAJAX::add_action( 'fl_builder_notifications', array( 'FLBuilderNotifications', 'notications_ajax' ), array( 'read' ) );
@@ -26,7 +22,9 @@ final class FLBuilderNotifications {
 	 * @since 2.2.1
 	 */
 	public static function set_schedule() {
-
+		if ( FLBuilderModel::is_white_labeled() || true == apply_filters( 'fl_disable_notifications', false ) ) {
+			return false;
+		}
 		if ( ! wp_next_scheduled( 'fl_builder_notifications_event' ) ) {
 			wp_schedule_single_event( time() + self::$seconds, 'fl_builder_notifications_event' );
 		}
