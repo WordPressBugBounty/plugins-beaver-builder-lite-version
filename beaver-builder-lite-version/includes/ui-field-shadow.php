@@ -18,6 +18,7 @@ var picker = wp.template( 'fl-builder-field-color' )( {
 		show_reset: true,
 		show_alpha: true,
 	},
+	deferRendering: data.deferColorPickers,
 } );
 
 var dimensions = {

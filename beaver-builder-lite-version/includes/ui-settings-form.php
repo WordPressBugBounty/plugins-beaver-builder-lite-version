@@ -1,5 +1,5 @@
 <script type="text/html" id="tmpl-fl-builder-settings">
-	<form class="fl-builder-settings {{data.className}}" {{{data.attrs}}} data-form-id="{{data.id}}" data-form-group="{{data.type}}" onsubmit="return false;">
+	<form class="fl-builder-settings {{data.className}}" {{{data.attrs}}} data-instance-id="{{data.lightboxId}}" data-form-id="{{data.id}}" data-form-group="{{data.type}}" onsubmit="return false;">
 		<div class="fl-lightbox-header-wrap">
 			<div class="fl-builder-panel-drag-handle">
 				<svg width="4" height="20">
@@ -48,72 +48,72 @@
 						<# var i = 0; for ( var tabId in data.tabs ) { #>
 						<# var tab = data.tabs[ tabId ]; #>
 						<div id="fl-builder-settings-tab-{{tabId}}" class="fl-builder-settings-tab<# if ( tabId === data.activeTab ) { #> fl-active<# } #>">
+							<# if ( ! FL?.Builder?.settingsForms.canDeferTab( tabId ) ) { #>
+								<# if ( tab.file ) { #>
+									<div class="fl-legacy-settings-tab" data-tab="{{tabId}}"></div>
+								<# } else if ( tab.template ) { #>
+									<# tab = FLBuilderSettingsForms.renderTabTemplate( tab, data.settings ); #>
+									{{{tab}}}
+								<# } else { #>
 
-							<# if ( tab.file ) { #>
-								<div class="fl-legacy-settings-tab" data-tab="{{tabId}}"></div>
-							<# } else if ( tab.template ) { #>
-								<# tab = FLBuilderSettingsForms.renderTabTemplate( tab, data.settings ); #>
-								{{{tab}}}
-							<# } else { #>
-
-								<# if ( tab.description ) { #>
-								<p class="fl-builder-settings-tab-description">{{{tab.description}}}</p>
-								<# } #>
-
-								<# for ( var sectionId in tab.sections ) { #>
-								<# var section = tab.sections[ sectionId ]; #>
-								<#
-									var isCollapsed = false;
-									if ( typeof section.collapsed !== 'undefined' ) {
-										isCollapsed = section.collapsed
-									}
-									if ( typeof section.title !== 'undefined' && true === FLBuilderConfig.collapseSectionsDefault && section.title && '' !== section.title ) {
-										isCollapsed = true;
-									}
-									var collapsedClass = isCollapsed ? 'fl-builder-settings-section-collapsed' : '';
-
-								#>
-								<div id="fl-builder-settings-section-{{sectionId}}" class="fl-builder-settings-section {{collapsedClass}}">
-
-									<# if ( section.file ) { #>
-										<div class="fl-legacy-settings-section" data-section="{{sectionId}}" data-tab="{{tabId}}"></div>
-									<# } else if ( section.template ) { #>
-										<# section = FLBuilderSettingsForms.renderSectionTemplate( section, data.settings ); #>
-										{{{section}}}
-									<# } else { #>
-
-										<# if ( section.title ) { #>
-										<div class="fl-builder-settings-section-header">
-											<button class="fl-builder-settings-title">
-												<svg class="fl-symbol">
-													<use xlink:href="#fl-down-caret" />
-												</svg>
-												{{{section.title}}}
-											</button>
-										</div>
-										<# } #>
-
-										<div class="fl-builder-settings-section-content">
-											<# if ( section.description ) { #>
-											<p class="fl-builder-settings-description">{{{section.description}}}</p>
-											<# } #>
-
-											<table class="fl-form-table">
-											<#
-												var node = { type: data.id };
-												var fields = FLBuilderSettingsForms.renderFields( section.fields, data.settings, node );
-											#>
-											{{{fields}}}
-											</table>
-										</div>
-
+									<# if ( tab.description ) { #>
+									<p class="fl-builder-settings-tab-description">{{{tab.description}}}</p>
 									<# } #>
 
-								</div>
+									<# for ( var sectionId in tab.sections ) { #>
+									<# var section = tab.sections[ sectionId ]; #>
+									<#
+										var isCollapsed = false;
+										if ( typeof section.collapsed !== 'undefined' ) {
+											isCollapsed = section.collapsed
+										}
+										if ( typeof section.title !== 'undefined' && true === FLBuilderConfig.collapseSectionsDefault && section.title && '' !== section.title ) {
+											isCollapsed = true;
+										}
+										var collapsedClass = isCollapsed ? 'fl-builder-settings-section-collapsed' : '';
+
+									#>
+									<div id="fl-builder-settings-section-{{sectionId}}" class="fl-builder-settings-section {{collapsedClass}}">
+
+										<# if ( section.file ) { #>
+											<div class="fl-legacy-settings-section" data-section="{{sectionId}}" data-tab="{{tabId}}"></div>
+										<# } else if ( section.template ) { #>
+											<# section = FLBuilderSettingsForms.renderSectionTemplate( section, data.settings ); #>
+											{{{section}}}
+										<# } else { #>
+
+											<# if ( section.title ) { #>
+											<div class="fl-builder-settings-section-header">
+												<button class="fl-builder-settings-title">
+													<svg width="20" height="20">
+														<use href="#fl-builder-forms-down-caret" />
+													</svg>
+													{{{section.title}}}
+												</button>
+											</div>
+											<# } #>
+
+											<div class="fl-builder-settings-section-content">
+												<# if ( section.description ) { #>
+												<p class="fl-builder-settings-description">{{{section.description}}}</p>
+												<# } #>
+
+												<table class="fl-form-table">
+												<#
+													var node = { type: data.id };
+													var fields = FLBuilderSettingsForms.renderFields( section.fields, data.settings, node, tabId, sectionId );
+												#>
+												{{{fields}}}
+												</table>
+											</div>
+
+										<# } #>
+
+									</div>
+									<# } #>
+
 								<# } #>
-
 							<# } #>
-
 						</div>
 						<# i++; } #>
 					<# } #>

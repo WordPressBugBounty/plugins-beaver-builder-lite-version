@@ -503,7 +503,7 @@
 			}
 			else {
 
-				if ( boxWidth < 600 ) {
+				if ( boxWidth <= 600 ) {
 					lightbox.addClass( 'fl-lightbox-width-slim' );
 				} else {
 					lightbox.removeClass( 'fl-lightbox-width-slim' );

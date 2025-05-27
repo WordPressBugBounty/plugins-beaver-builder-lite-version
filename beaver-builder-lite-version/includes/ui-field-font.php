@@ -17,9 +17,7 @@ data.value = JSON.stringify( data.value );
 		<# if ( data.field.show_labels ) { #>
 		<label for="{{names.family}}"><?php _e( 'Family', 'fl-builder' ); ?></label>
 		<# } #>
-		<select name="{{names.family}}" class="fl-font-field-font">
-			<?php FLBuilderFonts::display_select_font( 'Default' ); ?>
-		</select>
+		<select name="{{names.family}}" class="fl-font-field-font"></select>
 	</div>
 	<div class="fl-font-field-weight-wrapper">
 		<# if ( data.field.show_labels ) { #>

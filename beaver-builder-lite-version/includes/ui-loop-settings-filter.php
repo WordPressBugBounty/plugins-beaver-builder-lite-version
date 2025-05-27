@@ -29,14 +29,19 @@ do_action( 'fl_builder_loop_settings_before_form', $settings );
 	<table class="fl-form-table">
 	<?php
 	// Data Source
+	$options = array(
+		'custom_query' => __( 'Custom Query', 'fl-builder' ),
+		'main_query'   => __( 'Main Query', 'fl-builder' ),
+	);
+
+	if ( 'loop' === $settings->type ) {
+		$options['taxonomy_query'] = __( 'Taxonomy Query', 'fl-builder' );
+	}
 	FLBuilder::render_settings_field('data_source', array(
 		'type'    => 'select',
 		'label'   => __( 'Source', 'fl-builder' ),
 		'default' => 'custom_query',
-		'options' => array(
-			'custom_query' => __( 'Custom Query', 'fl-builder' ),
-			'main_query'   => __( 'Main Query', 'fl-builder' ),
-		),
+		'options' => $options,
 		'toggle'  => array(
 			'custom_query' => array(
 				'fields' => array( 'posts_per_page' ),
@@ -47,12 +52,123 @@ do_action( 'fl_builder_loop_settings_before_form', $settings );
 	?>
 	</table>
 </div>
+
+<div class="fl-custom-query fl-loop-data-source" data-source="acf_repeater">
+	<div id="fl-builder-settings-section-general" class="fl-builder-settings-section">
+		<div class="fl-builder-settings-section-header">
+			<button class="fl-builder-settings-title">
+				<svg width="20" height="20">
+					<use xlink:href="#fl-builder-forms-down-caret"></use>
+				</svg>
+				<?php _e( 'ACF Repeater', 'fl-builder' ); ?>
+			</button>
+		</div>
+
+		<div class="fl-builder-settings-section-content">
+			<table class="fl-form-table">
+			<?php
+				// ACF Repeater Key
+				FLBuilder::render_settings_field('acf_repeater_key', array(
+					'type'  => 'text',
+					'label' => __( 'Key', 'fl-builder' ),
+				), $settings);
+				?>
+			</table>
+		</div>
+	</div>
+</div>
+
+<div class="fl-custom-query fl-loop-data-source" data-source="taxonomy_query">
+	<div id="fl-builder-settings-section-general" class="fl-builder-settings-section">
+		<div class="fl-builder-settings-section-header">
+			<button class="fl-builder-settings-title">
+				<svg width="20" height="20">
+					<use xlink:href="#fl-builder-forms-down-caret"></use>
+				</svg>
+				<?php _e( 'Taxonomy', 'fl-builder' ); ?>
+			</button>
+		</div>
+
+		<div class="fl-builder-settings-section-content">
+			<table class="fl-form-table">
+			<?php
+				$terms_taxonomy = isset( $settings->terms_taxonomy ) ? $settings->terms_taxonomy : 'category';
+				// Taxonomy
+				FLBuilder::render_settings_field('terms_taxonomy', array(
+					'type'    => 'select',
+					'label'   => __( 'Taxonomy', 'fl-builder' ),
+					'default' => 'category',
+					'options' => FLBuilderLoop::get_taxonomy_options(),
+				), $settings);
+
+				// Parent term
+				FLBuilder::render_settings_field('term_parent', array(
+					'type'    => 'select',
+					'label'   => __( 'Parent Term', 'fl-builder' ),
+					'default' => 0,
+					'options' => FLBuilderLoop::get_term_options( $terms_taxonomy ),
+				), $settings);
+
+				// Order
+				FLBuilder::render_settings_field('term_order', array(
+					'type'    => 'select',
+					'label'   => __( 'Order', 'fl-builder' ),
+					'default' => 'ASC',
+					'options' => array(
+						'ASC'  => __( 'Ascending', 'fl-builder' ),
+						'DESC' => __( 'Descending', 'fl-builder' ),
+					),
+				), $settings);
+
+				FLBuilder::render_settings_field('term_hide_empty', array(
+					'type'    => 'select',
+					'label'   => __( 'Hide Empty', 'fl-builder' ),
+					'default' => '1',
+					'help'    => __( 'Hide terms that don\'t have any posts.', 'fl-builder' ),
+					'options' => array(
+						'1' => __( 'Yes', 'fl-builder' ),
+						'0' => __( 'No', 'fl-builder' ),
+					),
+				), $settings);
+
+				FLBuilder::render_settings_field('term_order_by', array(
+					'type'    => 'select',
+					'label'   => __( 'Order By', 'fl-builder' ),
+					'default' => 'name',
+					'options' => array(
+						'name'           => __( 'Name', 'fl-builder' ),
+						'count'          => __( 'Term Count', 'fl-builder' ),
+						'id'             => __( 'ID', 'fl-builder' ),
+						'meta_value'     => __( 'Meta Value (Alphabetical)', 'fl-builder' ),
+						'meta_value_num' => __( 'Meta Value (Numeric)', 'fl-builder' ),
+						'parent'         => __( 'Parent', 'fl-builder' ),
+					),
+					'toggle'  => array(
+						'meta_value'     => array(
+							'fields' => array( 'term_order_by_meta_key' ),
+						),
+						'meta_value_num' => array(
+							'fields' => array( 'term_order_by_meta_key' ),
+						),
+					),
+				), $settings);
+
+				FLBuilder::render_settings_field('term_order_by_meta_key', array(
+					'type'  => 'text',
+					'label' => __( 'Meta Key', 'fl-builder' ),
+				), $settings);
+				?>
+			</table>
+		</div>
+	</div>
+</div>
+
 <div class="fl-custom-query fl-loop-data-source" data-source="custom_query">
 	<div id="fl-builder-settings-section-general" class="fl-builder-settings-section">
 		<div class="fl-builder-settings-section-header">
 			<button class="fl-builder-settings-title">
-				<svg class="fl-symbol">
-					<use xlink:href="#fl-down-caret"></use>
+				<svg width="20" height="20">
+					<use href="#fl-builder-forms-down-caret" />
 				</svg>
 				<?php _e( 'Custom Query', 'fl-builder' ); ?>
 			</button>
@@ -144,8 +260,8 @@ do_action( 'fl_builder_loop_settings_before_form', $settings );
 	<div id="fl-builder-settings-section-filter" class="fl-builder-settings-section">
 		<div class="fl-builder-settings-section-header">
 			<button class="fl-builder-settings-title">
-				<svg class="fl-symbol">
-					<use xlink:href="#fl-down-caret"></use>
+				<svg width="20" height="20">
+					<use href="#fl-builder-forms-down-caret" />
 				</svg>
 				<?php _e( 'Filter', 'fl-builder' ); ?>
 			</button>
@@ -169,7 +285,7 @@ do_action( 'fl_builder_loop_settings_before_form', $settings );
 			// Taxonomies
 			$taxonomies = FLBuilderLoop::taxonomies( $slug );
 
-			$field_settings = new stdClass;
+			$field_settings = new stdClass();
 			foreach ( $settings as $k => $setting ) {
 				if ( false !== strpos( $k, 'tax_' . $slug ) ) {
 					$field_settings->$k = $setting;
@@ -214,8 +330,8 @@ do_action( 'fl_builder_loop_settings_before_form', $settings );
 	<div id="fl-builder-settings-section-filter" class="fl-builder-settings-section">
 		<div class="fl-builder-settings-section-header">
 			<button class="fl-builder-settings-title">
-				<svg class="fl-symbol">
-					<use xlink:href="#fl-down-caret"></use>
+				<svg width="20" height="20">
+					<use href="#fl-builder-forms-down-caret" />
 				</svg>
 				<?php _e( 'Custom Field Filter', 'fl-builder' ); ?>
 			</button>

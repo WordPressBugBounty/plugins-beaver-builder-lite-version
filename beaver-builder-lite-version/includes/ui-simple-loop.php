@@ -15,8 +15,8 @@ $settings     = (object) array_merge( $defaults, $tab_defaults, (array) $setting
 <div id="fl-builder-settings-section-post" class="fl-builder-settings-section">
 	<div class="fl-builder-settings-section-header">
 		<button class="fl-builder-settings-title">
-			<svg class="fl-symbol">
-				<use xlink:href="#fl-down-caret"></use>
+			<svg width="20" height="20">
+				<use href="#fl-builder-forms-down-caret" />
 			</svg>
 			<?php _e( 'Post', 'fl-builder' ); ?>
 		</button>
@@ -107,7 +107,7 @@ $settings     = (object) array_merge( $defaults, $tab_defaults, (array) $setting
 					// Taxonomies
 					$taxonomies = FLBuilderLoop::taxonomies( $slug );
 
-					$field_settings = new stdClass;
+					$field_settings = new stdClass();
 					foreach ( $settings as $k => $setting ) {
 						if ( false !== strpos( $k, 'tax_' . $slug ) ) {
 							$field_settings->$k = $setting;

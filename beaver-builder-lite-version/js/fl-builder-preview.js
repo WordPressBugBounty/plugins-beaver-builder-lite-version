@@ -15,6 +15,9 @@
 		// Set the type.
 		this.type = config.type;
 
+		// Set the layout document.
+		this.layoutDoc = FLBuilderPreview.getLayoutDoc();
+
 		// Save the current state.
 		this._saveState();
 
@@ -75,6 +78,25 @@
 	};
 
 	/**
+	 * Returns the document object that contains the node layout.
+	 * In the builder, this is always the current document, regardless
+	 * of if the layout is in an iframe or not. The preview logic
+	 * loads where the layout is rendered in the builder.
+	 *
+	 * @since 2.9
+	 * @method getLayoutDoc
+	 * @return {Object}
+	 */
+	FLBuilderPreview.getLayoutDoc = () => {
+		if ( FLBuilder.isBlockEditor() ) {
+			const iframe = document.querySelector( '[name="editor-canvas"]' )
+			return iframe ? iframe.contentDocument : document
+		}
+
+		return document
+	}
+
+	/**
 	 * Prototype for new instances.
 	 *
 	 * @since 1.3.3
@@ -132,6 +154,14 @@
 		 * @property {Object} state
 		 */
 		state               : null,
+
+		/**
+		 * The document object that contains the node layout.
+		 *
+		 * @since 2.9
+		 * @property {Object} layoutDoc
+		 */
+		layoutDoc           : null,
 
 		/**
 		 * Node settings saved when the preview was initalized.
@@ -225,7 +255,7 @@
 		_init: function()
 		{
 			// Node Id
-			this.nodeId = $('.fl-builder-settings', window.parent.document).data('node');
+			this.nodeId = $('form.fl-builder-settings:visible', window.parent.document).data('node');
 
 			// Save settings
 			this._saveSettings();
@@ -238,7 +268,6 @@
 
 			this._bindEvents()
 		},
-
 
 		_bindEvents() {
 			// Responsive previews
@@ -332,8 +361,8 @@
 			$.extend(this.elements, {
 				settings        : $(this.classes.settings, window.parent.document),
 				settingsHeader  : $(this.classes.settingsHeader, window.parent.document),
-				node            : $(this.classes.node),
-				content         : $(this.classes.content)
+				node            : $(this.classes.node, this.layoutDoc),
+				content         : $(this.classes.content, this.layoutDoc)
 			});
 		},
 
@@ -346,6 +375,11 @@
 		 */
 		_createSheets: function()
 		{
+			// We use different stylesheets in the block editor.
+			if ( FLBuilder.isBlockEditor() ) {
+				return;
+			}
+
 			this._destroySheets();
 
 			if ( ! this._styleSheet ) {
@@ -418,14 +452,14 @@
 				config = FLBuilderConfig.global,
 				node = this.elements.node;
 
-			if ( 'responsive' === mode ) {
-				FLBuilderSimulateMediaQuery.disableStyles( config.responsive_breakpoint );
+			if ( 'responsive' === mode && this._styleSheetResponsive ) {
+				window?.FLBuilderSimulateMediaQuery?.disableStyles( config.responsive_breakpoint );
 				this._styleSheetResponsive.disable();
-			} else if ( 'large' === mode ) {
-				FLBuilderSimulateMediaQuery.disableStyles( config.large_breakpoint );
+			} else if ( 'large' === mode && this._styleSheetLarge ) {
+				window?.FLBuilderSimulateMediaQuery?.disableStyles( config.large_breakpoint );
 				this._styleSheetLarge.disable();
-			} else if ( 'medium' === mode ) {
-				FLBuilderSimulateMediaQuery.disableStyles( config.medium_breakpoint );
+			} else if ( 'medium' === mode && this._styleSheetMedium ) {
+				window?.FLBuilderSimulateMediaQuery?.disableStyles( config.medium_breakpoint );
 				this._styleSheetMedium.disable();
 			}  else {
 				node.removeClass( function( i, className ) {
@@ -446,14 +480,14 @@
 			var mode = FLBuilderResponsiveEditing._mode,
 				node = this.elements.node;
 
-			if ( 'responsive' === mode ) {
-				FLBuilderSimulateMediaQuery.enableStyles();
+			if ( 'responsive' === mode && this._styleSheetResponsive ) {
+				window?.FLBuilderSimulateMediaQuery?.enableStyles();
 				this._styleSheetResponsive.enable();
-			} else if ( 'medium' === mode ) {
-				FLBuilderSimulateMediaQuery.enableStyles();
+			} else if ( 'medium' === mode && this._styleSheetMedium ) {
+				window?.FLBuilderSimulateMediaQuery?.enableStyles();
 				this._styleSheetMedium.enable();
-			} else if ( 'large' === mode ) {
-				FLBuilderSimulateMediaQuery.enableStyles();
+			} else if ( 'large' === mode && this._styleSheetLarge ) {
+				window?.FLBuilderSimulateMediaQuery?.enableStyles();
 				this._styleSheetLarge.enable();
 			} else {
 				node.addClass( 'fl-node-' + node.data( 'node' ) );
@@ -472,9 +506,9 @@
 		_getDefaultValue: function( selector, property )
 		{
 			var value = '',
-				element = $( selector ),
+				element = $( selector, this.layoutDoc ),
 				node = element.closest( '[data-node]' ),
-				ignore = [ 'line-height', 'font-weight' ];
+				ignore = [ 'color', 'background-color', 'border-color', 'line-height', 'font-weight' ];
 
 			if ( 'width' === property ) {
 				value = 'auto';
@@ -505,6 +539,12 @@
 			// Get the default value if needed.
 			if ( '' === value || 'null' === value ) {
 				value = this._getDefaultValue( selector, property );
+			}
+
+			// Fire a hook for the block editor.
+			if ( FLBuilder.isBlockEditor() ) {
+				FLBuilder.triggerHook( 'updateCSSRule', [ selector, property, value, responsive ] );
+				return;
 			}
 
 			// Update the rule.
@@ -723,9 +763,6 @@
 				nodeId   = form.attr('data-node'),
 				settings = FLBuilder._getSettings(form);
 
-			// Show the node as loading.
-			FLBuilder._showNodeLoading( nodeId );
-
 			// Abort an existing preview request.
 			this._cancelPreview();
 
@@ -735,12 +772,48 @@
 				return 0;
 			}
 
-			// Make a new preview request.
-			this._xhr = FLBuilder.ajax({
-				action          : 'render_layout',
-				node_id         : nodeId,
-				node_preview    : settings
-			}, $.proxy(this._renderPreview, this));
+			if ( FLBuilder.isBlockEditor() ) {
+				FLBuilder.triggerHook( 'requestPreview', settings );
+				this._renderPreviewComplete();
+			} else {
+
+				// Show the node as loading.
+				FLBuilder._showNodeLoading( nodeId );
+
+				// Make a new preview request.
+				this._xhr = FLBuilder.ajax({
+					action          : 'render_layout',
+					node_id         : this._getNodeIdForPreview( nodeId ),
+					node_preview_id : nodeId,
+					node_preview    : settings
+				}, $.proxy(this._renderPreview, this));
+			}
+		},
+
+		/**
+		 * Returns the ID of the node that should be previewed. For duplicate
+		 * nodes with the same ID (as in loop modules), it will return the
+		 * outer most parent with only one ID on the page. That way, all copies
+		 * of the child modules get an updated preview with the new settings.
+		 *
+		 * This is different than `node_preview_id` which points to the node
+		 * whose settings are currently being previewed.
+		 *
+		 * @since 2.9
+		 * @param {String} nodeId
+		 * @return {String}
+		 */
+		_getNodeIdForPreview: function( nodeId ) {
+			var node = $( '.fl-node-' + nodeId );
+
+			if ( 1 < node.length ) {
+				var parent = node.parents( '[data-node]' ).eq(0);
+				var parentId = parent.attr( 'data-node' );
+
+				return this._getNodeIdForPreview( parentId );
+			}
+
+			return nodeId;
 		},
 
 		/**
@@ -838,7 +911,7 @@
 			}, 500 );
 
 			// Fire the preview rendered event.
-			$( FLBuilder._contentClass ).trigger( 'fl-builder.preview-rendered' );
+			$( FLBuilder._contentClass, this.layoutDoc ).trigger( 'fl-builder.preview-rendered' );
 		},
 
 		/**
@@ -1181,11 +1254,11 @@
 			// Only load the required API script library
 			if(source == 'video_service' && videoUrl != '') {
 				if (/^(?:(?:(?:https?:)?\/\/)?(?:www.)?(?:youtu(?:be.com|.be))\/(?:watch\?v\=|v\/|embed\/)?([\w\-]+))/i.test(videoUrl)
-					&& $( 'script[src*="youtube.com"' ).length < 1) {
+					&& $( 'script[src*="youtube.com"', this.layoutDoc ).length < 1) {
 					scriptTag.attr('src', youtubePlayer);
 				}
 				else if(/^(http\:\/\/|https\:\/\/)?(www\.)?(vimeo\.com\/)([0-9]+)$/.test(videoUrl)
-					&& $( 'script[src*="vimeo.com"' ).length < 1) {
+					&& $( 'script[src*="vimeo.com"', this.layoutDoc ).length < 1) {
 					scriptTag.attr('src', vimeoPlayer);
 				}
 
@@ -1422,24 +1495,36 @@
 		{
 			// Elements
 			$.extend(this.elements, {
-				width           	: $(this.classes.settings + ' select[name=width]', window.parent.document),
-				contentWidth    	: $(this.classes.settings + ' select[name=content_width]', window.parent.document),
-				maxContentWidth 	: $(this.classes.settings + ' input[name=max_content_width]', window.parent.document),
-				maxContentWidthUnit : $(this.classes.settings + ' select[name=max_content_width_unit]', window.parent.document),
-				height          	: $(this.classes.settings + ' select[name=full_height]', window.parent.document),
-				minHeight          	: $(this.classes.settings + ' input[name=min_height]', window.parent.document),
-				align           	: $(this.classes.settings + ' select[name=content_alignment]', window.parent.document),
-				aspectRatio         : $(this.classes.settings + ' input[name=aspect_ratio]', window.parent.document)
+				width                         : $(this.classes.settings + ' select[name=width]', window.parent.document),
+				contentWidth                  : $(this.classes.settings + ' select[name=content_width]', window.parent.document),
+				maxContentWidth               : $(this.classes.settings + ' input[name=max_content_width]', window.parent.document),
+				maxContentWidthLarge          : $(this.classes.settings + ' input[name=max_content_width_large]', window.parent.document),
+				maxContentWidthMedium         : $(this.classes.settings + ' input[name=max_content_width_medium]', window.parent.document),
+				maxContentWidthResponsive     : $(this.classes.settings + ' input[name=max_content_width_responsive]', window.parent.document),
+				maxContentWidthUnit           : $(this.classes.settings + ' select[name=max_content_width_unit]', window.parent.document),
+				maxContentWidthLargeUnit      : $(this.classes.settings + ' select[name=max_content_width_large_unit]', window.parent.document),
+				maxContentWidthMediumUnit     : $(this.classes.settings + ' select[name=max_content_width_medium_unit]', window.parent.document),
+				maxContentWidthResponsiveUnit : $(this.classes.settings + ' select[name=max_content_width_responsive_unit]', window.parent.document),
+				height                        : $(this.classes.settings + ' select[name=full_height]', window.parent.document),
+				minHeight                     : $(this.classes.settings + ' input[name=min_height]', window.parent.document),
+				align                         : $(this.classes.settings + ' select[name=content_alignment]', window.parent.document),
+				aspectRatio                   : $(this.classes.settings + ' input[name=aspect_ratio]', window.parent.document)
 			});
 
 			// Events
-			this.elements.width.on(         		'change', $.proxy(this._rowWidthChange, this));
-			this.elements.contentWidth.on(  		'change', $.proxy(this._rowContentWidthChange, this));
-			this.elements.maxContentWidth.on(   	'input',  $.proxy(this._rowMaxContentWidthChange, this));
-			this.elements.maxContentWidthUnit.on(   'change', $.proxy(this._rowMaxContentWidthChange, this));
-			this.elements.height.on(        		'change', $.proxy(this._rowHeightChange, this));
-			this.elements.align.on(         		'change', $.proxy(this._rowHeightChange, this));
-			this.elements.aspectRatio.on(           'input',  $.proxy(this._rowInitContentAlignment, this));
+			this.elements.width.on(                         'change', $.proxy(this._rowWidthChange, this));
+			this.elements.contentWidth.on(                  'change', $.proxy(this._rowContentWidthChange, this));
+			this.elements.maxContentWidth.on(               'input',  $.proxy(this._rowMaxContentWidthChange, this));
+			this.elements.maxContentWidthLarge.on(          'input',  $.proxy(this._rowMaxContentWidthChange, this));
+			this.elements.maxContentWidthMedium.on(         'input',  $.proxy(this._rowMaxContentWidthChange, this));
+			this.elements.maxContentWidthResponsive.on(     'input',  $.proxy(this._rowMaxContentWidthChange, this));
+			this.elements.maxContentWidthUnit.on(           'change', $.proxy(this._rowMaxContentWidthChange, this));
+			this.elements.maxContentWidthLargeUnit.on(      'change', $.proxy(this._rowMaxContentWidthChange, this));
+			this.elements.maxContentWidthMediumUnit.on(     'change', $.proxy(this._rowMaxContentWidthChange, this));
+			this.elements.maxContentWidthResponsiveUnit.on( 'change', $.proxy(this._rowMaxContentWidthChange, this));
+			this.elements.height.on(                        'change', $.proxy(this._rowHeightChange, this));
+			this.elements.align.on(                         'change', $.proxy(this._rowHeightChange, this));
+			this.elements.aspectRatio.on(                   'input',  $.proxy(this._rowInitContentAlignment, this));
 
 			// Common Elements
 			this._initNodeTextColor();
@@ -1522,23 +1607,50 @@
 		 */
 		_rowMaxContentWidthChange: function(e)
 		{
-			var settings	= FLBuilderConfig.global,
-				row     	= this.elements.node,
-				content 	= this.elements.content.find('.fl-row-content'),
-				width   	= this.elements.maxContentWidth.val(),
-				unit		= this.elements.maxContentWidthUnit.val();
+			var mode     = FLBuilderResponsiveEditing._mode,
+				settings = FLBuilderConfig.global,
+				selector = '',
+				width    = '';
 
-			if ( '' == width ) {
-				width = settings.row_width + settings.row_width_unit;
+			if ( 'fixed' == this.elements.width.val() ) {
+				selector = '.fl-node-' + this.nodeId + '.fl-row-fixed-width, .fl-node-' + this.nodeId + ' .fl-row-fixed-width';
 			} else {
-				width += unit;
+				selector = '.fl-node-' + this.nodeId + ' .fl-row-content';
 			}
 
-			if ( 'fixed' === this.elements.width.val() ) {
-				row.css( 'max-width', width );
-			}
+			if ( 'default' === mode ) {
+				if ( '' !== this.elements.maxContentWidth.val() ) {
+					width = this.elements.maxContentWidth.val() + this.elements.maxContentWidthUnit.val();
+				} else if ( '' !== settings.row_width ) {
+					width = settings.row_width + settings.row_width_unit;
+				}
 
-			content.css( 'max-width', width );
+				this.updateCSSRule( selector, 'max-width', width, false );
+			} else if ( 'large' === mode ) {
+				if ( '' !== this.elements.maxContentWidthLarge.val() ) {
+					width = this.elements.maxContentWidthLarge.val() + this.elements.maxContentWidthLargeUnit.val();
+				} else if ( '' !== settings.row_width_medium ) {
+					width = settings.row_width_medium + settings.row_width_medium_unit;
+				}
+
+				this.updateCSSRule( selector, 'max-width', width, true );
+			} else if ( 'medium' === mode ) {
+				if ( '' !== this.elements.maxContentWidthMedium.val() ) {
+					width = this.elements.maxContentWidthMedium.val() + this.elements.maxContentWidthMediumUnit.val();
+				} else if ( '' !== settings.row_width_medium ) {
+					width = settings.row_width_medium + settings.row_width_medium_unit;
+				}
+
+				this.updateCSSRule( selector, 'max-width', width, true );
+			} else if ( 'responsive' === mode ) {
+				if ( '' !== this.elements.maxContentWidthResponsive.val() ) {
+					width = this.elements.maxContentWidthResponsive.val() + this.elements.maxContentWidthResponsiveUnit.val();
+				} else if ( '' !== settings.row_width_responsive ) {
+					width = settings.row_width_responsive + settings.row_width_responsive_unit;
+				}
+
+				this.updateCSSRule( selector, 'max-width', width, true );
+			}
 		},
 
 		/**
@@ -1900,6 +2012,26 @@
 		},
 
 		/**
+		 * Reinitializes the preview logic for deferred fields
+		 * to setup events again if they have re-rendered.
+		 *
+		 * @since 2.9
+		 */
+		_reinitDeferredFieldPrevies: function() {
+			const fields = this.elements.settings.find( '.fl-field' );
+
+			for ( let i = 0; i < fields.length; i++ ) {
+				const field = $( fields[ i ] );
+				const type = field.data('type' );
+				const canDefer = FL.Builder.settingsForms.canDeferField( { type } );
+
+				if ( canDefer ) {
+					this._initDefaultFieldPreviews( field )
+				}
+			}
+		},
+
+		/**
 		 * Setup callback type previews
 		 *
 		 * @since 2.2
@@ -1914,7 +2046,7 @@
 				callback_name = preview['callback'],
 				form = $( '.fl-builder-settings:visible', window.parent.document ),
 				nodeID = form.data('node'),
-				node = $('.fl-builder-content .fl-node-' + nodeID );
+				node = $( FLBuilder._contentClass + ' .fl-node-' + nodeID, this.layoutDoc );
 
 			if ( 'undefined' !== typeof FLBuilderPreviewCallbacks[callback_name] ) {
 				callback = FLBuilderPreviewCallbacks[callback_name];
@@ -2269,15 +2401,15 @@
 			switch(fieldType) {
 
 				case 'text':
-					field.find('input[type=text]:not(.fl-preview-ignore)').on('keyup', callback);
+					field.find('input[type=text]:not(.fl-preview-ignore)').on('input', callback);
 				break;
 
 				case 'unit':
-					field.find('input[type=number]:not(.fl-preview-ignore)').on('keyup', callback);
+					field.find('input[type=number]:not(.fl-preview-ignore)').on('input', callback);
 				break;
 
 				case 'textarea':
-					field.find('textarea:not(.fl-preview-ignore)').on('keyup', callback);
+					field.find('textarea:not(.fl-preview-ignore)').on('input', callback);
 				break;
 
 				case 'code':
@@ -2302,14 +2434,16 @@
 		_previewText: function(preview, e)
 		{
 			var selector = this._getPreviewSelector( this.classes.node, preview.selector ),
-				element  = $( selector ),
+				element  = $( selector, this.layoutDoc ),
+				setting  = $(e.target).attr( 'name' ),
 				text     = $('<div>' + $(e.target).val() + '</div>');
 
-			if(element.length > 0) {
-				text.find('script').remove();
-				element.html(text.html());
+			text.find('script').remove();
+
+			if ( element.length > 0 ) {
+				element.html( text.html() );
 			} else {
-				this.delayPreview(e);
+				this.delayPreview( e );
 			}
 		},
 
@@ -2326,27 +2460,30 @@
 		_previewTextEditor: function(preview, id, e)
 		{
 			var selector = this._getPreviewSelector( this.classes.node, preview.selector ),
-				element  = $( selector ),
+				element  = $( selector, this.layoutDoc ),
 				editor   = typeof window.parent.tinyMCE != 'undefined' ? window.parent.tinyMCE.get(id) : null,
 				textarea = $('#' + id, window.parent.document),
+				setting  = textarea.closest( '.fl-editor-field' ).attr( 'data-name' ),
 				text     = '';
 
-			if(element.length > 0) {
-
-				if(editor && textarea.css('display') == 'none') {
-					text = $('<div>' + editor.getContent() + '</div>');
+			if(editor && textarea.css('display') == 'none') {
+				text = $('<div>' + editor.getContent() + '</div>');
+			} else if ( textarea.length ) {
+				if ( 'undefined' == typeof switchEditors || 'undefined' == typeof switchEditors.wpautop ) {
+					text = $('<div>' + textarea.val() + '</div>');
+				} else {
+					text = $('<div>' + switchEditors.wpautop( textarea.val() ) + '</div>');
 				}
-				else {
-					if ( 'undefined' == typeof switchEditors || 'undefined' == typeof switchEditors.wpautop ) {
-						text = $('<div>' + textarea.val() + '</div>');
-					}
-					else {
-						text = $('<div>' + switchEditors.wpautop( textarea.val() ) + '</div>');
-					}
-				}
+			} else {
+				return;
+			}
 
-				text.find('script').remove();
-				element.html(text.html());
+			text.find('script').remove();
+
+			if ( element.length > 0 ) {
+				element.html( text.html() );
+			} else {
+				this.delayPreview( e );
 			}
 		},
 
@@ -2509,15 +2646,16 @@
 			// remove last character and replace spaces with plus signs
 			href = url + href.slice( 0, -1 ).replace( ' ', '+' );
 
-			if( $( '#fl-builder-google-fonts-preview' ).length < 1 ){
-				$( '<link>' )
-					.attr( 'id', 'fl-builder-google-fonts-preview' )
-					.attr( 'type', 'text/css' )
-					.attr( 'rel', 'stylesheet' )
-					.attr( 'href', href )
-					.appendTo('head');
+			if( $( '#fl-builder-google-fonts-preview', this.layoutDoc ).length < 1 ){
+				$( 'head', this.layoutDoc ).append(
+					$( '<link>' )
+						.attr( 'id', 'fl-builder-google-fonts-preview' )
+						.attr( 'type', 'text/css' )
+						.attr( 'rel', 'stylesheet' )
+						.attr( 'href', href )
+				);
 			} else{
-				$( '#fl-builder-google-fonts-preview' ).attr( 'href', href );
+				$( '#fl-builder-google-fonts-preview', this.layoutDoc ).attr( 'href', href );
 			}
 
 		},
@@ -2644,6 +2782,9 @@
 					field.find( 'input[type=number]:not(.fl-preview-ignore)' ).on( 'input', $.proxy( this._previewCSS, this, preview, field ) );
 					field.find( 'input[type=hidden]:not(.fl-preview-ignore)').on( 'change', $.proxy( this._previewCSS, this, preview, field ) );
 				break;
+
+				case 'background':
+					const bg = field.find( 'input[type=hidden]:not(.fl-preview-ignore)').on( 'change', $.proxy( this._previewCSS, this, preview, field ) );
 			}
 		},
 
@@ -2835,7 +2976,8 @@
 				responsive 	= input.closest( '.fl-field-responsive-setting' ).length ? true : false,
 				important 	= preview.important && '' !== value ? ' !important' : '';
 
-			if ( '' !== value && value.indexOf( 'rgb' ) < 0 && value.indexOf( 'var' ) < 0 ) {
+			// Add # to hex values if needed
+			if ( ! CSS.supports( 'color', value ) && CSS.supports( 'color', '#' + value ) ) {
 				value = '#' + value;
 			}
 
@@ -3074,9 +3216,8 @@
 				if ( '' === spread ) {
 					spread = 0;
 				}
-				if ( color.indexOf( 'rgb' ) < 0 ) {
-					color = '#' + color;
-				}
+
+				color = FLBuilderPreview.formatColor( color )
 
 				value = horizontal + 'px ';
 				value += vertical + 'px ';
@@ -3160,7 +3301,7 @@
 				formatValue = window[preview.format_callback];
 
 			var fullSelector = this._getPreviewSelector( this.classes.node, preview.selector ),
-				element = $( fullSelector );
+				element = $( fullSelector, this.layoutDoc );
 
 			var callback = this._previewAttribute.bind( this, input, element, attrName, formatValue );
 
@@ -3233,7 +3374,7 @@
 		_previewAnimationField: function( preview, field, e )
 		{
 			var selector = this._getPreviewSelector( this.classes.node, preview.selector ),
-				element = $( selector ),
+				element = $( selector, this.layoutDoc ),
 				animation = field.find( '.fl-animation-field-style select' ),
 				duration = field.find( '.fl-animation-field-duration input' ),
 				options = animation[0].options;
@@ -3253,12 +3394,12 @@
 				element.data( 'animation-duration', duration.val() );
 			}
 
-			FLBuilderLayout._doModuleAnimation.apply( element );
+			FLBuilderLayoutModules._doModuleAnimation.apply( element );
 		},
 
 		_previewFieldObjectFit: function( preview, field, e ) {
 			const selector = this._getPreviewSelector( this.classes.node, preview.selector ),
-				  element = $( selector ).closest('.fl-module').get(0),
+				  element = $( selector, this.layoutDoc ).closest('.fl-module').get(0),
 				  className = 'fl-fill-container',
 				  fit = field.find( '.fl-button-group-field input' ).val();
 
@@ -3305,7 +3446,9 @@
 	 * @return {String}
 	 */
 	FLBuilderPreview.formatColor = function( value ) {
-		if ( '' !== value && ( value.indexOf( 'rgb' ) < 0 && value.indexOf( 'url' ) < 0 ) ) {
+
+		// Check if hex needs hash prepended
+		if ( ! CSS.supports( 'color', value ) && CSS.supports( 'color', '#' + value ) ) {
 			value = '#' + value;
 		}
 		return value;

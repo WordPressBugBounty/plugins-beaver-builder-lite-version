@@ -26,6 +26,7 @@ class FLPhotoModule extends FLBuilderModule {
 			'category'        => __( 'Basic', 'fl-builder' ),
 			'icon'            => 'format-image.svg',
 			'partial_refresh' => true,
+			'include_wrapper' => false,
 		));
 	}
 
@@ -148,11 +149,7 @@ class FLPhotoModule extends FLBuilderModule {
 			}
 
 			// Make sure we have enough memory to crop.
-			try {
-				ini_set( 'memory_limit', '300M' );
-			} catch ( Exception $e ) {
-				//
-			}
+			wp_raise_memory_limit( 'image' );
 
 			// Crop the photo.
 			$editor->resize( $new_width, $new_height, true );
@@ -208,6 +205,27 @@ class FLPhotoModule extends FLBuilderModule {
 	}
 
 	/**
+	 * @method get_wrapper_classes
+	 */
+	public function get_wrapper_classes() {
+		$classes = [
+			'fl-photo',
+			'fl-photo-align-' . sanitize_html_class( $this->settings->align ),
+		];
+
+		if ( ! empty( $this->settings->crop ) ) {
+			$classes[] = 'fl-photo-crop-' . sanitize_html_class( $this->settings->crop );
+		}
+
+		// Implode and return early for v1 photo modules.
+		if ( ! $this->version || 1 === $this->version ) {
+			return implode( ' ', $classes );
+		}
+
+		return $classes;
+	}
+
+	/**
 	 * @method get_classes
 	 */
 	public function get_classes() {
@@ -240,7 +258,7 @@ class FLPhotoModule extends FLBuilderModule {
 			}
 		}
 
-		return implode( ' ', $classes );
+		return implode( ' ', apply_filters( 'fl_builder_photo_classes', $classes, $this->settings, $this->node ) );
 	}
 
 	/**
@@ -602,7 +620,7 @@ FLBuilder::register_module('FLPhotoModule', array(
 					'photo_url'    => array(
 						'type'        => 'text',
 						'label'       => __( 'Photo URL', 'fl-builder' ),
-						'placeholder' => __( 'http://www.example.com/my-photo.jpg', 'fl-builder' ),
+						'placeholder' => 'https://www.example.com/my-photo.jpg',
 						'preview'     => array(
 							'type' => 'none',
 						),

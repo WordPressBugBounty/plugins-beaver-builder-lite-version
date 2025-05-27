@@ -13,9 +13,11 @@ final class FL_Debug {
 			add_action( 'init', array( 'FL_Debug', 'display_tests' ) );
 		}
 
-		if ( get_transient( 'fl_debug_mode' ) ) {
-			self::enable_logging();
-			add_filter( 'fl_is_debug', '__return_true' );
+		if ( get_option( 'fl_debug_mode', false ) ) {
+			if ( get_transient( 'fl_debug_mode' ) ) {
+				self::enable_logging();
+				add_filter( 'fl_is_debug', '__return_true' );
+			}
 		}
 	}
 
@@ -55,8 +57,8 @@ final class FL_Debug {
 	private static function get_plugins() {
 
 		$plugins = array();
-		require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
-		require_once( ABSPATH . 'wp-admin/includes/update.php' );
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		require_once ABSPATH . 'wp-admin/includes/update.php';
 
 		$plugins_data = get_plugins();
 
@@ -204,6 +206,46 @@ final class FL_Debug {
 				'data' => ( $count->inherit > 0 ) ? $count->inherit : $count->publish,
 			);
 			self::register( 'wp_type_count_' . $type, $args );
+		}
+
+		$args = array(
+			'name' => 'Menus',
+			'data' => self::divider(),
+		);
+		self::register( 'menus', $args );
+
+		$menu_data = wp_get_nav_menus();
+		$menus     = array();
+
+		$args = array(
+			'name' => 'Total Menus',
+			'data' => count( $menu_data ),
+		);
+		self::register( 'menu_count', $args );
+
+		foreach ( (array) $menu_data as $menu ) {
+			$args                    = array(
+				'name' => $menu->name,
+				'data' => $menu->count,
+			);
+			$menus[ $menu->term_id ] = $menu->name;
+			self::register( 'menu_count_' . $menu->slug, $args );
+		}
+
+		$args = array(
+			'name' => 'Theme Locations',
+			'data' => self::divider(),
+		);
+		self::register( 'themes_location', $args );
+
+		$locations = get_nav_menu_locations();
+
+		foreach ( (array) $locations as $k => $location ) {
+			$args = array(
+				'name' => ucfirst( $k ),
+				'data' => $menus[ $location ] ? 'Menu - ' . $menus[ $location ] : 'No Menu Set',
+			);
+			self::register( 'menu_location_' . $k, $args );
 		}
 
 		$args = array(

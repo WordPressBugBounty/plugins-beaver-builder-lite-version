@@ -234,9 +234,10 @@ class FLbuilder_WPCLI_Command extends WP_CLI_Command {
 /**
  * WP Cli commands for Beaver Themer.
  */
+// phpcs:ignore Generic.Files.OneObjectStructurePerFile.MultipleFound
 class FLThemer_List_WPCLI_Command extends WP_CLI_Command {
 
-	var $fields = array(
+	public $fields = array(
 		'id',
 		'name',
 		'status',

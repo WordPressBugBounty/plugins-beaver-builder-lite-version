@@ -36,13 +36,6 @@
 	<# } #>
 	<div class="fl-field-control-wrapper">
 
-		<# if ( undefined !== data.field.variations ) {
-			const variationInputName = `${data.name}_field_variation`;
-			const variationValue = data.settings[variationInputName];
-		#>
-		<input type="hidden" class="fl-preview-ignore" name="{{{variationInputName}}}" value="{{{variationValue}}}" />
-		<# } #>
-
 		<# if ( data.responsive ) { #>
 		<i class="fl-field-responsive-toggle dashicons dashicons-desktop" data-mode="default"></i>
 		<# } #>
@@ -89,7 +82,7 @@
 			<# } else {
 				var name  = data.name.replace( '[]', '' );
 			#>
-			<div class="fl-legacy-field" data-field="{{name}}" />
+			<div class="fl-legacy-field" data-field="{{name}}"></div>
 			<# } #>
 			<# if ( data.responsive ) { #>
 			</div>

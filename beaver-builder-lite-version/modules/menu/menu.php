@@ -210,7 +210,6 @@ class FLMenuModule extends FLBuilderModule {
 		}
 
 		return $fields;
-
 	}
 
 	public function get_menu_label() {
@@ -1455,12 +1454,12 @@ FLBuilder::register_module('FLMenuModule', array(
 	),
 ));
 
-
+// phpcs:ignore Generic.Files.OneObjectStructurePerFile.MultipleFound
 class FL_Menu_Module_Walker extends Walker_Nav_Menu {
 
 	protected $walk_counter = 0;
 
-	function start_el( &$output, $item, $depth = 0, $args = array(), $id = 0 ) {
+	public function start_el( &$output, $item, $depth = 0, $args = array(), $id = 0 ) {
 
 		$indent = ( $depth ) ? str_repeat( "\t", $depth ) : '';
 		$args   = (object) $args;
@@ -1498,7 +1497,7 @@ class FL_Menu_Module_Walker extends Walker_Nav_Menu {
 		$output .= apply_filters( 'walker_nav_menu_start_el', $item_output, $item, $depth, $args );
 	}
 
-	function end_el( &$output, $item, $depth = 0, $args = array() ) {
+	public function end_el( &$output, $item, $depth = 0, $args = array() ) {
 		if ( isset( $args->menu_logo_image_src ) && 0 == (int) $item->menu_item_parent ) {
 			$this->walk_counter++;
 
@@ -1522,7 +1521,7 @@ class FL_Menu_Module_Walker extends Walker_Nav_Menu {
 		}
 	}
 
-	function display_element( $element, &$children_elements, $max_depth, $depth, $args, &$output ) {
+	public function display_element( $element, &$children_elements, $max_depth, $depth, $args, &$output ) {
 		$id_field = $this->db_fields['id'];
 		if ( is_object( $args[0] ) ) {
 			$args[0]->has_children = ! empty( $children_elements[ $element->$id_field ] );

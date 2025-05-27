@@ -13,8 +13,9 @@ class FLRichTextModule extends FLBuilderModule {
 			'name'            => __( 'Text Editor', 'fl-builder' ),
 			'description'     => __( 'A WYSIWYG text editor.', 'fl-builder' ),
 			'category'        => __( 'Basic', 'fl-builder' ),
-			'partial_refresh' => true,
 			'icon'            => 'text.svg',
+			'partial_refresh' => true,
+			'include_wrapper' => false,
 		));
 	}
 }
@@ -36,7 +37,7 @@ FLBuilder::register_module('FLRichTextModule', array(
 						'wpautop'     => false,
 						'preview'     => array(
 							'type'     => 'text',
-							'selector' => '.fl-rich-text',
+							'selector' => '{node}.fl-rich-text, .fl-rich-text', // Use {node}.class to support v2 markup
 						),
 						'connections' => array( 'string' ),
 					),
@@ -58,7 +59,7 @@ FLBuilder::register_module('FLRichTextModule', array(
 						'show_alpha'  => true,
 						'preview'     => array(
 							'type'      => 'css',
-							'selector'  => '{node} .fl-rich-text, {node} .fl-rich-text *',
+							'selector'  => '{node} .fl-rich-text, {node} .fl-rich-text *, {node}.fl-rich-text, {node}.fl-rich-text *',  // Use {node}.class to support v2 markup
 							'property'  => 'color',
 							'important' => true,
 						),
@@ -69,7 +70,7 @@ FLBuilder::register_module('FLRichTextModule', array(
 						'responsive' => true,
 						'preview'    => array(
 							'type'     => 'css',
-							'selector' => '.fl-rich-text, .fl-rich-text *:not(b, strong)',
+							'selector' => '.fl-rich-text, .fl-rich-text *:not(b, strong), {node}.fl-rich-text, {node}.fl-rich-text *:not(b, strong)',  // Use {node}.class to support v2 markup
 						),
 					),
 				),

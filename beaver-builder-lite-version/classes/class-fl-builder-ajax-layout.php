@@ -488,6 +488,7 @@ final class FLBuilderAJAXLayout {
 			// Get the node to render.
 			if ( ! $parent ) {
 				$root      = FLBuilderModel::get_module_parent( 'row', $module );
+				$root      = $root ? $root : $module;
 				$siblings  = FLBuilderModel::get_nodes( 'row' );
 				$render_id = $root->node;
 			} elseif ( 'row' == $parent->type && ! $module->accepts_children() ) {
@@ -543,6 +544,7 @@ final class FLBuilderAJAXLayout {
 			'legacy'       => FLBuilderUISettingsForms::pre_render_legacy_module_settings( $module->settings->type, $module->settings ),
 			'newNodes'     => $new_nodes,
 			'updatedNodes' => $updated_nodes,
+			'config'       => null === $template_id ? null : FLBuilderUISettingsForms::get_node_js_config(),
 		);
 	}
 

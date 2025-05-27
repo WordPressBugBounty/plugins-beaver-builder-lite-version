@@ -3,10 +3,10 @@ namespace FLCacheClear;
 
 class Kinsta {
 
-	var $name = 'Kinsta Hosting';
-	var $url  = 'https://kinsta.com/';
+	public $name = 'Kinsta Hosting';
+	public $url  = 'https://kinsta.com/';
 
-	static function run() {
+	public static function run() {
 
 		if ( ! defined( 'KINSTAMU_VERSION' ) ) {
 			return false;

@@ -831,6 +831,12 @@
             this.$searchInput.on('keyup', this.onSearchTermChanged.bind(this) );
             this.$searchPanel = this.$el.find('.fl-builder--search-results-panel');
 
+            this.$el.on('mousedown', () => {
+                if ( $('.fl-builder-workspace-panel').length && FLBuilder.PinnedUI.getPinnedSide() === 'right' ) {
+                    FL.Builder.togglePanel('outline');
+                }
+            });
+
             FLBuilder.addHook('showContentPanel', this.show.bind( this ));
             FLBuilder.addHook('showModules', this.show.bind( this, 'modules' ));
             FLBuilder.addHook('showRows', this.show.bind( this, 'rows' ));

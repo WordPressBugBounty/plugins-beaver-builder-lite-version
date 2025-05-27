@@ -1,5 +1,9 @@
 <?php
 
+$attrs = [
+	'class' => explode( ' ', $module->get_classname() ),
+];
+
 $button_node_id = "fl-node-$id";
 
 if ( isset( $settings->id ) && ! empty( $settings->id ) ) {
@@ -7,7 +11,7 @@ if ( isset( $settings->id ) && ! empty( $settings->id ) ) {
 }
 
 ?>
-<div class="<?php echo FLBuilderUtils::sanitize_html_class( $module->get_classname() ); ?>">
+<div <?php $module->render_attributes( $attrs ); ?>>
 	<?php if ( isset( $settings->click_action ) && 'lightbox' == $settings->click_action ) : ?>
 		<a href="<?php echo 'video' == $settings->lightbox_content_type ? esc_url( do_shortcode( $settings->lightbox_video_link ) ) : '#'; ?>" class="fl-button <?php echo $button_node_id; ?> fl-button-lightbox<?php echo ( 'enable' == $settings->icon_animation ) ? ' fl-button-icon-animation' : ''; ?>"<?php echo $module->get_role(); ?>>
 	<?php else : ?>
@@ -27,9 +31,9 @@ if ( isset( $settings->id ) && ! empty( $settings->id ) ) {
 		<i class="fl-button-icon fl-button-icon-after <?php echo esc_attr( $settings->icon ); ?>" aria-hidden="true"></i>
 		<?php endif; ?>
 	</a>
+	<?php if ( 'lightbox' == $settings->click_action && 'html' == $settings->lightbox_content_type && isset( $settings->lightbox_content_html ) ) : ?>
+		<div class="<?php echo $button_node_id; ?> fl-button-lightbox-content mfp-hide">
+			<?php echo $settings->lightbox_content_html; ?>
+		</div>
+	<?php endif; ?>
 </div>
-<?php if ( 'lightbox' == $settings->click_action && 'html' == $settings->lightbox_content_type && isset( $settings->lightbox_content_html ) ) : ?>
-	<div class="<?php echo $button_node_id; ?> fl-button-lightbox-content mfp-hide">
-		<?php echo $settings->lightbox_content_html; ?>
-	</div>
-<?php endif; ?>

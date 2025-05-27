@@ -116,6 +116,10 @@ final class FLBuilderUpdate {
 			self::v_28();
 		}
 
+		if ( version_compare( $saved_version, '2.8.1', '<' ) ) {
+			self::v_281();
+		}
+
 		if ( version_compare( $saved_version, '2.8.2', '<' ) ) {
 			self::v_282();
 		}
@@ -482,7 +486,7 @@ final class FLBuilderUpdate {
 	 */
 	static private function v_1_10( $network = false ) {
 		if ( ! function_exists( 'get_editable_roles' ) ) {
-			require_once( ABSPATH . 'wp-admin/includes/user.php' );
+			require_once ABSPATH . 'wp-admin/includes/user.php';
 		}
 
 		$roles             = get_editable_roles();
@@ -621,6 +625,20 @@ final class FLBuilderUpdate {
 			$enabled[] = 'numbers';
 		}
 		FLBuilderModel::update_admin_settings_option( '_fl_builder_enabled_modules', $enabled, true );
+	}
+
+	static private function v_281() {
+		if ( ! get_option( 'fl_beta_updates' ) ) {
+			add_option( 'fl_beta_updates', false );
+		}
+		if ( ! get_option( 'fl_alpha_updates' ) ) {
+			add_option( 'fl_alpha_updates', false );
+		}
+		if ( get_option( '_fl_builder_enabled_modules' ) ) {
+			$modules = get_option( '_fl_builder_enabled_modules' );
+			delete_option( '_fl_builder_enabled_modules' );
+			add_option( '_fl_builder_enabled_modules', $modules );
+		}
 	}
 
 	/**

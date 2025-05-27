@@ -9,11 +9,7 @@ if ( isset( $widget_class ) && class_exists( $widget_class ) ) {
 
 	// Widget settings
 	$settings_key    = 'widget-' . $widget_instance->id_base;
-	$widget_settings = array();
-
-	if ( isset( $settings->$settings_key ) ) {
-		$widget_settings = (array) $settings->$settings_key;
-	}
+	$widget_settings = isset( $settings->$settings_key ) ? (array) $settings->$settings_key : array();
 
 	// Widget title
 	$widget_title = $widget_instance->name;

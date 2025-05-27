@@ -35,7 +35,7 @@ final class FLBuilderCompatibility {
 		add_action( 'template_redirect', array( __CLASS__, 'fix_klaviyo_themer_layout' ) );
 		add_action( 'template_redirect', array( __CLASS__, 'aggiungi_script_instafeed_owl' ), 1000 );
 		add_action( 'template_redirect', array( __CLASS__, 'fix_happyfoxchat' ) );
-		add_action( 'template_redirect', array( __CLASS__, 'fix_adminbar' ) );
+		add_action( 'after_setup_theme', array( __CLASS__, 'fix_adminbar' ) );
 		add_action( 'tribe_events_pro_widget_render', array( __CLASS__, 'tribe_events_pro_widget_render_fix' ), 10, 3 );
 		add_action( 'wp_footer', array( __CLASS__, 'fix_woo_short_description_footer' ) );
 		add_action( 'save_post', array( __CLASS__, 'fix_seopress' ), 9 );
@@ -49,6 +49,7 @@ final class FLBuilderCompatibility {
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'ee_remove_stylesheet' ), 99999 );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'fix_woocommerce_products_filter' ), 12 );
 		add_action( 'pre_get_posts', array( __CLASS__, 'fix_woo_archive_loop' ), 99 );
+		add_action( 'pre_get_posts', array( __CLASS__, 'use_tribe_events_per_page' ) );
 		add_action( 'fl_builder_menu_module_before_render', array( __CLASS__, 'fix_menu_module_before_render' ) );
 		add_action( 'fl_builder_menu_module_after_render', array( __CLASS__, 'fix_menu_module_after_render' ) );
 		add_action( 'wp_before_admin_bar_render', array( __CLASS__, 'fix_dulicate_page' ), 11 );
@@ -436,7 +437,7 @@ final class FLBuilderCompatibility {
 	public static function fix_protector_gold() {
 		if ( FLBuilderModel::is_builder_active() && class_exists( 'Prevent_Direct_Access_Gold' ) && ! function_exists( 'get_current_screen' ) ) {
 			function get_current_screen() {
-				$args         = new StdClass;
+				$args         = new StdClass();
 				$args->id     = 'Beaver';
 				$args->action = 'Builder';
 				return $args;
@@ -532,7 +533,7 @@ final class FLBuilderCompatibility {
 	public static function wc_memberships_support() {
 
 		if ( function_exists( 'wc_memberships_is_post_content_restricted' ) ) {
-			add_filter( 'fl_builder_do_render_content', function( $do_render, $post_id ) {
+			add_filter( 'fl_builder_do_render_content', function ( $do_render, $post_id ) {
 				if ( wc_memberships_is_post_content_restricted() ) {
 					// check if user has access to restricted content
 					if ( ! current_user_can( 'wc_memberships_view_restricted_post_content', $post_id ) ) {
@@ -1016,6 +1017,34 @@ final class FLBuilderCompatibility {
 		}
 	}
 
+	/**
+	 * Use Events per Page value from the TEC Settings on the archive page.
+	 *
+	 * @since 2.9
+	 */
+	public static function use_tribe_events_per_page( $query ) {
+		if ( ! class_exists( 'Tribe__Events__Query' ) || ! class_exists( 'FLThemeBuilder' ) || is_admin() ) {
+			return;
+		}
+
+		if ( ( $query->is_main_query() && is_post_type_archive( 'tribe_events' ) ) || ( 'fl-theme-layout' === get_post_type() ) ) {
+			$events_per_page = (int) tribe_get_option( 'postsPerPage', 10 );
+			$query->set( 'posts_per_page', $events_per_page );
+		}
+	}
+
+	/**
+	 * Fix 'Hide From Event Listings' from the Event Options under the Event Edit Screen
+	 * not being picked up by the Posts Grid module set to 'custom_query'.
+	 *
+	 * @since 2.4.1
+	 */
+	public static function fix_tribe_events_hide_from_listings( $args ) {
+		if ( ! class_exists( 'Tribe__Events__Query' ) || is_admin() ) {
+			return $args;
+		}
+	}
+
 	public static function render_tribe_event_template( $content ) {
 
 		if ( ! class_exists( 'Tribe__Events__Main' ) ) {
@@ -1328,7 +1357,7 @@ final class FLBuilderCompatibility {
 	 */
 	public static function fix_adminbar() {
 		if ( isset( $_REQUEST['fl_builder'] ) ) {
-			remove_action( 'wp_enqueue_scripts', 'wp_enqueue_admin_bar_bump_styles' );
+			add_theme_support( 'admin-bar', array( 'callback' => '__return_false' ) );
 		}
 	}
 
@@ -1383,8 +1412,6 @@ final class FLBuilderCompatibility {
 		}
 
 		wp_dequeue_script( 'rms_jquery_ui_datepicker_script' );
-
 	}
-
 }
 FLBuilderCompatibility::init();

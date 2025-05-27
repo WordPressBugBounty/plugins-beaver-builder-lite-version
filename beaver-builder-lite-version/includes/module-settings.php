@@ -48,18 +48,8 @@ FLBuilder::register_settings_form('module_advanced', array(
 				'responsive_display'         => array(
 					'type'         => 'button-group',
 					'label'        => __( 'Breakpoint', 'fl-builder' ),
-					'options'      => array(
-						'desktop' => '<i class="dashicons dashicons-desktop"></i>',
-						'large'   => '<i class="dashicons dashicons-laptop"></i>',
-						'medium'  => '<i class="dashicons dashicons-tablet"></i>',
-						'mobile'  => '<i class="dashicons dashicons-smartphone"></i>',
-					),
-					'tooltip'      => array(
-						'desktop' => __( 'Extra Large', 'fl-builder' ),
-						'large'   => __( 'Large', 'fl-builder' ),
-						'medium'  => __( 'Medium', 'fl-builder' ),
-						'mobile'  => __( 'Mobile', 'fl-builder' ),
-					),
+					'options'      => FLBuilderModel::get_node_breakpoint_options(),
+					'tooltip'      => FLBuilderModel::get_node_breakpoint_tooltips(),
 					'default'      => 'desktop,large,medium,mobile',
 					'multi-select' => array(
 						'min' => 1,
@@ -183,3 +173,44 @@ FLBuilder::register_settings_form('module_advanced', array(
 		),
 	),
 ));
+
+FLBuilder::register_settings_form( 'auto_style', [
+	'title'    => __( 'Style', 'fl-builder' ),
+	'sections' => [
+		'color'  => [
+			'title'  => __( 'Color & Background', 'fl-builder' ),
+			'fields' => [
+				'color'      => [
+					'label'   => __( 'Color', 'fl-builder' ),
+					'type'    => 'x_color',
+					'preview' => [
+						'property' => 'color',
+					],
+				],
+				'background' => [
+					'label' => __( 'Background', 'fl-builder' ),
+					'type'  => 'background',
+				],
+			],
+		],
+		'layout' => [
+			'title'     => __( 'Layout', 'fl-builder' ),
+			'collapsed' => true,
+			'fields'    => [
+				'display' => [
+					'label'     => __( 'Display', 'fl-builder' ),
+					'type'      => 'x_button-group',
+					'options'   => [
+						''     => __( 'None', 'fl-builder' ),
+						'flex' => __( 'Flex', 'fl-builder' ),
+						'grid' => __( 'Grid', 'fl-builder' ),
+					],
+					'collapsed' => true,
+					'preview'   => [
+						'property' => 'display',
+					],
+				],
+			],
+		],
+	],
+] );

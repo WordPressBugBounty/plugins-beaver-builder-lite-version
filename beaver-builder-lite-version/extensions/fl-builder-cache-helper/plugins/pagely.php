@@ -2,10 +2,10 @@
 namespace FLCacheClear;
 class Pagely {
 
-	var $name = 'Pagely Hosting';
-	var $url  = 'https://pagely.com/plans-pricing/';
+	public $name = 'Pagely Hosting';
+	public $url  = 'https://pagely.com/plans-pricing/';
 
-	static function run( $post_id = false ) {
+	public static function run( $post_id = false ) {
 
 		$templates = array(
 			'fl-builder-template',

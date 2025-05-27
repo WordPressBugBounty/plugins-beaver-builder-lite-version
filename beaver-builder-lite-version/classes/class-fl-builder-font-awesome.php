@@ -9,7 +9,7 @@ use function FortAwesome\fa;
 
 final class FLBuilderFontAwesome {
 
-	static $cache_slug = '_fl_builder_font_awesome_data';
+	public static $cache_slug = '_fl_builder_font_awesome_data';
 	/**
 	 * @since 2.4
 	 * @return void
@@ -264,7 +264,7 @@ final class FLBuilderFontAwesome {
 		return $result;
 	}
 
-	static function get_fa_data() {
+	public static function get_fa_data() {
 
 		if ( ! self::is_installed() ) {
 			return false;
@@ -330,14 +330,14 @@ final class FLBuilderFontAwesome {
 		return $data;
 	}
 
-	static function clear_cache() {
+	public static function clear_cache() {
 		delete_transient( self::$cache_slug );
 	}
 }
 /**
  * Needs to be on wp_loaded as that is where FA plugin is started.
  */
-add_action( 'wp_loaded', function() {
+add_action( 'wp_loaded', function () {
 	FLBuilderFontAwesome::init();
 });
 add_action( 'update_option_font-awesome', array( 'FLBuilderFontAwesome', 'clear_cache' ) );

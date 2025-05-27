@@ -2,7 +2,7 @@
 namespace FLCacheClear;
 class Varnish {
 
-	static function run() {
+	public static function run() {
 
 		$settings = \FLCacheClear\Plugin::get_settings();
 		if ( ! $settings['varnish'] ) {

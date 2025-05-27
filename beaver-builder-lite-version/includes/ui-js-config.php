@@ -45,11 +45,13 @@ echo 'FLBuilderConfig              = ' . FLBuilderUtils::json_encode( apply_filt
 	'brandingIcon'               => FLBuilderModel::get_branding_icon(),
 	'url'                        => get_permalink(),
 	'editUrl'                    => FLBuilderModel::get_edit_url(),
+	'loginUrl'                   => wp_login_url( FLBuilderModel::get_edit_url() ),
 	'shortlink'                  => add_query_arg( 'fl_builder', '', FLBuilderUtils::get_safe_url( $post_id ) ),
 	'previewUrl'                 => add_query_arg( 'fl_builder_preview', '', get_permalink() ),
 	'layoutHasDraftedChanges'    => FLBuilderModel::layout_has_drafted_changes(),
 	'panelData'                  => FLBuilderUIContentPanel::get_panel_data(),
 	'contentItems'               => FLBuilderUIContentPanel::get_content_elements(),
+	'inlineModuleAliases'        => FLBuilderModel::get_inline_module_aliases(),
 	'mainMenu'                   => FLBuilder::get_main_menu_data(),
 	'keyboardShortcuts'          => FLBuilder::get_keyboard_shortcuts(),
 	'isCustomizer'               => is_customize_preview(),
@@ -62,10 +64,11 @@ echo 'FLBuilderConfig              = ' . FLBuilderUtils::json_encode( apply_filt
 	'showOutlinePanel'           => apply_filters( 'fl_builder_outline_panel_enabled', true ),
 	'unrestricted'               => FLBuilderUserAccess::current_user_can( 'unrestricted_editing' ),
 	'shouldRefreshOnPublish'     => FLBuilder::should_refresh_on_publish(),
-	'googleFontsUrl'             => apply_filters( 'fl_builder_google_fonts_domain', '//fonts.googleapis.com/' ) . 'css?family=',
+	'googleFontsUrl'             => apply_filters( 'fl_builder_google_fonts_domain', 'https://fonts.googleapis.com/' ) . 'css?family=',
 	'wp_editor'                  => FLBuilder::get_wp_editor(),
 	'rowResize'                  => FLBuilderModel::get_row_resize_settings(),
 	'notifications'              => FLBuilderNotifications::get_notifications(),
+	'notificationsEnabled'       => ( 1 == get_option( '_fl_builder_notifications_enabled' ) ) ? true : false,
 	'isWhiteLabeled'             => FLBuilderModel::is_white_labeled(),
 	'inlineEnabled'              => FLBuilderModel::is_inline_enabled(),
 	'CheckCodeErrors'            => FLBuilderModel::is_codechecking_enabled(),
@@ -149,12 +152,14 @@ echo 'FLBuilderConfig              = ' . FLBuilderUtils::json_encode( apply_filt
 		'flex',
 		'justify',
 		'size',
+		'background',
 	),
 	'collapseSectionsDefault'    => apply_filters( 'fl_builder_ui_collapse_sections', false ),
 	/**
 	 * @see fl_builder_default_image_select_size
 	 */
 	'defaultImageSize'           => apply_filters( 'fl_builder_default_image_select_size', 'full' ),
+	'useExperimentalColorPicker' => true,
 ) ) ) . ';';
 
 
@@ -194,9 +199,11 @@ echo 'FLBuilderStrings             = ' . FLBuilderUtils::json_encode( apply_filt
 	'collapse_all'                   => esc_attr__( 'Collapse All', 'fl-builder' ),
 	'column'                         => esc_attr__( 'Column', 'fl-builder' ),
 	'columnGroup'                    => esc_attr__( 'Group', 'fl-builder' ),
+	'copy'                           => esc_attr__( 'Copy', 'fl-builder' ),
 	'contentSliderSelectLayout'      => esc_attr__( 'Please select either a background layout or content layout before submitting.', 'fl-builder' ),
 	'contentSliderTransitionWarn'    => esc_attr__( 'Transition value should be lower than Delay value.', 'fl-builder' ),
 	'countdownDateisInThePast'       => esc_attr__( 'Error! Please enter a date that is in the future.', 'fl-builder' ),
+	'delete'                         => esc_attr__( 'Delete', 'fl-builder' ),
 	'deleteAccount'                  => esc_attr__( 'Remove Account', 'fl-builder' ),
 	'deleteAccountWarning'           => esc_attr__( 'Are you sure you want to remove this account? Other modules that are connected to it will be affected.', 'fl-builder' ),
 	'deleteColumnMessage'            => esc_attr__( 'Do you really want to delete this column?', 'fl-builder' ),
@@ -363,7 +370,7 @@ echo 'FLBuilderStrings             = ' . FLBuilderUtils::json_encode( apply_filt
 		),
 	),
 	'notifications'                  => array(
-		'title'   => esc_attr__( 'Notifications', 'fl-builder' ),
+		'title'   => esc_attr__( "What's New", 'fl-builder' ),
 		'loading' => esc_attr__( 'Loading...', 'fl-builder' ),
 		'none'    => esc_attr__( 'No Notifications.', 'fl-builder' ),
 	),

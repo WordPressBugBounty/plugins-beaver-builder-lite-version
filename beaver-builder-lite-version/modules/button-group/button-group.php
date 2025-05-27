@@ -13,9 +13,28 @@ class FLButtonGroupModule extends FLBuilderModule {
 			'name'            => __( 'Button Group', 'fl-builder' ),
 			'description'     => __( 'Renders a series of call to action buttons.', 'fl-builder' ),
 			'category'        => __( 'Basic', 'fl-builder' ),
-			'partial_refresh' => true,
 			'icon'            => 'button.svg',
+			'partial_refresh' => true,
+			'include_wrapper' => false,
 		));
+	}
+
+	/**
+	 * Return the root CSS selector for the module. In v2 of this module,
+	 * the root classes are on the module itself, not an inner div.
+	 *
+	 * @since 2.9
+	 * @param array $classes
+	 * @return string
+	 */
+	public function root_selector( $classes = [] ) {
+		if ( 1 < $this->version ) {
+			$class = implode( '', $classes );
+			return ".fl-node-{$this->node}{$class}";
+		}
+
+		$class = implode( ' ', $classes );
+		return ".fl-node-{$this->node} {$class}";
 	}
 
 	/**
@@ -511,7 +530,7 @@ FLBuilder::register_settings_form('buttons_form', array(
 						'link'           => array(
 							'type'          => 'link',
 							'label'         => __( 'Link', 'fl-builder' ),
-							'placeholder'   => __( 'https://www.example.com', 'fl-builder' ),
+							'placeholder'   => 'https://www.example.com',
 							'show_target'   => true,
 							'show_nofollow' => true,
 							'show_target'   => true,

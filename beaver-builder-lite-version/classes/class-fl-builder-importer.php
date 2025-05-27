@@ -13,10 +13,10 @@ class FLBuilderImporter extends WP_Import {
 	 * @since 1.8
 	 * @return array
 	 */
-	function parse( $file ) {
+	public function parse( $file ) {
 
 		if ( extension_loaded( 'xml' ) ) {
-			$parser = new FLBuilderImportParserXML;
+			$parser = new FLBuilderImportParserXML();
 			$result = $parser->parse( $file );
 
 				// If SimpleXML succeeds or this is an invalid WXR file then return the results
@@ -52,10 +52,10 @@ class FLBuilderImporter extends WP_Import {
 	}
 }
 
-
+// phpcs:ignore Generic.Files.OneObjectStructurePerFile.MultipleFound
 class FLBuilderImportParserXML extends WXR_Parser_XML {
 
-	function tag_close( $parser, $tag ) {
+	public function tag_close( $parser, $tag ) {
 		switch ( $tag ) {
 			case 'wp:comment':
 				unset( $this->sub_data['key'], $this->sub_data['value'] ); // remove meta sub_data
@@ -152,13 +152,14 @@ class FLBuilderImportParserXML extends WXR_Parser_XML {
  *
  * @since 1.8
  */
+// phpcs:ignore Generic.Files.OneObjectStructurePerFile.MultipleFound
 class FLBuilderImportParserRegex extends WXR_Parser_Regex {
 
 	/**
 	 * @since 1.8
 	 * @return array
 	 */
-	function parse( $file ) {
+	public function parse( $file ) {
 
 		// @codingStandardsIgnoreLine
 		$wxr_version = $in_post = false;
@@ -270,6 +271,7 @@ class FLBuilderImportParserRegex extends WXR_Parser_Regex {
  *
  * @since 1.8
  */
+// phpcs:ignore Generic.Files.OneObjectStructurePerFile.MultipleFound
 final class FLBuilderImporterDataFix {
 
 	/**
@@ -291,7 +293,7 @@ final class FLBuilderImporterDataFix {
 		}
 
 		if ( $linebreaks ) {
-			$data = preg_replace_callback('!([a-z-_0-9]+)";s:(\d+):"(.*?)";!', function( $m ) {
+			$data = preg_replace_callback('!([a-z-_0-9]+)";s:(\d+):"(.*?)";!', function ( $m ) {
 				// new replace logic.
 				if ( 'css' === $m[1] || 'js' === $m[1] || 'html' === $m[1] || 'bb_css_code' === $m[1] || 'bb_js_code' === $m[1] ) {
 					$m[3] = str_replace( '<br data-fl-fixed=true />', "\n", $m[3] );
@@ -300,7 +302,7 @@ final class FLBuilderImporterDataFix {
 				return $m[1] . '";s:' . strlen( $m[3] ) . ':"' . $m[3] . '";';
 			}, self::sanitize_from_word( $data, $linebreaks ) );
 		} else {
-			$data = preg_replace_callback('!s:(\d+):"(.*?)";!', function( $m ) {
+			$data = preg_replace_callback('!s:(\d+):"(.*?)";!', function ( $m ) {
 				return 's:' . strlen( $m[2] ) . ':"' . $m[2] . '";';
 			}, self::sanitize_from_word( $data, $linebreaks ) );
 		}

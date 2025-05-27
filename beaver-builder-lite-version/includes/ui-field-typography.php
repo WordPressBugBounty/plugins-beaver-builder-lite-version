@@ -193,17 +193,18 @@ var textShadow = wp.template( 'fl-builder-field-shadow' )( {
 	field: {
 		show_spread: false,
 	},
+	deferColorPickers: true
 } );
 
 #>
 <div class="fl-compound-field fl-typography-field">
-	<div class="fl-compound-field-section fl-typography-field-section-general fl-compound-field-section-visible">
+	<div class="fl-compound-field-section fl-typography-field-section-general">
 		<div class="fl-compound-field-section-toggle">
 			<i class="dashicons dashicons-arrow-right-alt2"></i>
 			<?php _e( 'Font', 'fl-builder' ); ?>
 		</div>
 		<# if ( 'default' === device ) { #>
-		<div class="fl-compound-field-row">
+		<div class="fl-compound-field-row fl-typography-field-family-row">
 			<div class="fl-compound-field-setting fl-typography-field-family" data-property="font-family">
 				<# if ( fl_typography_enabled( 'font_family' ) ) { #>
 				{{{fontFamily}}}
@@ -211,7 +212,7 @@ var textShadow = wp.template( 'fl-builder-field-shadow' )( {
 			</div>
 		</div>
 		<# } #>
-		<div class="fl-compound-field-row">
+		<div class="fl-compound-field-row fl-typography-field-size-row">
 			<div class="fl-compound-field-setting fl-typography-field-size" data-property="font-size">
 				<# if ( fl_typography_enabled( 'font_size' ) ) { #>
 				<label class="fl-compound-field-label">
@@ -243,7 +244,7 @@ var textShadow = wp.template( 'fl-builder-field-shadow' )( {
 			<i class="dashicons dashicons-arrow-right-alt2"></i>
 			<?php _e( 'Style &amp Spacing', 'fl-builder' ); ?>
 		</div>
-		<div class="fl-compound-field-row">
+		<div class="fl-compound-field-row fl-typography-field-spacing-row">
 			<div class="fl-compound-field-setting fl-typography-field-spacing" data-property="letter-spacing">
 				<# if ( fl_typography_enabled( 'letter_spacing' ) ) { #>
 				<label class="fl-compound-field-label">
@@ -261,7 +262,7 @@ var textShadow = wp.template( 'fl-builder-field-shadow' )( {
 				<# } #>
 			</div>
 		</div>
-		<div class="fl-compound-field-row">
+		<div class="fl-compound-field-row fl-typography-field-style-row">
 			<div class="fl-compound-field-setting fl-typography-field-decoration" data-property="text-decoration">
 			<# if ( fl_typography_enabled( 'text_decoration' ) ) { #>
 				<label class="fl-compound-field-label">
@@ -294,7 +295,7 @@ var textShadow = wp.template( 'fl-builder-field-shadow' )( {
 			<i class="dashicons dashicons-arrow-right-alt2"></i>
 			<?php _e( 'Text Shadow', 'fl-builder' ); ?>
 		</div>
-		<div class="fl-compound-field-row">
+		<div class="fl-compound-field-row fl-typography-field-shadow-row">
 			<div class="fl-compound-field-setting fl-typography-field-shadow" data-property="text-shadow">
 				{{{textShadow}}}
 			</div>

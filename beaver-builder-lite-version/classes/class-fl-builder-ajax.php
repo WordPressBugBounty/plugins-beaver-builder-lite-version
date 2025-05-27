@@ -101,6 +101,7 @@ final class FLBuilderAJAX {
 		self::add_action( 'duplicate_wpml_layout', 'FLBuilderModel::duplicate_wpml_layout', array( 'original_post_id', 'post_id' ) );
 		self::add_action( 'apply_user_template', 'FLBuilderModel::apply_user_template', array( 'template_id', 'append' ) );
 		self::add_action( 'apply_template', 'FLBuilderModel::apply_template', array( 'template_id', 'append' ) );
+		self::add_action( 'apply_module_alias', 'FLBuilderModel::apply_module_alias', array( 'node_id', 'alias', 'settings' ) );
 		self::add_action( 'save_layout', 'FLBuilderModel::save_layout', array( 'publish', 'exit' ) );
 		self::add_action( 'save_draft', 'FLBuilderModel::save_draft' );
 		self::add_action( 'clear_draft_layout', 'FLBuilderModel::clear_draft_layout' );
@@ -148,7 +149,7 @@ final class FLBuilderAJAX {
 		self::add_action( 'get_autosuggest_values', 'FLBuilderAutoSuggest::get_values', array( 'fields' ) );
 
 		self::add_action( 'save_browser_stats', 'FLBuilderUsage::browser_stats', array( 'browser_data' ) );
-		//	self::add_action( 'clear_cache_for_layout', 'FLBuilderAJAXLayout::refresh_layout_cache' );
+		//  self::add_action( 'clear_cache_for_layout', 'FLBuilderAJAXLayout::refresh_layout_cache' );
 	}
 
 	/**

@@ -18,7 +18,6 @@ final class FLBuilderUsage {
 		add_action( $hook, array( 'FLBuilderUsage', 'render_notification' ) );
 		add_action( 'fl_builder_usage_event', array( 'FLBuilderUsage', 'send_stats' ) );
 		add_action( 'wp_ajax_fl_usage_toggle', array( 'FLBuilderUsage', 'callback' ) );
-
 	}
 
 	public static function callback() {
@@ -123,7 +122,6 @@ final class FLBuilderUsage {
 		echo '</p>';
 
 		printf( '</div>%s</div>', FLBuilderUsage::data_demo() );
-
 	}
 
 	/**
@@ -284,7 +282,7 @@ final class FLBuilderUsage {
 					'version' => $plugin['Version'],
 					'slug'    => $plugin_slug,
 				);
-				$data['plugins_active'] ++;
+				$data['plugins_active']++;
 			}
 		}
 
@@ -300,7 +298,7 @@ final class FLBuilderUsage {
 			if ( isset( $post_types['attachment'] ) ) {
 				unset( $post_types['attachment'] );
 			}
-			//	$post_types['fl-builder-template'] = 'fl-builder-template';
+			//  $post_types['fl-builder-template'] = 'fl-builder-template';
 
 			/**
 			* Get a count of all posts/pages that are *not* builder enabled.
@@ -343,7 +341,7 @@ final class FLBuilderUsage {
 							if ( ! isset( $data['modules'][ $node->settings->type ] ) ) {
 								$data['modules'][ $node->settings->type ] = 1;
 							} else {
-								$data['modules'][ $node->settings->type ] ++;
+								$data['modules'][ $node->settings->type ]++;
 							}
 						}
 					}
@@ -367,7 +365,7 @@ final class FLBuilderUsage {
 						if ( ! isset( $data['themer'][ $meta['_fl_theme_layout_type'][0] ] ) ) {
 							$data['themer'][ $meta['_fl_theme_layout_type'][0] ] = 1;
 						} else {
-							$data['themer'][ $meta['_fl_theme_layout_type'][0] ] ++;
+							$data['themer'][ $meta['_fl_theme_layout_type'][0] ]++;
 						}
 					}
 				}

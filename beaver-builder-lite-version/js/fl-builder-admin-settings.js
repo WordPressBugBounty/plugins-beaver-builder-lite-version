@@ -435,9 +435,9 @@
 		_moduleAllCheckboxClicked: function()
 		{
 			if($(this).is(':checked')) {
-				$('.fl-module-cb').prop('checked', true);
+				$('.fl-module-cb:visible').prop('checked', true);
 			} else {
-				$('.fl-module-cb').prop('checked', false);
+				$('.fl-module-cb:visible').prop('checked', false);
 			}
 		},
 
@@ -453,7 +453,7 @@
 		{
 			var allChecked = true;
 
-			$('.fl-module-cb').each(function() {
+			$('.fl-module-cb:visible').each(function() {
 
 				if(!$(this).is(':checked')) {
 					allChecked = false;
@@ -461,10 +461,10 @@
 			});
 
 			if(allChecked) {
-				$('.fl-module-all-cb').prop('checked', true);
+				$('.fl-module-all-cb:visible').prop('checked', true);
 			}
 			else {
-				$('.fl-module-all-cb').prop('checked', false);
+				$('.fl-module-all-cb:visible').prop('checked', false);
 			}
 		},
 

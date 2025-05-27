@@ -24,6 +24,8 @@ class FLBuilderSeoPlugins {
 		add_filter( 'seopress_content_analysis_content', array( $this, 'sp_content_analysis_content' ), 10, 2 );
 		add_filter( 'fl_builder_register_template_category_args', array( $this, 'yoast_templates' ) );
 		add_filter( 'wpseo_indexable_excluded_post_types', array( $this, 'wpseo_indexable_excluded_post_types' ), 11 );
+
+		add_filter( 'wp_sitemaps_users_query_args', array( $this, 'wp_sitemaps_users_query_args' ) );
 	}
 
 	public function init() {
@@ -153,7 +155,7 @@ class FLBuilderSeoPlugins {
 		return $value;
 	}
 
-	public  function sf_sitemap( $types ) {
+	public function sf_sitemap( $types ) {
 		$types[] = 'fl-builder-template';
 		return $types;
 	}
@@ -187,6 +189,13 @@ class FLBuilderSeoPlugins {
 			}
 		}
 		return $option;
+	}
+
+	public function wp_sitemaps_users_query_args( $args ) {
+		if ( is_array( $args['has_published_posts'] ) ) {
+			$args['has_published_posts'] = array_diff( $args['has_published_posts'], array( 'fl-builder-template' ) );
+		}
+		return $args;
 	}
 }
 

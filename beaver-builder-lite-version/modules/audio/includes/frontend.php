@@ -1,4 +1,12 @@
 <?php
+
+$attrs = [
+	'class' => [
+		'fl-audio',
+		'fl-wp-audio',
+	],
+];
+
 // Display playlist if user selected more than one audio files
 if ( ( 'media_library' == $settings->audio_type ) && ( is_array( $settings->audios ) && count( $settings->audios ) > 1 ) ) {
 
@@ -8,7 +16,7 @@ if ( ( 'media_library' == $settings->audio_type ) && ( is_array( $settings->audi
 	$playlist_settings .= isset( $settings->images ) ? ' images="' . $settings->images . '"' : '';
 	$playlist_settings .= isset( $settings->artists ) ? ' artists="' . $settings->artists . '"' : '';
 	?>
-	<div class="fl-audio fl-wp-audio">
+	<div <?php $module->render_attributes( $attrs ); ?>>
 		<?php echo '[playlist ids="' . implode( ',', $settings->audios ) . '"' . $playlist_settings . ']'; ?>
 	</div>
 
@@ -17,7 +25,12 @@ if ( ( 'media_library' == $settings->audio_type ) && ( is_array( $settings->audi
 } else {
 
 	?>
-	<div class="fl-audio fl-wp-audio"<?php FLBuilder::print_schema( ' itemscope itemtype="https://schema.org/AudioObject"' ); ?>>
+	<div 
+	<?php
+	$module->render_attributes( $attrs );
+	FLBuilder::print_schema( ' itemscope itemtype="https://schema.org/AudioObject"' );
+	?>
+	>
 		<?php
 
 			$audio_data = $module->get_data();

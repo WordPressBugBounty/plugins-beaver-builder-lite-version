@@ -120,9 +120,11 @@ final class FLBuilderServiceEmailAddress extends FLBuilderService {
 			if ( $name ) {
 				$message .= "\n" . __( 'Name', 'fl-builder' ) . ': ' . $name;
 			}
-
-			$result = wp_mail( $account_data['email'], $subject, $message );
-
+			$headers = array(
+				'Content-Type: text/plain; charset=UTF-8',
+				'From: ' . get_option( 'blogname' ) . ' <' . get_option( 'admin_email' ) . '>',
+			);
+			$result  = wp_mail( $account_data['email'], $subject, $message, $headers );
 			if ( ! $result ) {
 				$response['error'] = __( 'There was an error subscribing. Please try again.', 'fl-builder' );
 			}

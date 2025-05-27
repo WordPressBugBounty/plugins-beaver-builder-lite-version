@@ -18,8 +18,9 @@ class FLAudioModule extends FLBuilderModule {
 			'name'            => __( 'Audio', 'fl-builder' ),
 			'description'     => __( 'Render a WordPress audio shortcode.', 'fl-builder' ),
 			'category'        => __( 'Basic', 'fl-builder' ),
-			'partial_refresh' => true,
 			'icon'            => 'format-audio.svg',
+			'partial_refresh' => true,
+			'include_wrapper' => false,
 		));
 	}
 
@@ -62,7 +63,6 @@ class FLAudioModule extends FLBuilderModule {
 
 		return $settings;
 	}
-
 }
 
 /**

@@ -102,7 +102,6 @@ final class FLBuilderCSS {
 		$selectors         = self::get_responsive_selectors( $args['selector'] );
 		$prop              = $args['prop'];
 		$props             = $args['props'];
-		$default_unit      = $args['unit'];
 		$enabled           = $args['enabled'];
 		$breakpoints       = self::get_breakpoints();
 		$ignore            = $args['ignore'];
@@ -182,6 +181,7 @@ final class FLBuilderCSS {
 			if ( ! in_array( $setting, $ignore ) ) {
 
 				if ( ! empty( $prop ) ) {
+					$default_unit   = property_exists( $settings, $base_name . '_unit' ) ? $settings->{$base_name . '_unit'} : $args['unit'];
 					$props[ $prop ] = array(
 						'value' => $setting,
 						'unit'  => FLBuilderCSS::get_unit( $base_name, $settings, $default_unit ),
@@ -547,19 +547,16 @@ final class FLBuilderCSS {
 			switch ( $type ) {
 
 				case 'color':
-					if ( strstr( $value, 'rgb' ) || strstr( $value, 'var' ) || strstr( $value, 'url' ) ) {
-						$css .= "\t$name: $value;\n";
-					} elseif ( 'inherit' === $value ) {
-						$css .= "\t$name: inherit;\n";
-					} elseif ( 'transparent' === $value ) {
-						$css .= "\t$name: transparent;\n";
-					} else {
+					// Handle Hex values, otherwise leave it alone.
+					if ( FLBuilderUtils::ctype_xdigit( ltrim( $value, '#' ) ) ) {
 						$css .= sprintf( "\t%s: #%s;\n", $name, ltrim( $value, '#' ) );
 						if ( isset( $args['opacity'] ) && '' !== $args['opacity'] ) {
 							$rgb  = implode( ',', FLBuilderColor::hex_to_rgb( $value ) );
 							$a    = $args['opacity'] / 100;
 							$css .= "\t$name: rgba($rgb,$a);\n";
 						}
+					} else {
+						$css .= "\t$name: $value;\n";
 					}
 					break;
 
@@ -657,11 +654,10 @@ final class FLBuilderCSS {
 	 * @return string
 	 */
 	static public function get_unit( $setting_name, $settings, $default_unit = '' ) {
-		$unit = $default_unit;
-		if ( '' === $unit && property_exists( $settings, $setting_name . '_unit' ) ) {
-			$unit = $settings->{$setting_name . '_unit'};
+		if ( '' === $default_unit && property_exists( $settings, $setting_name . '_unit' ) ) {
+			return $settings->{$setting_name . '_unit'};
 		}
-		return $unit;
+		return $default_unit;
 	}
 
 	/**
@@ -671,9 +667,23 @@ final class FLBuilderCSS {
 	 * @param object $module
 	 * @return void
 	 */
-	static public function auto_css( $module ) {
-		$fields = FLBuilderModel::get_settings_form_fields( $module->form );
-		self::auto_css_setup_fields( $fields, $module->node, $module->settings );
+	static public function auto_css( $node ) {
+
+		// Because rows and columns don't get their form properties set
+		if ( 'row' === $node->type ) {
+			$fields = FLBuilderModel::get_settings_form_fields( 'row', 'general' );
+		} elseif ( 'column' === $node->type ) {
+			$fields = FLBuilderModel::get_settings_form_fields( 'col', 'general' );
+		} else {
+			$fields = FLBuilderModel::get_settings_form_fields( $node->form );
+		}
+
+		self::auto_css_setup_fields( $fields, $node->node, $node->settings );
+
+		// Support auto style tab
+		if ( isset( $node->settings->auto_style_css ) ) {
+			print $node->settings->auto_style_css;
+		}
 	}
 
 	/**
@@ -683,6 +693,7 @@ final class FLBuilderCSS {
 	 * @return void
 	 */
 	static public function auto_css_setup_fields( $fields, $node_id, $settings ) {
+
 		// Get fields with auto-style enabled
 		foreach ( $fields as $handle => $field ) {
 

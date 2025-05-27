@@ -1,6 +1,6 @@
-/*! Magnific Popup - v1.1.0 - 2019-03-18
+/*! Magnific Popup - v1.2.0 - 2024-06-08
 * http://dimsemenov.com/plugins/magnific-popup/
-* Copyright (c) 2019 Dmitry Semenov; */
+* Copyright (c) 2024 Dmytro Semenov; */
 ;(function (factory) {
 if (typeof define === 'function' && define.amd) {
  // AMD. Register as an anonymous module.
@@ -89,7 +89,7 @@ var _mfpOn = function(name, f) {
 	},
 	_getCloseBtn = function(type) {
 		if(type !== _currPopupType || !mfp.currTemplate.closeBtn) {
-			mfp.currTemplate.closeBtn = $( mfp.st.closeMarkup.replace('%title%', mfp.st.tClose ) );
+			mfp.currTemplate.closeBtn = $( mfp.st.closeMarkup.replace(/%title%/g, mfp.st.tClose ) );
 			_currPopupType = type;
 		}
 		return mfp.currTemplate.closeBtn;
@@ -224,7 +224,12 @@ MagnificPopup.prototype = {
 				mfp.close();
 			});
 
-			mfp.wrap = _getEl('wrap').attr('tabindex', -1).on('click'+EVENT_NS, function(e) {
+			mfp.wrap = _getEl('wrap')
+				.attr('tabindex', -1)
+				.attr('role', 'dialog')
+				.attr('aria-modal', true)
+				.attr('aria-label', 'Popup Image')
+				.on('click'+EVENT_NS, function(e) {
 				if(mfp._checkIfClose(e.target)) {
 					mfp.close();
 				}
@@ -445,7 +450,7 @@ MagnificPopup.prototype = {
 
 
 		if(mfp.st.autoFocusLast && mfp._lastFocusedEl) {
-			$(mfp._lastFocusedEl).focus(); // put tab focus back
+			$(mfp._lastFocusedEl).trigger('focus'); // put tab focus back
 		}
 		mfp.currItem = null;
 		mfp.content = null;
@@ -641,7 +646,7 @@ MagnificPopup.prototype = {
 		var disableOn = options.disableOn !== undefined ? options.disableOn : $.magnificPopup.defaults.disableOn;
 
 		if(disableOn) {
-			if(typeof disableOn === 'function') {
+			if(typeof disableOn === "function") {
 				if( !disableOn.call(mfp) ) {
 					return true;
 				}
@@ -693,7 +698,11 @@ MagnificPopup.prototype = {
 			status = data.status;
 			text = data.text;
 
-			mfp.preloader.html(text);
+			if (mfp.st.allowHTMLInStatusIndicator) {
+				mfp.preloader.html(text);
+			} else {
+				mfp.preloader.text(text);
+			}
 
 			mfp.preloader.find('a').on('click', function(e) {
 				e.stopImmediatePropagation();
@@ -755,7 +764,7 @@ MagnificPopup.prototype = {
 		return (  (mfp.isIE7 ? _document.height() : document.body.scrollHeight) > (winHeight || _window.height()) );
 	},
 	_setFocus: function() {
-		(mfp.st.focus ? mfp.content.find(mfp.st.focus).eq(0) : mfp.wrap).focus();
+		(mfp.st.focus ? mfp.content.find(mfp.st.focus).eq(0) : mfp.wrap).trigger('focus');
 	},
 	_onFocusIn: function(e) {
 		if( e.target !== mfp.wrap[0] && !$.contains(mfp.wrap[0], e.target) ) {
@@ -796,7 +805,11 @@ MagnificPopup.prototype = {
 				}
 
 			} else {
-				template.find(EVENT_NS + '-'+key).html(value);
+				if (mfp.st.allowHTMLInTemplate) {
+					template.find(EVENT_NS + '-'+key).html(value);
+				} else {
+					template.find(EVENT_NS + '-'+key).text(value);
+				}
 			}
 		});
 	},
@@ -893,13 +906,17 @@ $.magnificPopup = {
 
 		overflowY: 'auto',
 
-		closeMarkup: '<button title="%title%" type="button" class="mfp-close">&#215;</button>',
+		closeMarkup: '<button title="%title%" type="button" class="mfp-close" aria-label="%title%"><span aria-hidden="true">&times;</span></button>',
 
 		tClose: 'Close (Esc)',
 
 		tLoading: 'Loading...',
 
-		autoFocusLast: true
+		autoFocusLast: true,
+
+		allowHTMLInStatusIndicator: false,
+
+		allowHTMLInTemplate: false
 
 	}
 };
@@ -1047,7 +1064,7 @@ $.magnificPopup.registerModule(AJAX_NS, {
 	options: {
 		settings: null,
 		cursor: 'mfp-ajax-cur',
-		tError: '<a href="%url%">The content</a> could not be loaded.'
+		tError: 'The content could not be loaded.'
 	},
 
 	proto: {
@@ -1117,7 +1134,7 @@ var _imgInterval,
 		var src = mfp.st.image.titleSrc;
 
 		if(src) {
-			if(typeof src === 'function') {
+			if(typeof src === "function") {
 				return src.call(mfp, item);
 			} else if(item.el) {
 				return item.el.attr(src) || '';
@@ -1144,7 +1161,7 @@ $.magnificPopup.registerModule('image', {
 		cursor: 'mfp-zoom-out-cur',
 		titleSrc: 'title',
 		verticalFit: true,
-		tError: '<a href="%url%">The image</a> could not be loaded.'
+		tError: 'The image could not be loaded.'
 	},
 
 	proto: {
@@ -1249,6 +1266,23 @@ $.magnificPopup.registerModule('image', {
 
 			var guard = 0,
 
+				imgSt = mfp.st.image,
+
+				// image error handler
+				onLoadError = function() {
+					if(item) {
+						item.img.off('.mfploader');
+						if(item === mfp.currItem){
+							mfp._onImageHasSize(item);
+							mfp.updateStatus('error', imgSt.tError.replace('%url%', item.src) );
+						}
+
+						item.hasSize = true;
+						item.loaded = true;
+						item.loadError = true;
+					}
+				},
+
 				// image load complete handler
 				onLoadComplete = function() {
 					if(item) {
@@ -1277,23 +1311,8 @@ $.magnificPopup.registerModule('image', {
 							}
 						}
 					}
-				},
+				};
 
-				// image error handler
-				onLoadError = function() {
-					if(item) {
-						item.img.off('.mfploader');
-						if(item === mfp.currItem){
-							mfp._onImageHasSize(item);
-							mfp.updateStatus('error', imgSt.tError.replace('%url%', item.src) );
-						}
-
-						item.hasSize = true;
-						item.loaded = true;
-						item.loadError = true;
-					}
-				},
-				imgSt = mfp.st.image;
 
 
 			var el = template.find('.mfp-img');
@@ -1571,7 +1590,7 @@ $.magnificPopup.registerModule(IFRAME_NS, {
 	options: {
 		markup: '<div class="mfp-iframe-scaler">'+
 					'<div class="mfp-close"></div>'+
-					'<iframe class="mfp-iframe" src="//about:blank" allowfullscreen></iframe>'+
+					'<iframe class="mfp-iframe" src="//about:blank" frameborder="0" allowfullscreen></iframe>'+
 				'</div>',
 
 		srcAction: 'iframe_src',
@@ -1579,7 +1598,7 @@ $.magnificPopup.registerModule(IFRAME_NS, {
 		// we don't care and support only one default type of URL by default
 		patterns: {
 			youtube: {
-				index: 'youtube.com/',
+				index: 'youtube.com',
 				id: 'v=',
 				src: '//www.youtube.com/embed/%id%?autoplay=1'
 			},
@@ -1629,6 +1648,7 @@ $.magnificPopup.registerModule(IFRAME_NS, {
 		getIframe: function(item, template) {
 			var embedSrc = item.src;
 			var iframeSt = mfp.st.iframe;
+
 			$.each(iframeSt.patterns, function() {
 				if(embedSrc.indexOf( this.index ) > -1) {
 					if(this.id) {
@@ -1647,6 +1667,7 @@ $.magnificPopup.registerModule(IFRAME_NS, {
 			if(iframeSt.srcAction) {
 				dataObj[iframeSt.srcAction] = embedSrc;
 			}
+
 			mfp._parseMarkup(template, dataObj, item);
 
 			mfp.updateStatus('ready');
@@ -1688,7 +1709,10 @@ $.magnificPopup.registerModule('gallery', {
 
 		tPrev: 'Previous (Left arrow key)',
 		tNext: 'Next (Right arrow key)',
-		tCounter: '%curr% of %total%'
+		tCounter: '%curr% of %total%',
+
+		langDir: null,
+		loop: true,
 	},
 
 	proto: {
@@ -1700,6 +1724,10 @@ $.magnificPopup.registerModule('gallery', {
 			mfp.direction = true; // true - next, false - prev
 
 			if(!gSt || !gSt.enabled ) return false;
+
+			if (!gSt.langDir) {
+				gSt.langDir = document.dir || 'ltr';
+			}
 
 			_wrapClasses += ' mfp-gallery';
 
@@ -1716,11 +1744,20 @@ $.magnificPopup.registerModule('gallery', {
 
 				_document.on('keydown'+ns, function(e) {
 					if (e.keyCode === 37) {
-						mfp.prev();
+						if (gSt.langDir === 'rtl') mfp.next();
+						else mfp.prev();
 					} else if (e.keyCode === 39) {
-						mfp.next();
+						if (gSt.langDir === 'rtl') mfp.prev();
+						else mfp.next();
 					}
 				});
+
+				mfp.updateGalleryButtons();
+
+			});
+
+			_mfpOn('UpdateStatus'+ns, function(/*e, data*/) {
+				mfp.updateGalleryButtons();
 			});
 
 			_mfpOn('UpdateStatus'+ns, function(e, data) {
@@ -1736,18 +1773,54 @@ $.magnificPopup.registerModule('gallery', {
 
 			_mfpOn('BuildControls' + ns, function() {
 				if(mfp.items.length > 1 && gSt.arrows && !mfp.arrowLeft) {
-					var markup = gSt.arrowMarkup,
-						arrowLeft = mfp.arrowLeft = $( markup.replace(/%title%/gi, gSt.tPrev).replace(/%dir%/gi, 'left') ).addClass(PREVENT_CLOSE_CLASS),
-						arrowRight = mfp.arrowRight = $( markup.replace(/%title%/gi, gSt.tNext).replace(/%dir%/gi, 'right') ).addClass(PREVENT_CLOSE_CLASS);
 
-					arrowLeft.click(function() {
-						mfp.prev();
+					var arrowLeftDesc, arrowRightDesc, arrowLeftAction, arrowRightAction;
+
+					if (gSt.langDir === 'rtl') {
+						arrowLeftDesc = gSt.tNext;
+						arrowRightDesc = gSt.tPrev;
+						arrowLeftAction = 'next';
+						arrowRightAction = 'prev';
+					} else {
+						arrowLeftDesc = gSt.tPrev;
+						arrowRightDesc = gSt.tNext;
+						arrowLeftAction = 'prev';
+						arrowRightAction = 'next';
+					}
+
+					var markup     = gSt.arrowMarkup,
+							arrowLeft  = mfp.arrowLeft = $( markup.replace(/%title%/gi, arrowLeftDesc)
+								.replace(/%action%/gi, arrowLeftAction)
+								.replace(/%dir%/gi, 'left') )
+								.attr('aria-label', arrowLeftDesc)
+								.addClass(PREVENT_CLOSE_CLASS),
+							arrowRight = mfp.arrowRight = $( markup.replace(/%title%/gi, arrowRightDesc)
+								.replace(/%action%/gi, arrowRightAction)
+								.replace(/%dir%/gi, 'right') )
+								.attr('aria-label', arrowRightDesc)
+								.addClass(PREVENT_CLOSE_CLASS);
+
+					if (gSt.langDir === 'rtl') {
+						mfp.arrowNext = arrowLeft;
+						mfp.arrowPrev = arrowRight;
+					} else {
+						mfp.arrowNext = arrowRight;
+						mfp.arrowPrev = arrowLeft;
+					}
+
+					arrowLeft.on('click', function() {
+						if (gSt.langDir === 'rtl') mfp.next();
+						else mfp.prev();
 					});
-					arrowRight.click(function() {
-						mfp.next();
+					arrowRight.on('click', function() {
+						if (gSt.langDir === 'rtl') mfp.prev();
+						else mfp.next();
 					});
 
 					mfp.container.append(arrowLeft.add(arrowRight));
+					mfp.container
+						.attr('role', 'region')
+						.attr('aria-label', 'carousel');
 				}
 			});
 
@@ -1769,13 +1842,17 @@ $.magnificPopup.registerModule('gallery', {
 
 		},
 		next: function() {
+			var newIndex = _getLoopedId(mfp.index + 1);
+			if (!mfp.st.gallery.loop && newIndex === 0 ) return false;
 			mfp.direction = true;
-			mfp.index = _getLoopedId(mfp.index + 1);
+			mfp.index = newIndex;
 			mfp.updateItemHTML();
 		},
 		prev: function() {
+			var newIndex = mfp.index - 1;
+			if (!mfp.st.gallery.loop && newIndex < 0) return false;
 			mfp.direction = false;
-			mfp.index = _getLoopedId(mfp.index - 1);
+			mfp.index = _getLoopedId(newIndex);
 			mfp.updateItemHTML();
 		},
 		goTo: function(newIndex) {
@@ -1822,9 +1899,30 @@ $.magnificPopup.registerModule('gallery', {
 
 
 			item.preloaded = true;
-		}
+		},
+
+		/**
+		 * Show/hide the gallery prev/next buttons if we're at the start/end, if looping is turned off
+		 * Added by Joloco for Veg
+		 */
+		updateGalleryButtons: function() {
+
+			if ( !mfp.st.gallery.loop && typeof mfp.arrowPrev === 'object' && mfp.arrowPrev !== null) {
+
+				if (mfp.index === 0) mfp.arrowPrev.hide();
+				else mfp.arrowPrev.show();
+
+				if (mfp.index === (mfp.items.length - 1)) mfp.arrowNext.hide();
+				else mfp.arrowNext.show();
+
+			}
+
+		},
+
 	}
+
 });
+
 
 /*>>gallery*/
 

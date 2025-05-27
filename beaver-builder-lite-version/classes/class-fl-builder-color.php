@@ -7,6 +7,14 @@
  */
 final class FLBuilderColor {
 
+	static public function is_hex_value( $value ) {
+		return FLBuilderUtils::ctype_xdigit( ltrim( $value, '#' ) );
+	}
+
+	static public function is_rgb_value( $value ) {
+		return is_string( $value ) && 0 === strpos( $value, 'rgb' );
+	}
+
 	/**
 	 * Converts a hex string into an array of RGB values.
 	 *
@@ -37,7 +45,7 @@ final class FLBuilderColor {
 			);
 		}
 
-		list($r, $g, $b) = array_map( function( $hex ) {
+		list($r, $g, $b) = array_map( function ( $hex ) {
 			return hexdec( str_pad( $hex, 2, $hex ) );
 		}, str_split( ltrim( $hex, '#' ), strlen( $hex ) > 4 ? 2 : 1 ) );
 		return array(
@@ -48,7 +56,7 @@ final class FLBuilderColor {
 	}
 
 	/**
-	 * Returns RGB or hex color value.
+	 * Returns RGB or hex color value, OR keyword.
 	 *
 	 * @since 1.10.8
 	 * @param string $color A color to check.
@@ -56,7 +64,7 @@ final class FLBuilderColor {
 	 */
 	static public function hex_or_rgb( $color ) {
 
-		// ACF colours can be an array
+		// ACF colors can be an array
 		// [red] => 62
 		// [green] => 122
 		// [blue] => 81
@@ -89,8 +97,9 @@ final class FLBuilderColor {
 			$color = sprintf( 'rgba(%s, %s, %s, %s)', $r, $g, $b, $a );
 		}
 
-		if ( ! empty( $color ) && ! stristr( $color, 'rgb' ) && ! stristr( $color, 'var' ) && ! stristr( $color, '#' ) ) {
-			$color = '#' . $color;
+		// Handle Prepending # To hex values
+		if ( self::is_hex_value( $color ) ) {
+			$color = '#' . ltrim( $color, '#' );
 		}
 
 		return $color;
@@ -108,7 +117,12 @@ final class FLBuilderColor {
 	 * @return string The adjusted value string.
 	 */
 	static public function adjust_brightness( $value, $steps, $type ) {
-		$is_rgb = is_string( $value ) && strstr( $value, 'rgb' );
+		$is_rgb = self::is_rgb_value( $value );
+
+		// Don't attempt to adjust brightness on other value types
+		if ( ! $is_rgb && ! self::is_hex_value( $value ) ) {
+			return $value;
+		}
 
 		// Get rgb vars.
 		if ( $is_rgb ) {
@@ -131,7 +145,7 @@ final class FLBuilderColor {
 			$steps = -$steps;
 		}
 
-		// Adjustr the rgb values.
+		// Adjust the rgb values.
 		$steps = max( -255, min( 255, $steps ) );
 		$r     = max( 0, min( 255, $r + $steps ) );
 		$g     = max( 0, min( 255, $g + $steps ) );
@@ -198,7 +212,7 @@ final class FLBuilderColor {
 				$color = 'rgba(255,255,255,0)';
 			}
 			if ( ! strstr( $color, 'rgb' ) && ! strstr( $color, 'var' ) ) {
-				$color = '#' . $color;
+				$color = self::hex_or_rgb( $color );
 			}
 			if ( ! is_numeric( $stop ) ) {
 				$stop = 0;
@@ -246,9 +260,9 @@ final class FLBuilderColor {
 			if ( isset( $setting['spread'] ) && '' === $setting['spread'] ) {
 				$setting['spread'] = 0;
 			}
-			if ( ! strstr( $setting['color'], 'rgb' ) && ! strstr( $setting['color'], 'var' ) ) {
-				$setting['color'] = '#' . $setting['color'];
-			}
+
+			// Process color value
+			$setting['color'] = self::hex_or_rgb( $setting['color'] );
 
 			$shadow  = $setting['horizontal'] . 'px ';
 			$shadow .= $setting['vertical'] . 'px ';

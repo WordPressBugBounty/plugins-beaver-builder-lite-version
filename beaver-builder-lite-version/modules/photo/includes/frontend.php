@@ -10,8 +10,21 @@ $filetype = pathinfo( $src, PATHINFO_EXTENSION );
 $rel      = $module->get_rel();
 $caption  = $module->get_caption();
 
+$wrapper_attrs = [
+	'class' => $module->get_wrapper_classes(),
+];
+
+if ( false === strpos( $attrs, 'loading=' ) ) {
+	$attrs .= FLBuilderUtils::img_lazyload( 'lazy' );
+}
+
 ?>
-<div class="fl-photo<?php echo ( ! empty( $settings->crop ) ) ? ' fl-photo-crop-' . sanitize_html_class( $settings->crop ) : ''; ?> fl-photo-align-<?php echo sanitize_html_class( $settings->align ); ?>"<?php FLBuilder::print_schema( ' itemscope itemtype="https://schema.org/ImageObject"' ); ?>>
+<div
+<?php
+$module->render_attributes( $wrapper_attrs );
+FLBuilder::print_schema( ' itemscope itemtype="https://schema.org/ImageObject"' );
+?>
+>
 	<div class="fl-photo-content fl-photo-img-<?php echo sanitize_html_class( $filetype ); ?>">
 		<?php if ( ! empty( $link ) ) : ?>
 		<a href="<?php echo $link; ?>" <?php echo ( isset( $settings->link_url_download ) && 'yes' === $settings->link_url_download ) ? ' download' : ''; ?> target="<?php echo esc_attr( $settings->link_url_target ); ?>"<?php echo $rel; ?> itemprop="url">

@@ -140,17 +140,24 @@ FLBuilder::register_settings_form('global', array(
 							),
 						),
 						'row_width'                 => array(
-							'type'      => 'unit',
-							'label'     => __( 'Max Width', 'fl-builder' ),
-							'default'   => '1100',
-							'maxlength' => '4',
-							'size'      => '5',
-							'sanitize'  => 'absint',
-							'help'      => __( 'All rows will default to this width. You can override this and make a row full width in the settings for each row.', 'fl-builder' ),
-							'units'     => array(
+							'type'       => 'unit',
+							'label'      => __( 'Max Width', 'fl-builder' ),
+							'maxlength'  => '4',
+							'size'       => '5',
+							'sanitize'   => 'absint',
+							'help'       => __( 'All rows will default to this width. You can override this and make a row full width in the settings for each row.', 'fl-builder' ),
+							'units'      => array(
 								'px',
 								'vw',
 								'%',
+							),
+							'responsive' => array(
+								'default' => array(
+									'default'    => '1100',
+									'large'      => '',
+									'medium'     => '',
+									'responsive' => '',
+								),
 							),
 						),
 						'row_width_default'         => array(

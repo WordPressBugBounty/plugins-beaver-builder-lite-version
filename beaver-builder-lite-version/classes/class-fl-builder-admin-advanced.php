@@ -35,11 +35,11 @@ final class FLBuilderAdminAdvanced {
 	static public function get_settings() {
 		$settings = array(
 			'iframe_ui'              => array(
-				'label'       => __( 'Responsive Iframe UI', 'fl-builder' ),
+				'label'       => __( 'Responsive iFrame UI', 'fl-builder' ),
 				'default'     => 1,
 				'callback'    => array( __CLASS__, 'disable_iframe_ui' ),
 				'group'       => 'ui',
-				'description' => __( 'Disables the iframe UI for accurate responsive editing. May cause issues with legacy add-ons.', 'fl-builder' ),
+				'description' => __( 'The iFrame UI provides accurate responsive editing. Disable it if you are having issues with third-party or legacy add-ons.', 'fl-builder' ),
 			),
 			'outline_enabled'        => array(
 				'label'    => __( 'Outline Panel', 'fl-builder' ),
@@ -56,7 +56,7 @@ final class FLBuilderAdminAdvanced {
 				'link'     => 'https://docs.wpbeaverbuilder.com/beaver-builder/basics/inline-editing/',
 			),
 			'notifications_enabled'  => array(
-				'label'       => __( 'Notification system', 'fl-builder' ),
+				'label'       => __( "What's New", 'fl-builder' ),
 				'default'     => 1,
 				'callback'    => array( __CLASS__, 'disable_notifications' ),
 				'group'       => 'ui',
@@ -148,6 +148,13 @@ final class FLBuilderAdminAdvanced {
 				'callback'    => array( __CLASS__, 'disable_google' ),
 				'group'       => 'assets',
 			),
+			'google_auto'            => array(
+				'label'       => 'Google Fonts Auto Update',
+				'description' => __( 'System will automatically update the available fonts', 'fl-builder' ),
+				'default'     => 1,
+				'callback'    => array( __CLASS__, 'google_auto' ),
+				'group'       => 'assets',
+			),
 			'awesome_enabled'        => array(
 				'label'       => __( 'Font Awesome', 'fl-builder' ),
 				'description' => __( 'When disabled Font Awesome will NOT be enqueued, even if modules require it.', 'fl-builder' ),
@@ -226,6 +233,13 @@ final class FLBuilderAdminAdvanced {
 				'group'       => 'ui',
 				'description' => __( 'Show WordPress Core colors in color pickers', 'fl-builder' ),
 			),
+			'module_wrappers'        => array(
+				'label'       => __( 'Force Module Wrapper Divs', 'fl-builder' ),
+				'default'     => 0,
+				'callback'    => array( __CLASS__, 'module_wrappers' ),
+				'group'       => 'frontend',
+				'description' => __( 'Forces modules to render their wrapper divs, even if they have been removed in a recent update.', 'fl-builder' ),
+			),
 		);
 		if ( FLBuilderModel::is_white_labeled() ) {
 			unset( $settings['notifications_enabled'] );
@@ -258,12 +272,13 @@ final class FLBuilderAdminAdvanced {
 		add_filter( 'fl_builder_duplicatemenu_enabled', '__return_true', 11 );
 	}
 	static private function disable_google() {
-		add_filter( 'fl_builder_font_families_google', '__return_empty_array', 11 );
-		add_filter( 'fl_enable_google_fonts_enqueue', '__return_false', 11 );
+	}
+	static private function google_auto() {
+		add_filter( 'fl_builder_google_auto', '__return_true' );
 	}
 	static private function disable_awesome() {
 		if ( ! isset( $_GET['fl_builder'] ) ) {
-			add_action( 'wp_enqueue_scripts', function() {
+			add_action( 'wp_enqueue_scripts', function () {
 				wp_dequeue_style( 'font-awesome' );
 				wp_dequeue_style( 'font-awesome-5' );
 				wp_deregister_style( 'font-awesome' );
@@ -283,12 +298,12 @@ final class FLBuilderAdminAdvanced {
 	}
 
 	static private function enable_gd_crop() {
-		add_filter( 'wp_image_editors', function() {
-			return  array( 'WP_Image_Editor_GD', 'WP_Image_Editor_Imagick' );
+		add_filter( 'wp_image_editors', function () {
+			return array( 'WP_Image_Editor_GD', 'WP_Image_Editor_Imagick' );
 		}, 100 );
 	}
 	static private function disable_rowshapes() {
-		add_filter( 'fl_builder_register_settings_form', function( $form, $id ) {
+		add_filter( 'fl_builder_register_settings_form', function ( $form, $id ) {
 			if ( 'global' == $id && isset( $form['tabs']['shapes'] ) ) {
 				unset( $form['tabs']['shapes'] );
 			}
@@ -301,7 +316,7 @@ final class FLBuilderAdminAdvanced {
 	}
 
 	static private function limit_revisions() {
-		add_filter( 'wp_revisions_to_keep', function( $num, $post ) {
+		add_filter( 'wp_revisions_to_keep', function ( $num, $post ) {
 			$enabled = get_post_meta( $post->ID, '_fl_builder_enabled', true );
 			if ( $enabled ) {
 				return (int) get_option( '_fl_builder_limitrevisions_num', 11 ) + 1;
@@ -311,7 +326,7 @@ final class FLBuilderAdminAdvanced {
 	}
 
 	static private function limithistory_enabled() {
-		add_filter( 'fl_history_states_max', function() {
+		add_filter( 'fl_history_states_max', function () {
 			return (int) get_option( '_fl_builder_limithistory_num', 5 );
 		} );
 	}
@@ -326,7 +341,7 @@ final class FLBuilderAdminAdvanced {
 
 	static private function shortcodes_enabled() {
 		add_filter( 'fl_enable_shortcode_css_js', '__return_true' );
-		add_filter( 'fl_ace_editor_settings', function( $args ) {
+		add_filter( 'fl_ace_editor_settings', function ( $args ) {
 			$args['useWorker'] = false;
 			return $args;
 		});
@@ -338,6 +353,10 @@ final class FLBuilderAdminAdvanced {
 
 	static private function collapse_default() {
 		add_filter( 'fl_builder_ui_collapse_sections', '__return_true' );
+	}
+
+	static private function module_wrappers() {
+		add_filter( 'fl_builder_force_module_wrappers', '__return_true' );
 	}
 
 	/**
@@ -355,7 +374,7 @@ final class FLBuilderAdminAdvanced {
 	 * @since 2.8.1
 	 */
 	static public function global_styles() {
-		add_filter( 'fl_builder_global_colors_json', function( $json ) {
+		add_filter( 'fl_builder_global_colors_json', function ( $json ) {
 			if ( ! get_option( '_fl_builder_core_colors' ) ) {
 				unset( $json['themeJSON']['color']['palette']['default'] );
 			}
@@ -421,7 +440,6 @@ final class FLBuilderAdminAdvanced {
 			FLBuilderAdminSettings::register_setting( '_fl_builder_' . $key );
 		}
 	}
-
 }
 
 FLBuilderAdminAdvanced::init();

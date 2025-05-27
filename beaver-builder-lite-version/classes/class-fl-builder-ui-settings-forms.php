@@ -46,11 +46,26 @@ class FLBuilderUISettingsForms {
 	static public function init() {
 		add_action( 'init', __CLASS__ . '::init_style_fields' );
 		add_action( 'wp', __CLASS__ . '::render_settings_config' );
+		add_action( 'wp', __CLASS__ . '::hook_settings_config' );
+		add_filter( 'fl_builder_ui_js_config', __CLASS__ . '::layout_css_js' );
+		add_filter( 'image_size_names_choose', __CLASS__ . '::inject_all_possible_image_size', 10, 1 );
+	}
+
+	/**
+	 * Hooks the necessary settings config and templates
+	 * if the builder is active.
+	 *
+	 * @since 2.9
+	 * @return void
+	 */
+	static public function hook_settings_config() {
+		if ( ! FLBuilderModel::is_builder_active() ) {
+			return;
+		}
+
 		add_action( 'wp_enqueue_scripts', __CLASS__ . '::enqueue_settings_config', 11 );
 		add_action( 'wp_footer', __CLASS__ . '::init_js_config', 1 );
 		add_action( 'wp_footer', __CLASS__ . '::render_js_templates', 11 );
-		add_filter( 'fl_builder_ui_js_config', __CLASS__ . '::layout_css_js' );
-		add_filter( 'image_size_names_choose', __CLASS__ . '::inject_all_possible_image_size', 10, 1 );
 	}
 
 	/**
@@ -72,26 +87,29 @@ class FLBuilderUISettingsForms {
 	 */
 	static public function enqueue_settings_config() {
 		global $wp_the_query;
+		global $post;
 
-		if ( FLBuilderModel::is_builder_active() ) {
+		$post_id      = $wp_the_query->post ? $wp_the_query->post->ID : $post->ID;
+		$block_editor = FLBuilderModuleBlocks::is_block_editor();
 
-			$script_url  = add_query_arg( array(
-				'fl_builder_load_settings_config' => true,
-				'ver'                             => rand(),
-			), FLBuilderModel::get_edit_url( $wp_the_query->post->ID ) );
-			$modules_url = add_query_arg( array(
-				'fl_builder_load_settings_config' => 'modules',
-				'ver'                             => rand(),
-			), FLBuilderModel::get_edit_url( $wp_the_query->post->ID ) );
-			$script      = 'var s = document.createElement("script");s.type = "text/javascript";s.src = "%s";document.head.appendChild(s);';
-			$config      = sprintf( $script, $script_url );
-			$modules     = sprintf( $script, $modules_url );
+		$script_url = add_query_arg( array(
+			'fl_builder_load_settings_config'      => true,
+			'fl_builder_load_settings_editor_type' => $block_editor ? 'block' : 'builder',
+			'ver'                                  => rand(),
+		), FLBuilderModel::get_edit_url( $post_id ) );
 
-			wp_add_inline_script( 'fl-builder', $config );
-			wp_add_inline_script( 'fl-builder-min', $config );
-			wp_add_inline_script( 'fl-builder', $modules );
-			wp_add_inline_script( 'fl-builder-min', $modules );
-		}
+		$modules_url = add_query_arg( array(
+			'fl_builder_load_settings_config'      => 'modules',
+			'fl_builder_load_settings_editor_type' => $block_editor ? 'block' : 'builder',
+			'ver'                                  => rand(),
+		), FLBuilderModel::get_edit_url( $post_id ) );
+
+		$deps = [
+			'fl-builder' . ( $block_editor || FLBuilder::is_debug() ? '' : '-min' ),
+		];
+
+		wp_enqueue_script( 'fl-builder-settings-config', $script_url, $deps, uniqid() );
+		wp_enqueue_script( 'fl-builder-modules-config', $modules_url, $deps, uniqid() );
 	}
 
 	/**
@@ -102,7 +120,15 @@ class FLBuilderUISettingsForms {
 	 * @return void
 	 */
 	static public function render_settings_config() {
-		if ( FLBuilderModel::is_builder_active() && isset( $_GET['fl_builder_load_settings_config'] ) ) {
+		global $wp_the_query;
+
+		if ( ! $wp_the_query->post || ! isset( $_GET['fl_builder_load_settings_config'] ) ) {
+			return;
+		}
+
+		// Check user access instead of builder active so the settings can be loaded
+		// even if the builder isn't being used (e.g. in the block editor).
+		if ( current_user_can( 'edit_post', $wp_the_query->post->ID ) ) {
 
 			// Increase available memory.
 			if ( function_exists( 'wp_raise_memory_limit' ) ) {
@@ -340,10 +366,10 @@ class FLBuilderUISettingsForms {
 			$css = '';
 			$js  = '';
 
-			$css_file_path = apply_filters( "fl_builder_module_settings_css_file_path_{$module->slug}", "{$module->dir}css/settings.css", $module );
-			$css_file_uri  = apply_filters( "fl_builder_module_settings_css_file_uri_{$module->slug}", "{$module->url}css/settings.css", $module );
-			$js_file_path  = apply_filters( "fl_builder_module_settings_js_file_path_{$module->slug}", "{$module->dir}js/settings.js", $module );
-			$js_file_uri   = apply_filters( "fl_builder_module_settings_js_file_uri_{$module->slug}", "{$module->url}js/settings.js", $module );
+			$css_file_path = apply_filters( "fl_builder_module_settings_css_file_path_{$module->slug}", $module->path( 'css/settings.css' ), $module );
+			$css_file_uri  = apply_filters( "fl_builder_module_settings_css_file_uri_{$module->slug}", $module->url( 'css/settings.css' ), $module );
+			$js_file_path  = apply_filters( "fl_builder_module_settings_js_file_path_{$module->slug}", $module->path( 'js/settings.js' ), $module );
+			$js_file_uri   = apply_filters( "fl_builder_module_settings_js_file_uri_{$module->slug}", $module->url( 'js/settings.js' ), $module );
 
 			if ( file_exists( $css_file_path ) ) {
 				$css .= '<link class="fl-builder-settings-css" rel="stylesheet" href="' . $css_file_uri . '" />';
@@ -353,13 +379,14 @@ class FLBuilderUISettingsForms {
 			}
 
 			$module_forms[ $module->slug ] = array(
-				'title'  => $module->name,
-				'tabs'   => $module->form,
-				'assets' => array(
+				'title'   => $module->name,
+				'tabs'    => $module->form,
+				'assets'  => array(
 					'css'   => $css,
 					'js'    => $js,
 					'jsurl' => $js_file_uri,
 				),
+				'version' => FLBuilderModuleDeprecations::get_module_version( $module->slug ),
 			);
 		}
 
@@ -581,12 +608,9 @@ class FLBuilderUISettingsForms {
 	 * @return void
 	 */
 	static public function render_js_templates() {
-		if ( ! FLBuilderModel::is_builder_active() ) {
-			return;
-		}
-
 		include FL_BUILDER_DIR . 'includes/ui-settings-form.php';
 		include FL_BUILDER_DIR . 'includes/ui-settings-form-row.php';
+		include FL_BUILDER_DIR . 'includes/ui-settings-form-field-group-row.php';
 		include FL_BUILDER_DIR . 'includes/ui-field.php';
 
 		$fields = glob( FL_BUILDER_DIR . 'includes/ui-field-*.php' );

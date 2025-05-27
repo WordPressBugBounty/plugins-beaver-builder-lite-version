@@ -16,7 +16,7 @@
 	--fl-builder-min-node-size: 24px;
 
 	--fl-builder-panel-width: 320px;
-	--fl-builder-panel-min-width: 320px;
+	--fl-builder-panel-min-width: 310px;
 	--fl-builder-panel-max-width: 600px;
 	--fl-builder-panel-min-height: 500px;
 
@@ -26,11 +26,18 @@
 
 	/* Panels & Forms */
 	--fl-builder-ui-hue: 210;
-	--fl-builder-input-bg-color: white;
+
 	--fl-builder-input-color: black;
+	--fl-builder-input-bg-color: white;
+
+	--fl-builder-panel-color: black;
 	--fl-builder-panel-bg-color: hsl( var(--fl-builder-ui-hue), 25%, 99% );
+
+	--fl-builder-heading-color: black;
 	--fl-builder-heading-bg-color: var(--fl-builder-panel-bg-color);
-	--fl-builder-platter-bg-color: hsl( var(--fl-builder-ui-hue), 30%, 96% );
+
+	--fl-builder-platter-color: black;
+	--fl-builder-platter-bg-color: hsl( var(--fl-builder-ui-hue), 23%, 95% );
 
 	--fl-builder-outline-color: hsl( var(--fl-builder-ui-hue), 26%, 86% );
 	--fl-builder-input-shadow: 0 0 0 1px var(--fl-builder-outline-color);

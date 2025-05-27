@@ -80,6 +80,7 @@ data-fallback="<?php if ( isset( $row->settings->bg_video_fallback_src ) ) { ech
 <?php if ( isset( $row->settings->bg_video_service_url ) && isset( $video_data['type'] ) ) : ?>
 data-<?php echo $video_data['type']; ?>="<?php echo do_shortcode( $row->settings->bg_video_service_url );  ?>"
 data-video-id="<?php echo $video_data['video_id']; ?>"
+data-video-hash="<?php echo empty( $video_data['video_hash'] ) ? '' : $video_data['video_hash']; ?>"
 data-enable-audio="<?php echo $row->settings->bg_video_audio; ?>"
 data-video-mobile="<?php if ( isset( $row->settings->bg_video_mobile ) ) { echo $row->settings->bg_video_mobile;} ?>"
 <?php if ( isset( $video_data['params'] ) ) : ?>

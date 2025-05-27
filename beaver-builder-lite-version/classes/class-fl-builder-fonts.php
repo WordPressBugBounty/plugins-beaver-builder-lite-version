@@ -12,11 +12,11 @@ final class FLBuilderFonts {
 	 * An array of fonts / weights.
 	 * @var array
 	 */
-	static private $fonts = array();
+	private static $fonts = array();
 
-	static private $enqueued_google_fonts_done = false;
+	private static $enqueued_google_fonts_done = false;
 
-	static $preload_fa5 = array();
+	public static $preload_fa5 = array();
 
 	/**
 	 * @since 1.9.5
@@ -28,6 +28,11 @@ final class FLBuilderFonts {
 		add_action( 'wp_enqueue_scripts', __CLASS__ . '::enqueue_google_fonts', 9999 );
 		add_filter( 'wp_resource_hints', __CLASS__ . '::resource_hints', 10, 2 );
 		add_action( 'wp_head', array( __CLASS__, 'preload' ), 5 );
+		add_action( 'fl_builder_cache_cleared', array( __CLASS__, 'clear_transient' ), 11 );
+	}
+
+	static public function clear_transient() {
+		delete_transient( 'fl_builder_google_json' );
 	}
 
 	static public function preload() {
@@ -170,7 +175,6 @@ final class FLBuilderFonts {
 				}
 			}
 		}
-
 	}
 
 	/**
@@ -421,7 +425,7 @@ final class FLBuilderFonts {
 		 * Google fonts domain
 		 * @see fl_builder_google_fonts_domain
 		 */
-		$google_fonts_domain = apply_filters( 'fl_builder_google_fonts_domain', '//fonts.googleapis.com/' );
+		$google_fonts_domain = apply_filters( 'fl_builder_google_fonts_domain', 'https://fonts.googleapis.com/' );
 		$google_url          = $google_fonts_domain . 'css?family=';
 
 		/**
@@ -492,7 +496,6 @@ final class FLBuilderFonts {
 		if ( isset( $_GET['fl_builder'] ) && ! empty( $recent ) && serialize( $recent ) !== serialize( $recent_fonts_db ) ) {
 			FLBuilderUtils::update_option( 'fl_builder_recent_fonts', array_slice( $recent, -11 ), true );
 		}
-
 	}
 
 	/**
@@ -651,7 +654,6 @@ final class FLBuilderFonts {
 		}
 		return $fallback;
 	}
-
 }
 
 FLBuilderFonts::init();
@@ -662,6 +664,7 @@ FLBuilderFonts::init();
  * @class FLFontFamilies
  * @since 1.6.3
  */
+// phpcs:ignore Generic.Files.OneObjectStructurePerFile.MultipleFound
 final class FLBuilderFontFamilies {
 
 	/**
@@ -750,7 +753,7 @@ final class FLBuilderFontFamilies {
 	 * @since 1.10.7
 	 * @return array
 	 */
-	static function google() {
+	public static function google() {
 
 		if ( false !== self::$_google_fonts ) {
 			return self::$_google_fonts;
@@ -790,7 +793,10 @@ final class FLBuilderFontFamilies {
 		if ( ! empty( self::$_google_json ) ) {
 			$json = self::$_google_json;
 		} else {
-			$json               = (array) json_decode( file_get_contents( trailingslashit( FL_BUILDER_DIR ) . 'json/fonts.json' ), true );
+			$json = self::try_cached_google();
+			if ( ! $json ) {
+				$json = (array) json_decode( file_get_contents( trailingslashit( FL_BUILDER_DIR ) . 'json/fonts.json' ), true );
+			}
 			self::$_google_json = $json;
 		}
 		/**
@@ -800,6 +806,50 @@ final class FLBuilderFontFamilies {
 		return apply_filters( 'fl_builder_get_google_json', $json );
 	}
 
+	static public function try_cached_google() {
+
+		// Check if enabled
+		if ( ! get_option( '_fl_builder_google_auto' ) ) {
+			return false;
+		}
+
+		if ( false === ( $json = get_transient( 'fl_builder_google_json' ) ) ) { // phpcs:ignore Generic.CodeAnalysis.AssignmentInCondition.Found, WordPress.CodeAnalysis.AssignmentInCondition.Found,Squiz.PHP.DisallowMultipleAssignments.FoundInControlStructure
+
+			try {
+				$response = wp_remote_get( 'https://updates.wpbeaverbuilder.com/fonts.json', array(
+					'headers' => array(
+						'Accept' => 'application/json',
+					),
+				) );
+				if ( ( ! is_wp_error( $response ) ) && ( 200 === wp_remote_retrieve_response_code( $response ) ) ) {
+					$body = json_decode( $response['body'] );
+					if ( json_last_error() === JSON_ERROR_NONE && isset( $body->items ) ) {
+						$json = array();
+						foreach ( $body->items as $font ) {
+							$fallback = 'sans-serif';
+							if ( 'sans-serif' === $font->category || 'serif' === $font->category || 'monospace' === $font->category || 'handwriting' === $font->category ) {
+								if ( 'handwriting' === $font->category ) {
+									$fallback = 'cursive';
+								} else {
+									$fallback = $font->category;
+								}
+							}
+							$json[] = array(
+								$font->family => array(
+									'variants' => $font->variants,
+									'fallback' => $fallback,
+								),
+							);
+						}
+						set_transient( 'fl_builder_google_json', $json, 604800 );
+					}
+				}
+			} catch ( Exception $ex ) {
+				return false; // TODO load default json here into transient?
+			}
+		}
+		return $json;
+	}
 
 	/**
 	 * @since 2.1.5

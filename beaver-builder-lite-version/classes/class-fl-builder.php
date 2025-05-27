@@ -83,11 +83,14 @@ final class FLBuilder {
 		add_action( 'wp', __CLASS__ . '::init_ui', 11 );
 		add_action( 'wp', __CLASS__ . '::rich_edit' );
 		add_action( 'wp_enqueue_scripts', __CLASS__ . '::register_layout_styles_scripts' );
-		add_action( 'wp_enqueue_scripts', __CLASS__ . '::enqueue_ui_styles_scripts', 11 );
+		add_action( 'fl_builder_ui_enqueue_scripts', __CLASS__ . '::enqueue_ui_styles_scripts', 11 );
+		add_action( 'wp_enqueue_scripts', __CLASS__ . '::enqueue_ui_layout_styles_scripts', 11 );
 		add_action( 'wp_enqueue_scripts', __CLASS__ . '::enqueue_all_layouts_styles_scripts' );
 		add_action( 'wp_head', __CLASS__ . '::render_custom_css_for_editing', 999 );
 		add_action( 'admin_bar_menu', __CLASS__ . '::admin_bar_menu', 999 );
 		add_action( 'wp_footer', __CLASS__ . '::render_ui' );
+		add_action( 'admin_enqueue_scripts', __CLASS__ . '::register_libs_everywhere' );
+		add_action( 'wp_enqueue_scripts', __CLASS__ . '::register_libs_everywhere' );
 
 		// TODO this needs fixing.
 		//add_action( 'wp_footer', __CLASS__ . '::check_content_filters', 1000 );
@@ -292,6 +295,18 @@ final class FLBuilder {
 	 */
 	static public function register_module( $class, $form ) {
 		FLBuilderModel::register_module( $class, $form );
+	}
+
+	/**
+	 * Alias method for registering module deprecations.
+	 *
+	 * @since 2.9
+	 * @param string $slug The module slug.
+	 * @param array $deprecations An array of config for each deprecation.
+	 * @return void
+	 */
+	static public function register_module_deprecations( $slug, $deprecations ) {
+		FLBuilderModuleDeprecations::register( $slug, $deprecations );
 	}
 
 	/**
@@ -633,24 +648,11 @@ final class FLBuilder {
 
 			// Enqueue required module CSS and JS
 			foreach ( $nodes['modules'] as $module ) {
-
 				if ( ! is_object( $module ) ) {
 					continue;
 				}
 
-				$module->enqueue_icon_styles();
-				$module->enqueue_font_styles();
-				$module->enqueue_scripts();
-
-				foreach ( $module->css as $handle => $props ) {
-					wp_enqueue_style( $handle, $props[0], $props[1], $props[2], $props[3] );
-				}
-				foreach ( $module->js as $handle => $props ) {
-					wp_enqueue_script( $handle, $props[0], $props[1], $props[2], $props[3] );
-				}
-				if ( isset( $module->settings->animation ) && is_array( $module->settings->animation ) && ! empty( $module->settings->animation['style'] ) ) {
-					wp_enqueue_script( 'jquery-waypoints' );
-				}
+				self::enqueue_module_layout_styles_scripts( $module );
 			}
 
 			// Enqueue Google Fonts
@@ -661,6 +663,29 @@ final class FLBuilder {
 
 			// Enqueue layout JS
 			self::enqueue_layout_cached_asset( 'js', $rerender );
+		}
+	}
+
+	/**
+	 * Enqueue the layout styles and scripts for a single module.
+	 *
+	 * @since 2.9
+	 * @param object $module
+	 * @return void
+	 */
+	static public function enqueue_module_layout_styles_scripts( $module ) {
+		$module->enqueue_icon_styles();
+		$module->enqueue_font_styles();
+		$module->enqueue_scripts();
+
+		foreach ( $module->css as $handle => $props ) {
+			wp_enqueue_style( $handle, $props[0], $props[1], $props[2], $props[3] );
+		}
+		foreach ( $module->js as $handle => $props ) {
+			wp_enqueue_script( $handle, $props[0], $props[1], $props[2], $props[3] );
+		}
+		if ( isset( $module->settings->animation ) && is_array( $module->settings->animation ) && ! empty( $module->settings->animation['style'] ) ) {
+			wp_enqueue_script( 'jquery-waypoints' );
 		}
 	}
 
@@ -809,6 +834,31 @@ final class FLBuilder {
 	}
 
 	/**
+	 * Register libraries for use on both frontend and admin
+	 */
+	static public function register_libs_everywhere() {
+
+		if ( ! is_user_logged_in() ) {
+			return;
+		}
+
+		$ver      = FL_BUILDER_VERSION;
+		$js_build = FLBuilder::plugin_url() . 'js/build/';
+		$ext      = self::is_debug() ? '.bundle.js' : '.bundle.min.js';
+
+		// Shared FL.Builder.utils API
+		wp_register_script( 'fl-builder-utils', $js_build . 'builder-utils' . $ext, [ 'jquery' ], $ver );
+
+		self::register_shared_vendors();
+
+		FLControls::register();
+
+		if ( FLBuilderModel::is_builder_active() ) {
+			FLControls::enqueue();
+		}
+	}
+
+	/**
 	 * Register common JS vendors
 	 * This is primarily for consistent sharing with Assistant.
 	 *
@@ -831,7 +881,6 @@ final class FLBuilder {
 			'react-dom',
 			'redux',
 			'react-router-dom',
-			'framer-motion',
 			'react-laag',
 			'wp-i18n',
 			'bb-icons',
@@ -843,7 +892,7 @@ final class FLBuilder {
 		}
 
 		// React polyfill for older versions of WordPress.
-		if ( version_compare( $wp_version, '5.2', '<=' ) || function_exists( 'classicpress_version' ) ) {
+		if ( version_compare( $wp_version, '6.2', '<=' ) || function_exists( 'classicpress_version' ) ) {
 
 			// React
 			wp_deregister_script( 'react' );
@@ -861,7 +910,6 @@ final class FLBuilder {
 				'react-dom',
 				'redux',
 				'react-router-dom',
-				'framer-motion',
 				'react-laag',
 				'bb-icons',
 			);
@@ -881,9 +929,6 @@ final class FLBuilder {
 		// react-router-dom
 		wp_register_script( 'react-router-dom', "{$js_vendors}react-router-dom.min.js", array( 'react' ), $ver, false );
 
-		// framer-motion
-		wp_register_script( 'framer-motion', "{$js_build}vendor-framer-motion{$tag}.js", array( 'react', 'react-dom' ), $ver, false );
-
 		// react-laag
 		wp_register_script( 'react-laag', "{$js_build}vendor-react-laag{$tag}.js", array( 'react' ), $ver, false );
 
@@ -897,12 +942,26 @@ final class FLBuilder {
 	}
 
 	/**
-	 * Register and enqueue the styles and scripts for the builder UI.
+	 * Register and enqueue the styles and scripts for the builder UI
+	 * that need to run in the parent iframe.
+	 *
+	 * @since 2.9
+	 * @return void
+	 */
+	static public function enqueue_ui_styles_scripts() {
+		foreach ( FLBuilderModel::$modules as $module ) {
+			$module->enqueue_ui_scripts();
+		}
+	}
+
+	/**
+	 * Register and enqueue the styles and scripts for the builder UI
+	 * that need to run in the layout iframe.
 	 *
 	 * @since 1.7.4
 	 * @return void
 	 */
-	static public function enqueue_ui_styles_scripts() {
+	static public function enqueue_ui_layout_styles_scripts() {
 		global $post, $wpdb;
 
 		if ( FLBuilderModel::is_builder_active() ) {
@@ -910,6 +969,7 @@ final class FLBuilder {
 			$ver     = FL_BUILDER_VERSION;
 			$css_url = FLBuilder::plugin_url() . 'css/';
 			$js_url  = FLBuilder::plugin_url() . 'js/';
+			$ext     = self::is_debug() ? '.bundle.js' : '.bundle.min.js';
 
 			// Remove wp admin bar top margin
 			remove_action( 'wp_head', '_admin_bar_bump_cb' );
@@ -938,17 +998,16 @@ final class FLBuilder {
 				wp_enqueue_style( 'fl-lightbox', $css_url . 'fl-lightbox.css', array(), $ver );
 				wp_enqueue_style( 'fl-icon-selector', $css_url . 'fl-icon-selector.css', array(), $ver );
 				wp_enqueue_style( 'fl-builder', $css_url . 'fl-builder.css', array( 'fl-builder-vars' ), $ver );
-				wp_enqueue_style( 'fl-builder-field-types', $css_url . 'fl-builder-field-types.css', array( 'fl-builder-vars' ), $ver );
+				wp_enqueue_style( 'fl-builder-forms', $css_url . 'build/builder-forms.bundle.css', [ 'fl-builder-vars', 'fl-controls' ], $ver );
 
 				// skins need to come after default ui styles
 				wp_enqueue_style( 'fl-builder-ui-skin-dark', $css_url . 'fl-builder-ui-skin-dark.css', array(), $ver );
-
 				wp_enqueue_style( 'fl-builder-system', $css_url . 'build/builder.bundle.css', array( 'bb-fluid' ), $ver );
 			} else {
 
 				wp_enqueue_style( 'fl-builder-min', $css_url . 'fl-builder.min.css', array(), $ver );
 				wp_enqueue_style( 'fl-builder-ui-skin-dark', $css_url . 'fl-builder-ui-skin-dark.css', array(), $ver );
-
+				wp_enqueue_style( 'fl-builder-forms', $css_url . 'build/builder-forms.bundle.min.css', [ 'fl-builder-min', 'fl-controls' ], $ver );
 				wp_enqueue_style( 'fl-builder-system', $css_url . 'build/builder.bundle.min.css', array( 'bb-fluid' ), $ver );
 			}
 
@@ -1009,11 +1068,22 @@ final class FLBuilder {
 				wp_enqueue_script( 'select2', $js_url . 'select2.min.js', array(), $ver );
 			}
 
+			// Settings Forms
+			$form_deps = [
+				'jquery',
+				'fl-controls',
+				'fl-builder-utils',
+				'wp-components',
+				'wp-i18n',
+				'wp-hooks',
+			];
+			wp_enqueue_script( 'fl-builder-forms', $js_url . 'build/builder-forms' . $ext, $form_deps, $ver );
+
+			$sys_bundle_deps = array( 'react', 'react-dom', 'bb-app-core', 'bb-fluid' );
+
 			// Enqueue individual builder scripts if WP_DEBUG is on.
-			$bundle_deps = array( 'react', 'react-dom', 'bb-app-core', 'bb-fluid' );
 			if ( self::is_debug() ) {
 
-				wp_enqueue_script( 'fl-builder-setting-field', $js_url . 'fl-builder-setting-field.js', array(), $ver );
 				wp_enqueue_script( 'fl-color-picker', $js_url . 'fl-color-picker.js', array(), $ver );
 				wp_enqueue_script( 'fl-lightbox', $js_url . 'fl-lightbox.js', array(), $ver );
 				wp_enqueue_script( 'fl-icon-selector', $js_url . 'fl-icon-selector.js', array(), $ver );
@@ -1038,17 +1108,22 @@ final class FLBuilder {
 				wp_enqueue_script( 'fl-builder-search', $js_url . 'fl-builder-search.js', array( 'jquery' ), $ver );
 				wp_enqueue_script( 'fl-builder-save-manager', $js_url . 'fl-builder-save-manager.js', array( 'jquery' ), $ver );
 				wp_enqueue_script( 'fl-builder-history-manager', $js_url . 'fl-builder-history-manager.js', array(), $ver );
-				wp_enqueue_script( 'fl-builder-system', $js_url . 'build/builder.bundle.js', $bundle_deps, $ver, true );
+				wp_enqueue_script( 'fl-builder-loop-containers', $js_url . 'fl-builder-loop-containers.js', array(), $ver );
+				wp_enqueue_script( 'fl-builder-system', $js_url . 'build/builder.bundle.js', $sys_bundle_deps, $ver, true );
 			} else {
-
 				wp_enqueue_script( 'fl-builder-min', $js_url . 'fl-builder.min.js', array( 'jquery', 'mousetrap' ), $ver );
-				wp_enqueue_script( 'fl-builder-system', $js_url . 'build/builder.bundle.min.js', $bundle_deps, $ver, true );
+				wp_enqueue_script( 'fl-builder-system', $js_url . 'build/builder.bundle.min.js', $sys_bundle_deps, $ver, true );
 			}
 
 			/* Additional module styles and scripts */
 			foreach ( FLBuilderModel::$modules as $module ) {
 
 				$module->enqueue_scripts();
+
+				// Ensure top-level UI scripts are enqueued in the legacy UI.
+				if ( ! FLBuilderUIIFrame::is_enabled() ) {
+					$module->enqueue_ui_scripts();
+				}
 
 				foreach ( $module->css as $handle => $props ) {
 					wp_enqueue_style( $handle, $props[0], $props[1], $props[2], $props[3] );
@@ -1058,10 +1133,6 @@ final class FLBuilder {
 				}
 			}
 
-			/**
-			 * Enqueue the canvas script for handling dom manipulation.
-			 */
-			self::enqueue_canvas();
 			$kb_link   = sprintf( "<a class='link' target='_blank' href='https://docs.wpbeaverbuilder.com/beaver-builder/troubleshooting/debugging/known-beaver-builder-incompatibilities'>%s</a>", __( 'Knowledge Base', 'fl-builder' ) );
 			$support   = sprintf( "<a class='link' target='_blank' href='https://www.wpbeaverbuilder.com/beaver-builder-support/'>%s</a>", __( 'Support ticket', 'fl-builder' ) );
 			$updates   = self::get_available_updates();
@@ -1160,32 +1231,6 @@ final class FLBuilder {
 	}
 
 	/**
-	 * Enqueue the canvas API
-	 *
-	 * @since 2.5
-	 * @return void
-	 */
-	static public function enqueue_canvas() {
-		global $wp_the_query;
-
-		$ver     = FL_BUILDER_VERSION;
-		$js_url  = FLBuilder::plugin_url() . 'js/build/';
-		$post_id = is_object( $wp_the_query->post ) ? $wp_the_query->post->ID : null;
-
-		if ( self::is_debug() ) {
-			wp_enqueue_script( 'fl-builder-canvas', $js_url . 'canvas.bundle.js', array(), $ver, true );
-		} else {
-			wp_enqueue_script( 'fl-builder-canvas', $js_url . 'canvas.bundle.min.js', array(), $ver, true );
-		}
-
-		// FLBuilderCanvasConfig
-		$args = array(
-			'postId' => $post_id,
-		);
-		wp_localize_script( 'fl-builder-canvas', 'FLBuilderCanvasConfig', $args );
-	}
-
-	/**
 	 * Adds builder classes to the body class.
 	 *
 	 * @since 1.0
@@ -1243,7 +1288,7 @@ final class FLBuilder {
 
 			// Has notifications
 			$has_new_notifications = FLBuilderNotifications::get_notifications();
-			if ( ! $has_new_notifications['read'] ) {
+			if ( ! empty( $has_new_notifications ) && ! $has_new_notifications['read'] ) {
 				$classes[] = 'fl-builder-has-new-notifications';
 			}
 
@@ -1422,7 +1467,9 @@ final class FLBuilder {
 			$global_settings = FLBuilderModel::get_global_settings();
 
 			include FL_BUILDER_DIR . 'includes/ui-extras.php';
+			include FL_BUILDER_DIR . 'includes/ui-extras-editor.php';
 			include FL_BUILDER_DIR . 'includes/ui-js-overlay-templates.php';
+			include FL_BUILDER_DIR . 'includes/ui-js-alert-templates.php';
 			include FL_BUILDER_DIR . 'includes/ui-js-templates.php';
 			include FL_BUILDER_DIR . 'includes/ui-js-config.php';
 		}
@@ -1434,7 +1481,7 @@ final class FLBuilder {
 	 * @since 2.0
 	 * @return array
 	 */
-	static function get_main_menu_data() {
+	public static function get_main_menu_data() {
 		global $post;
 
 		$views             = array();
@@ -1444,6 +1491,7 @@ final class FLBuilder {
 		$is_simple_ui      = ! FLBuilderUserAccess::current_user_can( 'unrestricted_editing' );
 		$key_shortcuts     = self::get_keyboard_shortcuts();
 		$help              = FLBuilderModel::get_help_button_settings();
+		$notifications     = FLBuilderNotifications::is_notications_enabled();
 		$default_view      = array(
 			'name'       => __( 'Unnamed Menu', 'fl-builder' ),
 			'isShowing'  => false,
@@ -1525,13 +1573,23 @@ final class FLBuilder {
 				'eventName' => 'showGlobalSettings',
 				'accessory' => isset( $key_shortcuts['showGlobalSettings'] ) ? $key_shortcuts['showGlobalSettings']['keyLabel'] : null,
 			);
-			if ( defined( 'FL_BUILDER_GLOBAL_STYLES_DIR' ) ) {
+			// Global styles
+			if ( $is_lite ) {
 				$tools_view['items'][61] = array(
-					'label'     => __( 'Global Styles', 'fl-builder' ) . ( $is_lite ? '<span class="fl-builder-pro-badge">PRO</span>' : '' ),
+					'label'     => __( 'Global Styles', 'fl-builder' ) . '<span class="fl-builder-pro-badge">PRO</span>',
 					'type'      => 'event',
 					'eventName' => 'showGlobalStyles',
 					'accessory' => isset( $key_shortcuts['showGlobalStyles'] ) ? $key_shortcuts['showGlobalStyles']['keyLabel'] : null,
 				);
+			} else {
+				if ( defined( 'FL_BUILDER_GLOBAL_STYLES_DIR' ) ) {
+					$tools_view['items'][61] = array(
+						'label'     => __( 'Global Styles', 'fl-builder' ),
+						'type'      => 'event',
+						'eventName' => 'showGlobalStyles',
+						'accessory' => isset( $key_shortcuts['showGlobalStyles'] ) ? $key_shortcuts['showGlobalStyles']['keyLabel'] : null,
+					);
+				}
 			}
 		}
 
@@ -1573,7 +1631,15 @@ final class FLBuilder {
 			);
 		}
 
-		$tools_view['items'][120] = array(
+		if ( $notifications ) {
+			$tools_view['items'][120] = array(
+				'label'     => __( "What's New", 'fl-builder' ),
+				'type'      => 'event',
+				'eventName' => 'showNotifications',
+			);
+		}
+
+		$tools_view['items'][130] = array(
 			'label'     => __( 'Keyboard Shortcuts', 'fl-builder' ),
 			'type'      => 'event',
 			'eventName' => 'showKeyboardShortcuts',
@@ -1691,7 +1757,7 @@ final class FLBuilder {
 	 * @since 2.0
 	 * @return array
 	 */
-	static function get_keyboard_shortcuts() {
+	public static function get_keyboard_shortcuts() {
 		$default_action = array(
 			'label'    => _x( 'Untitled Shortcut', 'A keyboard shortcut with no label given', 'fl-builder' ),
 			'keyCode'  => '',
@@ -1907,8 +1973,7 @@ final class FLBuilder {
 		$show_feedback         = false;
 
 		$show_notifications = ! $simple_ui &&
-							! FLBuilderModel::is_white_labeled() &&
-							$notifications['data'] &&
+							! FLBuilderModel::is_white_labeled() && ! empty( $notifications ) && $notifications['data'] &&
 							'{}' !== $notifications['data'] &&
 							! apply_filters( 'fl_disable_notifications', false );
 
@@ -1999,10 +2064,10 @@ final class FLBuilder {
 
 		echo '<span class="fl-builder--saving-indicator"></span>';
 
-		if ( ! $simple_ui && ! FLBuilderModel::is_white_labeled() && $notifications['data'] && '{}' !== $notifications['data'] && ! apply_filters( 'fl_disable_notifications', false ) ) {
+		if ( ! $simple_ui && ! FLBuilderModel::is_white_labeled() && ! empty( $notifications ) && $notifications['data'] && '{}' !== $notifications['data'] && ! apply_filters( 'fl_disable_notifications', false ) && ! $notifications['read'] ) {
 			echo '<span class="fl-builder-bar-spacer"></span>';
 			echo '<button id="fl-builder-toggle-notifications" class="fl-builder-button fl-builder-button-silent">';
-			include FL_BUILDER_DIR . 'img/svg/bell-active.svg';
+			include FL_BUILDER_DIR . 'img/svg/present.svg';
 			echo '</button>';
 		}
 
@@ -2303,7 +2368,7 @@ final class FLBuilder {
 
 			if ( empty( $attr_value ) ) {
 				continue;
-			} elseif ( is_string( $attr_value ) ) {
+			} elseif ( is_string( $attr_value ) || is_numeric( $attr_value ) || is_bool( $attr_value ) ) {
 				echo ' ' . $attr_key . '="' . $attr_value . '"';
 			} elseif ( is_array( $attr_value ) && ! empty( $attr_value ) ) {
 
@@ -2513,7 +2578,12 @@ final class FLBuilder {
 		do_action( 'fl_builder_before_render_rows', $rows );
 
 		foreach ( $rows as $row ) {
-			self::render_row( $row );
+			if ( 'module' === $row->type ) {
+				// Render a container module in the main layout.
+				self::render_module( $row );
+			} else {
+				self::render_row( $row );
+			}
 		}
 
 		/**
@@ -2589,7 +2659,7 @@ final class FLBuilder {
 		$has_rules    = FLBuilderModel::node_has_visibility_rules( $row );
 		$rules        = FLBuilderModel::node_visibility_rules( $row );
 		$attrs        = array(
-			'id'        => trim( esc_attr( do_shortcode( $row->settings->id ) ) ),
+			'id'        => self::sanitize_class_id( $row->settings->id ),
 			'class'     => array(
 				'fl-row',
 				'fl-row-' . $row->settings->width . '-width',
@@ -2660,7 +2730,7 @@ final class FLBuilder {
 			}
 		}
 		if ( ! empty( $custom_class ) ) {
-			$attrs['class'][] = trim( esc_attr( do_shortcode( $custom_class ) ) );
+			$attrs['class'][] = self::sanitize_class_id( $custom_class );
 		}
 		if ( $active && ! $visible ) {
 			$attrs['class'][] = 'fl-node-hidden';
@@ -2908,7 +2978,7 @@ final class FLBuilder {
 		$has_rules       = FLBuilderModel::node_has_visibility_rules( $col );
 		$rules           = FLBuilderModel::node_visibility_rules( $col );
 		$attrs           = array(
-			'id'        => trim( esc_attr( do_shortcode( $col->settings->id ) ) ),
+			'id'        => self::sanitize_class_id( $col->settings->id ),
 			'class'     => array(
 				'fl-col',
 				'fl-node-' . $col->node,
@@ -2959,7 +3029,7 @@ final class FLBuilder {
 			}
 		}
 		if ( ! empty( $custom_class ) ) {
-			$attrs['class'][] = trim( esc_attr( do_shortcode( $custom_class ) ) );
+			$attrs['class'][] = self::sanitize_class_id( $custom_class );
 		}
 		if ( $active && ! $visible ) {
 			$attrs['class'][] = 'fl-node-hidden';
@@ -3039,11 +3109,9 @@ final class FLBuilder {
 			return;
 		}
 
-		$settings = $module->settings;
-		$id       = $module->node;
-		$post_id  = FLBuilderModel::get_post_id();
-		$active   = FLBuilderModel::is_builder_active() && $post_id == $wp_the_query->post->ID;
-		$visible  = FLBuilderModel::is_node_visible( $module );
+		$post_id = FLBuilderModel::get_post_id();
+		$active  = FLBuilderModel::is_builder_active() && $post_id == $wp_the_query->post->ID;
+		$visible = FLBuilderModel::is_node_visible( $module );
 
 		if ( $active || $visible ) {
 
@@ -3053,18 +3121,7 @@ final class FLBuilder {
 			 */
 			do_action( 'fl_builder_before_render_module', $module );
 
-			if ( $module->include_wrapper ) {
-				$template_file = self::locate_template_file(
-					apply_filters( 'fl_builder_module_template_base', 'module', $module ),
-					apply_filters( 'fl_builder_module_template_slug', '', $module )
-				);
-
-				if ( $template_file ) {
-					include $template_file;
-				}
-			} else {
-				include FL_BUILDER_DIR . 'includes/module-content.php';
-			}
+			self::render_module_content( $module );
 
 			/**
 			 * After single module is rendered via ajax.
@@ -3077,6 +3134,31 @@ final class FLBuilder {
 			 * @see fl_builder_hidden_node
 			 */
 			do_action( 'fl_builder_hidden_node', $module );
+		}
+	}
+
+	/**
+	 * Renders the wrappers (if applicable) and content for a module.
+	 *
+	 * @since 2.9
+	 * @param object $module
+	 * @return void
+	 */
+	static public function render_module_content( $module ) {
+		$settings = $module->settings;
+		$id       = $module->node;
+
+		if ( $module->config( 'include_wrapper' ) ) {
+			$template_file = self::locate_template_file(
+				apply_filters( 'fl_builder_module_template_base', 'module', $module ),
+				apply_filters( 'fl_builder_module_template_slug', '', $module )
+			);
+
+			if ( $template_file ) {
+				include $template_file;
+			}
+		} else {
+			include FL_BUILDER_DIR . 'includes/module-content.php';
 		}
 	}
 
@@ -3099,7 +3181,9 @@ final class FLBuilder {
 		// Module
 		$class            = get_class( FLBuilderModel::$modules[ $type ] );
 		$module           = new $class();
-		$module->settings = FLBuilderSettingsCompat::filter_node_settings( 'module', $settings );
+		$module->settings = $settings;
+		$module->settings = FLBuilderSettingsCompat::filter_node_settings( $module );
+		$module->version  = FLBuilderModuleDeprecations::get_module_version( $module->slug );
 
 		// Shorthand reference to the module's id.
 		$id = $module->node;
@@ -3116,7 +3200,7 @@ final class FLBuilder {
 		if ( has_filter( 'fl_builder_module_frontend_custom_' . $module->slug ) ) {
 			echo apply_filters( 'fl_builder_module_frontend_custom_' . $module->slug, (array) $module->settings, $module );
 		} else {
-			include apply_filters( 'fl_builder_render_module_html', $module->dir . 'includes/frontend.php', $type, $settings, $module );
+			include apply_filters( 'fl_builder_render_module_html', $module->path( 'includes/frontend.php' ), $type, $settings, $module );
 		}
 
 		$content = ob_get_clean();
@@ -3136,9 +3220,10 @@ final class FLBuilder {
 	 *
 	 * @since 1.0
 	 * @param object $module A module node object.
+	 * @param array $attrs
 	 * @return void
 	 */
-	static public function render_module_attributes( $module ) {
+	static public function render_module_attributes( $module, $attrs = [] ) {
 		/**
 		 * Use this filter to work with the custom class a user adds to a module in the Class field on the Advanced tab.
 		 * @see fl_builder_module_custom_class
@@ -3149,17 +3234,60 @@ final class FLBuilder {
 		$visible      = FLBuilderModel::is_node_visible( $module );
 		$has_rules    = FLBuilderModel::node_has_visibility_rules( $module );
 		$rules        = FLBuilderModel::node_visibility_rules( $module );
-		$attrs        = array(
-			'id'        => trim( esc_attr( do_shortcode( $module->settings->id ) ) ),
-			'class'     => array(
-				'fl-module',
-				'fl-module-' . $module->settings->type,
-				'fl-node-' . $module->node,
-			),
-			'data-node' => $module->node,
-		);
+		$base_classes = array();
+
+		// Escape attrs coming into the function
+		foreach ( $attrs as $key => $value ) {
+			if ( 'class' === $key && is_array( $value ) ) {
+				foreach ( $value as $i => $classname ) {
+					$attrs[ $key ][ $i ] = FLBuilderUtils::sanitize_html_class( $classname );
+				}
+			} else {
+				$attrs[ $key ] = esc_attr( $value );
+			}
+		}
+
+		// ID
+		$id = self::sanitize_class_id( $module->settings->id );
+		if ( ! empty( $id ) ) {
+			$attrs['id'] = $id;
+		}
+
+		// Only use these attrs if a node ID is present.
+		// Supports rendering modules in modules using FLBuilder::render_module_html.
+		if ( $module->node ) {
+
+			// Base classes
+			$base_classes[] = 'fl-module';
+			$base_classes[] = 'fl-module-' . $module->settings->type;
+
+			// Node ID
+			$attrs['class'][]   = 'fl-node-' . $module->node;
+			$attrs['data-node'] = $module->node;
+
+			// Data for the builder.
+			if ( $active ) {
+				$attrs['data-parent']  = $module->parent;
+				$attrs['data-type']    = $module->settings->type;
+				$attrs['data-name']    = $module->name;
+				$attrs['data-accepts'] = $module->accepts_children() ? 'true' : '';
+			}
+		}
 
 		// Classes
+		if ( isset( $attrs['class'] ) ) {
+			$attrs['class'] = array_merge( $base_classes, $attrs['class'] );
+		} else {
+			$attrs['class'] = $base_classes;
+		}
+
+		// ClassName attr from the block editor
+		if ( isset( $attrs['className'] ) ) {
+			$attrs['class'] = array_merge( $attrs['class'], explode( ' ', $attrs['className'] ) );
+			unset( $attrs['className'] );
+		}
+
+		// Breakpoint classes
 		if ( ! empty( $module->settings->responsive_display ) ) {
 			$breakpoints = explode( ',', $module->settings->responsive_display );
 
@@ -3181,7 +3309,7 @@ final class FLBuilder {
 
 		// Custom Class field
 		if ( ! empty( $custom_class ) ) {
-			$attrs['class'][] = trim( esc_attr( do_shortcode( $custom_class ) ) );
+			$attrs['class'][] = self::sanitize_class_id( $custom_class );
 		}
 
 		// Hidden
@@ -3194,14 +3322,6 @@ final class FLBuilder {
 			$attrs['class'][]         = 'fl-node-has-rules';
 			$attrs['data-rules-type'] = $rules['type'];
 			$attrs['data-rules-text'] = esc_attr( $rules['text'] );
-		}
-
-		// Data
-		if ( $active ) {
-			$attrs['data-parent']  = $module->parent;
-			$attrs['data-type']    = $module->settings->type;
-			$attrs['data-name']    = $module->name;
-			$attrs['data-accepts'] = $module->accepts_children() ? 'true' : '';
 		}
 
 		// Allow the module itself to filter its own classes.
@@ -3254,12 +3374,13 @@ final class FLBuilder {
 		// Module
 		$class            = get_class( FLBuilderModel::$modules[ $type ] );
 		$module           = new $class();
-		$module->settings = FLBuilderSettingsCompat::filter_node_settings( 'module', $settings );
+		$module->settings = $settings;
+		$module->settings = FLBuilderSettingsCompat::filter_node_settings( $module );
 
 		// CSS
 		ob_start();
 		FLBuilderCSS::auto_css( $module );
-		$file = $module->dir . 'includes/frontend.css.php';
+		$file = $module->path( 'includes/frontend.css.php' );
 		if ( fl_builder_filesystem()->file_exists( $file ) ) {
 			include $file;
 		}
@@ -3267,6 +3388,61 @@ final class FLBuilder {
 		$css = ob_get_clean();
 
 		echo apply_filters( 'fl_builder_render_module_css', $css, $module, $id );
+	}
+
+	/**
+	 * Renders the CSS for a module instance in the main layout.
+	 *
+	 * @since 2.9
+	 * @param object $module
+	 * @return string
+	 */
+	static public function render_module_instance_css( $module ) {
+		$global_settings = FLBuilderModel::get_global_settings();
+		$file            = $module->path( 'includes/frontend.css.php' );
+		$settings        = $module->settings;
+		$id              = $module->node;
+		$module_css      = '';
+
+		// Allow Auto-css
+		ob_start();
+		FLBuilderCSS::auto_css( $module );
+		FLBuilderCSS::render();
+		$module_css .= ob_get_clean();
+
+		if ( ! in_array( $id, self::$enqueued_module_css_assets ) && fl_builder_filesystem()->file_exists( $file ) ) {
+			self::$enqueued_module_css_assets[] = $id;
+			ob_start();
+			include $file;
+			FLBuilderCSS::render();
+			$module_css .= ob_get_clean();
+		}
+
+		// Instance module margins
+		$module_css .= self::render_module_margins( $module );
+
+		if ( ! isset( $global_settings->auto_spacing ) || $global_settings->auto_spacing ) {
+			$module_css .= self::render_responsive_module_margins( $module );
+		}
+
+		// Instance module animation
+		$module_css .= self::render_node_animation_css( $settings );
+
+		/**
+		 * Filter each modules CSS in render_css
+		 * @since 2.5
+		 * @see fl_builder_render_css_module
+		 */
+		$module_css = apply_filters( 'fl_builder_render_css_module', $module_css, $module, $settings );
+
+		/**
+		 * Dynamic Filter to target modules with slug in render_css
+		 * @since 2.5
+		 * @see fl_builder_render_css_module_
+		 */
+		$module_css = apply_filters( "fl_builder_render_css_module_{$module->slug}", $module_css, $module, $settings );
+
+		return $module_css;
 	}
 
 	/**
@@ -3317,7 +3493,7 @@ final class FLBuilder {
 		$active          = FLBuilderModel::is_builder_active();
 		$nodes           = FLBuilderModel::get_categorized_nodes();
 		$node_status     = FLBuilderModel::get_node_status();
-		$global_settings = FLBuilderModel::get_global_settings();
+		$global_settings = FLBuilderModel::get_global_settings( false );
 		$asset_info      = FLBuilderModel::get_asset_info();
 		$enqueuemethod   = FLBuilderModel::get_asset_enqueue_method();
 		$post_id         = FLBuilderModel::get_post_id();
@@ -3344,6 +3520,7 @@ final class FLBuilder {
 			$settings = $row->settings;
 			$id       = $row->node;
 			ob_start();
+			FLBuilderCSS::auto_css( $row );
 			include FL_BUILDER_DIR . 'includes/row-css.php';
 			FLBuilderCSS::render();
 			$row_css .= ob_get_clean();
@@ -3380,6 +3557,7 @@ final class FLBuilder {
 			$settings = $col->settings;
 			$id       = $col->node;
 			ob_start();
+			FLBuilderCSS::auto_css( $col );
 			include FL_BUILDER_DIR . 'includes/column-css.php';
 			FLBuilderCSS::render();
 			$col_css .= ob_get_clean();
@@ -3417,8 +3595,8 @@ final class FLBuilder {
 			$module     = apply_filters( 'fl_builder_before_render_css_module', $module );
 			$module_css = '';
 			// Global module css
-			$file            = $module->dir . 'css/frontend.css';
-			$file_responsive = $module->dir . 'css/frontend.responsive.css';
+			$file            = $module->path( 'css/frontend.css' );
+			$file_responsive = $module->path( 'css/frontend.responsive.css' );
 
 			// Only include global module css that hasn't been included yet.
 			if ( ! in_array( $module->settings->type . '-module-css', self::$enqueued_global_assets ) ) {
@@ -3440,48 +3618,8 @@ final class FLBuilder {
 			}
 
 			// Instance module css
-			$file     = $module->dir . 'includes/frontend.css.php';
-			$settings = $module->settings;
-			$id       = $module->node;
-
-			// Allow Auto-css
-			ob_start();
-			FLBuilderCSS::auto_css( $module );
-			FLBuilderCSS::render();
-			$module_css .= ob_get_clean();
-
-			if ( ! in_array( $id, self::$enqueued_module_css_assets ) && fl_builder_filesystem()->file_exists( $file ) ) {
-				self::$enqueued_module_css_assets[] = $id;
-				ob_start();
-				include $file;
-				FLBuilderCSS::render();
-				$module_css .= ob_get_clean();
-			}
-
-			// Instance module margins
-			$module_css .= self::render_module_margins( $module );
-
-			if ( ! isset( $global_settings->auto_spacing ) || $global_settings->auto_spacing ) {
-				$module_css .= self::render_responsive_module_margins( $module );
-			}
-
-			// Instance module animation
-			$module_css .= self::render_node_animation_css( $settings );
-
-			/**
-			 * Filter each modules CSS in render_css
-			 * @since 2.5
-			 * @see fl_builder_render_css_module
-			 */
-			$module_css = apply_filters( 'fl_builder_render_css_module', $module_css, $module, $settings );
-
-			/**
-			 * Dynamic Filter to target modules with slug in render_css
-			 * @since 2.5
-			 * @see fl_builder_render_css_module_
-			 */
-			$module_css = apply_filters( "fl_builder_render_css_module_{$module->slug}", $module_css, $module, $settings );
-			$css       .= $module_css;
+			$module_css .= self::render_module_instance_css( $module );
+			$css        .= $module_css;
 		}
 
 		// Render all animation CSS when the builder is active.
@@ -3512,8 +3650,7 @@ final class FLBuilder {
 
 		// Minify the CSS.
 		if ( ! self::is_debug() ) {
-			$css = preg_replace( '!/\*[^*]*\*+([^/][^*]*\*+)*/!', '', $css );
-			$css = str_replace( array( "\r\n", "\r", "\n", "\t", '  ', '    ', '    ' ), '', $css );
+			$css = self::minify_css( $css );
 		}
 
 		// Save the CSS.
@@ -3531,6 +3668,23 @@ final class FLBuilder {
 	}
 
 	/**
+	 * Minify the CSS for builder layouts.
+	 *
+	 * @since 2.9
+	 * @return string
+	 */
+	static public function minify_css( $css ) {
+		if ( ! apply_filters( 'fl_builder_minify', true ) ) {
+			return $css;
+		}
+
+		$css = preg_replace( '!/\*[^*]*\*+([^/][^*]*\*+)*/!', '', $css );
+		$css = str_replace( array( "\r\n", "\r", "\n", "\t", '  ', '    ', '    ' ), '', $css );
+
+		return $css;
+	}
+
+	/**
 	 * Renders the CSS used for all builder layouts.
 	 *
 	 * @since 1.8.2
@@ -3538,13 +3692,14 @@ final class FLBuilder {
 	 */
 	static public function render_global_css() {
 		$css             = '';
-		$global_settings = FLBuilderModel::get_global_settings();
+		$global_settings = FLBuilderModel::get_global_settings( false );
 
 		// hooks for extension.
 		do_action( 'fl_builder_pre_render_global_css' );
 
 		// Core layout css
 		$css .= fl_builder_filesystem()->file_get_contents( FL_BUILDER_DIR . 'css/fl-builder-layout.css' );
+		$css .= fl_builder_filesystem()->file_get_contents( FL_BUILDER_DIR . 'css/fl-builder-layout-modules.css' );
 
 		// Core button defaults
 		if ( ! defined( 'FL_THEME_VERSION' ) ) {
@@ -3591,6 +3746,22 @@ final class FLBuilder {
 			ob_start();
 			include FL_BUILDER_DIR . 'includes/breakpoint-visibility-css.php';
 			$css .= ob_get_clean();
+		}
+
+		/**
+		 * This rule was added to prevent margin collapsing for
+		 * modules without wrappers to ensure consistency with
+		 * how margins have always worked in the builder.
+		 */
+		$force_wrappers = apply_filters( 'fl_builder_force_module_wrappers', false );
+		if ( ! $force_wrappers ) {
+			FLBuilderCSS::rule( array(
+				'selector' => '.fl-col-content',
+				'props'    => array(
+					'display'        => 'flex',
+					'flex-direction' => 'column',
+				),
+			) );
 		}
 
 		// Global node css.
@@ -3673,10 +3844,10 @@ final class FLBuilder {
 			'settings'     => $global_settings,
 			'setting_name' => 'module_margins',
 			'selector'     => array(
-				'default'    => '.fl-module-content, :where(.fl-module:not(:has(> .fl-module-content)))',
-				'large'      => '.fl-module[data-node] > .fl-module-content, :where(.fl-module:not(:has(> .fl-module-content)))',
-				'medium'     => '.fl-module[data-node] > .fl-module-content, :where(.fl-module:not(:has(> .fl-module-content)))',
-				'responsive' => '.fl-module[data-node] > .fl-module-content, :where(.fl-module:not(:has(> .fl-module-content)))',
+				'default'    => '.fl-module-content, .fl-module:where(.fl-module:not(:has(> .fl-module-content)))',
+				'large'      => '.fl-module[data-node] > .fl-module-content, .fl-module:where(.fl-module:not(:has(> .fl-module-content)))',
+				'medium'     => '.fl-module[data-node] > .fl-module-content, .fl-module:where(.fl-module:not(:has(> .fl-module-content)))',
+				'responsive' => '.fl-module[data-node] > .fl-module-content, .fl-module:where(.fl-module:not(:has(> .fl-module-content)))',
 			),
 			'props'        => array(
 				'margin-top'    => 'module_margins_top',
@@ -3795,11 +3966,16 @@ final class FLBuilder {
 				$selector_suffix = ' > .fl-col-content';
 				break;
 			case 'module':
-				if ( ! $node->include_wrapper ) {
+				if ( ! $node->config( 'include_wrapper' ) ) {
 					$selector_prefix = $selector_prefix . '.fl-module-' . $node->settings->type;
 					$selector_suffix = '';
 				} else {
 					$selector_suffix = ' > .fl-module-content';
+				}
+
+				// Extra specificity for top-level modules
+				if ( ! $node->parent ) {
+					$selector_prefix = '.fl-builder-content > ' . $selector_prefix;
 				}
 				break;
 		}
@@ -3985,10 +4161,15 @@ final class FLBuilder {
 		if ( '' !== $margins ) {
 
 			// Selector support for include_wrapper and unwrapped
-			if ( $module->include_wrapper ) {
+			if ( $module->config( 'include_wrapper' ) ) {
 				$selector = '.fl-node-' . $module->node . ' > .fl-module-content';
 			} else {
 				$selector = '.fl-node-' . $module->node . '.fl-module-' . $module->settings->type;
+			}
+
+			// Extra specificity for top-level modules
+			if ( ! $module->parent ) {
+				$selector = '.fl-builder-content > ' . $selector;
 			}
 
 			$css .= '@media (max-width: ' . esc_attr( $global_settings->responsive_breakpoint ) . 'px) { ';
@@ -4065,7 +4246,6 @@ final class FLBuilder {
 		$nodes           = FLBuilderModel::get_categorized_nodes();
 		$global_settings = FLBuilderModel::get_global_settings();
 		$layout_settings = FLBuilderModel::get_layout_settings();
-		$rows            = FLBuilderModel::get_nodes( 'row' );
 		$asset_info      = FLBuilderModel::get_asset_info();
 		$enqueuemethod   = FLBuilderModel::get_asset_enqueue_method();
 		$js              = '';
@@ -4113,11 +4293,6 @@ final class FLBuilder {
 			$js .= "; if(typeof FLBuilder !== 'undefined' && typeof FLBuilder._renderLayoutComplete !== 'undefined') FLBuilder._renderLayoutComplete();";
 		}
 
-		// Include FLJSMin
-		if ( ! class_exists( 'FLJSMin' ) ) {
-			include FL_BUILDER_DIR . 'classes/class-fl-jsmin.php';
-		}
-
 		/**
 		 * Use this filter to modify the JavaScript that is compiled and cached for each builder layout.
 		 * @see fl_builder_render_js
@@ -4130,14 +4305,7 @@ final class FLBuilder {
 
 			// Minify the JS.
 			if ( ! self::is_debug() ) {
-				try {
-					$min = FLJSMin::minify( $js );
-				} catch ( Exception $e ) {
-				}
-
-				if ( isset( $min ) ) {
-					$js = $min;
-				}
+				$js = self::minify_js( $js );
 			}
 
 			// Save the JS.
@@ -4155,6 +4323,34 @@ final class FLBuilder {
 		// if JS contains jQuery, make sure to enqueue it just in case inline mode is in use
 		if ( false !== strpos( $js, 'jQuery' ) ) {
 			wp_enqueue_script( 'jquery' );
+		}
+
+		return $js;
+	}
+
+	/**
+	 * Minify the JS for builder layouts.
+	 *
+	 * @since 2.9
+	 * @return string
+	 */
+	static public function minify_js( $js ) {
+		if ( ! apply_filters( 'fl_builder_minify', true ) ) {
+			return $js;
+		}
+
+		// Include FLJSMin
+		if ( ! class_exists( 'FLJSMin' ) ) {
+			include FL_BUILDER_DIR . 'classes/class-fl-jsmin.php';
+		}
+
+		try {
+			$min = FLJSMin::minify( $js );
+		} catch ( Exception $e ) {
+		}
+
+		if ( isset( $min ) ) {
+			$js = $min;
 		}
 
 		return $js;
@@ -4181,6 +4377,7 @@ final class FLBuilder {
 
 		// Core layout JS.
 		$js .= fl_builder_filesystem()->file_get_contents( FL_BUILDER_DIR . 'js/fl-builder-layout.js' );
+		$js .= fl_builder_filesystem()->file_get_contents( FL_BUILDER_DIR . 'js/fl-builder-layout-modules.js' );
 
 		// Add the global settings JS.
 		if ( ! isset( $_GET['safemode'] ) ) {
@@ -4295,7 +4492,8 @@ final class FLBuilder {
 	}
 
 	/**
-	 * Renders the JavaScript for a single module.
+	 * Renders the JavaScript for a single module including
+	 * the global module JS.
 	 *
 	 * @since 1.7
 	 * @param string|object $module_id A module ID or object.
@@ -4309,9 +4507,8 @@ final class FLBuilder {
 		if ( ! $module ) {
 			return $js;
 		}
-
 		// Global module JS
-		$file = $module->dir . 'js/frontend.js';
+		$file = $module->path( 'js/frontend.js' );
 
 		if ( fl_builder_filesystem()->file_exists( $file ) && ! in_array( $module->settings->type . '-module-js', self::$enqueued_global_assets ) ) {
 			$js                            .= "\n;" . ltrim( fl_builder_filesystem()->file_get_contents( $file ), ';' );
@@ -4319,9 +4516,26 @@ final class FLBuilder {
 		}
 
 		// Instance module JS
-		$file     = $module->dir . 'includes/frontend.js.php';
-		$settings = $module->settings;
-		$id       = $module->node;
+		$js .= self::render_module_instance_js( $module );
+
+		// Return the JS.
+		return $js;
+	}
+
+	/**
+	 * Renders only the JavaScript for a single module instance.
+	 *
+	 * @since 2.9
+	 * @param string|object $module_id A module ID or object.
+	 * @return string
+	 */
+	static public function render_module_instance_js( $module_id ) {
+		$global_settings = FLBuilderModel::get_global_settings();
+		$module          = is_object( $module_id ) ? $module_id : FLBuilderModel::get_module( $module_id );
+		$file            = $module->path( 'includes/frontend.js.php' );
+		$settings        = $module->settings;
+		$id              = $module->node;
+		$js              = '';
 
 		if ( ! in_array( $id, self::$enqueued_module_js_assets ) && fl_builder_filesystem()->file_exists( $file ) ) {
 			self::$enqueued_module_js_assets[] = $id;
@@ -4330,7 +4544,6 @@ final class FLBuilder {
 			$js .= ltrim( ob_get_clean(), ';' );
 		}
 
-		// Return the JS.
 		return $js;
 	}
 
@@ -4595,6 +4808,16 @@ final class FLBuilder {
 	}
 
 	/**
+	 * Sanitize the custom class or ID for node attribute and parse shortcodes
+	 * @since 2.5
+	 */
+	static public function sanitize_class_id( $attr ) {
+		$replace = array( '.', '#' );
+		$attr    = str_replace( $replace, '', $attr );
+		return trim( esc_attr( do_shortcode( $attr ) ) );
+	}
+
+	/**
 	 * @since 2.8.2
 	 */
 	static public function is_tour_enabled() {
@@ -4617,9 +4840,9 @@ final class FLBuilder {
 	 * @deprecated 1.7.4
 	 */
 	static public function styles_scripts() {
-		_deprecated_function( __METHOD__, '1.7.4', __CLASS__ . '::enqueue_ui_styles_scripts()' );
+		_deprecated_function( __METHOD__, '1.7.4', __CLASS__ . '::enqueue_ui_layout_styles_scripts()' );
 
-		self::enqueue_ui_styles_scripts();
+		self::enqueue_ui_layout_styles_scripts();
 	}
 
 	/**

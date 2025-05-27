@@ -2,10 +2,10 @@
 namespace FLCacheClear;
 class Hummingbird {
 
-	var $name = 'Hummingbird Page Speed Optimization';
-	var $url  = 'https://wordpress.org/plugins/hummingbird-performance/';
+	public $name = 'Hummingbird Page Speed Optimization';
+	public $url  = 'https://wordpress.org/plugins/hummingbird-performance/';
 
-	static function run() {
+	public static function run() {
 		if ( class_exists( '\WP_Hummingbird_Utils' ) && class_exists( '\WP_Hummingbird' ) ) {
 			if ( \WP_Hummingbird_Utils::get_module( 'page_cache' )->is_active() ) {
 				\WP_Hummingbird_Utils::get_module( 'page_cache' )->clear_cache();

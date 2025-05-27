@@ -28,14 +28,14 @@ if ( FLBuilder::is_module_disable_enabled() ) {
 					if ( ! isset( $used_modules[ $node->settings->type ][ $post->post_type ][ $post->ID ] ) ) {
 						$used_modules[ $node->settings->type ][ $post->post_type ][ $post->ID ] = 1;
 					} else {
-						$used_modules[ $node->settings->type ][ $post->post_type ][ $post->ID ] ++;
+						$used_modules[ $node->settings->type ][ $post->post_type ][ $post->ID ]++;
 					}
 
 
 					if ( ! isset( $used_modules[ $node->settings->type ][ $post->post_type ]['total'] ) ) {
 						$used_modules[ $node->settings->type ][ $post->post_type ]['total'] = 1;
 					} else {
-						$used_modules[ $node->settings->type ][ $post->post_type ]['total'] ++;
+						$used_modules[ $node->settings->type ][ $post->post_type ]['total']++;
 					}
 				}
 			}
@@ -64,6 +64,7 @@ if ( FLBuilder::is_module_disable_enabled() ) {
 
 			$categories      = FLBuilderModel::get_categorized_modules( true );
 			$enabled_modules = FLBuilderModel::get_enabled_modules();
+			$deprecated      = FLBuilderModel::get_deprecated_modules();
 			$checked         = in_array( 'all', $enabled_modules ) ? 'checked' : '';
 
 			?>
@@ -110,8 +111,9 @@ if ( FLBuilder::is_module_disable_enabled() ) {
 							}
 							$text = implode( ', ', $txt );
 						}
+						$module_name = in_array( $module->slug, $deprecated ) ? $module->name . sprintf( ' (%s)', __( 'Deprecated', 'fl-builder' ) ) : $module->name;
 						?>
-						<?php echo ( FLBuilder::is_module_disable_enabled() ) ? sprintf( '%s ( %s )', $module->name, $text ) : $module->name; ?>
+						<?php echo ( FLBuilder::is_module_disable_enabled() ) ? sprintf( '%s ( %s )', $module_name, $text ) : $module_name; ?>
 					</label>
 				</p>
 				<?php endforeach; ?>

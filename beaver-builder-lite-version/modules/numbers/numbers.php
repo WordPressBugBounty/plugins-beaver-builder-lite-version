@@ -15,6 +15,7 @@ class FLNumbersModule extends FLBuilderModule {
 			'category'        => __( 'Info', 'fl-builder' ),
 			'partial_refresh' => true,
 			'icon'            => 'chart-bar.svg',
+			'block_editor'    => true,
 		));
 
 		$this->add_js( 'jquery-waypoints' );

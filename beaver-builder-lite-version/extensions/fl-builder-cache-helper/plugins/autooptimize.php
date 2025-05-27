@@ -2,18 +2,17 @@
 namespace FLCacheClear;
 class Autooptimize {
 
-	var $name = 'Autoptimize';
-	var $url  = 'https://wordpress.org/plugins/autoptimize/';
+	public $name    = 'Autoptimize';
+	public $url     = 'https://wordpress.org/plugins/autoptimize/';
+	public $filters = array( 'init' );
 
-	var $filters = array( 'init' );
-
-	static function run() {
+	public static function run() {
 		if ( class_exists( '\autoptimizeCache' ) ) {
 			\autoptimizeCache::clearall();
 		}
 	}
 
-	function filters() {
+	public function filters() {
 		if ( isset( $_GET['fl_builder'] ) ) {
 			add_filter( 'autoptimize_filter_noptimize', '__return_true' );
 		}

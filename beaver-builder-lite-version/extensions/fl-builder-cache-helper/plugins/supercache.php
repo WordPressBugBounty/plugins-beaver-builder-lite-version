@@ -2,10 +2,10 @@
 namespace FLCacheClear;
 class Supercache {
 
-	var $name = 'WP Super Cache';
-	var $url  = 'https://wordpress.org/plugins/wp-super-cache/';
+	public $name = 'WP Super Cache';
+	public $url  = 'https://wordpress.org/plugins/wp-super-cache/';
 
-	static function run() {
+	public static function run() {
 		if ( function_exists( '\wp_cache_clear_cache' ) ) {
 			if ( is_multisite() ) {
 				\wp_cache_clear_cache( get_current_blog_id() );

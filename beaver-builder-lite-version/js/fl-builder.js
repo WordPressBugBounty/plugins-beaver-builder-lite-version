@@ -329,6 +329,13 @@
 		_shapesEdited: false,
 
 		/**
+		 * Cached font family markup for font fields.
+		 * @since 2.9
+		 * @access private
+		 */
+		_fontFamilyCache: null,
+
+		/**
 		 * Initializes the builder interface.
 		 *
 		 * @since 1.0
@@ -337,8 +344,17 @@
 		 */
 		_init: function()
 		{
-			FLBuilder.UIIFrame.init();
+			/**
+			 * Don't init inside the block editor. We just need the
+			 * builder's functions available there. Eventually, this
+			 * code should be refactored so we can load less of the
+			 * builder's JS in that environment.
+			 */
+			if ( FL.Builder.utils.isBlockEditor() ) {
+				return;
+			}
 
+			FLBuilder.UIIFrame.init();
 			FLBuilder._initJQueryReadyFix();
 			FLBuilder._initGlobalErrorHandling();
 			FLBuilder._initPostLock();
@@ -358,7 +374,7 @@
 			FLBuilder._setupEmptyLayout();
 			FLBuilder._highlightEmptyCols();
 			FLBuilder._checkEnv();
-			FLBuilder._initColorScheme();
+			FL.Builder.utils.colorScheme.init();
 
 			FLBuilder.addHook('didInitUI', FLBuilder._showTourOrTemplates.bind(FLBuilder) );
 			FLBuilder.addHook('endEditingSession', FLBuilder._doStats.bind(this) );
@@ -441,6 +457,16 @@
 				wp.heartbeat.enqueue('fl_builder_post_lock', {
 					post_id: FLBuilderConfig.postId
 				});
+			}
+		},
+
+		_heartbeatError: function( e, data ) {
+			if ( typeof data['wp-auth-check'] !== 'undefined' ) {
+				if ( ! data['wp-auth-check'] ) {
+					FLLightbox.closeAll();
+					FLBuilder.alert('You have been logged out. Please login to continue.<br />You will be redirected back here automatically.</p><p><button onclick="window.open(\'' + FLBuilderConfig.loginUrl + '\')" class="fl-builder-button fl-builder-button-large fl-builder-button-primary">Click to login</button></p>');
+					$('.fl-lightbox-footer').remove();
+				}
 			}
 		},
 
@@ -567,32 +593,41 @@
 				defaults.scroll = false;
 			}
 
+			// Mark modules that have an inner children wrapper.
+			$( FLBuilder._contentClass + ' [data-children-wrapper]' ).each( function() {
+				$( this ).closest( '.fl-module' ).attr( 'data-has-children-wrapper', 'true' )
+			} );
+
 			// Module Connections.
 			if ( 'row' == FLBuilderConfig.userTemplateType )  {
 				moduleConnections = FLBuilder._contentClass + ' .fl-row:not(.fl-builder-node-loading) .fl-col-group-drop-target, ' +
 									FLBuilder._contentClass + ' .fl-row:not(.fl-builder-node-loading) .fl-col-drop-target, ' +
 							  		FLBuilder._contentClass + ' .fl-row:not(.fl-builder-node-loading) .fl-col-content, ' +
-									FLBuilder._contentClass + ' .fl-row:not(.fl-builder-node-loading) .fl-module[data-accepts]:not(:has(> .fl-module-content)), ' +
-									FLBuilder._contentClass + ' .fl-row:not(.fl-builder-node-loading) .fl-module[data-accepts] > .fl-module-content';
+									FLBuilder._contentClass + ' .fl-row:not(.fl-builder-node-loading) .fl-module[data-accepts]:not([data-has-children-wrapper]):not(:has(> .fl-module-content)), ' +
+									FLBuilder._contentClass + ' .fl-row:not(.fl-builder-node-loading) .fl-module[data-accepts]:not([data-has-children-wrapper]) > .fl-module-content, ' +
+									FLBuilder._contentClass + ' [data-children-wrapper]';
 			}
 			else if ( 'column' == FLBuilderConfig.userTemplateType ) {
 				moduleConnections = FLBuilder._contentClass + ' .fl-col-group-drop-target, ' +
 			                        FLBuilder._contentClass + ' .fl-col-drop-target, ' +
 			                        FLBuilder._contentClass + ' .fl-col-content, ' +
-									FLBuilder._contentClass + ' .fl-module[data-accepts]:not(:has(> .fl-module-content)), ' +
-									FLBuilder._contentClass + ' .fl-module[data-accepts] > .fl-module-content';
+									FLBuilder._contentClass + ' .fl-module[data-accepts]:not([data-has-children-wrapper]):not(:has(> .fl-module-content)), ' +
+									FLBuilder._contentClass + ' .fl-module[data-accepts]:not([data-has-children-wrapper]) > .fl-module-content, ' +
+									FLBuilder._contentClass + ' [data-children-wrapper]';
 			}
 			else if ( 'module' == FLBuilderConfig.userTemplateType ) {
-				moduleConnections = FLBuilder._contentClass + ' .fl-module[data-accepts]:not(:has(> .fl-module-content)), ' +
-									FLBuilder._contentClass + ' .fl-module[data-accepts] > .fl-module-content';
+				moduleConnections = FLBuilder._contentClass + ' .fl-module[data-accepts]:not([data-has-children-wrapper]):not(:has(> .fl-module-content)), ' +
+									FLBuilder._contentClass + ' .fl-module[data-accepts]:not([data-has-children-wrapper]) > .fl-module-content, ' +
+									FLBuilder._contentClass + ' [data-children-wrapper]';
 			}
 			else {
 				moduleConnections = FLBuilder._contentClass + ' .fl-row-drop-target, ' +
 									FLBuilder._contentClass + ' .fl-row:not(.fl-builder-node-loading) .fl-col-group-drop-target, ' +
 									FLBuilder._contentClass + ' .fl-row:not(.fl-builder-node-loading) .fl-col-drop-target, ' +
 							  		FLBuilder._contentClass + ' .fl-row:not(.fl-builder-node-loading) .fl-col:not(.fl-builder-node-loading):not(.fl-node-global) .fl-col-content, ' +
-									FLBuilder._contentClass + ' .fl-row:not(.fl-builder-node-loading) .fl-module[data-accepts]:not(:has(> .fl-module-content)):not(.fl-node-global), ' +
-									FLBuilder._contentClass + ' .fl-row:not(.fl-builder-node-loading) .fl-module[data-accepts]:not(.fl-node-global) > .fl-module-content';
+									FLBuilder._contentClass + ' .fl-module[data-accepts]:not([data-has-children-wrapper]):not(:has(> .fl-module-content)):not(.fl-node-global), ' +
+									FLBuilder._contentClass + ' .fl-module[data-accepts]:not([data-has-children-wrapper]):not(.fl-node-global) > .fl-module-content, ' +
+									FLBuilder._contentClass + ' :not(.fl-node-global) [data-children-wrapper]';
 			}
 
 			// Column Connections.
@@ -702,15 +737,21 @@
 				handle: '.fl-module-sortable-proxy',
 			}));
 
-			// Modules and groups in container modules WITHOUT a wrapper.
-			$(FLBuilder._contentClass + ' .fl-module[data-accepts]:not(:has(> .fl-module-content))').sortable($.extend({}, defaults, {
-				cancel: '.fl-module, .fl-col-group',
+			// Modules in container modules WITHOUT a wrapper.
+			$(FLBuilder._contentClass + ' .fl-module[data-accepts]:not([data-has-children-wrapper]):not(:has(> .fl-module-content))').sortable($.extend({}, defaults, {
+				cancel: '.fl-module',
 				handle: '.fl-module-sortable-proxy',
 			}));
 
-			// Modules and groups in container modules WITH a wrapper.
-			$(FLBuilder._contentClass + ' .fl-module[data-accepts] > .fl-module-content').sortable($.extend({}, defaults, {
-				cancel: '.fl-module, .fl-col-group',
+			// Modules in container modules WITH a wrapper.
+			$(FLBuilder._contentClass + ' .fl-module[data-accepts]:not([data-has-children-wrapper]) > .fl-module-content').sortable($.extend({}, defaults, {
+				cancel: '.fl-module',
+				handle: '.fl-module-sortable-proxy',
+			}));
+
+			// Modules in container modules WITH a CHILD wrapper.
+			$(FLBuilder._contentClass + ' [data-children-wrapper]').sortable($.extend({}, defaults, {
+				cancel: '.fl-module',
 				handle: '.fl-module-sortable-proxy',
 			}));
 
@@ -758,14 +799,18 @@
 		_bindEvents: function()
 		{
 			/* Links */
-			$excludedLinks = $('.fl-builder-bar a, .fl-builder--content-library-panel a, .fl-page-nav .nav a'); // links in ui shouldn't be disabled.
-			$('a').not($excludedLinks).on('click', FLBuilder._preventDefault);
-			$('.fl-page-nav .nav a').on('click', FLBuilder._headerLinkClicked);
-			$('body').on( 'click', '.fl-builder-content a', FLBuilder._preventDefault);
-			$('body').on( 'mouseup', 'button.fl-builder-button', this._buttonMouseUp.bind(this) );
+			if ( ! $( 'body' ).hasClass( 'wp-admin' ) ) {
+				var $excludedLinks = $('.fl-builder-bar a, .fl-builder--content-library-panel a, .fl-page-nav .nav a'); // links in ui shouldn't be disabled.
+				$('a').not($excludedLinks).on('click', FLBuilder._preventDefault);
+				$('.fl-page-nav .nav a').on('click', FLBuilder._headerLinkClicked);
+				$('body').on( 'click', '.fl-builder-content a', FLBuilder._preventDefault);
+				$('body').on( 'mouseup', 'button.fl-builder-button', this._buttonMouseUp.bind(this) );
+			}
 
 			/* Heartbeat */
 			$(document).on('heartbeat-tick', FLBuilder._initPostLock);
+			$(document).on('heartbeat-tick', FLBuilder._heartbeatError);
+
 
 			/* Unload Warning */
 			$(window.parent).on('beforeunload', FLBuilder._warnBeforeUnload);
@@ -810,9 +855,6 @@
 
 			/* Alert Lightbox */
 			$('body', window.parent.document).on( 'click', '.fl-builder-alert-close', FLBuilder._alertClose);
-
-			/* General Overlays */
-			FLBuilder._bindGeneralOverlayEvents();
 
 			/* Node Templates */
 			$('body', window.parent.document).on( 'click', '.fl-builder-settings-save-as', FLBuilder._showNodeTemplateSettings);
@@ -984,7 +1026,7 @@
 				colSettings     = $('.fl-builder-col-settings', window.parent.document).length > 0,
 				moduleSettings  = $('.fl-builder-module-settings', window.parent.document).length > 0;
 
-			if(rowSettings || colSettings || moduleSettings) {
+			if( ! FLBuilder.isBlockEditor() && ( rowSettings || colSettings || moduleSettings ) ) {
 				return FLBuilderStrings.unloadWarning;
 			}
 		},
@@ -2291,7 +2333,7 @@
 				content.removeClass('fl-builder-empty');
 				content.find('.fl-builder-empty-message').remove();
 
-				if ( ! content.find( '.fl-row, .fl-builder-block' ).length ) {
+				if ( ! content.find( '.fl-row, .fl-module, .fl-builder-block' ).length ) {
 					content.addClass('fl-builder-empty');
 					content.append('<span class="fl-builder-empty-message">'+ FLBuilderStrings.emptyMessage +'</span>');
 					FLBuilder._initSortables();
@@ -2411,7 +2453,7 @@
 		 */
 		layoutHasContent: function()
 		{
-            if( $(FLBuilder._contentClass).children('.fl-row').length > 0) {
+            if( $(FLBuilder._contentClass).children('.fl-row, .fl-module').length > 0) {
                 return true;
             } else {
                 return false;
@@ -2453,15 +2495,16 @@
 		 */
 		_initDropTargets: function()
 		{
-			var notGlobal  = 'row' == FLBuilderConfig.userTemplateType ? '' : ':not(.fl-node-global)',
-				rows       = $( FLBuilder._contentClass + ' .fl-row' ),
-				row        = null,
-				groups     = $( FLBuilder._contentClass + ' .fl-row' + notGlobal ).find( '.fl-col-group' ),
-				group      = null,
-				cols       = null,
-				rootCol    = 'column' == FLBuilderConfig.userTemplateType ? $( FLBuilder._contentClass + '> .fl-col' ).eq(0) : null,
-				modules    = $( FLBuilder._contentClass + ' .fl-row' + notGlobal ).find( '.fl-row-content > .fl-module' ),
-				i          = 0;
+			var notGlobal     = 'row' == FLBuilderConfig.userTemplateType ? '' : ':not(.fl-node-global)',
+				rows          = $( FLBuilder._contentClass + ' .fl-row' ),
+				row           = null,
+				groups        = $( FLBuilder._contentClass + ' .fl-row' + notGlobal ).find( '.fl-col-group' ),
+				group         = null,
+				cols          = null,
+				rootCol       = 'column' == FLBuilderConfig.userTemplateType ? $( FLBuilder._contentClass + '> .fl-col' ).eq(0) : null,
+				layoutModules = $( FLBuilder._contentClass ).find( '> .fl-module' ),
+				rowModules    = $( FLBuilder._contentClass + ' .fl-row' + notGlobal ).find( '.fl-row-content > .fl-module' ),
+				i             = 0;
 
 			// Remove old drop targets.
 			$( '.fl-col-drop-target' ).remove();
@@ -2477,9 +2520,13 @@
 			rows.find( '.fl-row-content' ).prepend( '<div class="fl-drop-target fl-col-group-drop-target fl-col-group-drop-target-empty"></div>' );
 			FLBuilder._initEmptyRowDropTargets();
 
-			// Add drop targets to container modules.
-			modules.append( '<div class="fl-drop-target fl-col-group-drop-target"></div>' );
-			modules.append( '<div class="fl-drop-target fl-drop-target-last fl-col-group-drop-target fl-col-group-drop-target-last"></div>' );
+			// Add drop targets to container modules in the main layout.
+			layoutModules.prepend( '<div class="fl-drop-target fl-row-drop-target"></div>' );
+			layoutModules.append( '<div class="fl-drop-target fl-drop-target-last fl-row-drop-target fl-row-drop-target-last"></div>' );
+
+			// Add drop targets to container modules in rows.
+			rowModules.append( '<div class="fl-drop-target fl-col-group-drop-target"></div>' );
+			rowModules.append( '<div class="fl-drop-target fl-drop-target-last fl-col-group-drop-target fl-col-group-drop-target-last"></div>' );
 
 			// Add drop targets to column groups and columns.
 			for ( i = 0; i < groups.length; i++ ) {
@@ -2657,7 +2704,7 @@
 			$( '.fl-sortable-fixed-width' ).css( 'max-width', '' ).removeClass( 'fl-sortable-fixed-width' );
 
 			// Find the placeholder title.
-			if(parent.hasClass('fl-col-content') || parent.hasClass('fl-module') || parent.hasClass('fl-module-content')) {
+			if(parent.hasClass('fl-col-content') || parent.hasClass('fl-module') || parent.hasClass('fl-module-content') || parent.data('children-wrapper')) {
 
 				// Make flex items fixed width while sorting.
 				if ((/flex/).test(parent.css('display'))) {
@@ -2705,6 +2752,23 @@
 				}
 				else if(ui.item.hasClass('fl-row-sortable-proxy-item')) {
 					title = FLBuilderStrings.row;
+				}
+				else if(ui.item.hasClass('fl-builder-block-module') || ui.item.hasClass('fl-module-sortable-proxy-item')) {
+					var itemType = ui.item.data( 'type' );
+					var alias = ui.item.data( 'alias' );
+
+					var config = FLBuilderConfig.contentItems.module.filter( config => {
+						return alias === config.alias && itemType === config.slug
+					} ).pop();
+
+					var accepts = config ? config.accepts : false;
+					var name = config ? config.name : '';
+
+					if ( accepts && accepts.length ) {
+						title = name;
+					} else {
+						title = FLBuilderStrings.newRow;
+					}
 				}
 				else {
 					title = FLBuilderStrings.newRow;
@@ -2765,6 +2829,7 @@
 				isCol                = item.hasClass( 'fl-col-sortable-proxy-item' ),
 				isModule         	 = item.hasClass( 'fl-builder-block-module' ) || item.hasClass( 'fl-module-sortable-proxy-item' ),
 				isContainerModule	 = parent.data( 'accepts' ),
+				isChildrenWrapper	 = parent.data( 'children-wrapper' ),
 				isParentColGlobal    = parent.closest('.fl-col[data-template-url]').hasClass('fl-node-global'),
 				isParentCol          = parent.hasClass( 'fl-col-content' ),
 				isColTarget          = parent.hasClass( 'fl-col-drop-target' ),
@@ -2774,9 +2839,9 @@
 				itemType			 = item.data( 'type' );
 
 			// Handle container modules.
-			if ( isContainerModule ) {
-
-				const { accepts } = FLBuilderConfig.contentItems.module.filter( config => parentType === config.slug ).pop();
+			if ( isContainerModule || isChildrenWrapper ) {
+				var config = FLBuilderConfig.contentItems.module.filter( config => itemType === config.slug ).pop();
+				var accepts = config ? config.accepts : false;
 
 				// Prevent rows and columns in container modules.
 				if ( isRowBlock || isCol ) {
@@ -2789,13 +2854,14 @@
 			}
 
 			// Prevent modules in unaccepted parents.
-			// if ( isModule && 'widget' !== itemType ) {
-			// 	const { parents } = FLBuilderConfig.contentItems.module.filter( config => itemType === config.slug ).pop();
-			//
-			// 	if ( 'object' === typeof parents && ! parents.includes( parentType ) ) {
-			// 		prevent = true;
-			// 	}
-			// }
+			if ( isModule && 'widget' !== itemType ) {
+				var config = FLBuilderConfig.contentItems.module.filter( config => itemType === config.slug ).pop();
+				var parents = config ? config.parents : false;
+
+				if ( 'object' === typeof parents && ! parents.includes( parentType ) ) {
+					prevent = true;
+				}
+			}
 
 			// Prevent columns in nested columns.
 			if ( ( isRowBlock || isCol ) && isParentCol && nestedGroup.length > 0 ) {
@@ -3024,6 +3090,9 @@
 		_moveNode: function( newParent, nodeId, position )
 		{
 			const actions = FL.Builder.getActions()
+			const node = $( '.fl-node-' + nodeId )
+
+			node.attr( 'data-parent', newParent )
 			actions.moveNode( nodeId, position, newParent )
 		},
 
@@ -3055,6 +3124,7 @@
 		 * @return {JQuery} dom reference.
 		 */
 		_getJQueryElement: function( id ) {
+
 			return $( FLBuilder._contentClass ).find( '[data-node="' + id + '"]' )
 		},
 
@@ -3120,7 +3190,7 @@
 			}
 
 			if ( 'module' !== FLBuilderConfig.userTemplateType ) {
-				$( '.fl-row:not(.fl-node-global) .fl-module.fl-node-global[data-accepts]' ).addClass( 'fl-node-disabled' );
+				$( '.fl-module.fl-node-global[data-accepts][data-template-url]' ).addClass( 'fl-node-disabled' );
 			}
 		},
 
@@ -3277,7 +3347,7 @@
 		 */
 		_rowDragStart: function( e, ui )
 		{
-			var rows = $( FLBuilder._contentClass + ' .fl-row' ),
+			var rows = $( FLBuilder._contentClass ).find( '.fl-row, .fl-module' ),
 				row  = $( '.fl-node-dragging' );
 
 			if ( 1 === rows.length ) {
@@ -3359,8 +3429,9 @@
 				// A row was dropped into a row position.
 				else {
 
-					row = item.closest( '.fl-row' );
-					position = ! row.length ? 0 : $( FLBuilder._contentClass + ' > .fl-row' ).index( row );
+					row = item.closest( '.fl-row, .fl-module' );
+					position = $( FLBuilder._contentClass ).find( '> .fl-row, > .fl-module' ).index( row );
+					position = ! row.length ? 0 : position;
 
 					FLBuilder._addRow(
 						item.attr('data-cols'),
@@ -3696,7 +3767,7 @@
 
 		/**
 		 * Toggles the Content Alignment field based on the value of the Aspect Ratio.
-		 * 
+		 *
 		 * @since  2.8.2
 		 * @access private
 		 * @param {Object} e An event object.
@@ -3762,10 +3833,12 @@
 		{
 			var notGlobal = FLBuilderConfig.userTemplateType ? '' : ':not(.fl-node-global)',
 				cols 	  = $(FLBuilder._contentClass + ' .fl-col' + notGlobal),
-				modules   = $( FLBuilder._contentClass + ' .fl-module[data-accepts]' + notGlobal );
+				modules   = $( FLBuilder._contentClass + ' .fl-module[data-accepts]:not([data-has-children-wrapper])' + notGlobal ),
+				wrappers  = $( FLBuilder._contentClass + ' [data-children-wrapper]' );
 
 			cols.removeClass('fl-col-highlight').find('.fl-col-content').css( 'min-height', '' );
 			modules.removeClass('fl-module-highlight');
+			wrappers.removeClass('fl-module-highlight');
 
 			cols.each(function(){
 				var col = $(this);
@@ -3778,6 +3851,13 @@
 				var module = $(this);
 				if(!module.find('.fl-module').length && !module.closest('.fl-builder-shortcode-mask-wrap').length) {
 					module.addClass('fl-module-highlight');
+				}
+			});
+
+			wrappers.each(function(){
+				var wrapper = $(this);
+				if(!wrapper.find('.fl-module').length && !wrapper.closest('.fl-builder-shortcode-mask-wrap').length) {
+					wrapper.addClass('fl-module-highlight');
 				}
 			});
 		},
@@ -3813,12 +3893,14 @@
 			}
 
 			// Highlight container modules.
-			$( FLBuilder._contentClass + ' .fl-module[data-accepts]' ).each( function() {
+			var containerSelector = FLBuilder._contentClass + ' .fl-module[data-accepts]';
+			var childContainerSelector = FLBuilder._contentClass + ' [data-children-wrapper]';
+			$( containerSelector + ', ' + childContainerSelector ).each( function() {
 				if ( ! $( this ).closest( '.fl-builder-shortcode-mask-wrap' ).length ) {
 					$( this ).addClass( 'fl-module-highlight' );
 
 					if ( 0 === parseInt( $( this ).css( 'padding' ) ) ) {
-						$( this ).css( 'padding', '10px' )
+						$( this ).css( 'padding', '10px' );
 					}
 				}
 			} );
@@ -4008,7 +4090,7 @@
 				oldGroupId = oldGroup.attr( 'data-node' )
 				newGroup   = newParent.closest( '.fl-col-group' ),
 				newGroupId = newGroup.attr( 'data-node' ),
-				newRow     = newParent.closest('.fl-row'),
+				newRow     = newParent.closest('.fl-row, .fl-module'),
 				position   = 0,
 				actions    = FL.Builder.data.getLayoutActions();
 
@@ -4097,7 +4179,7 @@
 				col.remove();
 
 				// Find the new row position.
-				position = newParent.closest( '.fl-builder-content' ).find( '.fl-row' ).index( newRow );
+				position = newParent.closest( '.fl-builder-content' ).find( '.fl-row, > .fl-module' ).index( newRow );
 				position = newParent.hasClass( 'fl-drop-target-last' ) ? position + 1 : position;
 
 				// Add the new row.
@@ -4987,6 +5069,11 @@
 		_moduleDragStart: function( e, ui )
 		{
 			var module = $( '.fl-node-dragging' );
+			var rows = $( FLBuilder._contentClass ).find( '.fl-row, .fl-module' );
+
+			if ( 1 === rows.length ) {
+				$( FLBuilder._contentClass ).addClass( 'fl-builder-empty' );
+			}
 
 			module.hide();
 
@@ -5008,12 +5095,12 @@
 			FLBuilder._blockDragStop( e, ui );
 
 			var module	 = $( '.fl-node-dragging' ).removeClass( 'fl-node-dragging' ),
+				accepts  = module.attr( 'data-accepts' ),
 				item     = ui.item,
 				parent   = ui.item.parent(),
 				node     = null,
 				position = 0,
-				parentId = 0,
-				cols     = null;
+				parentId = 0;
 
 			// A module was dropped back into the module list.
 			if ( parent.hasClass( 'fl-builder-modules' ) || parent.hasClass( 'fl-builder-widgets' ) ) {
@@ -5033,8 +5120,8 @@
 				else if ( parent.hasClass( 'fl-row-drop-target' ) ) {
 					parent   = item.closest('.fl-builder-content');
 					parentId = 0;
-					node     = item.closest('.fl-row');
-					position = parent.find( '.fl-row' ).index( node );
+					node     = item.closest('.fl-row, .fl-module');
+					position = parent.find( '.fl-row, > .fl-module' ).index( node );
 				}
 				// A new module was dropped into a column group position.
 				else if ( parent.hasClass( 'fl-col-group-drop-target' ) ) {
@@ -5062,7 +5149,7 @@
 					parentId = parent.attr( 'data-node' );
 				}
 				// A new module was dropped into a container module WITH a wrapper.
-				else if ( parent.hasClass( 'fl-module-content' ) ) {
+				else if ( parent.hasClass( 'fl-module-content' ) || parent.attr( 'data-children-wrapper' ) ) {
 					position = parent.find( '> .fl-module, .fl-builder-block' ).index( item );
 					parentId = item.closest( '.fl-module' ).attr( 'data-node' );
 				}
@@ -5093,12 +5180,16 @@
 				}
 				// A module was dropped into a row position.
 				else if ( parent.hasClass( 'fl-row-drop-target' ) ) {
-					node     = item.closest( '.fl-row' );
-					position = item.closest( '.fl-builder-content' ).children( '.fl-row' ).index( node );
+					node     = item.closest( '.fl-row, .fl-module' );
+					position = item.closest( '.fl-builder-content' ).children( '.fl-row, .fl-module' ).index( node );
 					position = item.closest( '.fl-drop-target-last' ).length ? position + 1 : position;
-					cols     = module.attr( 'data-accepts' ) ? null : '1-col';
-					FLBuilder._addRow( cols, position, module.attr( 'data-node' ) );
-					module.remove();
+					if ( accepts ) {
+						FLBuilder._moveNode( 0, module.attr( 'data-node' ), position );
+						module.show();
+					} else {
+						FLBuilder._addRow( '1-col', position, module.attr( 'data-node' ) );
+						module.remove();
+					}
 				}
 				// A module was dropped into a column group position.
 				else if ( parent.hasClass( 'fl-col-group-drop-target' ) ) {
@@ -5106,7 +5197,7 @@
 					position = item.closest( '.fl-row-content ').find( ' > .fl-col-group, > .fl-module' ).index( node );
 					position = item.closest( '.fl-drop-target-last' ).length ? position + 1 : position;
 					parentId = item.closest( '.fl-row' ).attr( 'data-node' );
-					if ( module.attr( 'data-accepts' ) ) {
+					if ( accepts ) {
 						FLBuilder._moveNode( parentId, module.attr( 'data-node' ), position );
 						module.show();
 					} else {
@@ -5144,6 +5235,7 @@
 
 			FLBuilder._resizeLayout();
 			FLBuilder._initDropTargets();
+			FLBuilder.triggerHook( 'didDropModule' );
 		},
 
 		/**
@@ -5165,7 +5257,6 @@
 				FLBuilder._reorderNode( nodeId, position );
 			}
 			else {
-				module.attr('data-parent', newParent);
 				FLBuilder._moveNode( newParent, nodeId, position );
 			}
 		},
@@ -5200,6 +5291,7 @@
 			var row    = module.closest('.fl-row'),
 				rowNodes = row.find( '[data-node]' ),
 				nodeId = module.attr('data-node'),
+				parentId = module.parents('[data-node]').attr('data-node'),
 				acceptsChildren = module.attr('data-accepts');
 
 			const actions = FL.Builder.data.getLayoutActions()
@@ -5213,10 +5305,12 @@
 			module.empty();
 			module.remove();
 			row.removeClass('fl-block-overlay-muted');
+			FLBuilder._setupEmptyLayout();
 			FLBuilder._highlightEmptyCols();
 			FLBuilder._removeAllOverlays();
 			FLBuilder.triggerHook( 'didDeleteModule', {
 				nodeId: nodeId,
+				parentId: parentId,
 				moduleType: module.attr( 'data-type' ),
 			} );
 		},
@@ -5234,7 +5328,6 @@
 			const id = $( this ).closest( '.fl-module' ).data( 'node' );
 			const actions = FL.Builder.getActions()
 			actions.copyNode( id );
-
 			e.stopPropagation();
 		},
 
@@ -5247,7 +5340,8 @@
 				clone    = module.clone(),
 				parent   = module.parent(),
 				form	 = $( '.fl-builder-module-settings[data-node=' + id + ']', window.parent.document ),
-				settings = {};
+				settings = {},
+				elements = module.length;
 
 			if ( form.length ) {
 				settings = FLBuilder._getSettings( form );
@@ -5258,17 +5352,21 @@
 			clone.addClass( 'fl-node-' + id + '-clone fl-builder-node-clone' );
 			clone.find( '.fl-block-overlay' ).remove();
 			clone.removeAttr( 'data-node' );
-			module.after( clone );
+
+			if( 1 == elements ) {
+				module.after( clone );
+			}
 
 			// Show Loader
 			FLBuilder._showNodeLoading( id + '-clone' );
-
-			// Animate scroll to new element
-			const el  = clone.get(0);
-			el.scrollIntoView( {
-				behavior: 'smooth',
-				block: 'center',
-			} );
+			if ( 1 == elements ) {
+				// Animate scroll to new element
+				const el  = clone.get(0);
+				el.scrollIntoView( {
+					behavior: 'smooth',
+					block: 'center',
+				} );
+			}
 
 			const actions = FL.Builder.data.getLayoutActions()
 			const callback = function( response ) {
@@ -5440,6 +5538,7 @@
 					rules     : FLBuilder._moduleHelpers[ data.type ] ? FLBuilder._moduleHelpers[ data.type ].rules : null,
 					messages  : FLBuilder._moduleHelpers[ data.type ] ? FLBuilder._moduleHelpers[ data.type ].messages : null,
 					hide      : ( ! FLBuilderConfig.userCanEditGlobalTemplates && data.global ) ? true : false,
+					lightbox  : data.lightbox ? data.lightbox : null,
 					preview   : {
 						type     : 'module',
 						layout   : data.layout,
@@ -5652,7 +5751,6 @@
 
 			for ( var key in sides ) {
 				var input = form.find( 'input[name="margin_' + sides[ key ] + '"]' );
-				var value = input.val();
 
 				node.removeClass( 'fl-node-' + nodeId );
 				input.attr( 'placeholder', parseInt( content.css( 'margin-' + sides[ key ] ) ) );
@@ -5849,8 +5947,9 @@
 			}
 			// A saved row was dropped.
 			else if ( item.hasClass( 'fl-builder-block-saved-row' ) || item.hasClass( 'fl-builder-block-row-template' ) ) {
-				node     = item.closest( '.fl-row' );
-				position = ! node.length ? 0 : $( FLBuilder._contentClass + ' .fl-row' ).index( node );
+				node     = item.closest( '.fl-row, .fl-module' );
+				position = $( FLBuilder._contentClass ).find( '.fl-row, > .fl-module' ).index( node );
+				position = ! node.length ? 0 : position;
 				position = parent.hasClass( 'fl-drop-target-last' ) ? position + 1 : position;
 				parentId = null;
 				action	 = 'render_new_row_template';
@@ -5875,10 +5974,10 @@
 				}
 				// A column was dropped into a row position.
 				else if ( parent.hasClass( 'fl-row-drop-target' ) ) {
-					node     = item.closest( '.fl-row' ),
+					node     = item.closest( '.fl-row, .fl-module' ),
 					parentId = 0;
 					parent   = $( FLBuilder._contentClass );
-					position = ! node.length ? 0 : parent.find( '.fl-row' ).index( node );
+					position = ! node.length ? 0 : parent.find( '.fl-row, > .fl-module' ).index( node );
 				}
 				// A column was dropped into a column group position.
 				else if ( parent.hasClass( 'fl-col-group-drop-target' ) ) {
@@ -5926,7 +6025,7 @@
 				else if ( parent.hasClass( 'fl-row-drop-target' ) ) {
 					parent   = item.closest('.fl-builder-content');
 					parentId = 0;
-					position = parent.find( '.fl-row' ).index( item.closest('.fl-row') );
+					position = parent.find( '.fl-row, > .fl-module' ).index( item.closest('.fl-row, .fl-module') );
 				}
 				// Dropped into a column group position.
 				else if ( parent.hasClass( 'fl-col-group-drop-target' ) ) {
@@ -5984,15 +6083,15 @@
 			const templateId = item.attr( 'data-id' )
 			const templateType = item.attr( 'data-type' )
 			const ajaxCallback = function( response ) {
+				var data = FLBuilder._jsonParse( response );
 				if ( action.indexOf( 'row' ) > -1 ) {
-					var data = FLBuilder._jsonParse( response );
 					FLBuilder.triggerHook( 'didApplyRowTemplateComplete', data.config );
 					callback( data.layout );
 				} else if ( action.indexOf( 'col' ) > -1 ) {
-					var data = FLBuilder._jsonParse( response );
 					FLBuilder.triggerHook( 'didApplyColTemplateComplete', data.config );
 					callback( data.layout );
 				} else {
+					FLBuilder.triggerHook( 'didApplyModuleTemplateComplete', data.config );
 					callback( response );
 				}
 			}
@@ -6097,9 +6196,9 @@
 		 */
 		_initSettingsForms: function()
 		{
-			FLBuilder._initSettingsSections();
-			FLBuilder._initButtonGroupFields();
-			FLBuilder._initCompoundFields();
+			const form = $( '.fl-builder-settings:visible', window.parent.document );
+			FL.Builder.settingsForms.initEvents( form );
+
 			FLBuilder._CodeFieldSSLCheck();
 			FLBuilder._initCodeFields();
 			FLBuilder._initColorPickers();
@@ -6119,7 +6218,7 @@
 			FLBuilder._initFieldPopupSliders();
 			FLBuilder._initPresetFields();
 			FLBuilder._initModuleMarginPlaceholders();
-			FLBuilder._focusFirstSettingsControl();
+			FL.Builder.settingsForms.focusFirstSettingsControl();
 			FLBuilder._calculateSettingsTabsOverflow();
 			FLBuilder._lightbox._resizeEditors();
 
@@ -6132,6 +6231,20 @@
 		},
 
 		/**
+		 * Reinitializes all active settings forms.
+		 *
+		 * @since 2.9
+		 * @access private
+		 * @method _reinitSettingsForms
+		 */
+		_reinitSettingsForms: function()
+		{
+			FLBuilder._reinitEditorFields();
+
+			FLBuilder.triggerHook('settings-form-init');
+		},
+
+		/**
 		 * Destroys all active settings forms.
 		 *
 		 * @since 2.0
@@ -6141,6 +6254,7 @@
 		_destroySettingsForms: function()
 		{
 			FLBuilder._destroyEditorFields();
+			FLBuilder._hideColorPicker();
 		},
 
 		/**
@@ -6187,8 +6301,7 @@
 				localStorage.setItem( 'fl-builder-settings-tab', '' );
 			}
 
-			FLBuilder._focusFirstSettingsControl();
-			FLBuilder._hideEditorPopups();
+			FL.Builder.settingsForms.focusFirstSettingsControl();
 
 			e.preventDefault();
 		},
@@ -6201,6 +6314,23 @@
 			$lightbox.find('.fl-builder-settings-tabs .fl-active').removeClass('fl-active');
 			$lightbox.find('.fl-builder-settings-tabs-overflow-menu .fl-active').removeClass('fl-active');
 			$lightbox.find('.fl-contains-active').removeClass('fl-contains-active');
+		},
+
+		/**
+		* Calculate width of text from DOM element or string.
+		* Move from fl-builder-ui.js for 2.9 module blocks.
+		*
+		* @since 2.9
+		* @param {Object} ele
+		* @return {String}
+		*/
+		_calculateTextWidth: function(ele) {
+			var temp = $('<span>').hide().appendTo(document.body);
+			ele = $(ele);
+			temp.text(ele.val() || ele.text()).css('font', ele.css('font'));
+			var width = temp.width();
+			temp.remove();
+			return width;
 		},
 
 		/**
@@ -6242,7 +6372,8 @@
 				if ( !shouldEjectRemainingTabs ) {
 
 					// Width of text + padding + bumper space
-						var currentTabWidth = $(this).textWidth() + tabPadding + 12;
+					var textWidth = FLBuilder._calculateTextWidth(this);
+					var currentTabWidth = textWidth + tabPadding + 12;
 					tabsWidthTotal += currentTabWidth;
 
 					if ( tabsWidthTotal >= tabsAreaWidth ) {
@@ -6373,18 +6504,6 @@
 		},
 
 		/**
-		 * Setup section toggling for all sections
-		 *
-		 * @since 2.2
-		 * @access private
-		 * @method _initSettingsSections
-		 * @return void
-		 */
-		_initSettingsSections: function() {
-			$( '.fl-builder-settings:visible', window.parent.document ).find( '.fl-builder-settings-section' ).each( FLBuilder._initSection );
-		},
-
-		/**
 		 * Reverts an active preview and hides the lightbox when
 		 * the cancel button of a settings lightbox is clicked.
 		 *
@@ -6436,41 +6555,6 @@
 			FLBuilder.preview = null;
 			FLLightbox.closeParent(this);
 			FLBuilder.triggerHook( 'didCancelNodeSettings' );
-		},
-
-		/**
-		 * Focus the first visible control in a settings panel
-		 *
-		 * @since 2.0
-		 */
-		_focusFirstSettingsControl: function() {
-			var form   = $( '.fl-builder-settings:visible', window.parent.document ),
-				tab    = form.find( '.fl-builder-settings-tab.fl-active' ),
-				nodeId = form.data( 'node' ),
-				field  = tab.find('.fl-field').first(),
-				input  = field.find( 'input:not([type="hidden"]), textarea, select, button, a, .fl-editor-field' ).first();
-
-			// Don't focus fields that have an inline editor.
-			if ( nodeId && $( '.fl-node-' + nodeId + ' .fl-inline-editor' ).length ) {
-				return;
-			}
-
-			if ( 'undefined' !== typeof window.parent.tinyMCE && input.hasClass('fl-editor-field') ) {
-				// TinyMCE fields
-				var id = input.find('textarea.wp-editor-area').attr('id');
-				window.parent.tinyMCE.get( id ).focus();
-			} else {
-				// Everybody else
-				setTimeout(function() {
-					input.focus().css('animation-name', 'fl-grab-attention');
-				}, 300 );
-			}
-
-			// Grab attention
-			field.css('animation-name', 'fl-grab-attention');
-			field.on('animationend', function() {
-				field.css('animation-name', '');
-			});
 		},
 
 		/**
@@ -6580,6 +6664,11 @@
 
 				// Don't save text editor textareas.
 				if ( data[ i ].name.indexOf( 'flrich' ) > -1 ) {
+					continue;
+				}
+
+				// Don't save auto-style fields
+				if ( data[ i ].name.startsWith( 'fl_auto_style_' ) ) {
 					continue;
 				}
 
@@ -7095,6 +7184,9 @@
 				parentBoxForm.validate().hideErrors();
 				FLBuilder._toggleSettingsTabErrors();
 				FLBuilder._initMultipleFields();
+
+				// Pop form state
+				FL?.Builder?.settingsForms.state.pop()
 			} );
 
 			nestedBoxObj.close();
@@ -7112,7 +7204,14 @@
 		 */
 		_showHelpTooltip: function()
 		{
-			$(this).siblings('.fl-help-tooltip-text').fadeIn();
+			const $el = $( this );
+
+			const timeout = setTimeout( () => {
+				$el.siblings( '.fl-help-tooltip-text' ).fadeIn();
+				$el.removeData( 'hoverTimeout' );
+			}, 500 );
+
+			$el.data( 'hoverTimeout', timeout );
 		},
 
 		/**
@@ -7124,185 +7223,15 @@
 		 */
 		_hideHelpTooltip: function()
 		{
-			$(this).siblings('.fl-help-tooltip-text').fadeOut();
-		},
+			const $el = $( this );
+			const timeout = $el.data( 'hoverTimeout' );
 
-		/**
-		 * Setup section toggling
-		 *
-		 * @since 2.2
-		 * @access private
-		 * @method _initSection
-		 * @return void
-		 */
-		_initSection: function() {
-			var wrap = $(this),
-				button = wrap.find('.fl-builder-settings-section-header');
+			if ( timeout ) {
+				clearTimeout( timeout );
+				$el.removeData( 'hoverTimeout' );
+			}
 
-			button.on('click', function() {
-				wrap.toggleClass('fl-builder-settings-section-collapsed')
-			});
-		},
-
-		/* Align Fields
-		----------------------------------------------------------*/
-
-		/**
-		 * Initializes all button group fields within a settings form.
-		 *
-		 * @since 2.2
-		 * @access private
-		 * @method _initButtonGroupFields
-		 */
-		_initButtonGroupFields: function()
-		{
-			$( '.fl-builder-settings:visible', window.parent.document )
-				.find( '.fl-button-group-field' ).each( FLBuilder._initButtonGroupField );
-		},
-
-		/**
-		 * Initializes a button group field within a settings form.
-		 *
-		 * @since 2.2
-		 * @access private
-		 * @method _initButtonGroupField
-		 */
-		_initButtonGroupField: function()
-		{
-			var wrap = $( this ),
-				options    = wrap.find( '.fl-button-group-field-option' ),
-				multiple   = wrap.data( 'multiple' ),
-				min        = wrap.data( 'min' ),
-				max        = wrap.data( 'max' ),
-				input      = wrap.find( 'input:not(.fl-preview-ignore)' ),
-				allowEmpty = !! wrap.data( 'allowEmpty' ),
-				value      = function( format ) {
-					var val = [];
-
-					options.each(function(i, option) {
-						if ($(option).attr('data-selected') === '1') {
-							val.push($(option).attr('data-value'));
-						}
-					})
-
-					if ( 'array' == format ) {
-						return val;
-					}
-
-					return val.join(',');
-				};
-
-			options.on( 'click', function() {
-				var option = $( this ),
-					length = value( 'array' ).length,
-					isSelected = '1' === option.attr( 'data-selected' );
-
-				if ( ! allowEmpty && isSelected ) {
-					return;
-				}
-
-				if ( isSelected ) {
-					if ( false == min ) {
-						option.attr( 'data-selected', '0' );
-					} else {
-						if ( length - 1 >= min ) {
-							option.attr( 'data-selected', '0' );
-						}
-					}
-				} else {
-					// Unset other options
-					if ( multiple !== true ) {
-						options.attr( 'data-selected', '0' );
-					}
-
-					if ( false == max ) {
-						option.attr( 'data-selected', '1' );
-					} else {
-						if ( length + 1 <= max ) {
-							option.attr( 'data-selected', '1' );
-						}
-					}
-				}
-
-				input.val( value( '' ) ).trigger( 'change' );
-			} );
-
-			// Handle value being changed externally
-			input.on( 'change', function( e ) {
-				var value = input.val().split(',');
-
-				// Unset other options
-				if (multiple !== true) {
-					options.attr('data-selected', '0' );
-				}
-
-				$.each(value, function(i, val) {
-					var option = options.filter( '[data-value="' + val + '"]' );
-
-					// Set the matching one.
-					option.attr( 'data-selected', '1' );
-				});
-			});
-		},
-
-		/* Compound Fields
-		----------------------------------------------------------*/
-
-		/**
-		 * Initializes all compound fields within a settings form.
-		 *
-		 * @since 2.2
-		 * @access private
-		 * @method _initCompoundFields
-		 */
-		_initCompoundFields: function()
-		{
-			$( '.fl-builder-settings:visible', window.parent.document )
-				.find( '.fl-compound-field' ).each( FLBuilder._initCompoundField );
-		},
-
-		/**
-		 * Initializes a compound field within a settings form.
-		 *
-		 * @since 2.2
-		 * @access private
-		 * @method _initCompoundField
-		 */
-		_initCompoundField: function()
-		{
-			var wrap = $( this ),
-				sections = wrap.find( '.fl-compound-field-section' ),
-				toggles = wrap.find( '.fl-compound-field-section-toggle' ),
-				dimensions = wrap.find( '.fl-compound-field-setting' ).has( '.fl-dimension-field-units' );
-
-			sections.each( function() {
-				var section = $( this );
-				if ( ! section.find( '.fl-compound-field-section-toggle' ).length ) {
-					section.addClass( 'fl-compound-field-section-visible' );
-				}
-			} );
-
-			toggles.on( 'click', function() {
-				var toggle = $( this ),
-					field = toggle.closest( '.fl-field' ),
-					section = toggle.closest( '.fl-compound-field-section' ),
-					className = '.' + section.attr( 'class' ).split( ' ' ).join( '.' );
-
-				field.find( className ).toggleClass( 'fl-compound-field-section-visible' );
-			} );
-
-			// Init linking for compound dimension fields.
-			dimensions.each( function() {
-				var field = $( this ),
-					label = field.find( '.fl-compound-field-label' ),
-					icon = '<i class="fl-dimension-field-link fl-tip dashicons dashicons-admin-links" title="Link Values"></i>';
-
-				if ( ! label.length || field.find( '.fl-shadow-field' ).length ) {
-					return;
-				}
-
-				label.append( icon );
-			} );
+			$el.siblings( '.fl-help-tooltip-text' ).fadeOut();
 		},
 
 		/* Auto Suggest Fields
@@ -7490,6 +7419,21 @@
 
 			editor.getSession().on( 'change', function( e ) {
 				textarea.val( editor.getSession().getValue() ).trigger( 'change' );
+
+				// Handle node code settings when shortcodes are enabled.
+				saveBtn  = settings.find( '.fl-builder-settings-save' );
+				val = editor.getSession().getValue();
+
+				if ( settings.find( '#fl-builder-settings-section-bb_js_code' ).length > 0 && 'fl-field-bb_js_code' === field.closest( '.fl-field' ).attr('ID') ) {
+
+					if ( null !== val.match( /<\/iframe>|<\/script>|<meta/gm ) ) {
+						saveBtn.addClass( 'fl-builder-settings-error' );
+						saveBtn.on( 'click', FLBuilder._showCodeFieldCriticalError );
+					} else {
+						saveBtn.removeClass( 'fl-builder-settings-error' );
+						saveBtn.off( 'click', FLBuilder._showCodeFieldCriticalError );
+					}
+				}
 			} );
 
 			/**
@@ -7517,6 +7461,10 @@
 						hasError = true;
 						break;
 					}
+					if ( annot[ i ].text.indexOf( 'Expected (<color>) but found' ) > -1 ) {
+						annot.splice(i, 1);
+						editor.getSession().setAnnotations(annot);
+					}
 				}
 
 				val = editor.getSession().getValue();
@@ -7525,6 +7473,7 @@
 					saveBtn.addClass( 'fl-builder-settings-error' );
 					saveBtn.on( 'click', FLBuilder._showCodeFieldCriticalError );
 				}
+
 				if ( hasError && settings.find( '#fl-builder-settings-section-bb_js_code' ).length > 0 && 'fl-field-bb_js_code' === field.closest( '.fl-field' ).attr('ID') ) {
 					saveBtn.addClass( 'fl-builder-settings-error' );
 					saveBtn.on( 'click', FLBuilder._showCodeFieldCriticalError );
@@ -7661,12 +7610,18 @@
 				clone.find('.fl-global-color-field-uid').val( FLBuilder._uniqueColorID() );
 			}
 
+			// Remove react-based color picker dom
+			clone.find('.picker-mount').empty()
+
 			fieldRow.after(clone);
+			const table = clone.closest( '.fl-field' );
 			FLBuilder._initMultipleFields();
+			FLBuilder._renumberFields( table );
 
 			if ( form.length ) {
 				formType = form.find( '.fl-form-field-edit' ).data( 'type' );
 				form.find( 'input' ).val( JSON.stringify( FLBuilderSettingsConfig.defaults.forms[ formType ] ) );
+				form.find( 'input' ).trigger( 'change' )
 			}
 			else {
 				form = button.closest('form.fl-builder-settings');
@@ -7678,9 +7633,9 @@
 				} else {
 					button.parents( '.fl-field' ).find('input').trigger('change');
 				}
-
-				FLBuilder._renumberFields( clone.closest( '.fl-field' ) );
 			}
+
+			FLBuilder._updateRepeaterFormState( table )
 		},
 
 		/**
@@ -7693,23 +7648,32 @@
 		 */
 		_copyFieldClicked: function()
 		{
-			var row     = $(this).closest('tr'),
-				parent  = row.parent(),
-				clone   = row.clone(),
-				index   = parseInt(row.find('label span.fl-builder-field-index').html(), 10) + 1;
+			var row       = $(this).closest('tr'),
+				fieldName = row.data('field'),
+				parent    = row.parent(),
+				clone     = row.clone(),
+				index     = parseInt(row.find('label span.fl-builder-field-index').html(), 10) + 1;
 
 			clone.find('th label span.fl-builder-field-index').html(index);
 
 			// global color - remove input id for cloned field
 			if ( clone.find('.fl-global-color-field-uid') ) {
 				clone.find('.fl-global-color-field-uid').val( FLBuilder._uniqueColorID() );
+				clone_name = clone.find( '.fl-global-color-field-input.text').val() + ' (' + FLBuilderStrings.copy + ')';
+				clone.find( '.fl-global-color-field-input.text').attr( 'value', clone_name );
+				clone.find( '.fl-global-color-field-input.text').text( clone_name );
 			}
+
+			// Remove react-based color picker dom
+			clone.find('.picker-mount').empty()
 
 			row.after(clone);
 
-			parent.find('input').trigger('change');
 			FLBuilder._renumberFields(row.parent());
 			FLBuilder._initMultipleFields();
+			parent.find('input').trigger('change');
+			FLBuilder._updateRepeaterFormState( row.parent() );
+
 			if ( FLBuilder.preview ) {
 				FLBuilder.preview.delayPreview();
 			}
@@ -7734,10 +7698,76 @@
 				row.remove();
 				FLBuilder._renumberFields(parent);
 				FLBuilder._initMultipleFields();
+
+				parent.find('input').trigger('change');
+				FLBuilder._updateRepeaterFormState( parent );
+
 				if ( FLBuilder.preview ) {
 					FLBuilder.preview.delayPreview();
 				}
 			}
+		},
+
+		/**
+		 * Get the settings object from multiple form inputs with the same key
+		 *
+		 * @since 2.9
+		 * @access private
+		 * @method _getRepeaterSetting
+		 * @param String name - base name of the setting key
+		 * @param HTMLElement form
+		 */
+		_getRepeaterSetting( name, form ) {
+			const formData = new FormData( form )
+			const obj = []
+			const items = Array.from( formData.entries() ).filter( ( [ key ] ) => key.startsWith( name + "[" ) )
+
+			items.map( ( [ key, value ], i ) => {
+
+				// Convert the name into a key path array
+				const path = key.split('][').map( string => string.replaceAll(']', '').replaceAll('[', '') )
+				const [ _, ...keyPath ] = path
+
+				if ( 0 === keyPath.length ) {
+					obj[i] = value
+				} else {
+					keyPath.reduce( ( acc = {}, key, i ) => {
+						acc[key] = undefined !== acc[key] ? acc[key] : {}
+
+						// Last key
+						if ( keyPath.length - 1 === i ) {
+							acc[key] = value
+						}
+
+						return acc[key]
+					}, obj )
+				}
+			} )
+
+			return obj
+		},
+
+		/**
+		 * @since 2.9
+		 * @access private
+		 * @method _updateRepeaterFormState
+		 * @param HTMLElement table - A table element with mulitple fields
+		 */
+		_updateRepeaterFormState( table ) {
+			const { getSnapshot, setCurrentForm } = FL.Builder.settingsForms.state
+			const settingName = table.attr('id').replace( 'fl-field-', '' )
+			const forms = getSnapshot()
+			const currentForm = forms[forms.length - 1 ]
+			const settingValue = FLBuilder._getRepeaterSetting( settingName, table.closest('form').get(0) )
+
+			const newForm = {
+				...currentForm,
+				settings: {
+					...currentForm.settings,
+					[settingName]: settingValue
+				}
+			}
+			setCurrentForm( newForm )
 		},
 
 		/**
@@ -7801,6 +7831,9 @@
 		_fieldDragStop: function(e, ui)
 		{
 			FLBuilder._renumberFields(ui.item.parent());
+
+			ui.item.find('input').trigger('change');
+			FLBuilder._updateRepeaterFormState( ui.item.parent() );
 
 			if ( FLBuilder.preview ) {
 				FLBuilder.preview.delayPreview();
@@ -8119,7 +8152,18 @@
 
 		},
 
-		/* Color Pickers
+		/**
+		 * Hides the color picker UI.
+		 *
+		 * @since 2.9
+		 */
+		_hideColorPicker: function()
+		{
+			$( '.fl-color-picker-ui.fl-color-picker-active', window.parent.document )
+				.removeClass( 'fl-color-picker-active' );
+		},
+
+		/* Gradient Pickers
 		----------------------------------------------------------*/
 
 		/**
@@ -8900,17 +8944,50 @@
 		 */
 		_formFieldClicked: function()
 		{
-			var link      = $( this ),
-				form      = link.closest( '.fl-builder-settings' ),
-				type      = link.attr( 'data-type' ),
-				settings  = link.siblings( 'input' ).val(),
-				helper    = FLBuilder._moduleHelpers[ type ],
-				config    = FLBuilderSettingsConfig.forms[ type ],
-				lightbox  = FLBuilder._openNestedSettings( { className: 'fl-builder-lightbox fl-form-field-settings' } );
+			var link = $( this );
+			var type = link.attr( 'data-type' );
+			var input = link.siblings( 'input' );
+			var key = input.attr( 'name' ).replace( /\[(.*)\]/, '' );
+			var settings = input.val();
+			var multiple = link.closest( '.fl-builder-field-multiple' );
+			var index = ! multiple.length ? null : multiple.index( '.fl-builder-field-multiple' );
+			var defaults = FLBuilderSettingsConfig.defaults.forms[ type ];
+
+			if ( FLBuilder.isBlockEditor() ) {
+				settings = JSON.parse( settings );
+				settings = JSON.stringify( { ...defaults, ...settings } );
+				FLBuilder.triggerHook( 'renderFormFieldSettings', [ type, settings, input, key, index ] );
+				return;
+			}
 
 			if ( '' === settings ) {
-				settings = JSON.stringify( FLBuilderSettingsConfig.forms[ type ] );
+				settings = JSON.stringify( defaults );
+				input.val( settings );
 			}
+
+			var lightbox = FLBuilder._openNestedSettings( {
+				className: 'fl-builder-lightbox fl-form-field-settings'
+			} );
+
+			var callback = function() {
+				FLBuilderResponsiveEditing._switchAllSettingsToCurrentMode();
+			}
+
+			FLBuilder._renderFormFieldSettings( type, settings, input, lightbox, callback );
+		},
+
+		/**
+		 * Renders the settings for a nested form field.
+		 *
+		 * @since 2.9
+		 * @return void
+		 */
+		_renderFormFieldSettings: function( type, settings, input, lightbox, callback )
+		{
+			var form = $( '.fl-builder-settings:visible' );
+			var link = input.siblings( 'a' );
+			var helper = FLBuilder._moduleHelpers[ type ];
+			var config = FLBuilderSettingsConfig.forms[ type ];
 
 			// Trigger refresh preview
 			FLBuilder.preview?.preview()
@@ -8924,17 +9001,19 @@
 				rules 			: helper ? helper.rules : null,
 				helper			: {
 					init: function () {
+						var subform = $( '.fl-builder-settings:visible' );
+
+						link.attr( 'id', 'fl-' + subform.attr( 'data-instance-id' ) );
+						subform.attr( 'data-type', type );
+
 						if ( helper ) {
 							helper.init();
 						}
+
 						FLBuilder._initFormFieldSettingsPreview();
 					}
 				},
-			}, function() {
-				link.attr( 'id', 'fl-' + lightbox._node.attr( 'data-instance-id' ) );
-				lightbox._node.find( 'form.fl-builder-settings' ).attr( 'data-type', type );
-				FLBuilderResponsiveEditing._switchAllSettingsToCurrentMode();
-			} );
+			}, callback );
 		},
 
 		/**
@@ -8964,7 +9043,6 @@
 		 * @since 2.5
 		 * @access private
 		 * @method _initFormFieldSettingsPreview
-		 * @param {Object} lightbox
 		 */
 		_initFormFieldSettingsPreview: function()
 		{
@@ -9033,13 +9111,14 @@
 		 */
 		_saveFormFieldSettings: function( form )
 		{
-			var lightboxId    = form.closest( '.fl-lightbox-wrap' ).attr( 'data-instance-id' ),
+			var lightboxId    = form.attr( 'data-instance-id' ),
 				type          = form.attr( 'data-type' ),
 				settings      = FLBuilder._getSettings( form ),
 				oldSettings   = {},
 				helper        = FLBuilder._moduleHelpers[ type ],
 				link          = $( '.fl-builder-settings #fl-' + lightboxId, window.parent.document ),
 				preview       = link.parent().attr( 'data-preview-text' ),
+				preview_img   = link.parent().attr( 'data-preview-image' ),
 				previewOptions = [],
 				activePreview = '',
 				previewField  = null,
@@ -9063,6 +9142,10 @@
 				}
 			}
 
+			// Handle preview_img
+			if ( preview_img ) {
+				preview_img = settings[ preview_img ];
+			}
 
 			if ( selectPreview && selectPreview.length > 0 ) {
 				previewText = selectPreview.find( 'option[value="' + previewText + '"]' ).text();
@@ -9090,10 +9173,13 @@
 					if( 'filter_meta_label' == preview && ! previewText ) {
 						previewText = FLBuilderSettingsForms.escapeHTML( settings[ 'filter_meta_key' ] );
 					}
+					if ( preview_img ) {
+						previewText = '<img style="max-width: 60px" src="' + FLBuilderSettingsForms.escapeHTML( preview_img ) + '" />&nbsp;' + previewText;
+					}
 					link.siblings( '.fl-form-field-preview-text' ).html( previewText );
 				}
 
-				if ( link.length > 0 ) {
+				if ( link.length > 0 && ! FLBuilder.isBlockEditor() ) {
 					oldSettings = link.siblings( 'input' ).val().replace( /&#39;/g, "'" );
 
 					if ( '' != oldSettings ) {
@@ -9281,9 +9367,25 @@
 		 */
 		_initFontField: function(){
 			var wrap   = $( this ),
+				section = wrap.closest( '.fl-compound-field-section' ),
 				value  = wrap.attr( 'data-value' ),
 				font   = wrap.find( '.fl-font-field-font' ),
 				weight = wrap.find( '.fl-font-field-weight' );
+
+			// Lazy render font fields in compound fields to prevent family options
+			// from being rendered multiple times and slowing down rendering.
+			if ( section.length && ! section.hasClass( 'fl-font-field-lazy-init' ) ) {
+				section.addClass( 'fl-font-field-lazy-init' )
+				section.one( 'click', () => FLBuilder._initFontField.apply( this ) );
+				if ( value.indexOf( 'family' ) > -1 ) {
+					value = FLBuilder._jsonParse( value );
+					font.append( '<option value="' + value.family + '" selected>' + value.family + '</option>' );
+					weight.append( '<option value="' + value.weight + '" selected>' + value.weight + '</option>' );
+				}
+				return;
+			} else {
+				FLBuilder._initFontFamilyOptions(font); // Render the full family options list.
+			}
 
 			if ( FLBuilderConfig.select2Enabled ) {
 				font.select2({width:'100%'})
@@ -9357,6 +9459,57 @@
 		},
 
 		/**
+		 * Initializes the font family options for a font field.
+		 *
+		 * @since  2.9
+		 */
+		_initFontFamilyOptions: function(fontSelect) {
+			if (!FLBuilder._fontFamilyCache) {
+				const fonts = FLBuilderFontFamilies;
+				const recent = FLBuilderConfig.recentFonts || {};
+		
+				const createOption = (value, label) => {
+					const opt = document.createElement('option');
+					opt.value = value;
+					opt.textContent = label;
+					return opt;
+				};
+		
+				const fragment = document.createDocumentFragment();
+		
+				fragment.appendChild(createOption('Default', 'Default'));
+		
+				const recentKeys = Object.keys(recent).filter(f => f !== 'Default');
+				if (recentKeys.length) {
+					const group = document.createElement('optgroup');
+					group.label = 'Recently Used';
+					group.className = 'recent-fonts';
+					recentKeys.forEach(name => group.appendChild(createOption(name, name)));
+					fragment.appendChild(group);
+				}
+		
+				const systemGroup = document.createElement('optgroup');
+				systemGroup.label = 'System';
+				Object.keys(fonts.system).forEach(name => {
+					systemGroup.appendChild(createOption(name, name));
+				});
+				fragment.appendChild(systemGroup);
+		
+				const googleGroup = document.createElement('optgroup');
+				googleGroup.label = 'Google';
+				Object.keys(fonts.google).forEach(name => {
+					googleGroup.appendChild(createOption(name, name));
+				});
+				fragment.appendChild(googleGroup);
+		
+				FLBuilder._fontFamilyCache = fragment;
+			}
+		
+			fontSelect.empty();
+			fontSelect.append(FLBuilder._fontFamilyCache.cloneNode(true)); // Clone cached
+		},
+
+		/**
 		 * Renders the correct weights list for a respective font.
 		 *
 		 * @since  1.6.3
@@ -9422,7 +9575,7 @@
 				FLBuilder._initEditorField.call( this, window.parent );
 			} );
 
-			if ( FLBuilder.UIIFrame.isEnabled() ) {
+			if ( 'undefined' !== typeof FLBuilder.UIIFrame && FLBuilder.UIIFrame.isEnabled() ) {
 				$( '.fl-builder-hidden-editor' ).each( function() {
 					FLBuilder._initEditorField.call( this, window );
 				} );
@@ -9517,7 +9670,7 @@
 		 */
 		_reinitEditorFields: function()
 		{
-			if ( ! $( '.fl-lightbox-resizable:visible', window.parent.document ).length ) {
+			if ( ! $( 'form.fl-builder-settings:visible', window.parent.document ).length ) {
 				return;
 			}
 
@@ -9568,16 +9721,6 @@
 
 			$( '.wplink-autocomplete', window.parent.document ).remove();
 			$( '.ui-helper-hidden-accessible', window.parent.document ).remove();
-		},
-
-		/**
-		 * Hide all TinyMCE popups.
-		 *
-		 * @since 2.8
-		 */
-		_hideEditorPopups: function()
-		{
-			$( '.mce-inline-toolbar-grp', window.parent.document ).hide();
 		},
 
 		/**
@@ -10430,7 +10573,6 @@
 
 			node.addClass( 'fl-builder-node-loading' );
 
-			FLBuilder._removeAllOverlays();
 			FLBuilder.triggerHook( 'didStartNodeLoading', node );
 		},
 
@@ -10468,7 +10610,7 @@
 
 			// Get sibling rows.
 			if ( parent.hasClass( 'fl-builder-content' ) ) {
-				siblings = parent.find( ' > .fl-row' );
+				siblings = parent.find( ' > .fl-row, > .fl-module' );
 			}
 			// Get sibling column groups.
 			else if ( parent.hasClass( 'fl-row-content' ) ) {
@@ -10795,48 +10937,6 @@
 			lightbox._node.find( '.fl-builder-confirm-cancel' ).on( 'click', config.cancel );
 		},
 
-		/* Simple JS hooks similar to WordPress PHP hooks.
-		----------------------------------------------------------*/
-
-		/**
-		 * Trigger a hook.
-		 *
-		 * @since 1.8
-		 * @method triggerHook
-		 * @param {String} hook The hook to trigger.
-		 * @param {Array} args An array of args to pass to the hook.
-		 */
-		triggerHook: function( hook, args )
-		{
-			$( 'body' ).trigger( 'fl-builder.' + hook, args );
-		},
-
-		/**
-		 * Add a hook.
-		 *
-		 * @since 1.8
-		 * @method addHook
-		 * @param {String} hook The hook to add.
-		 * @param {Function} callback A function to call when the hook is triggered.
-		 */
-		addHook: function( hook, callback )
-		{
-			$( 'body' ).on( 'fl-builder.' + hook, callback );
-		},
-
-		/**
-		 * Remove a hook.
-		 *
-		 * @since 1.8
-		 * @method removeHook
-		 * @param {String} hook The hook to remove.
-		 * @param {Function} callback The callback function to remove.
-		 */
-		removeHook: function( hook, callback )
-		{
-			$( 'body' ).off( 'fl-builder.' + hook, callback );
-		},
-
 		/* Console Logging
 		----------------------------------------------------------*/
 
@@ -10996,107 +11096,6 @@
 			}
 			return false;
 		},
-		/**
-		 * Helper taken from lodash
-		 * @since 2.2.2
-		 */
-		isUndefined: function(obj) {
-			return obj === void 0;
-		},
-
-		/**
-		 * Helper taken from lodash
-		 * @since 2.2.2
-		 */
-		isBoolean: function(value) {
-			return value === true || value === false
-		},
-
-		/**
-		 * Check if the operating system is set to dark mode.
-		 *
-		 * @since 2.6
-		 * @return bool
-		 */
-		_isSystemColorSchemeDark: function() {
-			return window.matchMedia && window.matchMedia( '( prefers-color-scheme: dark )' ).matches
-		},
-
-		/**
-		 * Get the static color scheme value even if matching the operating system.
-		 *
-		 * @since 2.6
-		 * @return string (light|dark)
-		 */
-		_getComputedColorScheme: function() {
-			const colorScheme = FL.Builder.data.getSystemState().colorScheme
-			if ( 'auto' === colorScheme ) {
-				return FLBuilder._isSystemColorSchemeDark() ? 'dark' : 'light'
-			}
-			return colorScheme
-		},
-
-		/**
-		 * Setup color scheme handling
-		 *
-		 * @since 2.6
-		 * @param {string} key
-		 * @param {any} data
-		 * @return void
-		 */
-		_initColorScheme: function() {
-			FLBuilder._setColorSchemeBodyClasses( FLBuilder._getComputedColorScheme() )
-
-			// Listen for system color scheme changes
-			window.matchMedia( '(prefers-color-scheme: dark)' )
-				.addEventListener( 'change', FLBuilder._systemColorSchemeChanged )
-		},
-
-		/**
-		 * Listen for changes to the operating system color scheme value.
-		 *
-		 * @since 2.6
-		 * @param MediaQueryListEvent e
-		 * @param {any} data
-		 * @return void
-		 */
-		_systemColorSchemeChanged: function( e ) {
-			const colorScheme = FL.Builder.data.getSystemState().colorScheme
-
-			if ( 'auto' !== colorScheme ) {
-				return
-			}
-			if ( e.matches ) {
-				FLBuilder._setColorSchemeBodyClasses( 'dark' )
-			} else {
-				FLBuilder._setColorSchemeBodyClasses( 'light' )
-			}
-		},
-
-		/**
-		 * Add/Remove appropriate color scheme body classes.
-		 *
-		 * @since 2.6
-		 * @param String name (light|dark|auto)
-		 * @return void
-		 */
-		_setColorSchemeBodyClasses: function( name ) {
-			const parentClasses = window.parent.document.body.classList
-			const childClasses = document.body.classList
-			let add = name
-
-			// Handle 'auto' value
-			if ( 'auto' === name ) {
-				add = FLBuilder._getComputedColorScheme()
-			}
-
-			const remove = 'dark' === add ? 'light' : 'dark'
-
-			parentClasses.remove( `fl-builder-ui-skin--${remove}`, `fluid-color-scheme-${remove}` );
-			childClasses.remove( `fl-builder-ui-skin--${remove}`, `fluid-color-scheme-${remove}` );
-			parentClasses.add( `fl-builder-ui-skin--${add}`, `fluid-color-scheme-${add}` );
-			childClasses.add( `fl-builder-ui-skin--${add}`, `fluid-color-scheme-${add}` );
-		},
 
 		/**
 		 * Get sandbox data.
@@ -11132,6 +11131,54 @@
 			delete this._sandbox[key];
 		},
 	};
+
+	/**
+	 * Setup Proxy to redirect properties
+	 */
+	FLBuilder = new Proxy( FLBuilder, {
+
+		deprecated: {
+
+			// Conditional Utils
+			isBlockEditor: FL.Builder.utils.isBlockEditor,
+			isBoolean: FL.Builder.utils.isBoolean,
+			isUndefined: FL.Builder.utils.isUndefined,
+
+			// Hooks
+			addHook: FL.Builder.utils.hooks.add,
+			removeHook: FL.Builder.utils.hooks.remove,
+			triggerHook: FL.Builder.utils.hooks.trigger,
+
+			// Color Scheme
+			_initColorScheme: FL.Builder.utils.colorScheme.init,
+			_isSystemColorSchemeDark: FL.Builder.utils.colorScheme.isSystemDark,
+			_getComputedColorScheme: FL.Builder.utils.colorScheme.getComputedColorScheme,
+			_systemColorSchemeChanged: FL.Builder.utils.colorScheme.systemColorSchemeChanged,
+			_setColorSchemeBodyClasses: FL.Builder.utils.colorScheme.setBodyClasses,
+
+			// Settings Form Events
+			_focusFirstSettingsControl: FL.Builder.settingsForms.focusFirstSettingsControl,
+
+			/**
+			 * I've chosen not to proxy these methods because they don't seem to be called directly in BB
+			 * If you run into an error just restore the proxy and export the function from its new file.
+			 * Keeping them here for now for the sake of notes.
+			 */
+			//_initCompoundFields: FL.Builder.settingsForms.compoundFields.init,
+			//_initCompoundField: FL.Builder.settingsForms.compoundFields.initField,
+			//_initButtonGroupFields: FL.Builder.settingsForms.buttonGroups.init,
+			//_initButtonGroupField: FL.Builder.settingsForms.buttonGroups.initField,
+			//_initSettingsSections: FL.Builder.settingsForms.sections.init,
+			//_initSection: FL.Builder.settingsForms.sections.initSection,
+		},
+
+		get( target, prop, receiver ) {
+			if ( prop in this.deprecated ) {
+				return this.deprecated[prop]
+			}
+			return Reflect.get( ...arguments )
+		},
+	} )
 
 	/* Start the party!!! */
 	$(function(){

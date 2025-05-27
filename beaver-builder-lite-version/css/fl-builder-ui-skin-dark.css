@@ -2,10 +2,17 @@ body.fl-builder-ui-skin--dark {
 	--fl-builder-outline-color: hsl( var(--fl-builder-ui-hue), 11%, 25% );
 	--fl-builder-divider-color: hsl( var(--fl-builder-ui-hue), 11%, 23% );
 	--fl-builder-input-shadow: 0 0 0 1px var(--fl-builder-outline-color);
+
+	--fl-builder-panel-color: white;
 	--fl-builder-panel-bg-color: #23282e;
+
+	--fl-builder-platter-color: white;
 	--fl-builder-platter-bg-color: #181b20;
-	--fl-builder-input-bg-color: #181b20;
+
 	--fl-builder-input-color: white;
+	--fl-builder-input-bg-color: #181b20;
+
+	--fl-builder-heading-color: white;
 	--fl-builder-heading-bg-color: #101216;
 }
 
@@ -276,7 +283,7 @@ body.fl-builder-ui-skin--dark .fl-builder-bar .fl-builder-bar-content,
     background-color: #1b2025;
 }
 
-.fl-builder-ui-skin--dark .fl-lightbox :not(i):not([class^='ace_']):not(.error):not(.fl-builder-settings-tab-description a):not(.fl-field-description a):not(.fl-builder-service-error):not(.fl-lightbox-header span):not(.fl-switch-group-item):not(.fl-switch-group-item *):not(.fl-builder-button):not(.fl-lightbox-message a) {
+.fl-builder-ui-skin--dark .fl-lightbox :not(i):not([class^='ace_']):not(.error):not(.fl-builder-settings-tab-description a):not(.fl-field-description a):not(.fl-builder-service-error):not(.fl-lightbox-header span):not(.fl-switch-group-item):not(.fl-switch-group-item *):not(.fl-builder-button):not(.fl-lightbox-message a):not(.fl-control) {
     color: #a7b1bb !important;
 }
 .fl-builder-ui-skin--dark .fl-builder-button {

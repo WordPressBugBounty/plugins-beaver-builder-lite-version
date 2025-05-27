@@ -37,8 +37,13 @@ final class FLBuilderServices {
 		),
 		'constant-contact'        => array(
 			'type'  => 'autoresponder',
-			'name'  => 'Constant Contact',
+			'name'  => 'Constant Contact (deprecated)',
 			'class' => 'FLBuilderServiceConstantContact',
+		),
+		'constant-contact-3'      => array(
+			'type'  => 'autoresponder',
+			'name'  => 'Constant Contact',
+			'class' => 'FLBuilderServiceConstantContact3',
 		),
 		'convertkit'              => array(
 			'type'  => 'autoresponder',

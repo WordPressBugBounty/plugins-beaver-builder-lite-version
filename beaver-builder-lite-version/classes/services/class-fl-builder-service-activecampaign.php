@@ -157,7 +157,8 @@ final class FLBuilderServiceActiveCampaign extends FLBuilderService {
 		$response['html'] .= $render_type_html;
 
 		if ( ! isset( $post_data['list_type'] ) ) {
-			$response['html'] .= $this->render_tags_field( $settings );
+			$tags              = json_decode( $api->api( 'contact/tags_list' ) );
+			$response['html'] .= $this->render_tags_field( $tags, $settings );
 		}
 
 		return $response;
@@ -267,17 +268,33 @@ final class FLBuilderServiceActiveCampaign extends FLBuilderService {
 	 * @return string The markup for the tags field.
 	 * @access private
 	 */
-	private function render_tags_field( $settings ) {
+	private function render_tags_field( $tags, $settings ) {
 		ob_start();
 
+		$options = array(
+			'' => __( 'Choose...', 'fl-builder' ),
+		);
+
+		// make sure backwards compatible
+		if ( is_string( $settings->tags ) ) {
+			$settings->tags = explode( ',', $settings->tags );
+		}
+
+		foreach ( (array) $tags as $tag ) {
+			if ( is_object( $tag ) && isset( $tag->id ) ) {
+				$options[ $tag->name ] = esc_attr( $tag->name . ' (' . $tag->count . ')' );
+			}
+		}
+
 		FLBuilder::render_settings_field( 'tags', array(
-			'row_class' => 'fl-builder-service-connect-row',
-			'class'     => 'fl-builder-service-connect-input',
-			'type'      => 'text',
-			'default'   => '',
-			'label'     => _x( 'Tags', 'A comma separated list of tags.', 'fl-builder' ),
-			'help'      => __( 'A comma separated list of tags.', 'fl-builder' ),
-			'preview'   => array(
+			'row_class'    => 'fl-builder-service-connect-row',
+			'class'        => 'fl-builder-service-connect-input',
+			'type'         => 'select',
+			'default'      => '',
+			'label'        => _x( 'Tags', 'fl-builder' ),
+			'options'      => $options,
+			'multi-select' => true,
+			'preview'      => array(
 				'type' => 'none',
 			),
 		), $settings);
@@ -360,7 +377,11 @@ final class FLBuilderServiceActiveCampaign extends FLBuilderService {
 
 			// Tags
 			if ( isset( $settings->tags ) && ! empty( $settings->tags ) ) {
-				$data['tags'] = $settings->tags;
+				if ( is_array( $settings->tags ) ) {
+					$data['tags'] = implode( ',', $settings->tags );
+				} else {
+					$data['tags'] = $settings->tags;
+				}
 			}
 
 			// Subscribe

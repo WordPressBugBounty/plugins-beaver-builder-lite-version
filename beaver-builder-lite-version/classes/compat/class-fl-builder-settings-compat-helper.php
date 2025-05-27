@@ -46,7 +46,7 @@ class FLBuilderSettingsCompatHelper {
 		}
 
 		// Build the child settings object from the parent settings and key map.
-		$child_settings = new stdClass;
+		$child_settings = new stdClass();
 
 		foreach ( $key_map as $parent_key => $child_key ) {
 			if ( isset( $settings->{ $parent_key } ) ) {

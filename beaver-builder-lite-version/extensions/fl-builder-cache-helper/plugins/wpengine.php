@@ -2,10 +2,10 @@
 namespace FLCacheClear;
 class Wpengine {
 
-	var $name = 'WPEngine Hosting';
-	var $url  = 'https://wpengine.com/';
+	public $name = 'WPEngine Hosting';
+	public $url  = 'https://wpengine.com/';
 
-	static function run() {
+	public static function run() {
 		if ( class_exists( '\WpeCommon' ) ) {
 			\WpeCommon::purge_memcached();
 			\WpeCommon::clear_maxcdn_cache();

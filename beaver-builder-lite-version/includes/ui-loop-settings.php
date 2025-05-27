@@ -157,7 +157,7 @@ do_action( 'fl_builder_loop_settings_before_form', $settings );
 			// Taxonomies
 			$taxonomies = FLBuilderLoop::taxonomies( $slug );
 
-			$field_settings = new stdClass;
+			$field_settings = new stdClass();
 			foreach ( $settings as $k => $setting ) {
 				if ( false !== strpos( $k, 'tax_' . $slug ) ) {
 					$field_settings->$k = $setting;

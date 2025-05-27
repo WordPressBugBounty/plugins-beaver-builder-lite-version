@@ -1,7 +1,12 @@
 <?php
 
-// Width, Alignment, Space Between buttons
+// CSS selectors with compat for v1 so this file doesn't need to be deprecated.
+$group_selector   = $module->root_selector( [ '.fl-button-group' ] );
+$buttons_selector = $module->root_selector( [ '.fl-button-group', '.fl-button-group-buttons' ] );
+$vert_selector    = $module->root_selector( [ '.fl-button-group-layout-vertical', '.fl-button-group-buttons' ] );
+$horiz_selector   = $module->root_selector( [ '.fl-button-group-layout-horizontal', '.fl-button-group-buttons' ] );
 
+// Width, Alignment, Space Between buttons
 $width = '';
 if ( '' === $settings->width ) {
 	$width = '100%';
@@ -10,12 +15,11 @@ if ( '' === $settings->width ) {
 }
 ?>
 
-.fl-node-<?php echo $id; ?> .fl-button-group-layout-vertical .fl-button-group-buttons a.fl-button,
-.fl-node-<?php echo $id; ?> .fl-button-group-layout-horizontal .fl-button-group-buttons a.fl-button {
+<?php echo $vert_selector; ?> a.fl-button,
+<?php echo $horiz_selector; ?> a.fl-button {
 	width: <?php echo $width; ?>;
 }
-
-.fl-node-<?php echo $id; ?> .fl-button-group-layout-horizontal .fl-button-group-buttons {
+<?php echo $horiz_selector; ?> {
 	<?php
 	$button_group_horiz_align = '';
 	if ( 'left' == $settings->align ) {
@@ -35,14 +39,14 @@ if ( '' === $settings->width ) {
 FLBuilderCSS::responsive_rule( array(
 	'settings'     => $settings,
 	'setting_name' => 'align',
-	'selector'     => ".fl-node-$id .fl-button-group-layout-vertical .fl-button-group-button .fl-button-wrap",
+	'selector'     => "$vert_selector .fl-button-group-button .fl-button-wrap",
 	'prop'         => 'text-align',
 ) );
 
 // Align Horizontal -- Desktop
 if ( 'horizontal' === $settings->layout && ! empty( $settings->align ) ) {
 	FLBuilderCSS::rule( array(
-		'selector' => ".fl-node-$id .fl-button-group-layout-horizontal .fl-button-group-buttons",
+		'selector' => $horiz_selector,
 		'media'    => 'default',
 		'props'    => array(
 			'justify-content' => $module->map_horizontal_alignment( $settings->align ),
@@ -53,7 +57,7 @@ if ( 'horizontal' === $settings->layout && ! empty( $settings->align ) ) {
 // Align Horizontal -- Large
 if ( 'horizontal' === $settings->layout && ! empty( $settings->align_large ) ) {
 	FLBuilderCSS::rule( array(
-		'selector' => ".fl-node-$id .fl-button-group-layout-horizontal .fl-button-group-buttons",
+		'selector' => $horiz_selector,
 		'media'    => 'large',
 		'props'    => array(
 			'justify-content' => $module->map_horizontal_alignment( $settings->align_large ),
@@ -64,7 +68,7 @@ if ( 'horizontal' === $settings->layout && ! empty( $settings->align_large ) ) {
 // Align Horizontal -- Medium
 if ( 'horizontal' === $settings->layout && ! empty( $settings->align_medium ) ) {
 	FLBuilderCSS::rule( array(
-		'selector' => ".fl-node-$id .fl-button-group-layout-horizontal .fl-button-group-buttons",
+		'selector' => $horiz_selector,
 		'media'    => 'medium',
 		'props'    => array(
 			'justify-content' => $module->map_horizontal_alignment( $settings->align_medium ),
@@ -75,7 +79,7 @@ if ( 'horizontal' === $settings->layout && ! empty( $settings->align_medium ) ) 
 // Align Horizontal -- Responsive
 if ( 'horizontal' === $settings->layout && ! empty( $settings->align_responsive ) ) {
 	FLBuilderCSS::rule( array(
-		'selector' => ".fl-node-$id .fl-button-group-layout-horizontal .fl-button-group-buttons",
+		'selector' => $horiz_selector,
 		'media'    => 'responsive',
 		'props'    => array(
 			'justify-content' => $module->map_horizontal_alignment( $settings->align_responsive ),
@@ -87,7 +91,7 @@ if ( 'horizontal' === $settings->layout && ! empty( $settings->align_responsive 
 FLBuilderCSS::dimension_field_rule( array(
 	'settings'     => $settings,
 	'setting_name' => 'button_spacing',
-	'selector'     => ".fl-builder-content .fl-node-$id .fl-button-group .fl-button-group-buttons .fl-button-group-button",
+	'selector'     => ".fl-builder-content $buttons_selector .fl-button-group-button",
 	'props'        => array(
 		'padding-top'    => 'button_spacing_top',
 		'padding-right'  => 'button_spacing_right',
@@ -99,17 +103,17 @@ FLBuilderCSS::dimension_field_rule( array(
 // Text (Color, Typography, etc)
 if ( ! empty( $settings->text_color ) ) :
 	?>
-	.fl-builder-content .fl-node-<?php echo $id; ?> .fl-button-group a.fl-button > span,
-	.fl-builder-content .fl-node-<?php echo $id; ?> .fl-button-group a.fl-button > i {
+	.fl-builder-content <?php echo $group_selector; ?> a.fl-button > span,
+	.fl-builder-content <?php echo $group_selector; ?> a.fl-button > i {
 		color: <?php echo FLBuilderColor::hex_or_rgb( $settings->text_color ); ?>;
 	}
 <?php endif; ?>
 
 <?php if ( ! empty( $settings->text_hover_color ) ) : ?>
-	.fl-builder-content .fl-node-<?php echo $id; ?> .fl-button-group a.fl-button:hover > span,
-	.fl-builder-content .fl-node-<?php echo $id; ?> .fl-button-group a.fl-button:focus > span,
-	.fl-builder-content .fl-node-<?php echo $id; ?> .fl-button-group a.fl-button:hover > i,
-	.fl-builder-content .fl-node-<?php echo $id; ?> .fl-button-group a.fl-button:focus > i {
+	.fl-builder-content <?php echo $group_selector; ?> a.fl-button:hover > span,
+	.fl-builder-content <?php echo $group_selector; ?> a.fl-button:focus > span,
+	.fl-builder-content <?php echo $group_selector; ?> a.fl-button:hover > i,
+	.fl-builder-content <?php echo $group_selector; ?> a.fl-button:focus > i {
 		color: <?php echo FLBuilderColor::hex_or_rgb( $settings->text_hover_color ); ?>;
 	}
 <?php endif; ?>
@@ -119,14 +123,14 @@ if ( ! empty( $settings->text_color ) ) :
 FLBuilderCSS::typography_field_rule( array(
 	'settings'     => $settings,
 	'setting_name' => 'typography',
-	'selector'     => ".fl-builder-content .fl-node-$id .fl-button-group a.fl-button, .fl-builder-content .fl-node-$id .fl-button-group a.fl-button:visited",
+	'selector'     => ".fl-builder-content $group_selector a.fl-button, .fl-builder-content $group_selector a.fl-button:visited",
 ) );
 
 // Button Padding
 FLBuilderCSS::dimension_field_rule( array(
 	'settings'     => $settings,
 	'setting_name' => 'button_spacing',
-	'selector'     => ".fl-builder-content .fl-node-$id .fl-button-group .fl-button-group-buttons .fl-button-group-button a.fl-button",
+	'selector'     => ".fl-builder-content $buttons_selector .fl-button-group-button a.fl-button",
 	'unit'         => 'px',
 	'props'        => array(
 		'padding-top'    => 'button_padding_top',
@@ -140,7 +144,7 @@ FLBuilderCSS::dimension_field_rule( array(
 FLBuilderCSS::dimension_field_rule( array(
 	'settings'     => $settings,
 	'setting_name' => 'padding',
-	'selector'     => ".fl-builder-content .fl-node-$id .fl-button-group .fl-button-group-buttons",
+	'selector'     => ".fl-builder-content $buttons_selector",
 	'unit'         => 'px',
 	'props'        => array(
 		'padding-top'    => 'padding_top',
@@ -177,7 +181,7 @@ if ( ! empty( $settings->bg_color ) ) :
 
 	$bg_grad_start = FLBuilderColor::adjust_brightness( $settings->bg_color, 30, 'lighten' );
 	?>
-.fl-builder-content .fl-node-<?php echo $id; ?> .fl-button-group-buttons a.fl-button {
+.fl-builder-content <?php echo $buttons_selector; ?> a.fl-button {
 	background: <?php echo FLBuilderColor::hex_or_rgb( $settings->bg_color ); ?>;
 	<?php echo $bgroup_default_border; ?>
 	<?php if ( 'gradient' == $settings->style ) : ?>
@@ -191,8 +195,8 @@ endif;
 if ( ! empty( $settings->bg_hover_color ) ) :
 	$bg_hover_grad_start = FLBuilderColor::adjust_brightness( $settings->bg_hover_color, 30, 'lighten' );
 	?>
-.fl-builder-content .fl-node-<?php echo $id; ?> .fl-button-group-buttons a.fl-button:hover,
-.fl-builder-content .fl-node-<?php echo $id; ?> .fl-button-group-buttons a.fl-button:focus {
+.fl-builder-content <?php echo $buttons_selector; ?> a.fl-button:hover,
+.fl-builder-content <?php echo $buttons_selector; ?> a.fl-button:focus {
 
 	background: <?php echo FLBuilderColor::hex_or_rgb( $settings->bg_hover_color ); ?>;
 
@@ -212,13 +216,13 @@ if ( 'adv-gradient' === $settings->style ) :
 		$adv_grad_bg_color_end   = FLBuilderColor::hex_or_rgb( $adv_grad_bg_color );
 		$adv_grad_border_color   = FLBuilderColor::hex_or_rgb( FLBuilderColor::adjust_brightness( $adv_grad_bg_color, 12, 'darken' ) );
 
-		$adv_grad_css_rule['selector'] = ".fl-node-$id .fl-button-group-buttons .fl-button-group-button a.fl-button, .fl-node-$id .fl-button-group-buttons .fl-button-group-button a.fl-button:hover";
+		$adv_grad_css_rule['selector'] = "$buttons_selector .fl-button-group-button a.fl-button, $buttons_selector .fl-button-group-button a.fl-button:hover";
 		$adv_grad_css_rule['props']    = array(
 			'border'           => "1px solid $adv_grad_border_color",
 			'background-image' => "linear-gradient(to bottom, $adv_grad_bg_color_start 0%, $adv_grad_bg_color_end 100%)",
 		);
 	} else {
-		$adv_grad_css_rule['selector'] = ".fl-node-$id .fl-button-group-buttons .fl-button-group-button a.fl-button";
+		$adv_grad_css_rule['selector'] = "$buttons_selector .fl-button-group-button a.fl-button";
 		$adv_grad_css_rule['props']    = array(
 			'background-image' => FLBuilderColor::gradient( $settings->bg_gradient ),
 		);
@@ -230,7 +234,7 @@ endif;
 
 $group_custom_gradient_hover_enable = 'adv-gradient' === $settings->style && ! ( empty( $settings->bg_gradient_hover['colors'][0] ) && empty( $settings->bg_gradient_hover['colors'][1] ) );
 FLBuilderCSS::rule( array(
-	'selector' => ".fl-node-$id .fl-button-group-buttons .fl-button-group-button a.fl-button:hover",
+	'selector' => "$buttons_selector .fl-button-group-button a.fl-button:hover",
 	'enabled'  => $group_custom_gradient_hover_enable,
 	'props'    => array(
 		'background-image' => FLBuilderColor::gradient( $settings->bg_gradient_hover ),
@@ -255,7 +259,7 @@ if ( 'adv-gradient' !== $settings->style ) {
 FLBuilderCSS::border_field_rule( array(
 	'settings'     => $settings,
 	'setting_name' => 'border',
-	'selector'     => ".fl-builder-content .fl-node-$id .fl-button-group-buttons a.fl-button",
+	'selector'     => ".fl-builder-content $buttons_selector a.fl-button",
 ) );
 
 // Border - Hover Settings
@@ -278,7 +282,7 @@ if ( 'adv-gradient' !== $settings->style ) {
 FLBuilderCSS::border_field_rule( array(
 	'settings'     => $settings,
 	'setting_name' => 'border',
-	'selector'     => ".fl-builder-content .fl-node-$id .fl-button-group-buttons a.fl-button:hover",
+	'selector'     => ".fl-builder-content $buttons_selector a.fl-button:hover",
 ) );
 
 // Default background color for gradient styles.
@@ -288,7 +292,7 @@ if ( empty( $settings->bg_color ) && 'gradient' === $settings->style ) {
 
 // Border - Default
 FLBuilderCSS::rule( array(
-	'selector' => ".fl-node-$id .fl-button-group-buttons a.fl-button, .fl-node-$id .fl-button-group-buttons a.fl-button:visited",
+	'selector' => "$buttons_selector a.fl-button, $buttons_selector a.fl-button:visited",
 	'enabled'  => ! empty( $settings->bg_color ) && 'gradient' === $settings->style,
 	'props'    => array(
 		'border' => '1px solid ' . FLBuilderColor::hex_or_rgb( FLBuilderColor::adjust_brightness( $settings->bg_color, 12, 'darken' ) ),

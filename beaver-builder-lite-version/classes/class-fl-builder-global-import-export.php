@@ -1,13 +1,13 @@
 <?php
 class FLBuilderGlobalImportExport {
 
-	function __construct() {
+	public function __construct() {
 		add_action( 'wp_ajax_export_global_settings', array( $this, 'export_data' ) );
 		add_action( 'wp_ajax_import_global_settings', array( $this, 'import_data' ) );
 		add_action( 'wp_ajax_reset_global_settings', array( $this, 'reset_data' ) );
 		add_filter( 'wp_check_filetype_and_ext', array( $this, 'allow_import' ), 10, 4 );
 
-		add_action( 'admin_enqueue_scripts', function( $hook ) {
+		add_action( 'admin_enqueue_scripts', function ( $hook ) {
 			if ( 'settings_page_fl-builder-settings' === $hook ) {
 				wp_enqueue_script( 'fl-builder-global-import-export', FLBuilder::plugin_url() . 'js/fl-builder-global-import-export.js', array( 'jquery' ), FL_BUILDER_VERSION );
 				wp_localize_script( 'fl-builder-global-import-export', 'FLBuilderAdminImportExportConfig', array(
@@ -188,4 +188,4 @@ class FLBuilderGlobalImportExport {
 		return $data;
 	}
 }
-new FLBuilderGlobalImportExport;
+new FLBuilderGlobalImportExport();

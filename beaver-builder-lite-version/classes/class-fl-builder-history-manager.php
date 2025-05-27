@@ -75,52 +75,59 @@ final class FLBuilderHistoryManager {
 			'template_applied'        => esc_attr__( 'Template Applied', 'fl-builder' ),
 			'row_template_applied'    => esc_attr__( 'Row Template Added', 'fl-builder' ),
 			'column_template_applied' => esc_attr__( 'Column Template Added', 'fl-builder' ),
+			'module_template_applied' => esc_attr__( 'Module Template Added', 'fl-builder' ),
 			'history_disabled'        => __( 'Undo/Redo history is currently disabled.', 'fl-builder' ),
 		);
 
 		$hooks = array(
 			// Layout
-			'didDiscardChanges'             => 'changes_discarded',
-			'didRestoreRevisionComplete'    => 'revision_restored',
+			'didDiscardChanges'              => 'changes_discarded',
+			'didRestoreRevisionComplete'     => 'revision_restored',
 
 			// Save settings
-			'didSaveRowSettingsComplete'    => 'row_edited',
-			'didSaveColumnSettingsComplete' => 'column_edited',
-			'didSaveModuleSettingsComplete' => 'module_edited',
-			'didSaveGlobalSettingsComplete' => 'global_settings_edited',
-			'didSaveLayoutSettingsComplete' => 'layout_settings_edited',
+			'didSaveRowSettingsComplete'     => 'row_edited',
+			'didSaveColumnSettingsComplete'  => 'column_edited',
+			'didSaveModuleSettingsComplete'  => 'module_edited',
+			'didSaveGlobalSettingsComplete'  => 'global_settings_edited',
+			'didSaveLayoutSettingsComplete'  => 'layout_settings_edited',
 
 			// Add nodes
-			'didAddRow'                     => 'row_added',
-			'didAddColumnGroup'             => 'columns_added',
-			'didAddColumn'                  => 'column_added',
-			'didAddModule'                  => 'module_added',
+			'didAddRow'                      => 'row_added',
+			'didAddColumnGroup'              => 'columns_added',
+			'didAddColumn'                   => 'column_added',
+			'didAddModule'                   => 'module_added',
 
 			// Delete nodes
-			'didDeleteRow'                  => 'row_deleted',
-			'didDeleteColumn'               => 'column_deleted',
-			'didDeleteModule'               => 'module_deleted',
+			'didDeleteRow'                   => 'row_deleted',
+			'didDeleteColumn'                => 'column_deleted',
+			'didDeleteModule'                => 'module_deleted',
 
 			// Duplicate nodes
-			'didDuplicateRow'               => 'row_duplicated',
-			'didDuplicateColumn'            => 'column_duplicated',
-			'didDuplicateModule'            => 'module_duplicated',
+			'didDuplicateRow'                => 'row_duplicated',
+			'didDuplicateColumn'             => 'column_duplicated',
+			'didDuplicateModule'             => 'module_duplicated',
 
 			// Move nodes
-			'didMoveRow'                    => 'row_moved',
-			'didMoveColumn'                 => 'column_moved',
-			'didMoveModule'                 => 'module_moved',
+			'didMoveRow'                     => 'row_moved',
+			'didMoveColumn'                  => 'column_moved',
+			'didMoveModule'                  => 'module_moved',
 
 			// Resize nodes
-			'didResizeRow'                  => 'row_resized',
-			'didResetRowWidth'              => 'row_resized',
-			'didResizeColumn'               => 'column_resized',
-			'didResetColumnWidthsComplete'  => 'columns_resized',
+			'didResizeRow'                   => 'row_resized',
+			'didResetRowWidth'               => 'row_resized',
+			'didResizeColumn'                => 'column_resized',
+			'didResetColumnWidthsComplete'   => 'columns_resized',
 
 			// Templates
-			'didApplyTemplateComplete'      => 'template_applied',
-			'didApplyRowTemplateComplete'   => 'row_template_applied',
-			'didApplyColTemplateComplete'   => 'column_template_applied',
+			'didApplyTemplateComplete'       => 'template_applied',
+			'didApplyRowTemplateComplete'    => 'row_template_applied',
+			'didApplyColTemplateComplete'    => 'column_template_applied',
+			'didApplyModuleTemplateComplete' => 'module_template_applied',
+
+			// Global Nodes
+			'didUnlinkGlobalRow'             => 'global_row_unlinked',
+			'didUnlinkGlobalColumn'          => 'global_column_unlinked',
+			'didUnlinkGlobalModule'          => 'global_module_unlinked',
 		);
 
 		$config['history'] = array(

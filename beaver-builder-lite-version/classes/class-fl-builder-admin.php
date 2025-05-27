@@ -26,7 +26,7 @@ final class FLBuilderAdmin {
 
 		// Filters
 		add_filter( 'plugin_action_links_' . $basename, __CLASS__ . '::render_plugin_action_links' );
-
+		add_filter( 'plugin_row_meta', __CLASS__ . '::render_settings_link', 10, 3 );
 	}
 
 	/**
@@ -41,8 +41,8 @@ final class FLBuilderAdmin {
 		global $wp_version;
 
 		// Check for WordPress 3.5 and above.
-		if ( ! version_compare( $wp_version, '4.6', '>=' ) ) {
-			self::show_activate_error( __( 'The <strong>Beaver Builder</strong> plugin requires WordPress version 4.6 or greater. Please update WordPress before activating the plugin.', 'fl-builder' ) );
+		if ( ! version_compare( $wp_version, '5.2', '>=' ) ) {
+			self::show_activate_error( __( 'The <strong>Beaver Builder</strong> plugin requires WordPress version 5.2 or greater. Please update WordPress before activating the plugin.', 'fl-builder' ) );
 		}
 
 		/**
@@ -264,16 +264,36 @@ final class FLBuilderAdmin {
 			$actions[] = '<a href="' . $url . '" style="color:#3db634;" target="_blank">' . _x( 'Upgrade', 'Plugin action link label.', 'fl-builder' ) . '</a>';
 		}
 
+		if ( is_network_admin() ) {
+			$url = network_admin_url( '/settings.php?page=fl-builder-multisite-settings' );
+		} else {
+			$url = admin_url( '/options-general.php?page=fl-builder-settings' );
+		}
+
+		$actions[] = '<a href="' . $url . '">' . __( 'Settings', 'fl-builder' ) . '</a>';
+
+		return $actions;
+	}
+
+	/**
+	 * Show Settings link in plugin action links
+	 */
+	public static function render_settings_link( $plugin_meta, $plugin_file, $plugin_data ) {
+
+		if ( 'fl-builder.php' !== basename( $plugin_file ) ) {
+			return $plugin_meta;
+		}
+
 		if ( ! FLBuilderModel::is_white_labeled() ) {
-			$url       = FLBuilderModel::get_store_url( 'change-logs', array(
+			$url           = FLBuilderModel::get_store_url( 'change-logs', array(
 				'utm_medium'   => 'bb-pro',
 				'utm_source'   => 'plugins-admin-page',
 				'utm_campaign' => 'plugins-admin-changelog',
 			) );
-			$actions[] = '<a href="' . $url . '" target="_blank">' . _x( 'Change Log', 'Plugin action link label.', 'fl-builder' ) . '</a>';
+			$plugin_meta[] = '<a href="' . $url . '" target="_blank">' . _x( 'Change Log', 'Plugin action link label.', 'fl-builder' ) . '</a>';
 		}
 
-		return $actions;
+		return $plugin_meta;
 	}
 
 	/**
@@ -285,7 +305,7 @@ final class FLBuilderAdmin {
 		$curl = ( function_exists( 'curl_version' ) ) ? true : false;
 
 		if ( ! $curl ) {
-			$text     = __( 'We’ve detected that your server does not have the PHP cURL extension installed. Ask your hosting provider to install it so you’ll be able to perform automatic updates without error.', 'fl-builder' );
+			$text     = __( "We've detected that your server does not have the PHP cURL extension installed. Ask your hosting provider to install it so you'll be able to perform automatic updates without error.", 'fl-builder' );
 			$link     = 'https://docs.wpbeaverbuilder.com/beaver-builder/troubleshooting/common-issues/error-when-trying-to-install-update';
 			$link_txt = __( 'See our Knowledge Base for more info.', 'fl-builder' );
 			printf( '<div class="curl-alert"><p>%s</p><p><a target="_blank" href="%s">%s</a></p></div>', $text, $link, $link_txt );

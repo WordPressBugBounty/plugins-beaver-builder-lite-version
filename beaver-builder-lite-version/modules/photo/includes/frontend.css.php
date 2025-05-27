@@ -4,7 +4,7 @@
 FLBuilderCSS::responsive_rule( array(
 	'settings'     => $settings,
 	'setting_name' => 'align',
-	'selector'     => ".fl-node-$id .fl-photo",
+	'selector'     => ".fl-node-$id, .fl-node-$id .fl-photo",
 	'prop'         => 'text-align',
 ) );
 

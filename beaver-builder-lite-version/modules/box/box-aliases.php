@@ -11,10 +11,6 @@ FLBuilder::register_module_alias( 'horizontal-stack', [
 		'layout'         => 'flex',
 		'flex_direction' => 'row',
 		'child_flex'     => [ 'grow' => '1' ],
-		'margin_top'     => '0',
-		'margin_right'   => '0',
-		'margin_bottom'  => '0',
-		'margin_left'    => '0',
 	],
 	'template'    => [
 		[ 'box', [] ],
@@ -50,10 +46,6 @@ FLBuilder::register_module_alias( 'box-three-x-two-grid', [
 		'grid_gap_row'    => '40',
 		'grid_gap_column' => '40',
 		'grid_gap_unit'   => 'px',
-		'margin_top'      => '0',
-		'margin_right'    => '0',
-		'margin_bottom'   => '0',
-		'margin_left'     => '0',
 	],
 	'template'    => [
 		[ 'box', [] ],
@@ -93,10 +85,6 @@ FLBuilder::register_module_alias( 'box-four-x-two-grid', [
 		'grid_gap_row'             => '20',
 		'grid_gap_column'          => '20',
 		'grid_gap_unit'            => 'px',
-		'margin_top'               => '0',
-		'margin_right'             => '0',
-		'margin_bottom'            => '0',
-		'margin_left'              => '0',
 	],
 	'template'    => [
 		[
@@ -149,10 +137,6 @@ FLBuilder::register_module_alias( 'split-header', [
 		'grid_gap_row'             => '40',
 		'grid_gap_column'          => '40',
 		'grid_gap_unit'            => 'px',
-		'margin_top'               => '0',
-		'margin_right'             => '0',
-		'margin_bottom'            => '0',
-		'margin_left'              => '0',
 	],
 	'template'    => [
 		[
@@ -180,20 +164,6 @@ FLBuilder::register_module_alias( 'split-header', [
 				'place_content' => [
 					'vertical'   => 'center',
 					'horizontal' => 'center',
-				],
-			],
-			[
-				[
-					'photo',
-					[
-						'photo_source'  => 'url',
-						'photo_url'     => $img_path . 'logo-a.svg',
-						'width'         => '106',
-						'margin_top'    => '0',
-						'margin_right'  => '0',
-						'margin_bottom' => '0',
-						'margin_left'   => '0',
-					],
 				],
 			],
 		],
@@ -240,10 +210,6 @@ FLBuilder::register_module_alias( 'photo-grid', [
 		'grid_gap_row'             => '30',
 		'grid_gap_column'          => '30',
 		'grid_gap_unit'            => 'px',
-		'margin_top'               => '0',
-		'margin_right'             => '0',
-		'margin_bottom'            => '0',
-		'margin_left'              => '0',
 	],
 	'template'    => [
 		[

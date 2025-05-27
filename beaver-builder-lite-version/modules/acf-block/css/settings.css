@@ -2,8 +2,38 @@
 .acf-fields .clear {
 	clear: both;
 }
-.acf-input-wrap {
+.acf-input:not(:has(.acf-input-prepend, .acf-input-append)) .acf-input-wrap {
 	overflow: visible !important;
+}
+/* Styling for prepended & appended text */
+.acf-input-prepend, .acf-input-append {
+	line-height: 26px !important;
+	border-width: 1px !important;
+}
+.acf-input:has(.acf-input-prepend, .acf-input-append) .acf-input-wrap {
+	padding-block: 1px;
+}
+.acf-input:not(:has(.acf-input-prepend)) .acf-input-wrap {
+	padding-inline-start: 1px;
+}
+.acf-input:not(:has(.acf-input-append)) .acf-input-wrap {
+	padding-inline-end: 1px;
+}
+.acf-input:has(.acf-input-prepend) .acf-input-wrap > input {
+	border-top-left-radius: 0 !important;
+	border-bottom-left-radius: 0 !important;
+}
+.acf-input:has(.acf-input-append) .acf-input-wrap > input {
+	border-top-right-radius: 0 !important;
+	border-bottom-right-radius: 0 !important;
+}
+.acf-input:has(.acf-input-prepend, .acf-input-append) .acf-input-wrap > input {
+	height: calc(var(--fl-builder-target-size) - 2px) !important;
+}
+.fl-builder-ui-skin--dark .acf-input-prepend,
+.fl-builder-ui-skin--dark .acf-input-append {
+	border-color: transparent;
+	background: #2c333a;
 }
 .fl-builder-ui-skin--dark .acf-fields > .acf-field {
 	border-color: #191b21;

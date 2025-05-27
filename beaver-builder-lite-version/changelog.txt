@@ -1,327 +1,399 @@
-<h4>2.8.6.2 - 04/18/2025</h4>
+<h4>2.9.0.5 - 05/22/2025</h4>
 <p><strong>Hotfix</strong></p>
 <ul>
-	<li>WPML: Fix editing global rows not working when fl-builder-template post type is translateable (#3995)</li>
+	<li>When Force Module Wrappers setting is turned on in Advanced Settings, do not render flex CSS for columns (#4133)</li>
+	<li>Fix fatal error if ctype functions are not available (#4142)</li>
+</ul>
+
+<h4>2.9.0.4 - 05/06/2025</h4>
+<p><strong>Hotfix</strong></p>
+<ul>
+	<li>Security: Ensure PHP files cannot be uploaded in icon set zips (#4103)</li>
+	<li>Minimum required WordPress version is now 5.2 (#4105)</li>
+	<li>Fix Row & Column border radius not working using multiple background field (#4004)</li>
+	<li>Fix saved rows tab showing when editing a saved container module (#4092)</li>
+	<li>Fix incorrect module position when duplicating after duplicating a row (#4080)</li>
+	<li>Fix syntax highlighting being broken in layout and global JS (#4040)</li>
+	<li>Color Picker: Fix some theme registered color swatches not showing (#4001)</li>
+	<li>Row background: fix some unlisted Vimeo videos not rendering (#2769)</li>
+	<li>Icon Module: fix line height issue when using icon text (#4119)</li>
+</ul>
+
+<h4>2.9.0.3 - 04/24/2025</h4>
+<p><strong>Hotfix</strong></p>
+<ul>
+	<li>Typography: Fix font weight resetting after editing (#4076)</li>
+	<li>Outline Panel: fix JS error after saving Global Colors and then clicking on the Outline Panel icon immediately after (#4077)</li>
+	<li>Global Colors: Make sure they are not empty to prevent a JS error (#4054)</li>
+	<li>Accordion Module: Fix HTML not being rendered in Accordion labels (#4083)</li>
+	<li>Callout Module: fix text color overriding link color settings (#4015)</li>
+	<li>Color Picker: fix colors affecting tabs when not needed (#4005)</li>
+	<li>History Manager: Fix history state not being saved when adding module templates (#4063)</li>
+	<li>Fix UI not working in Safari (#4088)</li>
+</ul>
+
+<h4>2.9.0.2 - 04/17/2025</h4>
+<p><strong>Hotfix</strong></p>
+<ul>
+	<li>Box Module: fix link field escaping shortcodes (#4030)</li>
+	<li>Loop Module: pagination div no longer renders if pagination is enabled but there's no pagination (#4041)</li>
+	<li>Post Slider Module: Fix it being broken in FireFox if using featured image as a background (#3991)</li>
+	<li>Fix gradient fields not working if one color is a hex color (#4024)</li>
+	<li>In Settings in WP Admin, show label next to deprecated modules (#3986)</li>
+	<li>Adjust overlay position to account for margins of modules without content wrappers</li>
 	<li>Fix translation warnings due to translation being triggered too early (#3798)</li>
+	<li>Fix font family select causing slowness in Global Styles Panel (#4066)</li>
+	<li>Fix top level boxes with scripts or styles breaking full layout rendering (#4060)</li>
+	<li>Remove dependency for WordPress 6.2</li>
 </ul>
 
-<h4>2.8.6.1 - 01/22/2025</h4>
+<h4>2.9.0.1 - 04/02/2025</h4>
 <p><strong>Hotfix</strong></p>
 <ul>
-	<li>Callout Module: Fix PHP notice showing after upgrading from previous versions</li>
+	<li>Fix button styles targeting the entire module when rendered within another module (#4003)</li>
+	<li>WPML: Fix editing global rows not working when fl-builder-template post type is translateable (#3995)</li>
+	<li>Photo Module: fix array to string conversion if force module wrappers is on #4009</li>
+	<li>Add delay to tooltips to prevent triggering them inadvertently (#4011)</li>
+	<li>Fix top level box modules in the main layout having zero margins when box modules are present in a Themer layout</li>
+	<li>Multi-background field for Rows & Columns is now responsive</li>
+	<li>Various improvements to presets in color picker: increase size of swatches, add tooltip and add delete confirmation </li>
 </ul>
 
-<h4>2.8.6 - 01/16/2025</h4>
-<strong>Enhancements</strong>
+<h4>2.9 "Coyote" - 03/19/2025</h4>
+<p>Beaver Builder 2.9 is here! This is a major update and will be released as the official download on the My Account page first. Remote updates to all existing sites will begin soon.</p>
+
+<p>Please check out the <a href="https://www.wpbeaverbuilder.com/beaver-builder-2-9" target="_blank" rel="noopener">Release Post</a> for highlights of what's new or the <a href="https://docs.wpbeaverbuilder.com/beaver-builder/about-this-release" target="_blank" rel="noopener">"About this Release"</a> doc for all of the details.</p>
+
+<p><strong>Enhancements</strong></p>
 <ul>
-	<li>Add AVIF image support (#3872)</li>
-	<li>Add force download option to link fields where it is missing (#3767)</li>
+	<li>Box Module: Added new multi-layer background field</li>
+	<li>New re-written color/gradient pickers added to color fields</li>
+	<li>Outline Panel: Added a search/filter option and the ability to add/edit labels inline</li>
+	<li>Container modules such as Box are no longer wrapped in a row when dropping into the layout</li>
+	<li>All Basic modules no longer have module wrapper divs</li>
+	<li>Add new advanced setting to force module wrappers (#3744)</li>
+	<li>Added the ability to use a selection of modules as blocks in the block editor</li>
+	<li>ACF: Add ACF URL fields to Video Module embed field connections (#1518)</li>
+	<li>Box Module: Add background color field (#3973)</li>
+	<li>Box Module: Add auto option for aspect ratio (#3174)</li>
+	<li>Box Module: Add additional tooltips for some fields, set grid rows to 1 track (#3919)</li>
+	<li>Countdown Module: Add field connection support to time field (#3743)</li>
+	<li>Subscribe Module: Constant Contact integration has been upgraded to use v3 of their API.  V2 of their API has been deprecated (#1899)</li>
+	<li>List Module: Allow rendering of basic HTML tags in the Heading field (#3862)</li>
+	<li>Nofications Center: revamp it and change it to What's New (#3049)</li>
+	<li>Posts Module: Add option for enabling equal height of Posts Featured Images for Masonry and Column layouts (#534)</li>
+	<li>Posts Module: Add aspect ratio as an option for images when Equal Height Images are used</li>
+	<li>Add sanitization to node attributes (#1654)</li>
+	<li>Outline Panel: Add title and change position of panel when content panel is pinned to the right (#3793)</li>
+	<li>Row Settings: make width responsive (#733)</li>
+	<li>Saved Nodes: Enable some information in the Publish metabox that was previously hidden (#3846)</li
+	<li>(a11y)Content Slider: Add aria-current for current item in dot navigation (#3583) </li>
+	<li>Add support for auto sizes for lazy loaded images in WP 6.7 (#3735)</li>
+	<li>Add Global Colors to Block Editor colors (#3188)</li>
+	<li>Icon & Icon Group Module: Adjust default spacing of new modules dropped on the page</li>
+	<li>Update code field script (Ace)</li>
+	<li>Show a modal when you've been logged out of WordPress(#2585)</li>
+	<li>Global Colors: when duplicating a color, add copy to label (#3567)</li>
+	<li>Subscribe Module: Add support for tags in the Active Campaign integration (#3198)</li>
+	<li>Performance: make sure expensive query doesn't run when Themer is not active (#3616)</li>
+	<li>Performance: debug mode query optimizations (#3334)</li>
+	<li>Add a modal when issues are detected that would interfere with the iFrame UI (#2736)</li>
+	<li>Debug Mode: Add menu counts (#3623)</li>
 </ul>
 
-<strong>Bug Fixes</strong>
+<p><strong>Bug Fixes</strong></p>
 <ul>
-	<li>Performance: optimize asset files to prevent files being generated when not necessary (#3869)</li>
-	<li>Ensure BB theme button settings still apply when setting some styles in button modules (#3857)</li>
-	<li>Remove update_metadata optimization that isn't needed and is causing issues when duplicating (#3849)</li>
-	<li>Audio Module: fix audio file not being able to be uploaded if you edited a photo module directly before (#3797)</li>
-	<li>Contact Form Module: Fix notice when displayed in the WP Admin (#2779)</li>
-	<li>List Module: Fix strong tag being overridden by font weight option (#2772)</li>
-	<li>Menu Module: Fix Below Row responsive style not working properly on mobile (#3841)</li>
-	<li>Photo Module: fix enabling photo page for the link type not working (#3769)</li>
-	<li>Fix Bugherd menu appearing twice in the UI  (#2870)</li>
-	<li>Login Module: Fix issues with alignment of options on the login form (#2304)</li>
+	<li>(a11y) Video Module: fix tabbing to video when lightbox is in use (#2987)</li>
+	<li>Accordion Module: Fix label text color being overridden by Global Styles link color (#3642)</li>
+	<li>ACF Blocks: Fix issues with display of prepending/appending text in our UI (#2775)</li>
+	<li>Box Module: Fix issue with units not working at different breakpoints (#3504)</li>
+	<li>Box Module: fix setting visibility to never display breaking preview (#3698)</li>
+	<li>Box Module: fix setting min width on empty children not working (#3103)</li>
+	<li>Fix fatal error when using global colors in some compound fields with PHP 8+ (#3952)</li>
+	<li>Box Module: Fix flex layout getting broken when column uses center vertical alignment (#3801)</li>
+	<li>Menu Module: Fix tabbing/focus issue with the Flyout Menu (#3672)</li>
+	<li>Customizer: prevent internal post type and taxonomies from showing in the menu editor (#3915)</li>
+	<li>Gallery Module: Fix smooth scroll when used in a row with animation (#3548)</li>
+	<li>Heading Module: Increase specificity for text-transform styling (#1657)</li>
+	<li>HTML Module: adjust spacing of field connection icon</li>
+	<li>Outline Panel: adjust color of title when using dark mode (#3948)</li>
+	<li>Outline Panel: Fix not being able to drag a row below the last row if that last row is expanded and not collapsed (#3860)</li>
+	<li>Outline Panel: Don't show colon if option deselected in Box Module (#3819)</li>
+	<li>Photo Module: Fix notice when using cropping (#3824)</li>
+	<li>Posts Module: Fix layout not previewing correctly when used as a block (#3564)</li>
+	<li>Posts Module: Fix fatal error if Themer is inactive</li>
+	<li>Photo Module: Fix enable link to Photo page not working (#3769)</li>
+	<li>TEC: Fix Posts Module ignoring the TEC setting for "number of events to show per page" (#1858)</li>
+	<li>Fix conflict with Search & Filter plugin query interfering with query on WooCommerce Shop/Product Archive (#3923)</li>
+	<li>Fixed incorrect position when dropping container module node templates into a row position</li>
+	<li>Fix conflict with Estatik Pro  when dropping modules on the page (#3945)</li>
+	<li>Hide "Add New" button for Saved Columns in the WP Admin (#3942)</li>
+	<li>Smooth Scrolling: fix smooth scrolling when there's a gallery module above the target section (#1403)</li>
+	<li>Fix PHP warnings if a theme does not register color names (3956)</li>
+	<li>Fix PHP warning for null post_type on class-fl-theme-builder-rules-location.php (#3917)</li>
+	<li>Fix rendering of node attributes when using non-string scalar values (#3920)</li>
+	<li>Fix PHP warning for feeds (#3917)</li>
+	<li>Fix Global Box modules being empty when inside another node (#3871)</li>
+	<li>Fix templates being exposed in WP Sitemaps (#3864)</li>
+	<li>Fix bxSlider compatibility with FSE themes (#3788)</li>
+	<li>Fix link field field connection covering checkboxes (#3671)</li>
+	<li>Fix row styles not live previewing (#3599)</li>
+	<li>Fix pinned builder class remaining after publishing layout (#1455)</li>
+	<li>Fix global columns settings not opening in the parent menu (#3886)</li>
+	<li>Various fixes for dragging and dropping container modules and dropping modules inside container modules</li>
+	<li>Fix settings panel when pinned not being stacked at max width (#3590)</li>
+	<li>Box Module: fix split header preset to avoid nested photo modules (#3604)</li>
+	<li>Subscribe Module: add some default headers (#1431)</li>
 </ul>
 
-<h4>2.8.5.3 - 12/05/2024</h4>
-<p><strong>Hotfix</strong></p>
+<p><strong>Changes</strong></p>
 <ul>
-	<li>Security: hardening against XSS in HTML classes (#3800)</li>
-	<li>Node CSS/JS: make sure it's not accessible to the Contributor role and below</li>
-	<li>Additional fixes for layout shifting to below the footer after some actions</li>
-	<li>Heading Module: sanitize title attribute (#3757)</li>
+	<li>Adjustments to the plugin action links in the WP Admin (#3950)</li>
+	<li>Various API changes for container modules to support Beaver Themer's new Loop module.</li>
 </ul>
 
-<h4>2.8.5.2 - 12/03/2024</h4>
-<p><strong>Hotfix</strong></p>
+<p><strong>Developer</strong></p>
 <ul>
-	<li>Fix layout shifting to below the footer after some actions (#3834)</li>
+	<li>Update PHPCS for WPCS 3 (#3395)</li>
+	<li>Add filter <code>fl_builder_loop_terms_args</code> for <code>terms_query</code> and add <code>$settings</code> to args (#3901)</li>
+	<li>Add filter to disable minification <code>fl_builder_minify</code> (#3867)</li>
+	<li>Global Styles: Add <code>fl_builder_before_generate_global_css</code> hook to add CSS selectors</li>
+ 	<li>White Labeling: Add <code>fl_builder_theme_branding</code> filter for theme branding</li>
+ 	<li>Photo Module: Add <code>fl_builder_photo_classes</code> filter for image classes</li>
+	<li>Add support for preview of an image to repeater fields (#3208)</li>
 </ul>
 
-<h4>2.8.5.1 - 11/26/2024</h4>
-<p><strong>Hotfix</strong></p>
+<h4>2.9-rc.1 - 03/07/2025</h4>
+<p><strong>Enhancements</strong></p>
 <ul>
-	<li>Rows: Fix vertical alignment being hidden when it shouldn't be (#3779)</li>
-	<li>Always ensure we have a default nodeClass when cleaning new ajax HTML</li>
+	<li>Update the welcome page (#3876)</li>
+	<li>Box Module: Add background color field (#3973)</li>
 </ul>
 
-<h4>2.8.5 - 11/19/2024</h4>
-<strong>Enhancements</strong>
+<p><strong>Bug Fixes</strong></p>
 <ul>
-	<li>Video Module: Add support for WebM as the main video type not just fallback (#1669)</li>
-	<li>Stats: Collect data on usage of iFrame UI and Legacy UI (#3711)</li>
-	<li>Add parameter to <code>[fl-safe]</code> shortcode to allow for a custom message to be displayed in the UI (#3723)</li>
+	<li>Box Module: Fix parent flyout menu not displaying when editing global box modules (#3966)</li>
+	<li>Box Module: Fix issues when upgrading from 2.8 if using a field connection on background color (#3973)</li>
+	<li>HTML Module: adjust spacing of field connection icon</li>
 </ul>
 
-<strong>Bug Fixes</strong>
+<h4>2.9-beta.5 - 02/28/2025</h4>
+<p><strong>Enhancements</strong></p>
 <ul>
-	<li>Fixed deleting a blank column causing the dom nodes for the entire layout to be deleted in Themer layouts (#3752)</li>
-	<li>Accordion Module (a11y): Fix issue when FontAwesome plugin is active (#3648)</li>
-	<li>Accordion Module: tweak font CSS so it's not as easily overridden (#1756)</li>
-	<li>Button Module: Fix background color not working on PHP 7.4 and small issue with border hover color (#3709 & 3729)</li>
-	<li>Border Field: Tweak code to ensure there's proper checking for top right border radius (#3716)</li>
-	<li>List Module: Fix icon not rendering if using shared icon (#3806)</li>
-	<li>Map Module: fix error when using field connections and custom field is left blank (#3505)</li>
-	<li>Menu Module (a11y): fix aria-haspopup being on the wrong element (#3236)</li>
-	<li>Post Carousel & Post Slider Modules: Fix posts displaying if no result when ACF relationship is used (#1323)</li>
-	<li>Slideshow Module: Fix rendering issues with FSE themes (#2967)</li>
-	<li>Video Module: Fix videos not using mp4 or webm extension no longer displaying and fix videos being forced to a 16:9 format (#3733 & 3765)</li>
-	<li>Outline Panel: Fix error when using a Slider Revolution widget (#3706)</li>
-	<li>WooCommerce: Fix compatibility with Restaurant for WooCommerce Plugin (#3724)</li>
-	<li>Multi-Site: ensure error message fires when you try to use an incompatible BB version (#3509)</li>
-	<li>Row settings: Only show vertical align when needed (#2988)</li>
+	<li>List Module: Allow rendering of basic HTML tags in the Heading field (#3862)</li>
+	<li>Box Module: Add auto option for aspect ratio (#3174)</li>
 </ul>
 
-<h4>2.8.4.3 - 10/28/2024</h4>
-<p><strong>Hotfix</strong></p>
+<p><strong>Bug Fixes</strong></p>
 <ul>
-	<li>Fix potential for XSS with links when inline editing is enabled(#3727)</li>
+	<li>Box Module: Fix issue with units not working at different breakpoints (#3504)</li>
+	<li>Box Module: fix setting visibility to never display breaking preview (#3698)</li>
+	<li>Box Module: fix setting min width on empty children not working (#3103)</li>
+	<li>Fix transparency being reset in shadow color picker fields (#3914)</li>
+	<li>Fix fatal error when using global colors in some compound fields with PHP 8+ (#3952)</li>
+	<li>Outline Panel: adjust color of title when using dark mode (#3948)</li>
+	<li>Fix conflict with Search & Filter plugin query interfering with query on WooCommerce Shop/Product Archive (#3923)</li>
+	<li>Fixed issue when dropping a widget onto the page</li>
+	<li>Fixed incorrect position when dropping container module node templates into a row position</li>
+	<li>Fix conflict with Estatik Pro  when dropping modules on the page (#3945)</li>
+	<li>Hide "Add New" button for Saved Columns in the WP Admin (#3942)</li>
+	<li>ACF Blocks: Fix issues with display of prepending/appending text in our UI (#2775)</li>
+	<li>Smooth Scrolling: fix smooth scrolling when there's a gallery module above the target section (#1403)</li>
+	<li>Fix PHP warnings if a theme does not register color names (3956)</li>
 </ul>
 
-<h4>2.8.4.2 - 10/09/2024</h4>
-<p><strong>Hotfix</strong></p>
+<p><strong>Changes</strong></p>
 <ul>
-	<li>BB Lite: Fix fatal error when Themer is not installed</li>
+	<li>Adjustments to the plugin action links in the WP Admin (#3950)</li>
+	<li>Box Module: Remove default flex grow being set to 1</li>
+	<li>Add a modal when issues are detected that would interfere with the iFrame UI (#2736)</li>
 </ul>
 
-<h4>2.8.4.1 - 10/09/2024</h4>
-<p><strong>Hotfix</strong></p>
+<p><strong>Developer</strong></p>
 <ul>
-	<li>Fix fatal error with old versions of Themer (#3690)</li>
-	<li>Posts Module: Fix auto suggest filter fields not finding any posts (#3696)</li>
-	<li>Fix syntax error when using PHP 7.2 (#3673)</li>
+	<li>Update PHPCS for WPCS 3 (#3395)</li>
 </ul>
 
-<h4>2.8.4 - 10/3/2024</h4>
-<strong>Security</strong>
+<h4>2.9-beta.4 - 02/07/2025</h4>
+<p><strong>Enhancements</strong></p>
 <ul>
-	<li>Security: Fix potential XSS issue with layout field in the Button Group module (#3660)</li>
+	<li>Box Module: Add additional tooltips for some fields, set grid rows to 1 track and change default flex grow to 1 (#3919)</li>
+	<li>Subscribe Module: Constant Contact integration has been upgraded to use v3 of their API.  V2 of their API has been deprecated (#1899)</li>
 </ul>
 
-<strong>Enhancements</strong>
+<p><strong>Bug Fixes</strong></p>
 <ul>
-	<li>Performance: Optimize history storage to use less memory(#3592)</li>
-	<li>Column Settings: Add field connection for background overlay setting (#219)</li>
-	<li>Video Module: add field connection when using the media library (#1569)</li>
-	<li>Global Settings: Add additional units for Row padding (#3575)</li>
-	<li>Columns: add column class for different background types (#3608)</li>
-	<li>Update Dash Icons(#3572)</li>
-	<li>Subscribe Module: Update Keap (InfusionSoft) integration so that non-legacy keys can be used (#3562)</li>
-	<li>(A11y) Post Module: Add p tag as an option for Post Title tag (#3553)</li>
+	<li>Outline Panel: Fix not being able to drag a row below the last row if that last row is expanded and not collapsed (#3860)</li>
+	<li>Loop Module: fix rendering with multiple query types on the same layout (#3908)</li>
+	<li>(a11y) Video Module: fix tabbing to video when lightbox is in use (#2987)</li>
+	<li>Fix order by meta value not working in modules with a loop field (#3904)</li>
+	<li>Fix PHP warning for null post_type on class-fl-theme-builder-rules-location.php (#3917)</li>
+	<li>Fix rendering of node attributes when using non-string scalar values (#3920)</li>
+	<li>Fix PHP warning for feeds (#3917)</li>
+	<li>Customizer: prevent internal post type and taxonomies from showing in the menu editor (#3915)</li>
 </ul>
 
-<strong>Bug Fixes</strong>
+<p><strong>Developer</strong></p>
 <ul>
-	<li>Outline Panel: Fix issue with Fluent Forms widget and ACF blocks causing a JS error (#3597 & #3612)</li>
-	<li>Fix fatal PHP error if a saved module no longer exists (#3423)</li>
-	<li>Accordion Module: Fix module9 not rendering all posts of a CPT when inside a Themer Archive layout (#3004)</li>
-	<li>(A11y) Menu Module: Fix flyout menu not opening when tabbing through the page (#1663)</li>
-	<li>Menu Module: Fix flyout menu being too short on Safari when scrolling (#3308)</li>
-	<li>Fix border added to button module when not using BB theme (#3284)</li>
-	<li>Icon Group Module: Fix alignment changes not live previewing (#461)</li>
-	<li>Fix installer on license tab for the child theme (#3475)</li>
-	<li>Fix row heading color overriding Post Carousel Module Title Color (#3565)</li>
-	<li>Fix settings form buttons not fitting in modal when modal is in thin mode (#3527)</li>
-	<li>Fix PHP warning when using Fashion Freaks Template (#3614)</li>
-	 <li>Fix conflict with some themes that display cart in menu or header (#3633)</li>
+	<li>Add filter <code>fl_builder_loop_terms_args</code> for <code>terms_query</code> and add <code>$settings</code> to args (#3901)</li>
 </ul>
 
-<strong>Developer</strong>
+<h4>2.9-beta.3 - 01/24/2025</h4>
+<p><strong>Enhancements</strong></p>
 <ul>
-	<li>Add filter to allow plugins to modify photo paths/URLs (#3437)</li>
+	<li>Add sanitization to node attributes (#1654)</li>
 </ul>
 
-<h4>2.8.3.7 - 09/24/2024</h4>
-<p><strong>Hotfix</strong></p>
+<p><strong>Bug Fixes</strong></p>
 <ul>
-	<li>Security: Fix XSS issue via form fields with preview text (#3630)</li>
+	<li>Color Picker: Various bug fixes</li>
+	<li>Background Field: ensure field has a non-null value</li>
+</ul>
+
+<h4>2.9-beta.2 - 01/17/2025</h4>
+<p><strong>Enhancements</strong></p>
+<ul>
+	<li>Color Picker: Add support in Global Colors and in repeater fields</li>
+	<li>Outline Panel: Add title and change position of panel when content panel is pinned to the right (#3793)</li>
+	<li>Add filter to disable minification <code>fl_builder_minify</code> (#3867)</li>
+	<li>Row Settings: make width responsive (#733)</li>
+</ul>
+
+<p><strong>Bug Fixes</strong></p>
+<ul>
+	<li>Loop Module: Fix output with ACF relationship fields (#3858)</li>
+	<li>Fix Global Box modules being empty when inside another node (#3871)</li>
+	<li>Fix templates being exposed in WP Sitemaps (#3864)</li>
+	<li>Box Module: Fix flex layout getting broken when column uses center vertical alignment (#3801)</li>
+	<li>Fix bxSlider compatibility with FSE themes (#3788)</li>
+	<li>Fix link field field connection covering checkboxes (#3671)</li>
+	<li>Accordion Module: Fix label text color being overridden by Global Styles link color (#3642)</li>
+	<li>Fix row styles not live previewing (#3599)</li>
+	<li>Fix pinned builder class remaining after publishing layout (#1455)</li>
+	<li>ACF: Add ACF URL fields to Video Module embed field connections (#1518)</li>
+	<li>TEC: Fix Posts Module ignoring the TEC setting for "number of events to show per page" (#1858)</li>
+	<li>Color Picker: Fix various bugs</li>
+	<li>Fix global columns settings not opening in the parent menu (#3886)</li>
+	<li>Various fixes for dragging and dropping container modules and dropping modules inside container modules</li>
+</ul>
+
+<p><strong>Changes</strong></p>
+<ul>
+	<li>Do not open What's New by default if there are new notifications (#3861)</li>
+</ul>
+
+<h4>2.9-beta.1 - 12/10/2024</h4>
+<p><strong>Enhancements</strong></p>
+<ul>
+	<li>Color Picker: it is now available for compound fields (Typography, Box Shadow, Border, Shadow etc and Gradients</li>
+	<li>Debug Mode: Add menu counts (#3623)</li>
+	<li>Conditional Logic: New empty options appear higher in the list in dropdown (#942)</li>
+	<li>Outline Panel: Don't show colon if options deselected in Box Module (#3819)</li>
+	<li>Countdown Module: Add field connection support to time field (#3743)</li>
+	<li>Saved Nodes: Enable some information in the Publish metabox that was previously hidden (#3846)</li>
+</ul>
+
+<p><strong>Bug Fixes</strong></p>
+<ul>
+	<li>Tweaks to the change to make sure an expensive Themer doesn't run when Themer is not active (#3826)</li>
+	<li>Photo Module: Fix notice when using cropping (#3824)</li>
+	<li>Post Module: Fix layout not previewing correctly when used as a block (#3564)</li>
+	<li>Posts Module: Add aspect ratio as an option for images when Equal Height Images are used</li>
+	<li>Photo Module: Fix enable link to Photo page not working (#3769)</li>
+	<li>Gallery Module: Fix smooth scroll when used in a row with animation (#3548)</li>
+	<li>Heading Module: Increase specificity for text-transform styling (#1657)</li>
+</ul>
+
+<p><strong>Changes</strong></p>
+<ul>
+	<li>Remove Menu accessibility changes for now</li>
 </ul>
 
 
-<h4>2.8.3.6 - 08/28/2024</h4>
-<p><strong>Hotfix</strong></p>
+<h4>2.9-alpha.2 - 11/06/2024</h4>
+<p><strong>Enhancements</strong></p>
 <ul>
-	<li>Security: Fix XSS issue via type parameter on repeater fields (#3585)</li>
+	<li>Add new advanced setting to force module wrappers (#3744)</li>
+	<li>Content Slider: Add aria-current for current item in dot navigation (#3583) </li>
+	<li>Add support for auto sizes for lazy loaded images in WP 6.7 (#3735)</li>
+	<li>Nofications Center: revamp it and change it to What's New (#3049)</li>
+	<li>Posts Module: Add option for enabling equal height of Posts Featured Images for Masonry and Column layouts (#534)</li>
+	<li>Add Global Colors to Block Editor colors (#3188)</li>
+	<li>Icon & Icon Group Module: Adjust default spacing of new modules dropped on the page</li>
+	<li>Updated color picker configuration</li>
+	<li>Update code field script (Ace)</li>
+	<li>Show a modal when you've been logged out of WordPress(#2585)</li>
+	<li>Menu Module: Refactor keyboard navigation and separate sub-menu icon toggle (#3754)</li>
+	<li>Menu Module: use aria-hasexpanded for submenus/dropdowns (#2196)</li>
 </ul>
 
-<h4>2.8.3.5 - 08/15/2024</h4>
-<p><strong>Hotfix</strong></p>
+<p><strong>Bug Fixes</strong></p>
 <ul>
-	<li>Text Editor Module: Fix not being able to access link settings when settings are pinned to the right (#3560)</li>
-	<li>Global Colors: Fix colors rendering requiring a refresh  (#3543)</li>
-	<li>Accordion Module: Fix issue with functionality when Expand on Tab is enabled (#3469)</li>
-	<li>Fix conflict with at.js script (#3546)</li>
+	<li>Posts Module: Fix fatal error if Themer is inactive</li>
+	<li>Menu Module: Fix tabbing/focus issue with the Flyout Menu (#3672)</li>
+	<li>Outline Panel: Fix inline labels when filtering in the Outline Panel (#3652)</li>
+	<li>Fix settings panel when pinned not being stacked at max width (#3590)</li>
+	<li>Box Module: fix split header preset to avoid nested photo modules (#3604)</li>
+	<li>Subscribe Module: add some default headers (#1431)</li>
 </ul>
 
-<h4>2.8.3.4 - 08/06/2024</h4>
-<p><strong>Hotfix</strong></p>
+<p><strong>Developer</strong></p>
 <ul>
-	<li>Security: sanitize widget class variable properly (#3534)</li>
-	<li>Outline Panel: fix JS errow when some node settings are not set (#3530)</li>
-	<li>Global Styles: fix switching from one global color to another being glitchy (#3528)</li>
-	<li>Fix sanitization of Post Module ul classes not recognizing spaces (#3525)</li>
-	<li>Debug Mode: Prevent fatal errors for defines that are not set (#3523)</li>
-	<li>Fix PHP warnings when using WPML and cropping in the Photo Module (#3520)</li>
+	<li>Global Styles: Add <code>fl_builder_before_generate_global_css</code> hook to add CSS selectors</li>
+ 	<li>White Labeling: Add <code>fl_builder_theme_branding</code> filter for theme branding</li>
+ 	<li>Photo Module: Add <code>fl_builder_photo_classes</code> filter for image classes</li>
 </ul>
 
-<h4>2.8.3.3 - 07/25/2024</h4>
-<p><strong>Hotfix</strong></p>
+<h4>2.9-alpha.1 - 10/01/2024</h4>
+<p><strong>Enhancements</strong></p>
 <ul>
-	<li>Fix duplicate Global color replacing original color (#3498)</li>
-	<li>Fix issue with fonts only used in Global Styles not loading properly (#3518)</li>
-	<li>Fix JS error in the Outline Panel when WordPress widgets exist on the page (#3500)</li>
-	<li>Fix issue with some slider modules inside of a Box module not rendering properly (#3466)</li>
-	<li>Developer: Fix potential for JS fatals due to a missing semi-colon in frontend.js or frontend.js.php (#3490)</li>
+	<li>Loop Module: Changes to support Taxonomy queries (#929)</li>
+	<li>Color Picker: Global colors now are available to select</li>
+	<li>Added Multi-Background support to Rows and Columns</li>
+	<li>Performance: make sure expensive query doesn't run when Themer is not active (#3616)</li>
+	<li>Performance: debug mode query optimizations (#3334)</li>
+	<li>BB Lite: Show Global Styles item greyed out (#3594)</li>
+	<li>Global Colors: when duplicating a color, add copy to label (#3567)</li>
+	<li>Subscribe Module: Add support for tags in the Active Campaign integration (#3198)</li>
+	<li>Google Fonts: Add option for enabling real-time checking for updates to the Google Fonts (#3050)</li>
+	<li>Enable Slim data mode for new core templates (#3639)</li>
+	<li>A11y: Separate the menu link and sub-menu icon in the Menu Module (#1328)</li>
+	<li>A11y: various improvements for magnific pop-up for accessibility (#3589)</li>
+	<li>A11y: Add option in Accordion for user to select heading level for label (#3582)</li>
+	<li>A11y: Add focus missing on selected tab in Tabs Module (#3540)</li>
 </ul>
 
-<h4>2.8.3.2 - 07/09/2024</h4>
-<p><strong>Hotfix</strong></p>
+<p><strong>Bug Fixes</strong></p>
 <ul>
-	<li>Fix JS error in Outline panel caused by modules that are disabled or no longer exist (#3488)</li>
-	<li>Clear cache subscription data when a license key is saved (#3482)</li>
+	<li>Color picker: various bug fixes</li>
+	<li>Outline Panel: Fix editing labels inline not working on all nodes (#3607)</li>
+	<li>Box Module: Fix overlays not working properly after moving item in Outline Panel (#3473)</li>
 </ul>
 
-<h4>2.8.3.1 - 07/01/2024</h4>
-<p><strong>Hotfix</strong></p>
+<p><strong>Developer</strong></p>
 <ul>
-	<li>Remove fix that addresses conflict with Yoast SEO when an image has shortcode in alt text as it was creating issues with shortcodes rendering when using Yoast SEO (#3486)</li>
-	<li>Fix fatal error when using notequals to check for a custom field value</li>
+	<li>Add support for preview of an image to repeater fields (#3208)</li>
 </ul>
 
-<h4>2.8.3 - 06/27/2024</h4>
-
-<strong>Enhancements</strong>
+<h4>2.9-dev.2 - 08/02/2024</h4>
+<p><strong>Enhancements</strong></p>
 <ul>
-	<li>Add class for columns with background images (#1658)</li>
-	<li>Debug: Add history counts (#3323)</li>
-	<li>Clear cache when you import BB settings (#3441)</li>
+	<li>Box Module: Added new multi-layer background field</li>
+	<li>New re-written color/gradient pickers to nearly all color fields (exceptions: Global Colors, border & box shadow fields)</li>
+	<li>Outline Panel: Added a search/filter option and the ability to add/edit labels inline</li>
 </ul>
 
-<strong>Bug Fixes</strong>
+<h4>2.9-dev.1 - 06/25/2024</h4>
+<p><strong>Enhancements</strong></p>
 <ul>
-	<li>Security: Update libraries for MailJet and MailerLite integrations (#3426)</li>
-	<li>Security: Use sanitize_html_class for icon classes where necessary in Icon, Button, Post, Accordion and Pricing Table modules (#3462)</li>
-	<li>Fix container modules not being read by Relevanssi (#3460)</li>
-	<li>Fix not being able to drag into the Box module when it has no padding (#3435)</li>
-	<li>Fix conflict with Yoast SEO when an image has shortcode in alt text (#3468)</li>
-	<li>Countdown Module: Fix styling of field connection window (#3439)</li>
-	<li>Fix issue with ACF Blocks integration where shortcodes in Post Module were returning no data (#3431)</li>
-	<li>Fix fatal error with ACF Color field set tor return RGBA Array (#3389)</li>
-	<li>Fix integration with ClassicPress 2 (#3405)</li>
-	<li>Outline Panel: Fix dragging into box modules in global rows (#3411)</li>
-	<li>Fix validation errors in CSS (#3194)</li>
-	<li>Fix PHP warning with jsmin when using PHP 7.0 (#3182)</li>
-	<li>Slideshow: Fix boxes transition showing blank/empty image on mobile (#185)</li>
+	<li>Container modules such as Box are no longer wrapped in a row when dropping into the layout.</li>
+	<li>All Basic modules no longer have module wrapper divs.</li>
+	<li>Added the ability to use modules as blocks in the block editor.</li>
 </ul>
 
-<h4>2.8.2.2 - 06/6/2024</h4>
-<p><strong>Hotfix</strong></p>
+<p><strong>Changes</strong></p>
 <ul>
-	<li>Fix Global Styles being reset or replaced during upgrade process on Multi-Site installations (#3420)</li>
-	<li>Fix YUI loading an unload listener (#2791)</li>
-	<li>Fix incorrect module position when dropping into a container module (#3383)</li>
-</ul>
-
-<h4>2.8.2.1 - 05/30/2024</h4>
-<p><strong>Hotfix</strong></p>
-<ul>
-	<li>Revert: Photo Module fix caption not aligning with image when using a custom width (#2295) as it was causing photo module alignment not to work responsively</li>
-	<li>Dark Mode: Fixed CSS/JS advanced indicator (#3417)</li>
-	<li>Tools: Fixed branding typo for Autoptimize (#3416)</li>
-	<li>Docs: fixed a 404 documentation link (#3398)</li>
-	<li>Menu Module: Fixed fatal error when search is enabled and using Lite version (#3409)</li>
-</ul>
-
-<h4>2.8.2 - 05/23/2024</h4>
-
-<strong>Enhancements</strong>
-<ul>
-	<li>Add copy/paste to parent menu (#3380)</li>
-	<li>Show color value in color picker when clicking a Global connected color (#3367)</li>
-	<li>Photo Module: Add new filter to change the photo link (#356)</li>
-	<li>Add filter to disable the tour option (#1104)</li>
-	<li>Post Module: Add option to disable paged autoscroll (#2219)</li>
-	<li>Add an indicator to Node CSS/JS tabs (#3331)</li>
-	<li>Debug Mode: Add enabled/disabled modules section and previous version info (#3233 & 3314)</li>
-	<li>Add version info to body tag for easier discovery (#2740)</li>
-	<li>Try to detect PHP Memory Limit errors (#3196)</li>
-</ul>
-
-<strong>Bug Fixes</strong>
-<ul>
-	<li>Accordion Module: Fix redundant link and ARIA failure A11y issues (#3333 & #2676)</li>
-	<li>Box Module: Fix Grid Alignment not always working properly (#3250)</li>
-	<li>Box Module: Fix incorrect module margin placeholders (#3367)</li>
-	<li>Login Module: Fix sanitization of password field so special characters are not removed (#2480)</li>
-	<li>Fix issue with a duplicated Global Color still using the original color (#3351)</li>
-	<li>Fix Header Themer Layout showing nodes that should be hidden at the breakpoint when editing pages (#3280)</li>
-	<li>Fix saving issue when multiple Gravity Forms forms are on the page (#3105)</li>
-	<li>Fix Column Margins/Padding not live previewing (#3170)</li>
-	<li>Gallery Module: Fix photos overflowing when you resize column (#2991)</li>
-	<li>Photo Module: Fix caption not aligning with image when using a custom width (#2295)</li>
-	<li>Media: Show alert when Media uploader is blocked for the user role (#3317)</li>
-</ul>
-
-<h4>2.8.1.3 - 05/08/2024</h4>
-<p><strong>Hotfix</strong></p>
-<ul>
-    <li>Security: Add sanitization when echoing class (#3372) </li>
-	<li>Fix fatal error when copying and pasting settings with nested forms when the multiple attribute set to false (#3364)</li>
-	<li>Rank Math: Fix fatal error with versions with AI (#3360)</li>
-	<li>Search Module: Add excerpt option when displaying AJAX search results (#3361)</li>
-</ul>
-
-<h4>2.8.1.1 - 04/18/2024</h4>
-<p><strong>Hotfix</strong></p>
-<ul>
-    <li>Fix submenu delay closing other menus (#3349)</li>
-</ul>
-
-<h4>2.8.1 - 04/17/2024</h4>
-<strong>Changes</strong>
-<ul>
-    <li>Improved BB Settings Export/Import to use serialization to fix various bugs when importing. Prior exports will not work with the new system. (#3283)</li>
-    <li>Box Module now requires WordPress version 5.2+. Versions below 5.2 will not see the Box Module in the UI (#3226)</li>
-</ul>
-
-<strong>Enhancements</strong>
-<ul>
-    <li>New keyboard shortcut <code>Shift+R</code> to toggle through breakpoints in reverse order (#3159)</li>
-    <li>Menu Module: add new filters <code>fl_builder_menu_toggle_button</code> and <code>fl_builder_menu_toggle_button</code> to the render-toggle-button function allowing manipulation of the nav element for the flyout menu (#2958)</li>
-    <li>Add delay to overlay submenus to ensure they don't close too quickly (#3309)</li>
-	<li>Add <code>vh</code> as a unit to Box Module fields (#3325)</li>
-	<li>Add new toggles in Advanced Settings to include BB Theme and WordPress theme colors to color pickers (#3328)</li>
-</ul>
-
-<strong>Bug Fixes</strong>
-<ul>
-	<li>Fix Row overlay menu icons when the row is at the top of the page and visibility options are used (#2883)</li>
-	<li>Disable the Outline Panel for roles with restricted editing to avoid unauthorized permissions (#2924)</li>
-	<li>Fix the Slideshow Module not displaying when using some default WordPress themes (#2967)</li>
-	<li>Adjust styling for links in our alert modals (#3179)</li>
-	<li>Fix editing Popups created by Pop-Up Maker when the pop-ups are disabled (#3292)</li>
-	<li>Fix linear gradient not working properly when Small Data Mode is enabled (#3285)</li>
-	<li>Fix modules dropped below a Box Module ending up in the wrong place (#3302)</li>
-	<li>Text Editor Module: Adjust styling so the link search box is not covered (#3304)</li>
-	<li>Box Module: Fix overlay on modules that overflow (#3309)</li>
-	<li>Fix Typography font size slider not using the proper steps (#3266)</li>
-	<li>Fix nested form fields not live previewing when added or duplicated (#3336)</li>
-	<li>Fix Rows not appearing in the Saved Tab of the Content Panel when editing a template (#3288)</li>
-	<li>Posts Module: Fix post alignment problem when using scroll pagination (#204)</li>
-</ul>
-
-<strong>Performance</strong>
-<ul>
-	<li>Ensure that JS needed for upgrades/downgrades only loads where needed (#3299)</li>
+	<li>Various API changes for container modules to support Beaver Themer's new Loop module.</li>
 </ul>
 
 <h4>2.8.0.7 - 04/01/2024</h4>
@@ -2200,11 +2272,11 @@ Fixed default text still appearing even after being removed</li>
  	<li>Touch Support: Use BB on a mobile device.</li>
  	<li>Module Copy/Paste Settings (in Advanced tab)</li>
  	<li>New BigCommerce module to display content from BigCommerce (<strong>BigCommerce plugin required</strong>)</li>
- 	<li>Body classes added based on device size <code>fl-builder-breakpoint-small</code></li>
- 	<li>New filter to completely disable modules from loading <code>is_module_disable_enabled</code></li>
+ 	<li>Body classes added based on device size <code>fl-builder-breakpoint-small</code></li>
+ 	<li>New filter to completely disable modules from loading <code>is_module_disable_enabled</code></li>
  	<li>Visibility icon now shows what rule is active (e.g. logged in / out)</li>
  	<li>FontAwesome: Update FontAwesome icons and Enable Pro in settings as well as added support for Kits and the DuoTone icon set</li>
- 	<li>Added new filter to enable shortcodes in layout/global CSS and JS <code>fl_enable_shortcode_css_js</code></li>
+ 	<li>Added new filter to enable shortcodes in layout/global CSS and JS <code>fl_enable_shortcode_css_js</code></li>
  	<li>Decreased page load by approximately 20% by caching internal variables.</li>
 </ul>
 <strong>Bug Fixes</strong>
@@ -2558,7 +2630,7 @@ Fixed default text still appearing even after being removed</li>
 	<li>Fixed text editor module styles overriding individual styles set in TinyMCE.</li>
 	<li>Fixed functions being stripped from tiny_mce_before_init because of JSON.Stringify().</li>
 	<li>Fixed jQuery migrate warning in _initTimezoneField().</li>
-	<li>Make sure submenu icon won’t display on mobile if sets to None in Menu Module.</li>
+	<li>Make sure submenu icon won't display on mobile if sets to None in Menu Module.</li>
 	<li>Removed all frameborder=0 as it is not needed in modern browsers.</li>
 	<li>Removed focus CSS from tinymce textarea.</li>
 	<li>Removed Caldera Forms Widget fix added in 2.2.1.5, Caldera Forms 1.8.4 fixed the issue.</li>
@@ -2982,7 +3054,7 @@ Fixed default text still appearing even after being removed</li>
 	<li>Added more entrance animations from animate.css.</li>
 	<li>Added live preview for editing entrance animations.</li>
 	<li>Added alpha slider to all color picker settings and removed old opacity settings.</li>
-	<li>Added live preview to more module settings so changes don’t require a refresh.</li>
+	<li>Added live preview to more module settings so changes don't require a refresh.</li>
 	<li>Added popup slider control to various unit and dimension settings.</li>
 	<li>Added the ability to link values for all dimension settings.</li>
 	<li>Added new align setting to various modules in place of the old align selects.</li>
@@ -3227,7 +3299,7 @@ Fixed default text still appearing even after being removed</li>
   <li>Added caption on lightbox of the Photo Module.</li>
   <li>More fl_builder_render_assets_inline fixes.</li>
   <li>Changed delete_users capability to manage_options for builder UI and added <code>fl_builder_admin_settings_capability</code> filter.</li>
-  <li>Changed connections type to photo for row’s background fallback photo.</li>
+  <li>Changed connections type to photo for row's background fallback photo.</li>
   <li>Added aria-hidden attribute to icons for better screenreader experience.</li>
   <li>Added placeholder support for link field type.</li>
   <li>New filter <code>fl_builder_google_fonts_pre_enqueue</code> makes it possible to dequeue any fonts added by modules.</li>
@@ -3385,12 +3457,12 @@ Fixed default text still appearing even after being removed</li>
 	<li>Fixed responsive editing mode not scrolling to the active node when switched.</li>
 	<li>Fixed missing icon is Tabs module when responsive.</li>
 	<li>Added logic that resets color picker when clicking an empty color field.</li>
-	<li>If nodes are hidden using the visibility setting they shouldn’t show after you publish out of the builder.</li>
+	<li>If nodes are hidden using the visibility setting they shouldn't show after you publish out of the builder.</li>
 	<li>Fixed MailChimp Subscribe with multiple last names.</li>
 	<li>Fixed compatibility issue with Fusion Builder by namespacing the color picker code to FLBuilderColor.</li>
 	<li>Fixed more icon issues when fa4 and fa5 css are both loaded in a page.</li>
 	<li>Fixed an issue where the combining of Google fonts could result in 2 calls to the font css.</li>
-	<li>Fixed loop delays in Row’s Youtube background.</li>
+	<li>Fixed loop delays in Row's Youtube background.</li>
 	<li>Fixed shortcodes with single quotes around attrs breaking in nested form fields.</li>
 	<li>Fixed color issue with code highlighting when using the dark UI mode.</li>
 	<li>Fixed a PHP undefined var in Gallery module when using SmugMug.</li>
@@ -4058,7 +4130,7 @@ Fixed default text still appearing even after being removed</li>
 
 <h4>2.0-alpha.3 - 08/07/2017</h4>
 <ul>
-	<li>Settings forms now load instantly! We've completely rewritten the settings forms in JavaScript so they donâ€™t need to be loaded from the server anymore. The only time something needs to load is if youâ€™re using a third party add-on that introduces legacy PHP fields. Weâ€™ll have docs on the new JavaScript settings APIs when 2.0 is released and hope that all major add-on authors will convert their fields to JavaScript so everything loads instantly! :)</li>
+	<li>Settings forms now load instantly! We've completely rewritten the settings forms in JavaScript so they dont need to be loaded from the server anymore. The only time something needs to load is if you're using a third party add-on that introduces legacy PHP fields. We'll have docs on the new JavaScript settings APIs when 2.0 is released and hope that all major add-on authors will convert their fields to JavaScript so everything loads instantly! :)</li>
 	<li>Added an initial set of core row templates.</li>
 	<li>Various bug fixes and style tweaks.</li>
 </ul>
@@ -4265,8 +4337,8 @@ Fixed default text still appearing even after being removed</li>
 </ul>
 <p><strong>Bug Fixes</strong></p>
 <ul>
-    <li>Removed the new core media widgets from the builder since they donâ€™t work in the builder and we have modules that do the same thing.</li>
-    <li>Fixed the core text widget form in the builder so the legacy form loads since the new form in 4.8 doesnâ€™t. The text widget is also removed from the module list in favor of the Text Editor and HTML modules. Sites previously using the text widget will still render and they can still be edited, they just wonâ€™t be able to add new text widgets.</li>
+    <li>Removed the new core media widgets from the builder since they dont work in the builder and we have modules that do the same thing.</li>
+    <li>Fixed the core text widget form in the builder so the legacy form loads since the new form in 4.8 doesn't. The text widget is also removed from the module list in favor of the Text Editor and HTML modules. Sites previously using the text widget will still render and they can still be edited, they just won't be able to add new text widgets.</li>
     <li>Fixed Slideshow module not showing in the Tabs module.</li>
     <li>Fixed JS error in Row > Background > Slideshow  on touch-enabled devices.</li>
     <li>Increased the video ratio to 16:9 to fix the top/bottom black border on responsive layout.</li>
@@ -4416,15 +4488,15 @@ Fixed default text still appearing even after being removed</li>
 </ul>
 <p><strong>Post Module Enhancements</strong></p>
 <ul>
-	<li>Added â€œcolumnsâ€ layout to the layout setting.</li>
+	<li>Added "columns" layout to the layout setting.</li>
 	<li>Added more layout and styling settings.</li>
-	<li>The â€œno resultsâ€ message is now shown when no posts are found.</li>
+	<li>The "no results" message is now shown when no posts are found.</li>
 	<li>Added a setting to show a search form if no posts are found.</li>
 	<li>Added the ability to exclude posts in the content filter for the query.</li>
 </ul>
 <p><strong>Menu Module Enhancements</strong></p>
 <ul>
-	<li>Added â€œbelow row" option for mobile menu position.</li>
+	<li>Added "below row" option for mobile menu position.</li>
 	<li>Added font family setting.</li>
 	<li>Misc CSS improvements.</li>
 </ul>
@@ -4468,7 +4540,7 @@ Fixed default text still appearing even after being removed</li>
 <h4>1.9.5.1 - 3/21/2017</h4>
 <p><strong>Bug Fixes</strong></p>
 <ul>
-	<li>Rolled back change in 1.9.5 that fixed some photos not going full width on mobile. That was causing all photos to go full width on mobile even when not intended. Weâ€™ll revisit that fix in 1.10.</li>
+	<li>Rolled back change in 1.9.5 that fixed some photos not going full width on mobile. That was causing all photos to go full width on mobile even when not intended. We'll revisit that fix in 1.10.</li>
 </ul>
 
 <h4>1.9.5 - 3/20/2017</h4>

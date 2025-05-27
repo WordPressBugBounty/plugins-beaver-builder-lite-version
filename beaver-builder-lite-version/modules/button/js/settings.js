@@ -68,7 +68,7 @@
 
 		_previewIcon: function() {
 			var node = FLBuilder.preview.elements.node,
-				wrap = node.find( '.fl-button-wrap' ),
+				wrap = node.find( '.fl-button-wrap' ).addBack( '.fl-button-wrap' ), // Use addBack for compat with v1 button
 				link = node.find( 'a.fl-button' ),
 				form = $( '.fl-builder-settings:visible' ),
 				text = form.find( 'input[name=text]' ).val(),

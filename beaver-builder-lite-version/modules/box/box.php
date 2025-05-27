@@ -13,10 +13,46 @@ class FLBuilderBoxModule extends FLBuilderModule {
 			'include_wrapper' => false,
 			'accepts'         => 'all',
 			'enabled'         => version_compare( $wp_version, '5.2', '>=' ) && ! function_exists( 'classicpress_version' ),
+			'block_editor'    => true,
 		] );
 
 		// Register custom fields.
 		add_filter( 'fl_builder_custom_fields', __CLASS__ . '::get_custom_field_types' );
+	}
+
+	public function enqueue_ui_scripts() {
+		$ver    = FL_BUILDER_VERSION;
+		$js_url = FL_BUILDER_URL . 'modules/box/js/custom-elements/';
+
+		wp_enqueue_script( 'fl-base-element', $js_url . 'fl-element.js', [ 'wp-compose' ], $ver );
+		wp_enqueue_script( 'fl-menu-element', $js_url . 'fl-menu.js', [ 'fl-base-element' ], $ver );
+		wp_enqueue_script( 'fl-stepper-element', $js_url . 'fl-stepper.js', [], $ver );
+		wp_enqueue_script( 'fl-grid-area-field-element', $js_url . 'fl-grid-area-field.js', [], $ver );
+		wp_enqueue_script( 'fl-layer-group-element', $js_url . 'fl-layer-group.js', [ 'fl-base-element', 'jquery' ], $ver );
+		wp_enqueue_script( 'fl-grid-tracklist-element', $js_url . 'fl-grid-tracklist.js', [ 'fl-layer-group-element', 'jquery' ], $ver );
+	}
+
+	/**
+	 * Filter settings for backwards compat with older fields.
+	 *
+	 * @param Object $settings
+	 * @return Object
+	 */
+	public function filter_raw_settings( $settings, $defaults ) {
+
+		foreach ( [ '', 'child_' ] as $prefix ) {
+			if ( ! isset( $settings->{ $prefix . 'bg_type' } ) ) {
+				if ( isset( $settings->{ $prefix . 'background' } ) && is_array( $settings->{ $prefix . 'background' } ) ) {
+					if ( isset( $settings->{ $prefix . 'background' }['css'] ) && ! empty( $settings->{ $prefix . 'background' }['css'] ) ) {
+						$settings->{ $prefix . 'bg_type' } = 'advanced';
+					}
+				} else {
+					$settings->{ $prefix . 'bg_type' } = 'basic';
+				}
+			}
+		}
+
+		return $settings;
 	}
 
 	/**
@@ -29,7 +65,7 @@ class FLBuilderBoxModule extends FLBuilderModule {
 
 		// Support link field attributes
 		if ( '' !== $this->settings->link ) {
-			$attrs['href'] = esc_url( $this->settings->link );
+			$attrs['href'] = esc_url( do_shortcode( $this->settings->link ) );
 
 			if ( isset( $this->settings->link_target ) ) {
 				$attrs['target'] = esc_attr( $this->settings->link_target );
@@ -74,7 +110,10 @@ class FLBuilderBoxModule extends FLBuilderModule {
 		echo $tag;
 	}
 
-	static public function child_selector() {
+	static public function child_selector( $specificity = 0 ) {
+		if ( 1 === $specificity ) {
+			return '.fl-node-{node_id} > :not( .fl-block-overlay, .fl-drop-target )';
+		}
 		return ':where( .fl-node-{node_id} > :not( .fl-block-overlay, .fl-drop-target ) )';
 	}
 
@@ -99,8 +138,9 @@ class FLBuilderBoxModule extends FLBuilderModule {
 			'basics' => [
 				'label'   => __( 'Basics', 'fl-builder' ),
 				'options' => [
-					''    => __( 'None', 'fl-builder' ),
-					'1/1' => __( 'Square', 'fl-builder' ),
+					''     => __( '--', 'fl-builder' ),
+					'auto' => __( 'Auto', 'fl-builder' ),
+					'1/1'  => __( 'Square', 'fl-builder' ),
 				],
 			],
 			'wide'   => [
@@ -123,31 +163,7 @@ class FLBuilderBoxModule extends FLBuilderModule {
 			],
 		];
 	}
-
-	static public function init() {
-		if ( FLBuilderUIIFrame::is_enabled() ) {
-			add_action( 'fl_builder_ui_enqueue_scripts', __CLASS__ . '::enqueue_custom_elements' );
-		} else {
-			add_action( 'wp_enqueue_scripts', __CLASS__ . '::enqueue_custom_elements' );
-		}
-	}
-
-	static public function enqueue_custom_elements() {
-		if ( FLBuilderModel::is_builder_active() ) {
-			$ver    = FL_BUILDER_VERSION;
-			$js_url = FL_BUILDER_URL . 'modules/box/js/custom-elements/';
-
-			wp_enqueue_script( 'fl-base-element', $js_url . 'fl-element.js', [ 'wp-compose' ], $ver );
-			wp_enqueue_script( 'fl-menu-element', $js_url . 'fl-menu.js', [ 'fl-base-element' ], $ver );
-			wp_enqueue_script( 'fl-stepper-element', $js_url . 'fl-stepper.js', [], $ver );
-			wp_enqueue_script( 'fl-grid-area-field-element', $js_url . 'fl-grid-area-field.js', [], $ver );
-			wp_enqueue_script( 'fl-layer-group-element', $js_url . 'fl-layer-group.js', [ 'fl-base-element', 'jquery' ], $ver );
-			wp_enqueue_script( 'fl-grid-tracklist-element', $js_url . 'fl-grid-tracklist.js', [ 'fl-layer-group-element', 'jquery' ], $ver );
-		}
-	}
 }
-
-FLBuilderBoxModule::init();
 
 /**
  * Register the node and its form settings.
@@ -253,7 +269,12 @@ FLBuilder::register_module( 'FLBuilderBoxModule', [
 											'value' => '3',
 										],
 									],
-									'rows'         => [],
+									'rows'         => [
+										[
+											'type'  => 'basic-track',
+											'value' => '1',
+										],
+									],
 									'auto_columns' => [],
 									'auto_rows'    => [],
 								],
@@ -305,6 +326,8 @@ FLBuilder::register_module( 'FLBuilderBoxModule', [
 					'flex_direction' => [
 						'label'      => __( 'Direction', 'fl-builder' ),
 						'type'       => 'button-group',
+						'fill_space' => true,
+						'help'       => __( 'Controls how items inside the box line up. Either horizontally in a row or vertically in a column.', 'fl-builder' ),
 						'responsive' => [
 							'default' => [
 								'default'    => 'row',
@@ -327,6 +350,7 @@ FLBuilder::register_module( 'FLBuilderBoxModule', [
 					],
 					'grid_auto_flow' => [
 						'label'      => __( 'Flow Direction', 'fl-builder' ),
+						'help'       => __( 'Controls how items are placed into the grid. Either filling rows first or columns first.', 'fl-builder' ),
 						'type'       => 'button-group',
 						'fill_space' => true,
 						'options'    => [
@@ -364,6 +388,7 @@ FLBuilder::register_module( 'FLBuilderBoxModule', [
 						'type'       => 'justify',
 						'preset'     => 'v_flex',
 						'responsive' => true,
+						'help'       => __( 'Controls the vertical (top row) and horizontal (bottom row) alignment of items within the box.', 'fl-builder' ),
 						'preview'    => [
 							'type'  => 'css',
 							'auto'  => true,
@@ -429,11 +454,12 @@ FLBuilder::register_module( 'FLBuilderBoxModule', [
 						'responsive'  => true,
 						'allow_empty' => false,
 						'fill_space'  => true,
+						'help'        => __( "Controls if items should all stay on one line or wrap onto additional lines when there isn't enough space.", 'fl-builder' ),
 						'options'     => [
 							''             => __( 'Normal', 'fl-builder' ),
-							'nowrap'       => __( 'No Wrap', 'fl-builder' ),
+							'nowrap'       => __( 'None', 'fl-builder' ),
 							'wrap'         => __( 'Wrap', 'fl-builder' ),
-							'wrap-reverse' => __( 'Reverse Wrap', 'fl-builder' ),
+							'wrap-reverse' => __( 'Reversed', 'fl-builder' ),
 						],
 						'preview'     => [
 							'type'     => 'css',
@@ -449,10 +475,12 @@ FLBuilder::register_module( 'FLBuilderBoxModule', [
 				],
 			],
 			'spacing' => [
-				'title'  => __( 'Spacing', 'fl-builder' ),
-				'fields' => [
+				'title'     => __( 'Spacing', 'fl-builder' ),
+				'collapsed' => true,
+				'fields'    => [
 					'gap'      => [
 						'label'      => __( 'Gap', 'fl-builder' ),
+						'help'       => __( 'Controls the space between items in the box.', 'fl-builder' ),
 						'type'       => 'unit',
 						'default'    => '10',
 						'responsive' => true,
@@ -512,6 +540,97 @@ FLBuilder::register_module( 'FLBuilderBoxModule', [
 						'preview'    => [
 							'type'     => 'css',
 							'property' => 'padding',
+							'auto'     => true,
+						],
+					],
+				],
+			],
+			'style'   => [
+				'title'  => __( 'Appearance', 'fl-builder' ),
+				'fields' => [
+					'color'      => [
+						'label'       => __( 'Text Color', 'fl-builder' ),
+						'type'        => 'color',
+						'responsive'  => true,
+						'show_reset'  => true,
+						'show_alpha'  => true,
+						'connections' => [ 'color' ],
+						'preview'     => [
+							'type'     => 'css',
+							'property' => 'color',
+							'auto'     => true,
+						],
+					],
+					'bg_type'    => [
+						'label'       => __( 'Background Type', 'fl-builder' ),
+						'type'        => 'button-group',
+						'fill_space'  => true,
+						'allow_empty' => false,
+						'default'     => 'basic',
+						'options'     => [
+							'basic'    => __( 'Color', 'fl-builder' ),
+							'advanced' => __( 'Advanced', 'fl-builder' ),
+						],
+						'toggle'      => [
+							'basic'    => [
+								'fields' => [ 'bg_color' ],
+							],
+							'advanced' => [
+								'fields' => [ 'background' ],
+							],
+						],
+					],
+					'background' => [
+						'label'      => __( 'Background Layers', 'fl-builder' ),
+						'type'       => 'background',
+						'responsive' => [
+							'default' => [
+								'default' => [
+									[
+										'id'    => 1,
+										'type'  => 'color',
+										'state' => [
+											'color' => '',
+										],
+									],
+								],
+							],
+						],
+						'preview'    => [
+							'type'      => 'css',
+							'auto'      => true,
+							'property'  => 'background',
+							'sub_value' => [
+								'setting_name' => 'css',
+							],
+							'enabled'   => [
+								'bg_type' => 'advanced',
+							],
+						],
+					],
+					'bg_color'   => [
+						'label'       => __( 'Background Color', 'fl-builder' ),
+						'type'        => 'color',
+						'responsive'  => true,
+						'show_reset'  => true,
+						'show_alpha'  => true,
+						'connections' => [ 'color' ],
+						'preview'     => [
+							'type'     => 'css',
+							'property' => 'background-color',
+							'auto'     => true,
+							'enabled'  => [
+								'bg_type' => 'basic',
+							],
+						],
+					],
+					'border'     => [
+						'label'      => __( 'Border', 'fl-builder' ),
+						'type'       => 'border',
+						'responsive' => true,
+						'preview'    => [
+							'type'     => 'css',
+							'property' => 'border',
 							'auto'     => true,
 						],
 					],
@@ -655,48 +774,6 @@ FLBuilder::register_module( 'FLBuilderBoxModule', [
 					],
 				],
 			],
-			'style'   => [
-				'title'     => __( 'Appearance', 'fl-builder' ),
-				'collapsed' => true,
-				'fields'    => [
-					'bg_color' => [
-						'label'       => __( 'Background Color', 'fl-builder' ),
-						'type'        => 'color',
-						'responsive'  => true,
-						'show_reset'  => true,
-						'show_alpha'  => true,
-						'connections' => [ 'color' ],
-						'preview'     => [
-							'type'     => 'css',
-							'property' => 'background-color',
-							'auto'     => true,
-						],
-					],
-					'color'    => [
-						'label'       => __( 'Text Color', 'fl-builder' ),
-						'type'        => 'color',
-						'responsive'  => true,
-						'show_reset'  => true,
-						'show_alpha'  => true,
-						'connections' => [ 'color' ],
-						'preview'     => [
-							'type'     => 'css',
-							'property' => 'color',
-							'auto'     => true,
-						],
-					],
-					'border'   => [
-						'label'      => __( 'Border', 'fl-builder' ),
-						'type'       => 'border',
-						'responsive' => true,
-						'preview'    => [
-							'type'     => 'css',
-							'property' => 'border',
-							'auto'     => true,
-						],
-					],
-				],
-			],
 			'link'    => [
 				'title'     => __( 'Linking', 'fl-builder' ),
 				'collapsed' => true,
@@ -704,7 +781,7 @@ FLBuilder::register_module( 'FLBuilderBoxModule', [
 					'link' => [
 						'label'         => __( 'Link', 'fl-builder' ),
 						'type'          => 'link',
-						'placeholder'   => __( 'http://www.example.com', 'fl-builder' ),
+						'placeholder'   => 'https://www.example.com',
 						'show_target'   => true,
 						'show_nofollow' => true,
 						'show_download' => true,
@@ -848,7 +925,7 @@ FLBuilder::register_module( 'FLBuilderBoxModule', [
 							'rules' => [
 								[
 									'property'  => 'min-width',
-									'selector'  => FLBuilderBoxModule::child_selector(),
+									'selector'  => FLBuilderBoxModule::child_selector( 1 ),
 									'sub_value' => [
 										'setting_name' => 'min_width',
 										'type'         => 'unit',
@@ -916,7 +993,7 @@ FLBuilder::register_module( 'FLBuilderBoxModule', [
 				'title'     => __( 'Appearance', 'fl-builder' ),
 				'collapsed' => true,
 				'fields'    => [
-					'child_color'    => [
+					'child_color'      => [
 						'label'       => __( 'Text Color', 'fl-builder' ),
 						'type'        => 'color',
 						'responsive'  => true,
@@ -930,7 +1007,43 @@ FLBuilder::register_module( 'FLBuilderBoxModule', [
 							'selector' => FLBuilderBoxModule::child_selector(),
 						],
 					],
-					'child_bg_color' => [
+					'child_bg_type'    => [
+						'label'       => __( 'Background Type', 'fl-builder' ),
+						'type'        => 'button-group',
+						'fill_space'  => true,
+						'allow_empty' => false,
+						'default'     => 'basic',
+						'options'     => [
+							'basic'    => __( 'Color', 'fl-builder' ),
+							'advanced' => __( 'Advanced', 'fl-builder' ),
+						],
+						'toggle'      => [
+							'basic'    => [
+								'fields' => [ 'child_bg_color' ],
+							],
+							'advanced' => [
+								'fields' => [ 'child_background' ],
+							],
+						],
+					],
+					'child_background' => [
+						'label'      => __( 'Background', 'fl-builder' ),
+						'type'       => 'background',
+						'responsive' => true,
+						'preview'    => [
+							'type'      => 'css',
+							'auto'      => true,
+							'property'  => 'background',
+							'selector'  => FLBuilderBoxModule::child_selector(),
+							'sub_value' => [
+								'setting_name' => 'css',
+							],
+							'enabled'   => [
+								'child_bg_type' => 'advanced',
+							],
+						],
+					],
+					'child_bg_color'   => [
 						'label'       => __( 'Background Color', 'fl-builder' ),
 						'type'        => 'color',
 						'responsive'  => true,
@@ -942,9 +1055,12 @@ FLBuilder::register_module( 'FLBuilderBoxModule', [
 							'property' => 'background-color',
 							'auto'     => true,
 							'selector' => FLBuilderBoxModule::child_selector(),
+							'enabled'  => [
+								'child_bg_type' => 'basic',
+							],
 						],
 					],
-					'child_border'   => [
+					'child_border'     => [
 						'label'      => __( 'Border', 'fl-builder' ),
 						'type'       => 'border',
 						'responsive' => true,
@@ -961,4 +1077,4 @@ FLBuilder::register_module( 'FLBuilderBoxModule', [
 	],
 ] );
 
-require_once dirname( __FILE__ ) . '/box-aliases.php';
+require_once __DIR__ . '/box-aliases.php';

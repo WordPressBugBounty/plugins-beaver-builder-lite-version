@@ -111,7 +111,8 @@ FLBuilderCSS::typography_field_rule( array(
 
 // Link Color
 FLBuilderCSS::rule( array(
-	'selector' => ".fl-node-$id a.fl-callout-cta-link",
+	'selector' => ".fl-builder-content .fl-node-$id .fl-callout-content .fl-callout-cta-link",
+	'enabled'  => ! empty( $settings->link_color ),
 	'props'    => array(
 		'color' => $settings->link_color,
 	),
@@ -119,7 +120,8 @@ FLBuilderCSS::rule( array(
 
 // Link Hover Color
 FLBuilderCSS::rule( array(
-	'selector' => ".fl-node-$id a.fl-callout-cta-link:hover, .fl-node-$id a.fl-callout-cta-link:focus",
+	'selector' => ".fl-builder-content .fl-node-$id .fl-callout-content .fl-callout-cta-link:hover, .fl-builder-content .fl-node-$id .fl-callout-content .fl-callout-cta-link:focus",
+	'enabled'  => ! empty( $settings->link_hover_color ),
 	'props'    => array(
 		'color' => $settings->link_hover_color,
 	),

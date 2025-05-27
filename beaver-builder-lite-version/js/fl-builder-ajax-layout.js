@@ -39,7 +39,7 @@
 					this._content 			= $( '.fl-node-' + this._data.oldNodeId );
 				} else {
 					this._oldScriptsStyles 	= $( '.fl-builder-node-scripts-styles[data-node="' + this._data.nodeId + '"]' );
-					this._content 			= $( '.fl-node-' + this._data.nodeId ).eq(0);
+					this._content 			= $( '.fl-node-' + this._data.nodeId );
 				}
 			}
 		} else {
@@ -338,26 +338,32 @@
 
 			// Setup vars.
 			var html          = $( '<div>' + this._data.html + '</div>' ),
-				nodeClass     = 'fl-row',
+				nodeClass     = [ 'fl-row', 'fl-module' ],
 				scriptsStyles = this._data.scriptsStyles,
 				removed       = '';
 
 			// Get the class of the nodes that should be in data.html.
 			if ( this._data.partial ) {
 				if ( 'column-group' == this._data.nodeType ) {
-					nodeClass = 'fl-col-group';
+					nodeClass = [ 'fl-col-group' ];
 				}
 				else if ( 'column' == this._data.nodeType ) {
-					nodeClass = 'fl-col';
+					nodeClass = [ 'fl-col' ];
 				}
 				else {
-					nodeClass = this._data.nodeType ? 'fl-' + this._data.nodeType : 'fl-row';
+					nodeClass = [ this._data.nodeType ? 'fl-' + this._data.nodeType : 'fl-row' ];
 				}
 			}
 
 			// Remove elements that shouldn't be in data.html.
 			html.find( '> *, script' ).each( function() {
-				if ( ! $( this ).hasClass( nodeClass ) && 'application/json' != $( this ).attr( 'type' ) ) {
+				let hasClass = false;
+				for ( c of nodeClass ) {
+					if ( $( this ).hasClass( c ) ) {
+						hasClass = true;
+					}
+				}
+				if ( ! hasClass && 'application/json' != $( this ).attr( 'type' ) ) {
 					removed 	   = $( this ).remove();
 					scriptsStyles += removed[0].outerHTML;
 				}
@@ -397,7 +403,7 @@
 
 					// Get sibling rows.
 					if ( this._data.nodeParent.hasClass( 'fl-builder-content' ) ) {
-						siblings = this._data.nodeParent.find( ' > .fl-row' );
+						siblings = this._data.nodeParent.find( ' > .fl-row, > .fl-module' );
 					}
 					// Get sibling column groups.
 					else if ( this._data.nodeParent.hasClass( 'fl-row-content' ) ) {
@@ -441,7 +447,10 @@
 			if ( FLBuilder.preview && this._data.nodeId && this._data.nodeId != FLBuilder.preview.nodeId ) {
 				var previewNode = $( FLBuilder.preview.classes.node );
 				var isChild = previewNode.closest( '.fl-node-' + this._data.nodeId ).length;
-				if ( isChild ) {
+
+				// Only do this when there is one copy of the preview node on the page.
+				// If there is more than one, it means we're editing a loop based module.
+				if ( isChild && 1 === previewNode.length ) {
 					previewNode.html( FLBuilder.preview.elements.node.html() );
 				}
 			}
@@ -592,9 +601,9 @@
 				FLBuilder._refreshSortables();
 			} else {
 				FLBuilder._setupEmptyLayout();
-				FLBuilder._highlightEmptyCols();
 				FLBuilder._initDropTargets();
 				FLBuilder._initSortables();
+				FLBuilder._highlightEmptyCols();
 				FLBuilder._resizeLayout();
 			}
 

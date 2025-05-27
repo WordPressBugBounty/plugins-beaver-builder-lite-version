@@ -60,6 +60,14 @@
 		 */
 		_init: function()
 		{
+			/**
+			 * Don't init inside the block editor. We just need the
+			 * these functions available there.
+			 */
+			if ( FLBuilder.isBlockEditor() ) {
+				return;
+			}
+
 			this._bind();
 
 			if ( ! FLBuilder.UIIFrame.isEnabled() ) {

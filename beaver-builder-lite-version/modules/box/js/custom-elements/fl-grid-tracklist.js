@@ -32,13 +32,13 @@ class FLGridTrackList extends FLElement {
 		const input = this.querySelector(`input[name="${inputName}"]`)
 
 		input?.setAttribute( 'value', list.value )
-		input?.dispatchEvent( new Event( 'change' ) )
+		input?.dispatchEvent( new Event( 'change', { bubbles: true } ) )
 
 		const cssInputName = `${this.name}[${list.name}_css]`
 		const css = this.getCSS( list.value )
 		const cssInput = this.querySelector(`input[name="${cssInputName}"]`)
 		cssInput?.setAttribute( 'value', css )
-		cssInput?.dispatchEvent( new Event( 'change' ) )
+		cssInput?.dispatchEvent( new Event( 'change', { bubbles: true } ) )
 	}
 
 	get name() {
@@ -76,7 +76,7 @@ class FLGridTrackList extends FLElement {
 		return `
 			<div class="fl-layer-group-cluster" style="display: grid; gap: 1px">
 				${ lists.map( list => {
-						const value = Array.isArray( values[list] ) ? JSON.stringify( values[list] ) : ''
+						const value = values && Array.isArray( values[list] ) ? JSON.stringify( values[list] ) : ''
 						const inputName = `${ this.name }[${list}]`
 						const cssInputName = `${ this.name }[${list}_css]`
 

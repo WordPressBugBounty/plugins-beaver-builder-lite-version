@@ -8,6 +8,7 @@
 	$mobile_breakpoint = isset( $settings->mobile_breakpoint ) ? esc_js( $settings->mobile_breakpoint ) : 'mobile';
 	$post_id           = FLBuilderModel::get_post_id();
 	$mobile_stacked    = isset( $settings->mobile_stacked ) && 'no' === $settings->mobile_stacked ? 'false' : 'true';
+	$submenu_icon      = isset( $settings->submenu_hover_toggle ) ? esc_js( $settings->submenu_hover_toggle ) : 'none';
 ?>
 
 (function($) {
@@ -28,6 +29,7 @@
 			mobileBreakpoint: '<?php echo $mobile_breakpoint; ?>',
 			postId : '<?php echo $post_id; ?>',
 			mobileStacked: <?php echo $mobile_stacked; ?>,
+			submenuIcon: '<?php echo $submenu_icon; ?>',
 		});
 
 	});

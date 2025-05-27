@@ -138,7 +138,7 @@ FLBuilder::register_settings_form('col', array(
 				'background'  => array(
 					'title'  => __( 'Background', 'fl-builder' ),
 					'fields' => array(
-						'bg_type' => array(
+						'bg_type'    => array(
 							'type'    => 'select',
 							'label'   => __( 'Type', 'fl-builder' ),
 							'default' => 'color',
@@ -147,6 +147,7 @@ FLBuilder::register_settings_form('col', array(
 								'color'    => _x( 'Color', 'Background type.', 'fl-builder' ),
 								'gradient' => _x( 'Gradient', 'Background type.', 'fl-builder' ),
 								'photo'    => _x( 'Photo', 'Background type.', 'fl-builder' ),
+								'multiple' => _x( 'Multiple Backgrounds', 'Background type.', 'fl-builder' ),
 							),
 							'toggle'  => array(
 								'color'    => array(
@@ -158,9 +159,41 @@ FLBuilder::register_settings_form('col', array(
 								'photo'    => array(
 									'sections' => array( 'bg_photo', 'bg_overlay', 'bg_color' ),
 								),
+								'multiple' => array(
+									'fields' => array( 'background' ),
+								),
 							),
 							'preview' => array(
 								'type' => 'none',
+							),
+						),
+						'background' => array(
+							'type'       => 'background',
+							'label'      => __( 'Background Layers', 'fl-builder' ),
+							'responsive' => [
+								'default' => [
+									'default' => [
+										[
+											'id'    => 1,
+											'type'  => 'color',
+											'state' => [
+												'color' => '',
+											],
+										],
+									],
+								],
+							],
+							'preview'    => array(
+								'type'      => 'css',
+								'auto'      => true,
+								'property'  => 'background',
+								'selector'  => '> .fl-col-content',
+								'sub_value' => [
+									'setting_name' => 'css',
+								],
+								'enabled'   => [
+									'bg_type' => 'multiple',
+								],
 							),
 						),
 					),
@@ -479,18 +512,8 @@ FLBuilder::register_settings_form('col', array(
 						'responsive_display'         => array(
 							'type'         => 'button-group',
 							'label'        => __( 'Breakpoint', 'fl-builder' ),
-							'options'      => array(
-								'desktop' => '<i class="dashicons dashicons-desktop"></i>',
-								'large'   => '<i class="dashicons dashicons-laptop"></i>',
-								'medium'  => '<i class="dashicons dashicons-tablet"></i>',
-								'mobile'  => '<i class="dashicons dashicons-smartphone"></i>',
-							),
-							'tooltip'      => array(
-								'desktop' => __( 'Extra Large', 'fl-builder' ),
-								'large'   => __( 'Large', 'fl-builder' ),
-								'medium'  => __( 'Medium', 'fl-builder' ),
-								'mobile'  => __( 'Mobile', 'fl-builder' ),
-							),
+							'options'      => FLBuilderModel::get_node_breakpoint_options(),
+							'tooltip'      => FLBuilderModel::get_node_breakpoint_tooltips(),
 							'default'      => 'desktop,large,medium,mobile',
 							'multi-select' => array(
 								'min' => 1,

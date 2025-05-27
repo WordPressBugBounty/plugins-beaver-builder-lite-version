@@ -11,6 +11,9 @@ class FLBuilderUIIFrame {
 	static public function init() {
 		add_action( 'wp', __CLASS__ . '::redirect' );
 		add_action( 'wp', __CLASS__ . '::hooks' );
+		add_action( 'fl_builder_cache_cleared', function () {
+			update_option( '_fl_builder_iframe_check', false );
+		} );
 	}
 
 	/**
@@ -54,6 +57,31 @@ class FLBuilderUIIFrame {
 			 */
 			if ( ! defined( 'IFRAME_REQUEST' ) ) {
 				define( 'IFRAME_REQUEST', true );
+			}
+
+			if ( ! get_option( '_fl_builder_iframe_check', false ) ) {
+				// test for X-Frame-Options: DENY as it will break iframe ui, ugh
+				$response        = wp_remote_get( get_permalink() );
+				$xframe          = wp_remote_retrieve_header( $response, 'x-frame-options' );
+				$csp             = wp_remote_retrieve_header( $response, 'content-security-policy' );
+				$deny            = preg_grep( '#deny#i', (array) $xframe );
+				$frame_ancestors = preg_grep( '#frame-ancestors\s+?[\'|"]none[\'|"]#i', (array) $csp );
+
+				if ( $deny || $frame_ancestors ) {
+					$message = sprintf( '<h1>%s</h1>', __( 'Error: Could not load the UI', 'fl-builder' ) );
+
+					$message .= sprintf( '<p>%s</p>', __( "The UI uses an iFrame but this site's security policy is preventing it from loading.", 'fl-builder' ) );
+
+					$message .= sprintf( '<p>%s</p>', __( 'Refresh this page to restart the builder in legacy mode.', 'fl-builder' ) );
+
+					$message .= sprintf( '<p>%s</p>', __( 'We do recommend that you look into this as the new UI is an improvement to the legacy UI and eventually the legacy UI will be removed.', 'fl-builder' ) );
+
+					$message .= $deny ? sprintf( '<p>%s</p>', __( 'To fix the issue: X-Frame-Options is set to DENY, change it to SAMEORIGIN', 'fl-builder' ) ) : sprintf( '<p>%s</p>', __( 'To fix the issue: Content-Security-Policy frame-ancestors is set to none, change to self', 'fl-builder' ) );
+
+					update_option( '_fl_builder_iframe_ui', false );
+					wp_die( $message, 'Oops!' );
+				}
+				update_option( '_fl_builder_iframe_check', true );
 			}
 
 			add_action( 'template_redirect', __CLASS__ . '::render' );

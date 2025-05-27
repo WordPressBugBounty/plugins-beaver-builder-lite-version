@@ -1,10 +1,10 @@
 === Beaver Builder - WordPress Page Builder ===
 Contributors: justinbusa, RobbyMcCullough, billyyoung, hinampaksh, diegoliv, webmandesign, eugenealegiojo, helgatheviking, ozancanakli, brentjettgmailcom, jproffitt71, brainstormforce, ideaboxcreations, laubsterboy, nikolayyordanov, codente, pross, pedromendonca
 Tags: page builder, beaver builder, landing page, front-end builder, drag and drop editor
-Requires at least: 4.6
-Tested up to: 6.7
+Requires at least: 5.2
+Tested up to: 6.8
 Requires PHP: 7.0
-Stable tag: 2.8.6.2
+Stable tag: 2.9.0.5
 License: GPL2+
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -86,10 +86,6 @@ Every part of a Beaver Builder layout or landing page is fully responsive and lo
 
 We've designed Beaver Builder to create layouts and landing pages that load quickly. Many page builders load in an ungodly number of scripts and stylesheets to every page on your site. Not Beaver Builder! It only loads the assets needed for a given layout or landing page.
 
-= ClassicPress =
-
-This plugin is compatible with [ClassicPress](https://www.classicpress.net/).
-
 == Installation ==
 
 1. Install Beaver Builder either via the WordPress plugin directory or by uploading the files to your server at wp-content/plugins.
@@ -110,7 +106,7 @@ For information on using Beaver Builder, please visit our [Knowledge Base](https
 2. Drag and Drop modules rows and columns to build layouts
 3. Images can easily be modified to fit your needs, both inline and background
 4. Stylize heading and paragraph text using module settings
-5. You'll love  our ready made responsive design features and straightforward responsive editor
+5. You'll love our ready made responsive design features and straightforward responsive editor
 6. Access templates from the Beaver Builder interface and find more on Assistant.Pro
 
 == Changelog ==

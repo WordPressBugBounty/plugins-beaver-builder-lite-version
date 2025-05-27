@@ -11,6 +11,16 @@
 		_selectedNode: null,
 
 		/**
+		 * Initialize overlays.
+		 *
+		 * @since 2.8
+		 */
+		_initOverlays: function()
+		{
+			FLBuilder._bindGeneralOverlayEvents();
+		},
+
+		/**
 		 * Binds general overlay events that don't get removed.
 		 *
 		 * @since 2.8
@@ -23,6 +33,9 @@
 
 			/* Context Menu */
 			body.on( 'contextmenu', '.fl-block-overlay', FLBuilder._onOverlayContextMenu );
+
+			/* Remove Overlays */
+			FLBuilder.addHook( 'didStartNodeLoading', FLBuilder._removeAllOverlays );
 
 			/* Selected Overlays */
 			FLBuilder.addHook( 'didInitDrag', FLBuilder._deselectNodeOverlay );
@@ -181,7 +194,7 @@
 			node.trigger( 'mouseover' );
 
 			if ( openSettings ) {
-				node.find( '> .fl-block-overlay a.fl-block-settings' ).eq(0).trigger( 'click' );
+				node.find( '> .fl-block-overlay .fl-block-settings:not(.fl-builder-submenu-link)' ).eq(0).trigger( 'click' );
 			}
 		},
 
@@ -210,7 +223,7 @@
 		_selectNodeParentOnMenuClick: function( e )
 		{
 			var nodeId = $( this ).data( 'target-node' );
-			var node = $( `[data-node=${ nodeId }]` );
+			var node = $( this ).closest( `[data-node=${ nodeId }]` );
 
 			FLBuilder._selectNodeOverlay( node );
 			FLBuilder._removeNodeParentHighlight();
@@ -226,7 +239,7 @@
 		_highlightNodeParentOnMenuHover: function()
 		{
 			var nodeId = $( this ).data( 'target-node' );
-			var node = $( `[data-node=${ nodeId }]` );
+			var node = $( this ).closest( `[data-node=${ nodeId }]` );
 
 			FLBuilder._removeNodeParentHighlight();
 
@@ -261,7 +274,7 @@
 			var parents = node.parentsUntil( FLBuilder._contentClass, selector ).add( node );
 			var data = [];
 
-			if ( ! parents.length ) {
+			if ( parents.length <= 1 ) {
 				return null;
 			}
 
@@ -274,7 +287,7 @@
 						return;
 					} else if ( parent.hasClass( 'fl-col' ) && 'column' === FLBuilderConfig.userTemplateType ) {
 						return;
-					} else if ( parent.hasClass( 'fl-module' ) && 'module' === FLBuilderConfig.userTemplateType ) {
+					} else if ( parent.hasClass( 'fl-module' ) && 'module' === FLBuilderConfig.userTemplateType && parent.data( 'node' ) === node.data( 'node' ) ) {
 						return;
 					}
 				}
@@ -787,6 +800,16 @@
 					layoutDirection	  : layoutDirection,
 				} ) );
 
+				// Adjust overlay position to match margins of
+				// modules that do not have content wrappers.
+				overlay.css( {
+					'top': '-' + module.css( 'margin-top' ),
+					'right': '-' + module.css( 'margin-right' ),
+					'bottom': '-' + module.css( 'margin-bottom' ),
+					'left': '-' + module.css( 'margin-left' ),
+					'height': 'auto'
+				} );
+
 				// Build the overlay overflow menu if necessary.
 				FLBuilder._buildOverlayOverflowMenu( overlay );
 
@@ -1006,7 +1029,7 @@
 					if ( overflowItems[ i ].is( '.fl-builder-has-submenu' ) ) {
 						menuData.push( {
 							type    : 'submenu',
-							label   : overflowItems[ i ].find( '.fa, .fas, .far, svg' ).data( 'title' ),
+							label   : overflowItems[ i ].find( '.fa, .fas, .far, svg, span' ).data( 'title' ),
 							submenu : overflowItems[ i ].find( '.fl-builder-submenu' )[0].outerHTML,
 							className : overflowItems[ i ].find( '> i, > svg' ).removeClass( function( i, c ) {
 											return c.replace( /fl-block-([^\s]+)/, '' );
@@ -1028,6 +1051,10 @@
 				FLBuilder._initTipTips();
 			}
 		},
+	} );
+
+	$( function() {
+		FLBuilder._initOverlays();
 	} );
 
 } )( jQuery );

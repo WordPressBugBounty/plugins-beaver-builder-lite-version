@@ -1,8 +1,8 @@
 <?php if ( ! empty( $settings->color ) ) : ?>
-.fl-row .fl-col .fl-node-<?php echo $id; ?> <?php echo $settings->tag; ?>.fl-heading a,
-.fl-row .fl-col .fl-node-<?php echo $id; ?> <?php echo $settings->tag; ?>.fl-heading .fl-heading-text,
-.fl-row .fl-col .fl-node-<?php echo $id; ?> <?php echo $settings->tag; ?>.fl-heading .fl-heading-text *,
-.fl-node-<?php echo $id; ?> <?php echo $settings->tag; ?>.fl-heading .fl-heading-text {
+.fl-row .fl-col <?php echo $settings->tag; ?>.fl-node-<?php echo $id; ?>,
+.fl-row .fl-col <?php echo $settings->tag; ?>.fl-node-<?php echo $id; ?> a,
+	<?php echo $settings->tag; ?>.fl-node-<?php echo $id; ?>,
+	<?php echo $settings->tag; ?>.fl-node-<?php echo $id; ?> a {
 	color: <?php echo FLBuilderColor::hex_or_rgb( $settings->color ); ?>;
 }
 <?php endif; ?>
@@ -11,5 +11,8 @@
 FLBuilderCSS::typography_field_rule( array(
 	'settings'     => $settings,
 	'setting_name' => 'typography',
-	'selector'     => ".fl-node-$id.fl-module-heading .fl-heading",
+	'selector'     => [
+		".fl-node-$id.fl-module-heading",
+		".fl-node-$id.fl-module-heading :where(a, q, p, span)",
+	],
 ) );

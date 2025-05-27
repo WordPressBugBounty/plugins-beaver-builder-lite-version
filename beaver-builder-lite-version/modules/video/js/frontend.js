@@ -4,8 +4,8 @@
 		$('.fl-embed-video').fitVids();
 
 		// Fix multiple videos where autoplay is enabled.
-		if (( $('.fl-module-video .fl-wp-video video').length > 1 ) && typeof $.fn.mediaelementplayer !== 'undefined' ) {
-			$('.fl-module-video .fl-wp-video video').mediaelementplayer( {pauseOtherPlayers: false} );
+		if (( $('.fl-wp-video video').length > 1 ) && typeof $.fn.mediaelementplayer !== 'undefined' ) {
+			$('.fl-wp-video video').mediaelementplayer( {pauseOtherPlayers: false} );
 		}
 
 	});
@@ -18,9 +18,8 @@
 	FLBuilderVideo = function( settings ){
 
 		// Set params
-		this.nodeID           	 = settings.id;
-		this.nodeClass           = '.fl-node-' + settings.id;
-		this.wrapperClass        = this.nodeClass + ' .fl-video';
+		this.nodeID    = settings.id;
+		this.nodeClass = '.fl-node-' + settings.id;
 
 		this._initVideo();
         this._initStickyOnScroll();

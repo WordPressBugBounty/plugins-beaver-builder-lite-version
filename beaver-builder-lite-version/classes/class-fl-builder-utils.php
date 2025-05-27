@@ -162,7 +162,7 @@ final class FLBuilderUtils {
 		$y_matches  = array();
 		$vm_matches = array();
 		$yt_pattern = '/^(?:(?:(?:https?:)?\/\/)?(?:www.)?(?:youtu(?:be.com|.be))\/(?:watch\?v\=|v\/|embed\/)?([\w\-]+))/is';
-		$vm_pattern = '#(?:https?://)?(?:www.)?(?:player.)?vimeo.com/(?:[a-z]*/)*([0-9]{6,11})[?]?.*#';
+		$vm_pattern = '#(?:https?://)?(?:www.)?(?:player.)?vimeo.com/(\d{6,11})(?:/([a-zA-Z0-9]+))?#';
 		$video_data = array(
 			'type'     => 'mp4',
 			'video_id' => '',
@@ -214,8 +214,9 @@ final class FLBuilderUtils {
 				$video_data['params'] = $yt_params;
 			}
 		} elseif ( isset( $vm_matches[1] ) ) {
-			$video_data['type']     = 'vimeo';
-			$video_data['video_id'] = $vm_matches[1];
+			$video_data['type']       = 'vimeo';
+			$video_data['video_id']   = $vm_matches[1];
+			$video_data['video_hash'] = empty( $vm_matches[2] ) ? '' : $vm_matches[2];
 		}
 
 		if ( ! empty( $type ) ) {
@@ -456,6 +457,7 @@ final class FLBuilderUtils {
 			'li',
 			'ul',
 			'ol',
+			'a',
 			'p',
 			'article',
 			'section',
@@ -467,14 +469,14 @@ final class FLBuilderUtils {
 		);
 	}
 
-	public static function esc_tags( $setting, $default = false ) {
+	public static function esc_tags( $setting, $default_tag = false ) {
 		$tags = self::allowed_tags();
 		foreach ( $tags as $tag ) {
 			if ( $tag === $setting ) {
 				return $setting;
 			}
 		}
-		return $default;
+		return $default_tag;
 	}
 
 	/**
@@ -517,5 +519,12 @@ final class FLBuilderUtils {
 		}
 		$mods = FLCustomizer::get_mods();
 		return isset( $mods[ $option ] ) ? $mods[ $option ] : '';
+	}
+
+	/**
+	 * Sometimes this core PHP function is not installed, it was added in PHP4
+	 */
+	public static function ctype_xdigit( $text ) {
+		return is_string( $text ) && '' !== $text && ! preg_match( '/[^A-Fa-f0-9]/', $text );
 	}
 }

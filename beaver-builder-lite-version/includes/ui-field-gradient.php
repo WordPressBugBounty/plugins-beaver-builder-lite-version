@@ -62,6 +62,7 @@ var color0 = wp.template( 'fl-builder-field-color' )( {
 		show_reset: true,
 		show_alpha: true,
 	},
+	deferRendering: true,
 } );
 
 var stop0 = wp.template( 'fl-builder-field-unit' )( {
@@ -80,6 +81,7 @@ var color1 = wp.template( 'fl-builder-field-color' )( {
 		show_reset: true,
 		show_alpha: true,
 	},
+	deferRendering: true,
 } );
 
 var stop1 = wp.template( 'fl-builder-field-unit' )( {

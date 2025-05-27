@@ -2,6 +2,7 @@
 var form = FLBuilderSettingsConfig.forms[ data.field.form ];
 var text = '';
 var preview = data.field.preview_text;
+var preview_img = data.field.preview_img || false;
 var previewData = null;
 
 function getPeviewData( form, preview, values ) {
@@ -36,7 +37,6 @@ function getPeviewData( form, preview, values ) {
 			}
 		}
 	}
-
 	return prevData;
 }
 
@@ -69,20 +69,25 @@ text = previewData.value;
 								text = '<i class="' + FLBuilderSettingsForms.escapeHTML( data.value[ data.field.preview_text ] ) + '"></i>';
 							}
 						} else if ( 'select' === field.type ) {
-							text = field.options[ data.value[ data.field.preview_text ] ];
+							text = FLBuilderSettingsForms.escapeHTML( field.options[ data.value[ data.field.preview_text ] ] );
 						} else if ( '' !== data.value[ data.field.preview_text ] && typeof data.value[ data.field.preview_text ] !== 'undefined' ) {
 							var tmp = document.createElement( 'div' );
 							text = data.value[ data.field.preview_text ].toString().replace( /&#39;/g, "'" );
 							tmp.innerHTML = text;
 							text = ( tmp.textContent || tmp.innerText || '' ).replace( /^(.{35}[^\s]*).*/, "$1" )  + '...';
-							text = FLBuilderSettingsForms.escapeHTML( text );
+							text = FLBuilderSettingsForms.escapeHTML(text);
 						}
 					}
 					if( '' === text && 'filter_meta_label' === data.field.preview_text ) {
 						text = FLBuilderSettingsForms.escapeHTML( data.value['filter_meta_key'] );
 					}
+
 				}
 			}
+		}
+		if ( preview_img && '' !== preview_img ) {
+			img = data.value[preview_img]
+			text = '<img style="width:auto;height:40px" src="' + FLBuilderSettingsForms.escapeHTML( img ) + '" />&nbsp;&nbsp;' + text
 		}
 		#>
 		{{{text}}}

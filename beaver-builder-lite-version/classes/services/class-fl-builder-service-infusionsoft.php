@@ -171,7 +171,7 @@ final class FLBuilderServiceInfusionsoft extends FLBuilderService {
 					break;
 				}
 
-				$page ++;
+				$page++;
 			}
 
 			$response['html'] = $this->render_list_field( $lists, $settings );

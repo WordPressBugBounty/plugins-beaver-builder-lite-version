@@ -45,7 +45,7 @@ final class FLBuilderSettingsCompat {
 	 * @return void
 	 */
 	static public function register_helper( $type, $class ) {
-		self::$helpers[ $type ] = new $class;
+		self::$helpers[ $type ] = new $class();
 	}
 
 	/**
@@ -59,7 +59,7 @@ final class FLBuilderSettingsCompat {
 	static public function filter_layout_data( $data ) {
 		foreach ( $data as $node_id => $node ) {
 			if ( isset( $node->settings ) && is_object( $node->settings ) ) {
-				$data[ $node_id ]->settings = self::filter_node_settings( $node->type, $node->settings );
+				$data[ $node_id ]->settings = self::filter_node_settings( $node );
 			}
 		}
 		return $data;
@@ -69,20 +69,22 @@ final class FLBuilderSettingsCompat {
 	 * Ensures settings are backwards compatible for a single node.
 	 *
 	 * @since 2.2
-	 * @param string $type
-	 * @param object $settings
+	 * @param object $node
 	 * @return object
 	 */
-	static public function filter_node_settings( $type, $settings ) {
+	static public function filter_node_settings( $node ) {
+		$type     = $node->type;
+		$settings = $node->settings;
 
 		// Filter raw module settings without defaults first.
 		if ( 'module' === $type && isset( FLBuilderModel::$modules[ $settings->type ] ) ) {
 			$module   = FLBuilderModel::$modules[ $settings->type ];
-			$settings = $module->filter_raw_settings( $settings );
+			$defaults = FLBuilderModel::get_node_defaults( $node );
+			$settings = $module->filter_raw_settings( $settings, $defaults );
 		}
 
 		// Make sure the defaults are merged.
-		$settings = FLBuilderModel::get_node_settings_with_defaults_merged( $type, $settings );
+		$settings = FLBuilderModel::get_node_settings_with_defaults_merged( $node );
 
 		// Filter with the generic helper for all node types.
 		$settings = self::$helpers['generic']->filter_settings( $settings );

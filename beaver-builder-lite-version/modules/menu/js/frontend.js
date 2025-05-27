@@ -20,6 +20,7 @@
 		this.currentBrowserWidth = $( window ).width();
 		this.postId              = settings.postId;
 		this.mobileStacked       = settings.mobileStacked;
+		this.submenuIcon         = settings.submenuIcon;
 
 		// initialize the menu
 		this._initMenu();
@@ -310,11 +311,10 @@
 					$subMenuParents = $( e.target ).parents( '.sub-menu' ),
 					$activeParents 	= $( e.target ).parents( '.fl-has-submenu.fl-active' );
 
-				if( !$subMenu.is(':visible') || $(e.target).hasClass('fl-menu-toggle')
+				if( ( !$subMenu.is(':visible') && 'none' === this.submenuIcon ) || $(e.target).hasClass('fl-menu-toggle')
 					|| ($subMenu.is(':visible') && (typeof $href === 'undefined' || $href == '#')) ){
 					e.preventDefault();
-				}
-				else {
+				} else {
 					e.stopPropagation();
 					window.location.href = $href;
 					return;

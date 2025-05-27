@@ -39,9 +39,9 @@ class FLWidgetModule extends FLBuilderModule {
 		return esc_attr( urldecode( $widget_class ) );
 	}
 
-		/**
-		 * @method check_class validate class variable for backward compatibility
-		 */
+	/**
+	 * @method check_class validate class variable for backward compatibility
+	 */
 	public static function check_class( $settings ) {
 		if ( isset( $settings->widget ) && class_exists( urldecode( $settings->widget ) ) ) {
 			return 'widget';
@@ -52,10 +52,10 @@ class FLWidgetModule extends FLBuilderModule {
 		}
 	}
 
-		/**
-		 * @method filter_raw_settings for checking widget settings compatibility for old pages
-		 */
-	public function filter_raw_settings( $settings ) {
+	/**
+	 * @method filter_raw_settings for checking widget settings compatibility for old pages
+	 */
+	public function filter_raw_settings( $settings, $defaults ) {
 		if ( FLWidgetModule::check_class( $settings ) === 'widget' ) {
 			$widget_class           = FLWidgetModule::extract_class( $settings );
 			$instance               = new $widget_class();
@@ -67,7 +67,7 @@ class FLWidgetModule extends FLBuilderModule {
 	}
 
 	/**
-	 * @return void
+	 * @method update for accessing widget settings through its related plugin
 	 */
 	public function update( $settings ) {
 		// Make sure we have a widget.
@@ -91,6 +91,11 @@ class FLWidgetModule extends FLBuilderModule {
 
 		// Run the widget update method.
 		$widget_settings = $instance->update( $widget_settings, array() );
+
+		// Save the widget settings as an object.
+		if ( is_array( $widget_settings ) ) {
+			$settings->$settings_key = (object) $widget_settings;
+		}
 
 		// Delete the WordPress cache for this widget.
 		wp_cache_delete( $widget_class, 'widget' );

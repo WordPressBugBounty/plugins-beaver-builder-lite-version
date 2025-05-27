@@ -14,8 +14,9 @@ class FLHeadingModule extends FLBuilderModule {
 			'name'            => __( 'Heading', 'fl-builder' ),
 			'description'     => __( 'Display a title/page heading.', 'fl-builder' ),
 			'category'        => __( 'Basic', 'fl-builder' ),
-			'partial_refresh' => true,
 			'icon'            => 'text.svg',
+			'partial_refresh' => true,
+			'include_wrapper' => false,
 		));
 	}
 
@@ -153,7 +154,7 @@ FLBuilder::register_module('FLHeadingModule', array(
 						'default'     => '',
 						'preview'     => array(
 							'type'     => 'text',
-							'selector' => '.fl-heading-text',
+							'selector' => '{node}.fl-heading-text, .fl-heading-text', // Use {node} for v2 markup
 						),
 						'connections' => array( 'string' ),
 					),
@@ -203,7 +204,7 @@ FLBuilder::register_module('FLHeadingModule', array(
 						'label'       => __( 'Color', 'fl-builder' ),
 						'preview'     => array(
 							'type'      => 'css',
-							'selector'  => '.fl-module-content *',
+							'selector'  => '{node}.fl-module-heading, {node}.fl-module-heading :not(.fl-block-overlay *)',
 							'property'  => 'color',
 							'important' => true,
 						),
@@ -214,7 +215,7 @@ FLBuilder::register_module('FLHeadingModule', array(
 						'responsive' => true,
 						'preview'    => array(
 							'type'      => 'css',
-							'selector'  => '{node}.fl-module-heading .fl-heading',
+							'selector'  => '{node}.fl-module-heading, {node}.fl-module-heading :where(a, q, p, span)',
 							'important' => true,
 						),
 					),

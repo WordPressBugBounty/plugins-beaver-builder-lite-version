@@ -73,6 +73,9 @@
 			body.append( mask );
 			body.append( frame );
 			body.css( 'overflow', 'hidden' );
+			frame.on('load', function() {
+				frame.contents().find('a').on( 'click', FLBuilder._preventDefault);
+			});
 		},
 
 		_showSize: function(mode) {

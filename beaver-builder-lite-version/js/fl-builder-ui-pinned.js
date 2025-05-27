@@ -9,7 +9,7 @@
 	 */
 	var PinnedUI = {
 
-		minWidth: 340,
+		minWidth: 310,
 
 		maxWidth: 600,
 
@@ -175,6 +175,7 @@
 				panel.addClass( 'fl-builder-ui-pinned-hidden' );
 				panel.hide();
 				body.css( 'margin', '' );
+				body.removeClass( 'fl-builder-ui-is-pinned fl-builder-ui-is-pinned-left fl-builder-ui-is-pinned-right' );
 				FLBuilder._resizeLayout();
 			}
 		},
@@ -506,9 +507,11 @@
 				body.css( 'margin', '' );
 			} else if ( panel.hasClass( 'fl-builder-ui-pinned-left' ) ) {
 				body.css( 'margin-left', width + 'px' );
+				body.css( '--fl-builder-panel-width', width + 'px' );
 				preview.css( 'margin-left', width + 'px' );
 			} else if ( panel.hasClass( 'fl-builder-ui-pinned-right' ) ) {
 				body.css( 'margin-right', width + 'px' );
+				body.css( '--fl-builder-panel-width', width + 'px' );
 				preview.css( 'margin-right', width + 'px' );
 			}
 		},

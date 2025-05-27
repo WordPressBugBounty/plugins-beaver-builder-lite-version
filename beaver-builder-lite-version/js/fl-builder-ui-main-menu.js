@@ -120,6 +120,7 @@
 
             // Event Listeners
             $('body', window.parent.document).on('click', '.fl-builder--main-menu-panel .pop-view', this.goToPreviousView.bind(this));
+            $('body', window.parent.document).on('click', '#fl-ui-root .fl-notifications-panel .back-menu', this.goToBackView.bind(this));
 
             this.$tabs = this.$el.find('.fl-builder--tabs > span'); /* on purpose */
             this.$tabs.on('click', this.onItemClick.bind(this));
@@ -143,6 +144,7 @@
 
             Tools.init();
             Help.init();
+
         },
 
         /**
@@ -219,6 +221,12 @@
             if (this.isShowing) {
                 this.hide();
             } else {
+
+                if( $( '#fl-ui-root .fl-notifications-panel' ).length ) {
+                    this.hide();
+                    FLBuilder.triggerHook('toggleNotifications');
+                    return;
+                }
                 this.show();
             }
         },
@@ -263,6 +271,16 @@
             newView.transitionIn();
             this.currentView = newView;
             this.viewNavigationStack.push(currentView);
+        },
+
+        /**
+        * Close notification panel
+        *
+        * @return void
+        */
+        goToBackView: function() {
+            FLBuilder.triggerHook('toggleNotifications');
+            MainMenuPanel.show();
         },
 
         /**
@@ -317,6 +335,7 @@
             FLBuilder.addHook('launchThemerLayouts', this.launchThemerLayouts.bind(this));
             FLBuilder.addHook('toggleOutlinePanel', this.toggleOutlinePanel.bind(this));
             FLBuilder.addHook('toggleMediaLibrary', this.toggleMediaLibrary.bind(this));
+            FLBuilder.addHook('showNotifications', this.showNotifications.bind(this));
 
             // Show Keyboard Shortcuts
             if ( 'FL' in window && 'Builder' in FL ) {
@@ -370,6 +389,15 @@
         */
         showGlobalStyles: function() {
             FLBuilder._globalStylesClicked();
+            MainMenuPanel.hide();
+        },
+
+        /**
+        * Show notifications panel
+        * @return void
+        */
+        showNotifications: function() {
+            FLBuilder.triggerHook('toggleNotifications');
             MainMenuPanel.hide();
         },
 

@@ -356,12 +356,15 @@ FLBuilderCSS::responsive_rule( array(
 ) );
 
 // Row Resize - Max Width
-if ( isset( $settings->max_content_width ) ) {
-	$has_max_width        = ! FLBuilderCSS::is_empty( $settings->max_content_width );
-	$is_row_fixed         = ( 'fixed' === $settings->width );
-	$is_row_content_fixed = ( 'fixed' === $settings->content_width );
-	$are_both_full_width  = ( ! $is_row_fixed && ! $is_row_content_fixed );
-	$max_width_selector   = '';
+if ( isset( $settings->max_content_width ) || isset( $settings->max_content_width_large ) || isset( $settings->max_content_width_medium ) || isset( $settings->max_content_width_responsive ) ) {
+	$has_max_width            = ! FLBuilderCSS::is_empty( $settings->max_content_width );
+	$has_large_max_width      = isset( $settings->max_content_width_large ) && ! FLBuilderCSS::is_empty( $settings->max_content_width_large );
+	$has_medium_max_width     = isset( $settings->max_content_width_medium ) && ! FLBuilderCSS::is_empty( $settings->max_content_width_medium );
+	$has_responsive_max_width = isset( $settings->max_content_width_responsive ) && ! FLBuilderCSS::is_empty( $settings->max_content_width_responsive );
+	$is_row_fixed             = ( 'fixed' === $settings->width );
+	$is_row_content_fixed     = ( 'fixed' === $settings->content_width );
+	$are_both_full_width      = ( ! $is_row_fixed && ! $is_row_content_fixed );
+	$max_width_selector       = '';
 
 	if ( $is_row_fixed ) {
 		$max_width_selector = ".fl-node-$id.fl-row-fixed-width, .fl-node-$id .fl-row-fixed-width";
@@ -379,48 +382,89 @@ if ( isset( $settings->max_content_width ) ) {
 			),
 		),
 	) );
+
+	if ( isset( $settings->max_content_width_large ) ) {
+		FLBuilderCSS::rule( array(
+			'selector' => $max_width_selector,
+			'media'    => 'large',
+			'enabled'  => $has_large_max_width && ! $are_both_full_width,
+			'props'    => array(
+				'max-width' => array(
+					'value' => $settings->max_content_width_large,
+					'unit'  => FLBuilderCSS::get_unit( 'max_content_width_large', $settings ),
+				),
+			),
+		) );
+	}
+
+	if ( isset( $settings->max_content_width_medium ) ) {
+		FLBuilderCSS::rule( array(
+			'selector' => $max_width_selector,
+			'media'    => 'medium',
+			'enabled'  => $has_medium_max_width && ! $are_both_full_width,
+			'props'    => array(
+				'max-width' => array(
+					'value' => $settings->max_content_width_medium,
+					'unit'  => FLBuilderCSS::get_unit( 'max_content_width_medium', $settings ),
+				),
+			),
+		) );
+	}
+
+	if ( isset( $settings->max_content_width_responsive ) ) {
+		FLBuilderCSS::rule( array(
+			'selector' => $max_width_selector,
+			'media'    => 'responsive',
+			'enabled'  => $has_responsive_max_width && ! $are_both_full_width,
+			'props'    => array(
+				'max-width' => array(
+					'value' => $settings->max_content_width_responsive,
+					'unit'  => FLBuilderCSS::get_unit( 'max_content_width_responsive', $settings ),
+				),
+			),
+		) );
+	}
 }
 
 FLBuilderArt::render_shape_layers_css( $row );
 
-?>
-
-<?php if ( ! empty( $settings->full_height ) && ( 'full' == $settings->full_height || 'custom' == $row->settings->full_height ) ) : ?>
-/* Full Height Rows */
-.fl-node-<?php echo $id; ?>.fl-row-full-height > .fl-row-content-wrap,
-.fl-node-<?php echo $id; ?>.fl-row-custom-height > .fl-row-content-wrap {
-	display: -webkit-box;
-	display: -webkit-flex;
-	display: -ms-flexbox;
-	display: flex;
-}
-.fl-node-<?php echo $id; ?>.fl-row-full-height > .fl-row-content-wrap {
-	min-height: 100vh;
-}
-.fl-node-<?php echo $id; ?>.fl-row-custom-height > .fl-row-content-wrap {
-	min-height: 0;
-}
-
-.fl-builder-edit .fl-node-<?php echo $id; ?>.fl-row-full-height > .fl-row-content-wrap {
-	min-height: calc( 100vh - 48px );
-}
-
-/* Full height iPad with portrait orientation. */
-@media all and (width: 768px) and (height: 1024px) and (orientation:portrait){
-	.fl-node-<?php echo $id; ?>.fl-row-full-height > .fl-row-content-wrap {
-		min-height: 1024px;
+if ( ! empty( $settings->full_height ) && ( 'full' == $settings->full_height || 'custom' == $row->settings->full_height ) ) :
+	?>
+	/* Full Height Rows */
+	.fl-node-<?php echo $id; ?>.fl-row-full-height > .fl-row-content-wrap,
+	.fl-node-<?php echo $id; ?>.fl-row-custom-height > .fl-row-content-wrap {
+		display: -webkit-box;
+		display: -webkit-flex;
+		display: -ms-flexbox;
+		display: flex;
 	}
-}
-/* Full height iPad with landscape orientation. */
-@media all and (width: 1024px) and (height: 768px) and (orientation:landscape){
 	.fl-node-<?php echo $id; ?>.fl-row-full-height > .fl-row-content-wrap {
-		min-height: 768px;
+		min-height: 100vh;
 	}
-}
-/* Full height iPhone 5. You can also target devices with aspect ratio. */
-@media screen and (aspect-ratio: 40/71) {
-	.fl-node-<?php echo $id; ?>.fl-row-full-height > .fl-row-content-wrap {
-		min-height: 500px;
+	.fl-node-<?php echo $id; ?>.fl-row-custom-height > .fl-row-content-wrap {
+		min-height: 0;
 	}
-}
+
+	.fl-builder-edit .fl-node-<?php echo $id; ?>.fl-row-full-height > .fl-row-content-wrap {
+		min-height: calc( 100vh - 48px );
+	}
+
+	/* Full height iPad with portrait orientation. */
+	@media all and (width: 768px) and (height: 1024px) and (orientation:portrait){
+		.fl-node-<?php echo $id; ?>.fl-row-full-height > .fl-row-content-wrap {
+			min-height: 1024px;
+		}
+	}
+	/* Full height iPad with landscape orientation. */
+	@media all and (width: 1024px) and (height: 768px) and (orientation:landscape){
+		.fl-node-<?php echo $id; ?>.fl-row-full-height > .fl-row-content-wrap {
+			min-height: 768px;
+		}
+	}
+	/* Full height iPhone 5. You can also target devices with aspect ratio. */
+	@media screen and (aspect-ratio: 40/71) {
+		.fl-node-<?php echo $id; ?>.fl-row-full-height > .fl-row-content-wrap {
+			min-height: 500px;
+		}
+	}
 <?php endif; ?>

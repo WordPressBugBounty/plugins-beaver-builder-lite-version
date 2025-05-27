@@ -13,8 +13,9 @@ class FLButtonModule extends FLBuilderModule {
 			'name'            => __( 'Button', 'fl-builder' ),
 			'description'     => __( 'A simple call to action button.', 'fl-builder' ),
 			'category'        => __( 'Basic', 'fl-builder' ),
-			'partial_refresh' => true,
 			'icon'            => 'button.svg',
+			'partial_refresh' => true,
+			'include_wrapper' => false,
 		));
 	}
 
@@ -195,7 +196,6 @@ class FLButtonModule extends FLBuilderModule {
 		}
 		return empty( ( FLBuilderGlobalStyles::get_settings() )->button_border_hover_color ) && empty( FLBuilderUtils::get_bb_theme_option( 'fl-button-border-hover-color' ) );
 	}
-
 }
 
 /**
@@ -276,7 +276,7 @@ FLBuilder::register_module('FLButtonModule', array(
 					'link'           => array(
 						'type'          => 'link',
 						'label'         => __( 'Link', 'fl-builder' ),
-						'placeholder'   => __( 'http://www.example.com', 'fl-builder' ),
+						'placeholder'   => 'https://www.example.com',
 						'show_target'   => true,
 						'show_nofollow' => true,
 						'show_download' => true,
@@ -387,7 +387,7 @@ FLBuilder::register_module('FLButtonModule', array(
 						'responsive' => true,
 						'preview'    => array(
 							'type'     => 'css',
-							'selector' => '.fl-button-wrap',
+							'selector' => '{node}.fl-button-wrap, .fl-button-wrap',
 							'property' => 'text-align',
 						),
 					),

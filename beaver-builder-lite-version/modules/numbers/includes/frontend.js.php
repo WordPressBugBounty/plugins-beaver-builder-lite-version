@@ -14,7 +14,7 @@
 (function($) {
 
 	$(function() {
-		var numModule = window.number_module_<?php echo $id; ?>;
+		var numModule = window['number_module_<?php echo $id; ?>'];
 
 		new FLBuilderNumber({
 			id: '<?php echo $id; ?>',

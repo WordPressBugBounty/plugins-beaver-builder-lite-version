@@ -44,24 +44,59 @@ $row_settings = array(
 							),
 						),
 						'max_content_width' => array(
-							'type'         => 'unit',
-							'label'        => __( 'Fixed Width', 'fl-builder' ),
-							'placeholder'  => $global_settings->row_width,
-							'default_unit' => $global_settings->row_width_unit,
-							'units'        => array(
+							'type'       => 'unit',
+							'label'      => __( 'Fixed Width', 'fl-builder' ),
+							'units'      => array(
 								'px',
 								'vw',
 								'%',
 							),
-							'slider'       => array(
-								'px' => array(
-									'min'  => 0,
-									'max'  => $global_settings->row_width,
-									'step' => 10,
+							'responsive' => array(
+								'placeholder'  => array(
+									'default'    => $global_settings->row_width,
+									'large'      => $global_settings->row_width_large,
+									'medium'     => $global_settings->row_width_medium,
+									'responsive' => $global_settings->row_width_responsive,
+								),
+								'default_unit' => array(
+									'default'    => $global_settings->row_width_unit,
+									'large'      => $global_settings->row_width_large_unit,
+									'medium'     => $global_settings->row_width_medium_unit,
+									'responsive' => $global_settings->row_width_responsive_unit,
+								),
+								'slider'       => array(
+									'default'    => array(
+										'px' => array(
+											'min'  => 0,
+											'max'  => 1920,
+											'step' => 1,
+										),
+									),
+									'large'      => array(
+										'px' => array(
+											'min'  => 0,
+											'max'  => 1200,
+											'step' => 1,
+										),
+									),
+									'medium'     => array(
+										'px' => array(
+											'min'  => 0,
+											'max'  => 971,
+											'step' => 1,
+										),
+									),
+									'responsive' => array(
+										'px' => array(
+											'min'  => 0,
+											'max'  => 728,
+											'step' => 1,
+										),
+									),
 								),
 							),
-							'preview'      => array(
-								'type' => 'refresh',
+							'preview'    => array(
+								'type' => 'none',
 							),
 						),
 						'full_height'       => array(
@@ -143,7 +178,9 @@ $row_settings = array(
 							'show_reset'  => true,
 							'show_alpha'  => true,
 							'preview'     => array(
-								'type' => 'none',
+								'type'     => 'css',
+								'selector' => '.fl-row-content-wrap *',
+								'property' => 'color',
 							),
 						),
 						'link_color'    => array(
@@ -153,7 +190,9 @@ $row_settings = array(
 							'show_reset'  => true,
 							'show_alpha'  => true,
 							'preview'     => array(
-								'type' => 'none',
+								'type'     => 'css',
+								'selector' => '.fl-row-content-wrap a',
+								'property' => 'color',
 							),
 						),
 						'hover_color'   => array(
@@ -173,7 +212,9 @@ $row_settings = array(
 							'show_reset'  => true,
 							'show_alpha'  => true,
 							'preview'     => array(
-								'type' => 'none',
+								'type'     => 'css',
+								'selector' => '.fl-row-content-wrap :is(h1, h2, h3, h4, h5, h6)',
+								'property' => 'color',
 							),
 						),
 					),
@@ -181,24 +222,35 @@ $row_settings = array(
 				'background'       => array(
 					'title'  => __( 'Background', 'fl-builder' ),
 					'fields' => array(
-						'bg_type' => array(
+						'bg_type'    => array(
 							'type'    => 'select',
 							'label'   => __( 'Type', 'fl-builder' ),
 							'default' => 'none',
 							'options' => array(
-								'none'      => _x( 'None', 'Background type.', 'fl-builder' ),
-								'color'     => _x( 'Color', 'Background type.', 'fl-builder' ),
-								'gradient'  => _x( 'Gradient', 'Background type.', 'fl-builder' ),
-								'photo'     => _x( 'Photo', 'Background type.', 'fl-builder' ),
-								'video'     => _x( 'Video', 'Background type.', 'fl-builder' ),
-								'embed'     => _x( 'Embedded Code', 'Background type.', 'fl-builder' ),
-								'slideshow' => array(
-									'label'   => _x( 'Slideshow', 'Background type.', 'fl-builder' ),
-									'premium' => true,
+								'none'     => _x( 'None', 'Background type.', 'fl-builder' ),
+								'css'      => array(
+									'label'   => __( 'Simple', 'fl-builder' ),
+									'options' => array(
+										'color'    => _x( 'Color', 'Background type.', 'fl-builder' ),
+										'gradient' => _x( 'Gradient', 'Background type.', 'fl-builder' ),
+										'photo'    => _x( 'Photo', 'Background type.', 'fl-builder' ),
+										'multiple' => _x( 'Multiple Backgrounds', 'Background type.', 'fl-builder' ),
+									),
 								),
-								'parallax'  => array(
-									'label'   => _x( 'Parallax', 'Background type.', 'fl-builder' ),
-									'premium' => true,
+								'advanced' => array(
+									'label'   => __( 'Advanced', 'fl-builder' ),
+									'options' => array(
+										'video'     => _x( 'Video', 'Background type.', 'fl-builder' ),
+										'embed'     => _x( 'Embedded Code', 'Background type.', 'fl-builder' ),
+										'slideshow' => array(
+											'label'   => _x( 'Slideshow', 'Background type.', 'fl-builder' ),
+											'premium' => true,
+										),
+										'parallax'  => array(
+											'label'   => _x( 'Parallax', 'Background type.', 'fl-builder' ),
+											'premium' => true,
+										),
+									),
 								),
 							),
 							'toggle'  => array(
@@ -226,9 +278,41 @@ $row_settings = array(
 								'embed'     => array(
 									'sections' => array( 'bg_embed_section' ),
 								),
+								'multiple'  => array(
+									'fields' => array( 'background' ),
+								),
 							),
 							'preview' => array(
 								'type' => 'refresh',
+							),
+						),
+						'background' => array(
+							'type'       => 'background',
+							'label'      => __( 'Background Layers', 'fl-builder' ),
+							'responsive' => [
+								'default' => [
+									'default' => [
+										[
+											'id'    => 1,
+											'type'  => 'color',
+											'state' => [
+												'color' => '',
+											],
+										],
+									],
+								],
+							],
+							'preview'    => array(
+								'type'      => 'css',
+								'auto'      => true,
+								'selector'  => '> .fl-row-content-wrap',
+								'property'  => 'background',
+								'sub_value' => [
+									'setting_name' => 'css',
+								],
+								'enabled'   => [
+									'bg_type' => 'multiple',
+								],
 							),
 						),
 					),
@@ -259,7 +343,7 @@ $row_settings = array(
 						'bg_image_url'    => array(
 							'type'        => 'text',
 							'label'       => __( 'Photo URL', 'fl-builder' ),
-							'placeholder' => __( 'https://www.example.com/my-photo.jpg', 'fl-builder' ),
+							'placeholder' => 'https://www.example.com/my-photo.jpg',
 							'connections' => array( 'photo' ),
 							'preview'     => array(
 								'type'     => 'css',
@@ -831,18 +915,8 @@ $row_settings = array(
 						'responsive_display'         => array(
 							'type'         => 'button-group',
 							'label'        => __( 'Breakpoint', 'fl-builder' ),
-							'options'      => array(
-								'desktop' => '<i class="dashicons dashicons-desktop"></i>',
-								'large'   => '<i class="dashicons dashicons-laptop"></i>',
-								'medium'  => '<i class="dashicons dashicons-tablet"></i>',
-								'mobile'  => '<i class="dashicons dashicons-smartphone"></i>',
-							),
-							'tooltip'      => array(
-								'desktop' => __( 'Extra Large', 'fl-builder' ),
-								'large'   => __( 'Large', 'fl-builder' ),
-								'medium'  => __( 'Medium', 'fl-builder' ),
-								'mobile'  => __( 'Mobile', 'fl-builder' ),
-							),
+							'options'      => FLBuilderModel::get_node_breakpoint_options(),
+							'tooltip'      => FLBuilderModel::get_node_breakpoint_tooltips(),
 							'default'      => 'desktop,large,medium,mobile',
 							'multi-select' => array(
 								'min' => 1,

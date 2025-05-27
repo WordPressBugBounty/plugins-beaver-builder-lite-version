@@ -13,8 +13,9 @@ class FLHtmlModule extends FLBuilderModule {
 			'name'            => __( 'HTML', 'fl-builder' ),
 			'description'     => __( 'Display raw HTML code.', 'fl-builder' ),
 			'category'        => __( 'Basic', 'fl-builder' ),
-			'partial_refresh' => true,
 			'icon'            => 'editor-code.svg',
+			'partial_refresh' => true,
+			'include_wrapper' => false,
 		));
 	}
 }
@@ -36,7 +37,7 @@ FLBuilder::register_module('FLHtmlModule', array(
 						'rows'        => '18',
 						'preview'     => array(
 							'type'     => 'text',
-							'selector' => '.fl-html',
+							'selector' => '{node}.fl-html, .fl-html', // Use both classes for compat with v1
 						),
 						'connections' => array( 'html', 'string', 'url' ),
 					),

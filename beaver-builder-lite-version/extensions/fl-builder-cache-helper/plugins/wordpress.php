@@ -2,9 +2,9 @@
 namespace FLCacheClear;
 //phpcs:ignore WordPress.WP.CapitalPDangit.MisspelledClassName
 class Wordpress {
-	var $name = 'Object Caching';
+	public $name = 'Object Caching';
 
-	function run() {
+	public static function run() {
 		wp_cache_flush();
 	}
 }

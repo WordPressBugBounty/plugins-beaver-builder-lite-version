@@ -21,6 +21,7 @@ final class FLBuilderAdminSettings {
 	private static $global_settings = array(
 		'_fl_builder_post_types',
 		'_fl_builder_enabled_modules',
+		'_fl_builder_enabled_blocks',
 		'_fl_builder_enabled_templates',
 		'_fl_builder_enabled_icons',
 		'_fl_builder_user_access',
@@ -261,6 +262,11 @@ final class FLBuilderAdminSettings {
 				'show'     => true,
 				'priority' => 300,
 			),
+			'blocks'        => array(
+				'title'    => __( 'Blocks', 'fl-builder' ),
+				'show'     => true,
+				'priority' => 310,
+			),
 			'post-types'    => array(
 				'title'    => __( 'Post Types', 'fl-builder' ),
 				'show'     => true,
@@ -348,6 +354,9 @@ final class FLBuilderAdminSettings {
 
 		// Modules
 		self::render_form( 'modules' );
+
+		// Blocks
+		self::render_form( 'blocks' );
 
 		// Post Types
 		self::render_form( 'post-types' );
@@ -460,6 +469,7 @@ final class FLBuilderAdminSettings {
 		}
 
 		self::save_enabled_modules();
+		self::save_enabled_blocks();
 		self::save_enabled_post_types();
 		self::save_enabled_icons();
 		self::save_user_access();
@@ -499,6 +509,26 @@ final class FLBuilderAdminSettings {
 			}
 
 			FLBuilderModel::update_admin_settings_option( '_fl_builder_enabled_modules', $modules, true );
+		}
+	}
+
+	/**
+	 * Saves the enabled blocks.
+	 *
+	 * @since 2.9
+	 * @access private
+	 * @return void
+	 */
+	static private function save_enabled_blocks() {
+		if ( isset( $_POST['fl-blocks-nonce'] ) && wp_verify_nonce( $_POST['fl-blocks-nonce'], 'blocks' ) ) {
+
+			$blocks = array();
+
+			if ( isset( $_POST['fl-blocks'] ) && is_array( $_POST['fl-blocks'] ) ) {
+				$blocks = array_map( 'sanitize_text_field', $_POST['fl-blocks'] );
+			}
+
+			FLBuilderModel::update_admin_settings_option( '_fl_builder_enabled_blocks', $blocks, true );
 		}
 	}
 
@@ -664,6 +694,14 @@ final class FLBuilderAdminSettings {
 				 */
 				do_action( 'fl_builder_after_unzip_icon_set', $new_path );
 
+				$files = glob( trailingslashit( $new_path ) . '*' );
+				foreach ( $files as $file ) {
+					$validate = pathinfo( $file );
+					if ( isset( $validate['extension'] ) && 'php' === $validate['extension'] ) {
+						fl_builder_filesystem()->unlink( $file );
+					}
+				}
+
 				/**
 				 * @see fl_builder_icon_set_check_path
 				 */
@@ -781,8 +819,10 @@ final class FLBuilderAdminSettings {
 
 			if ( ! $debugmode ) {
 				set_transient( 'fl_debug_mode', md5( rand() ), 172800 ); // 48 hours 172800
+				update_option( 'fl_debug_mode', true );
 			} else {
 				delete_transient( 'fl_debug_mode' );
+				update_option( 'fl_debug_mode', false );
 			}
 		}
 	}
@@ -908,15 +948,15 @@ final class FLBuilderAdminSettings {
 		} elseif ( isset( $_POST['fl-beta-nonce'] ) && wp_verify_nonce( $_POST['fl-beta-nonce'], 'beta' ) ) {
 
 			if ( isset( $_POST['beta-checkbox'] ) ) {
-				FLBuilderUtils::update_option( 'fl_beta_updates', true );
+				FLBuilderUtils::update_option( 'fl_beta_updates', true, true );
 			} else {
-				delete_option( 'fl_beta_updates' );
+				FLBuilderUtils::update_option( 'fl_beta_updates', false, true );
 			}
 
 			if ( isset( $_POST['alpha-checkbox'] ) ) {
-				FLBuilderUtils::update_option( 'fl_alpha_updates', true );
+				FLBuilderUtils::update_option( 'fl_alpha_updates', true, true );
 			} else {
-				delete_option( 'fl_alpha_updates' );
+				FLBuilderUtils::update_option( 'fl_alpha_updates', false, true );
 			}
 		}
 	}
@@ -949,7 +989,7 @@ final class FLBuilderAdminSettings {
 	/**
 	 * @since 1.10.6
 	 */
-	static function _filter_admin_footer_text( $text ) {
+	public static function _filter_admin_footer_text( $text ) {
 
 		$stars = '<a target="_blank" href="https://wordpress.org/support/plugin/beaver-builder-lite-version/reviews/#new-post" >&#9733;&#9733;&#9733;&#9733;&#9733;</a>';
 

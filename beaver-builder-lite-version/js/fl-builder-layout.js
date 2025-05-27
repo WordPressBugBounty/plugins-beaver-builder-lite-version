@@ -35,9 +35,6 @@
 			// Only init if the builder isn't active.
 			if ( 0 === $('.fl-builder-edit').length ) {
 
-				// Init module animations.
-				FLBuilderLayout._initModuleAnimations();
-
 				// Init anchor links.
 				FLBuilderLayout._initAnchorLinks();
 
@@ -685,6 +682,7 @@
 		{
 			var playerWrap	= $(this),
 				videoId 	= playerWrap.data('video-id'),
+				videoHash 	= playerWrap.data('video-hash'),
 				videoPlayer = playerWrap.find('.fl-bg-video-player'),
 				enableAudio = playerWrap.data('enable-audio'),
 				audioButton = playerWrap.find('.fl-bg-video-audio'),
@@ -693,16 +691,23 @@
 				ua    = navigator.userAgent;
 
 			if ( typeof Vimeo !== 'undefined' && videoId )	{
-				player = new Vimeo.Player(videoPlayer[0], {
-					id         : videoId,
+				
+				const vimOptions = {
 					loop       : true,
 					title      : false,
 					portrait   : false,
 					background : true,
 					autopause  : false,
-					muted      : true
-				});
+					muted      : true,
+				};
 
+				if ( videoHash.length ) {
+					vimOptions.url = `https://player.vimeo.com/video/${ videoId }?h=${ videoHash }`;
+				} else {
+					vimOptions.id = videoId;
+				}
+
+				player = new Vimeo.Player(videoPlayer[0], vimOptions );
 				playerWrap.data('VMPlayer', player);
 				if ( "no" === enableAudio ) {
 					player.setVolume(0);
@@ -966,68 +971,6 @@
 		},
 
 		/**
-		 * Initializes module animations.
-		 *
-		 * @since 1.1.9
-		 * @access private
-		 * @method _initModuleAnimations
-		 */
-		_initModuleAnimations: function()
-		{
-			if(typeof jQuery.fn.waypoint !== 'undefined') {
-				$('.fl-animation').each( function() {
-					var node = $( this ),
-						nodeTop = node.offset().top,
-						winHeight = $( window ).height(),
-						bodyHeight = $( 'body' ).height(),
-						waypoint = FLBuilderLayoutConfig.waypoint,
-						offset = '80%';
-
-					if ( typeof waypoint.offset !== undefined ) {
-						offset = FLBuilderLayoutConfig.waypoint.offset + '%';
-					}
-
-					if ( bodyHeight - nodeTop < winHeight * 0.2 ) {
-						offset = '100%';
-					}
-
-					node.waypoint({
-						offset: offset,
-						handler: FLBuilderLayout._doModuleAnimation
-					});
-				} );
-			}
-		},
-
-		/**
-		 * Runs a module animation.
-		 *
-		 * @since 1.1.9
-		 * @access private
-		 * @method _doModuleAnimation
-		 */
-		_doModuleAnimation: function()
-		{
-			var module = 'undefined' == typeof this.element ? $(this) : $(this.element),
-				delay = parseFloat(module.data('animation-delay')),
-				duration = parseFloat(module.data('animation-duration'));
-
-			if ( ! isNaN( duration ) ) {
-				module.css( 'animation-duration', duration + 's' );
-			}
-
-			if(!isNaN(delay) && delay > 0) {
-				setTimeout(function(){
-					module.addClass('fl-animated');
-				}, delay * 1000);
-			} else {
-				setTimeout(function(){
-					module.addClass('fl-animated');
-				}, 1);
-			}
-		},
-
-		/**
 		 * Opens a tab or accordion item if the browser hash is set
 		 * to the ID of one on the page.
 		 *
@@ -1180,13 +1123,13 @@
 					dest = element.offset().top - config.offset;
 				}
 
-				$( 'html, body' ).animate( { scrollTop: dest }, config.duration, config.easing, function() {
+				$( 'html, body' ).stop( true ).animate( { scrollTop: dest }, config.duration, config.easing, function() {
 
 					if ( 'undefined' != typeof callback ) {
 						callback();
 					}
 
-					if ( undefined != element.attr( 'id' ) ) {
+					if ( undefined != element.attr( 'id' ) && window.location.hash !== '#' + element.attr( 'id' ) ) {
 
 						if ( history.pushState ) {
 							history.pushState( null, null, '#' + element.attr( 'id' ) );

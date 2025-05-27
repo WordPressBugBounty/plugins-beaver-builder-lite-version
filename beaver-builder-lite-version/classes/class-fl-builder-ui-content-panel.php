@@ -92,6 +92,53 @@ class FLBuilderUIContentPanel {
 			'orderedSectionNames' => array_keys( FLBuilderModel::get_module_categories() ),
 		);
 
+		$templates          = FLBuilderModel::get_module_templates_data();
+		$is_module_template = FLBuilderModel::is_post_user_template( 'module' );
+
+		if ( ! $is_module_template && isset( $templates['groups'] ) && ! empty( $templates['groups'] ) ) {
+
+			$data['views'][] = array(
+				'type' => 'separator',
+			);
+
+			foreach ( $templates['groups'] as $slug => $group ) {
+
+				$data['views'][] = array(
+					'handle'      => $slug,
+					'name'        => $group['name'],
+					'hasChildren' => count( $group['categories'] ) > 1,
+					'query'       => array(
+						'kind'        => 'template',
+						'type'        => 'core',
+						'group'       => $slug,
+						'content'     => 'module',
+						'categorized' => true,
+					),
+				);
+
+				if ( count( $group['categories'] ) < 2 ) {
+					continue;
+				}
+
+				foreach ( $group['categories'] as $cat_slug => $category ) {
+					$data['views'][] = array(
+						'handle'    => $cat_slug,
+						'name'      => $category['name'],
+						'isSubItem' => true,
+						'parent'    => $slug,
+						'query'     => array(
+							'kind'        => 'template',
+							'type'        => 'core',
+							'content'     => 'module',
+							'group'       => $slug,
+							'category'    => $cat_slug,
+							'categorized' => true,
+						),
+					);
+				}
+			}
+		}
+
 		// Third Party Module Groups
 		$groups = FLBuilderModel::get_module_groups();
 		if ( ! empty( $groups ) ) {

@@ -22,6 +22,7 @@ final class FLBuilderNodeCodeSettings {
 		add_action( 'wp_enqueue_scripts', __CLASS__ . '::enqueue_builder_scripts' );
 
 		add_filter( 'fl_builder_register_settings_form', __CLASS__ . '::filter_settings_fields', 10, 2 );
+
 		if ( ! isset( $_GET['safemode'] ) ) {
 			add_filter( 'fl_builder_render_css', __CLASS__ . '::filter_layout_css', 10, 2 );
 			add_filter( 'fl_builder_render_js', __CLASS__ . '::filter_layout_js', 10, 2 );

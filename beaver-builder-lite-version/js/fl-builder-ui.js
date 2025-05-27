@@ -10,27 +10,20 @@
       };
     }
 
-		/**
-		 * Polyfill for String.endsWidth()
-		 */
-		if (!String.prototype.endsWith) {
-			String.prototype.endsWith = function(searchString, position) {
-				var subjectString = this.toString();
-				if (typeof position !== 'number' || !isFinite(position) || Math.floor(position) !== position || position > subjectString.length) {
-					position = subjectString.length;
-				}
-				position -= searchString.length;
-				var lastIndex = subjectString.indexOf(searchString, position);
-				return lastIndex !== -1 && lastIndex === position;
-			};
-		}
-
-    // Calculate width of text from DOM element or string. By Phil Freo <http://philfreo.com>
-    $.fn.textWidth = function(text, font) {
-        if (!$.fn.textWidth.fakeEl) $.fn.textWidth.fakeEl = $('<span>').hide().appendTo(document.body);
-        $.fn.textWidth.fakeEl.text(text || this.val() || this.text()).css('font', font || this.css('font'));
-        return $.fn.textWidth.fakeEl.width();
-    };
+	/**
+	 * Polyfill for String.endsWidth()
+	 */
+	if (!String.prototype.endsWith) {
+		String.prototype.endsWith = function(searchString, position) {
+			var subjectString = this.toString();
+			if (typeof position !== 'number' || !isFinite(position) || Math.floor(position) !== position || position > subjectString.length) {
+				position = subjectString.length;
+			}
+			position -= searchString.length;
+			var lastIndex = subjectString.indexOf(searchString, position);
+			return lastIndex !== -1 && lastIndex === position;
+		};
+	}
 
     /**
     * Base object that all view objects can delegate to.

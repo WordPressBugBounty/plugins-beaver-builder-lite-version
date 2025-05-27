@@ -17,7 +17,7 @@ final class FLBuilderAdminPosts {
 		/* Actions */
 		add_action( 'current_screen', __CLASS__ . '::init_rendering' );
 
-		if ( get_transient( 'fl_debug_mode' ) || ( defined( 'FL_ENABLE_META_CSS_EDIT' ) && FL_ENABLE_META_CSS_EDIT ) ) {
+		if ( is_admin() && get_transient( 'fl_debug_mode' ) || ( defined( 'FL_ENABLE_META_CSS_EDIT' ) && FL_ENABLE_META_CSS_EDIT ) ) {
 			add_action( 'add_meta_boxes', array( __CLASS__, 'add_meta_box' ) );
 			add_action( 'save_post', array( __CLASS__, 'save_meta' ) );
 		}
@@ -125,7 +125,7 @@ final class FLBuilderAdminPosts {
 		$data = get_post_meta( $post_id, '_fl_builder_data_settings', true );
 
 		if ( ! is_object( $data ) ) {
-			$data = new StdClass;
+			$data = new StdClass();
 		}
 		$data->css = $_POST['fl_css'];
 		$data->js  = $_POST['fl_js'];
@@ -133,7 +133,6 @@ final class FLBuilderAdminPosts {
 		// Update the meta field.
 		update_post_meta( $post_id, '_fl_builder_data_settings', $data );
 		update_post_meta( $post_id, '_fl_builder_draft_settings', $data );
-
 	}
 
 	/**

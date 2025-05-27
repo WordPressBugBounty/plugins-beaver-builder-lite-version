@@ -226,7 +226,6 @@ final class FLBuilderIcons {
 				self::$sets[ $set_key ]['icons'] = $icons;
 			}
 		}
-
 	}
 
 	/**

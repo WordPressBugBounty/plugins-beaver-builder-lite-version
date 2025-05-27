@@ -23,10 +23,10 @@ if ( ! class_exists( 'FLBuilderLoader' ) ) {
 
 			$lite_dirname   = 'beaver-builder-lite-version';
 			$lite_active    = is_plugin_active( $lite_dirname . '/fl-builder.php' );
-			$plugin_dirname = basename( dirname( dirname( __FILE__ ) ) );
+			$plugin_dirname = basename( dirname( __DIR__, 1 ) );
 
 			if ( $lite_active && $plugin_dirname != $lite_dirname ) {
-				add_action( 'admin_init', function() {
+				add_action( 'admin_init', function () {
 					deactivate_plugins( array( 'beaver-builder-lite-version/fl-builder.php' ), false, is_network_admin() );
 				});
 				return;
@@ -48,8 +48,8 @@ if ( ! class_exists( 'FLBuilderLoader' ) ) {
 		 * @return void
 		 */
 		static private function define_constants() {
-			define( 'FL_BUILDER_VERSION', '2.8.6.2' );
-			define( 'FL_BUILDER_FILE', trailingslashit( dirname( dirname( __FILE__ ) ) ) . 'fl-builder.php' );
+			define( 'FL_BUILDER_VERSION', '2.9.0.5' );
+			define( 'FL_BUILDER_FILE', trailingslashit( dirname( __DIR__, 1 ) ) . 'fl-builder.php' );
 			define( 'FL_BUILDER_DIR', plugin_dir_path( FL_BUILDER_FILE ) );
 			define( 'FL_BUILDER_URL', esc_url( plugins_url( '/', FL_BUILDER_FILE ) ) );
 			define( 'FL_BUILDER_LITE', true );
@@ -83,6 +83,7 @@ if ( ! class_exists( 'FLBuilderLoader' ) ) {
 			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-auto-suggest.php';
 			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-color.php';
 			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-css.php';
+			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-css-vars.php';
 			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-export.php';
 			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-extensions.php';
 			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-fonts.php';
@@ -93,9 +94,12 @@ if ( ! class_exists( 'FLBuilderLoader' ) ) {
 			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-iframe-preview.php';
 			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-import.php';
 			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-loop.php';
+			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-loop-term-query.php';
 			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-model.php';
 			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-admin-advanced.php';
 			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-module.php';
+			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-module-data-repeater.php';
+			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-module-deprecations.php';
 			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-photo.php';
 			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-revisions.php';
 			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-services.php';
@@ -118,6 +122,7 @@ if ( ! class_exists( 'FLBuilderLoader' ) ) {
 			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-font-awesome.php';
 			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-global-import-export.php';
 			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-node-code-settings.php';
+			require_once FL_BUILDER_DIR . 'classes/class-fl-controls.php';
 
 			/* WP CLI Commands */
 			if ( defined( 'WP_CLI' ) ) {
@@ -126,6 +131,7 @@ if ( ! class_exists( 'FLBuilderLoader' ) ) {
 
 			/* WP Blocks Support */
 			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-wp-blocks.php';
+			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-module-blocks.php';
 
 			/* Includes */
 			require_once FL_BUILDER_DIR . 'includes/compatibility.php';

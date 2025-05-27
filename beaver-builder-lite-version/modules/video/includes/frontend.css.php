@@ -7,37 +7,37 @@
 <?php if ( 'hide' == $settings->play_pause ) : ?>
 	.fl-node-<?php echo $id; ?> .mejs-playpause-button {
 		display: none !important;
-	}	
+	}
 <?php endif; ?>
 
 <?php if ( 'hide' == $settings->timer ) : ?>
 	.fl-node-<?php echo $id; ?> .mejs-currenttime-container {
 		display: none !important;
-	}		
+	}
 <?php endif; ?>
 
 <?php if ( 'hide' == $settings->time_rail ) : ?>
 	.fl-node-<?php echo $id; ?> .mejs-time-rail {
 		display: none !important;
-	}		
+	}
 <?php endif; ?>
 
 <?php if ( 'hide' == $settings->duration ) : ?>
 	.fl-node-<?php echo $id; ?> .mejs-duration-container {
 		display: none !important;
-	}		
+	}
 <?php endif; ?>
 
 <?php if ( 'hide' == $settings->volume ) : ?>
 	.fl-node-<?php echo $id; ?> .mejs-volume-button {
 		display: none !important;
-	}		
+	}
 <?php endif; ?>
 
 <?php if ( 'hide' == $settings->full_screen ) : ?>
 	.fl-node-<?php echo $id; ?> .mejs-fullscreen-button {
 		display: none !important;
-	}		
+	}
 <?php endif; ?>
 
 <?php

@@ -39,7 +39,7 @@ class Plugin {
 		'fl_builder_after_save_user_template',
 	);
 
-	function __construct() {
+	public function __construct() {
 
 		add_action( 'plugins_loaded', array( $this, 'unload_helper_plugin' ) );
 		add_action( 'plugins_loaded', array( $this, 'load_files' ) );
@@ -52,9 +52,16 @@ class Plugin {
 	 * @since 2.4.1
 	 */
 	public function check_urls() {
-		$replace = array( 'https://', 'http://' );
-		$current = str_replace( $replace, '', get_option( 'siteurl' ) );
-		$saved   = str_replace( $replace, '', base64_decode( get_option( 'fl_site_url' ), true ) );
+		$replace = array( 'https://', 'http://', 'www' );
+		$current = str_replace( $replace, '', untrailingslashit( get_option( 'siteurl' ) ) );
+		$saved   = str_replace( $replace, '', untrailingslashit( base64_decode( get_option( 'fl_site_url' ), true ) ) );
+
+		/**
+		 * @see fl_builder_check_urls_enabled
+		 */
+		if ( \FLBuilderAJAX::doing_ajax() || true !== apply_filters( 'fl_builder_check_urls_enabled', true ) ) {
+			return false;
+		}
 
 		if ( $current !== $saved ) {
 			\FLBuilderUtils::update_option( 'fl_site_url', base64_encode( $current ) );
@@ -134,7 +141,7 @@ class Plugin {
 				$this->triggererror( $file );
 				return false;
 			} else {
-				include_once( $file );
+				include_once $file;
 			}
 
 			$class = new $classname();
@@ -197,13 +204,14 @@ class Plugin {
 		return '<ul>' . $output . '</ul>';
 	}
 
-	function add_actions( $class, $actions ) {
+	// phpcs:ignore Universal.NamingConventions.NoReservedKeywordParameterNames.classFound
+	public function add_actions( $class, $actions ) {
 		foreach ( $actions as $action ) {
 			add_action( $action, array( $class, 'run' ) );
 		}
 	}
-
-	function add_filters( $class, $filters ) {
+	// phpcs:ignore Universal.NamingConventions.NoReservedKeywordParameterNames.classFound
+	public function add_filters( $class, $filters ) {
 		foreach ( $filters as $filter ) {
 			add_action( $filter, array( $class, 'filters' ) );
 		}
@@ -215,4 +223,4 @@ class Plugin {
 		}
 	}
 }
-new Plugin;
+new Plugin();

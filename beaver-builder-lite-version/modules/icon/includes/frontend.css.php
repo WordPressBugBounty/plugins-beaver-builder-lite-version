@@ -6,6 +6,7 @@ $size_value['large']      = empty( $settings->size_large ) ? $size_value[''] : $
 $size_value['medium']     = empty( $settings->size_medium ) ? $size_value['large'] : $settings->size_medium;
 $size_value['responsive'] = empty( $settings->size_responsive ) ? $size_value['medium'] : $settings->size_responsive;
 
+// Responsive rules.
 foreach ( array( '', 'large', 'medium', 'responsive' ) as $device ) {
 
 	$key      = empty( $device ) ? 'size' : "size_{$device}";

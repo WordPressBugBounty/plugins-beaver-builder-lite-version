@@ -1,4 +1,13 @@
-<div class="fl-rich-text">
+<?php
+
+$attrs = [
+	'class' => [
+		'fl-rich-text', // Necessary for live preview/inline editing.
+	],
+];
+
+?>
+<div <?php $module->render_attributes( $attrs ); ?>>
 	<?php
 
 	global $wp_embed;

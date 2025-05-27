@@ -135,7 +135,7 @@
 		<?php endif; ?>
 		<p>
 		<?php // translators: %s: Link to Docs ?>
-		<?php printf( 'Please be sure to read our %s.', sprintf( "<a target='_blank' href='https://docs.wpbeaverbuilder.com/general/alpha-and-beta-releases/'>%s</a>", __( 'Prerelease Documentation', 'fl-builder' ) ) ); ?>
+		<?php printf( 'Please be sure to read our %s.', sprintf( "<a target='_blank' href='https://docs.wpbeaverbuilder.com/beaver-builder/introduction/releases-versioning#alpha-beta--dev-releases'>%s</a>", __( 'Prerelease Documentation', 'fl-builder' ) ) ); ?>
 		</p>
 		</div>
 		<p class="submit">

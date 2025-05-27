@@ -171,6 +171,15 @@ class FLBuilderModule {
 	public $template = [];
 
 	/**
+	 * The version for this module instance. Used internally to
+	 * deprecate config, files, and defaults.
+	 *
+	 * @since 2.9
+	 * @var int $version
+	 */
+	public $version = null;
+
+	/**
 	 * The class of the font icon for this module.
 	 *
 	 * @since 2.0
@@ -192,6 +201,37 @@ class FLBuilderModule {
 	public $template_node_id;
 
 	public $template_id;
+
+	/**
+	 * Whether this module is acting as a block or not.
+	 *
+	 * @var boolean $is_block
+	 */
+	public $is_block = false;
+
+	/**
+	 * Whether to include this module as a block in the
+	 * WordPress block editor.
+	 *
+	 * @var boolean $block_editor
+	 */
+	public $block_editor = false;
+
+	/**
+	 * Inner blocks to render for this module if it accepts children
+	 * and is acting as a block in the block editor.
+	 *
+	 * @var string $block_editor_children
+	 */
+	public $block_editor_children = null;
+
+	/**
+	 * Does the module support the auto_style tab?
+	 *
+	 * @var Boolean $auto_style
+	 */
+	public $auto_style = false;
+
 	/**
 	 * Module constructor.
 	 *
@@ -201,7 +241,7 @@ class FLBuilderModule {
 		$class_info            = new ReflectionClass( $this );
 		$class_path            = $class_info->getFileName();
 		$dir_path              = dirname( $class_path );
-		$this->slug            = basename( $class_path, '.php' );
+		$this->slug            = isset( $params['slug'] ) ? $params['slug'] : basename( $class_path, '.php' );
 		$this->enabled         = isset( $params['enabled'] ) ? $params['enabled'] : true;
 		$this->editor_export   = isset( $params['editor_export'] ) ? $params['editor_export'] : true;
 		$this->partial_refresh = isset( $params['partial_refresh'] ) ? $params['partial_refresh'] : false;
@@ -209,6 +249,8 @@ class FLBuilderModule {
 		$this->accepts         = isset( $params['accepts'] ) ? $params['accepts'] : [];
 		$this->parents         = isset( $params['parents'] ) ? $params['parents'] : 'all';
 		$this->template        = isset( $params['template'] ) ? $params['template'] : [];
+		$this->block_editor    = isset( $params['block_editor'] ) ? $params['block_editor'] : false;
+		$this->auto_style      = isset( $params['auto_style'] ) ? $params['auto_style'] : false;
 
 		// We need to normalize the paths here since path comparisons
 		// break on Windows because they use backslashes.
@@ -253,6 +295,47 @@ class FLBuilderModule {
 		$this->category    = $details['category'];
 		$this->group       = $details['group'];
 		$this->icon        = $details['icon'];
+	}
+
+	/**
+	 * Returns the path for a module file taking deprecations
+	 * into account. Since 2.9, this is the only way you should
+	 * be accessing module paths.
+	 *
+	 * @since 2.9
+	 * @param string $base
+	 * @return string
+	 */
+	public function path( $base ) {
+		return FLBuilderModuleDeprecations::get_module_path( $this, $base );
+	}
+
+	/**
+	 * Returns the url for a module file taking deprecations
+	 * into account. Since 2.9, this is the only way you should
+	 * be accessing module urls.
+	 *
+	 * @since 2.9
+	 * @param string $base
+	 * @return string
+	 */
+	public function url( $base ) {
+		$path = $this->path( $base );
+
+		return str_replace( $this->dir, $this->url, $path );
+	}
+
+	/**
+	 * Returns a single config value for a module taking deprecations
+	 * into account. Since 2.9, this is the only way you should
+	 * be accessing module config that can be deprecated.
+	 *
+	 * @since 2.9
+	 * @param string $key
+	 * @return mixed
+	 */
+	public function config( $key ) {
+		return FLBuilderModuleDeprecations::get_module_config( $this, $key );
 	}
 
 	/**
@@ -320,8 +403,16 @@ class FLBuilderModule {
 	 * @return void
 	 */
 	public function enqueue_scripts() {
-
 	}
+
+	/**
+	 * Should be overridden by subclasses to enqueue
+	 * css/js for the parent document in the iframe UI.
+	 *
+	 * @since 2.9
+	 * @return void
+	 */
+	public function enqueue_ui_scripts() {}
 
 	/**
 	 * Should be overridden by subclasses to
@@ -342,9 +433,10 @@ class FLBuilderModule {
 	 *
 	 * @since 2.6.0.1
 	 * @param object $settings A raw settings object.
+	 * @param object $defaults The default settings for this module.
 	 * @return object
 	 */
-	public function filter_raw_settings( $settings ) {
+	public function filter_raw_settings( $settings, $defaults ) {
 		return $settings;
 	}
 
@@ -373,7 +465,6 @@ class FLBuilderModule {
 	 * @return void
 	 */
 	public function delete() {
-
 	}
 
 	/**
@@ -384,7 +475,6 @@ class FLBuilderModule {
 	 * @return void
 	 */
 	public function remove() {
-
 	}
 
 	/**
@@ -481,10 +571,11 @@ class FLBuilderModule {
 	/**
 	 * Renders the root element attributes for this module.
 	 *
+	 * @param array $attrs
 	 * @return void
 	 */
-	public function render_attributes() {
-		echo FLBuilder::render_module_attributes( $this );
+	public function render_attributes( $attrs = [] ) {
+		echo FLBuilder::render_module_attributes( $this, $attrs );
 	}
 
 	/**
@@ -497,17 +588,65 @@ class FLBuilderModule {
 	}
 
 	/**
+	 * Checks if this module has child nodes.
+	 *
+	 * @return bool
+	 */
+	public function has_children() {
+		$children = FLBuilderModel::get_nodes( null, $this );
+
+		return count( $children ) ? true : false;
+	}
+
+	/**
 	 * Renders the child nodes for this module.
 	 *
 	 * @return void
 	 */
 	public function render_children() {
-		$children = FLBuilderModel::get_nodes( null, $this );
+		if ( null !== $this->block_editor_children ) {
+			echo $this->block_editor_children;
+		} else {
 
-		foreach ( $children as $child ) {
-			if ( 'module' === $child->type ) {
-				FLBuilder::render_module( $child );
+			$children = FLBuilderModel::get_nodes( null, $this );
+			foreach ( $children as $child ) {
+				if ( 'module' === $child->type ) {
+					FLBuilder::render_module( $child );
+				}
 			}
 		}
+	}
+
+	/**
+	 * Renders the child nodes for this module with a wrapper. It must
+	 * be done this way so we know what element to sort in. This also
+	 * allows child nodes to be added when other static elements are
+	 * present in the module.
+	 *
+	 *
+	 * @param string $tag
+	 * @param array $attrs
+	 * @return void
+	 */
+	public function render_children_with_wrapper( $tag = 'div', $attrs = [] ) {
+		if ( FLBuilderModel::is_builder_active() ) {
+			$attrs['data-children-wrapper'] = 'true';
+		}
+
+		echo "<$tag ";
+		FLBuilder::render_node_attributes( $attrs );
+		echo '>';
+		$this->render_children();
+		echo "</$tag>";
+	}
+
+	/**
+	 * Whether a module has a block.js template for instant
+	 * rendering in the builder or block editor.
+	 *
+	 * @return bool
+	 */
+	public function is_js_block() {
+		return fl_builder_filesystem()->file_exists( $this->dir . 'js/block.js' );
 	}
 }

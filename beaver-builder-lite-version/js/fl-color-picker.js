@@ -577,7 +577,11 @@ var FLBuilderColorPicker;
 					if ( $colorTrigger.hasClass('fl-color-picker-alpha-enabled') && $parsedValue.rgba ) {
 						$bgColor = $this.val().toString();
 					}
-					else if ( !$colorTrigger.hasClass('fl-color-picker-alpha-enabled') && $parsedValue.rgba ) {
+					else if (
+						! $this.hasClass( 'fl-react-color-picker-value' ) &&
+						! $colorTrigger.hasClass('fl-color-picker-alpha-enabled') &&
+						$parsedValue.rgba
+					) {
 						var $newColorValue = $colorValue.replace('rgba', 'rgb')
 							$newColorValue = $newColorValue.substr(0, $newColorValue.lastIndexOf(",")) + ')';
 

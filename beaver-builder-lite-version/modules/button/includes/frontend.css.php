@@ -13,7 +13,7 @@ FLBuilderCSS::rule( array(
 FLBuilderCSS::responsive_rule( array(
 	'settings'     => $settings,
 	'setting_name' => 'align',
-	'selector'     => ".fl-node-$id .fl-button-wrap",
+	'selector'     => ".fl-node-$id.fl-button-wrap, .fl-node-$id .fl-button-wrap", // Both rules needed for compat with v1
 	'prop'         => 'text-align',
 ) );
 
@@ -21,7 +21,7 @@ FLBuilderCSS::responsive_rule( array(
 FLBuilderCSS::dimension_field_rule( array(
 	'settings'     => $settings,
 	'setting_name' => 'padding',
-	'selector'     => ".fl-builder-content .fl-node-$id .fl-button-wrap a.fl-button",
+	'selector'     => ".fl-builder-content .fl-node-$id a.fl-button",
 	'unit'         => 'px',
 	'props'        => array(
 		'padding-top'    => 'padding_top',
@@ -188,13 +188,13 @@ FLBuilderCSS::rule( array(
 
 
 <?php if ( $settings->duo_color1 && false !== strpos( $settings->icon, 'fad fa' ) ) : ?>
-.fl-node-<?php echo $id; ?> .fl-module-content .fl-button-icon:before {
+.fl-node-<?php echo $id; ?> .fl-button-icon:before {
 	color: <?php echo FLBuilderColor::hex_or_rgb( $settings->duo_color1 ); ?>;
 }
 <?php endif; ?>
 
 <?php if ( $settings->duo_color2 && false !== strpos( $settings->icon, 'fad fa' ) ) : ?>
-.fl-node-<?php echo $id; ?> .fl-module-content .fl-button-icon:after {
+.fl-node-<?php echo $id; ?> .fl-button-icon:after {
 	color: <?php echo FLBuilderColor::hex_or_rgb( $settings->duo_color2 ); ?>;
 	opacity: 1;
 }

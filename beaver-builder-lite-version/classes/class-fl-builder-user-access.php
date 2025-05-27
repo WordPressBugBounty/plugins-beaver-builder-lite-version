@@ -216,7 +216,7 @@ final class FLBuilderUserAccess {
 	 */
 	static public function get_all_roles() {
 		if ( ! function_exists( 'get_editable_roles' ) ) {
-			require_once( ABSPATH . 'wp-admin/includes/user.php' );
+			require_once ABSPATH . 'wp-admin/includes/user.php';
 		}
 
 		$editable_roles = get_editable_roles();
@@ -276,7 +276,7 @@ final class FLBuilderUserAccess {
 	 * @private
 	 * @return void
 	 */
-	static function register_default_settings() {
+	public static function register_default_settings() {
 		self::register_setting( 'builder_access', array(
 			'default'     => 'all',
 			'group'       => __( 'Frontend', 'fl-builder' ),

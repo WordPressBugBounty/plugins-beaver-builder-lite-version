@@ -1,8 +1,11 @@
 <?php
-$settings = FLBuilderUserSettings::get()['pinned'];
-$style    = '';
+$settings     = FLBuilderUserSettings::get()['pinned'];
+$style        = '';
+$body_classes = '';
 if ( isset( $settings['position'] ) && '' !== $settings['position'] ) {
-	$style .= "margin-{$settings['position']}:{$settings['width']}px;";
+	$style        .= "margin-{$settings['position']}:{$settings['width']}px;";
+	$style        .= " --fl-builder-panel-width:{$settings['width']}px;";
+	$body_classes .= ' fl-builder-ui-is-pinned fl-builder-ui-is-pinned-' . $settings['position'];
 }
 ?>
 <!DOCTYPE html>
@@ -11,7 +14,7 @@ if ( isset( $settings['position'] ) && '' !== $settings['position'] ) {
 		<meta name='viewport' content='width=device-width, initial-scale=1.0' />
 		<?php wp_head(); ?>
 	</head>
-	<body <?php body_class(); ?> <?php echo "style='{$style}'"; ?>>
+	<body <?php body_class( $body_classes ); ?> <?php echo "style='{$style}'"; ?>>
 		<div class="fl-builder-ui-iframe-toolbar">
 			<div class="fl-builder-ui-iframe-breakpoint-text">
 				<?php _e( 'Breakpoint', 'fl-builder' ); ?>

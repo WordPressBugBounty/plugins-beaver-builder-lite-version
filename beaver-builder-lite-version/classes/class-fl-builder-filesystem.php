@@ -23,7 +23,7 @@ class FL_Filesystem {
 	 * file_get_contents using wp_filesystem.
 	 * @since 2.0.6
 	 */
-	function file_get_contents( $path ) {
+	public function file_get_contents( $path ) {
 
 		$wp_filesystem = $this->get_filesystem();
 		return $wp_filesystem->get_contents( $path );
@@ -33,7 +33,7 @@ class FL_Filesystem {
 	 * is_writable using wp_filesystem.
 	 * @since 2.1.2
 	 */
-	function is_writable( $path ) {
+	public function is_writable( $path ) {
 
 		$wp_filesystem = $this->get_filesystem();
 		return $wp_filesystem->is_writable( $path );
@@ -43,7 +43,7 @@ class FL_Filesystem {
 	 * file_put_contents using wp_filesystem.
 	 * @since 2.0.6
 	 */
-	function file_put_contents( $path, $contents ) {
+	public function file_put_contents( $path, $contents ) {
 
 		$wp_filesystem = $this->get_filesystem();
 		return $wp_filesystem->put_contents( $path, $contents, FS_CHMOD_FILE );
@@ -53,7 +53,7 @@ class FL_Filesystem {
 	 * mkdir using wp_filesystem.
 	 * @since 2.0.6
 	 */
-	function mkdir( $path ) {
+	public function mkdir( $path ) {
 
 		$wp_filesystem = $this->get_filesystem();
 		return $wp_filesystem->mkdir( $path );
@@ -63,7 +63,7 @@ class FL_Filesystem {
 	 * is_dir using wp_filesystem.
 	 * @since 2.0.6
 	 */
-	function is_dir( $path ) {
+	public function is_dir( $path ) {
 
 		$wp_filesystem = $this->get_filesystem();
 		return $wp_filesystem->is_dir( $path );
@@ -73,7 +73,7 @@ class FL_Filesystem {
 	 * dirlist using wp_filesystem.
 	 * @since 2.0.6
 	 */
-	function dirlist( $path ) {
+	public function dirlist( $path ) {
 
 		$wp_filesystem = $this->get_filesystem();
 		return $wp_filesystem->dirlist( $path );
@@ -83,17 +83,17 @@ class FL_Filesystem {
 	 * move using wp_filesystem.
 	 * @since 2.0.6
 	 */
-	function move( $old, $new ) {
+	public function move( $old_path, $new_path ) {
 
 		$wp_filesystem = $this->get_filesystem();
-		return $wp_filesystem->move( $old, $new );
+		return $wp_filesystem->move( $old_path, $new_path );
 	}
 
 	/**
 	 * rmdir using wp_filesystem.
 	 * @since 2.0.6
 	 */
-	function rmdir( $path, $recursive = false ) {
+	public function rmdir( $path, $recursive = false ) {
 
 		$wp_filesystem = $this->get_filesystem();
 		return $wp_filesystem->rmdir( $path, $recursive );
@@ -103,7 +103,7 @@ class FL_Filesystem {
 	 * unlink using wp_filesystem.
 	 * @since 2.0.6
 	 */
-	function unlink( $path ) {
+	public function unlink( $path ) {
 		$wp_filesystem = $this->get_filesystem();
 		return $wp_filesystem->delete( $path );
 	}
@@ -112,7 +112,7 @@ class FL_Filesystem {
 	 * unlink using wp_filesystem.
 	 * @since 2.0.6
 	 */
-	function file_exists( $path ) {
+	public function file_exists( $path ) {
 		$wp_filesystem = $this->get_filesystem();
 		return $wp_filesystem->exists( $path );
 	}
@@ -121,7 +121,7 @@ class FL_Filesystem {
 	 * filesize using wp_filesystem.
 	 * @since 2.0.6
 	 */
-	function filesize( $path ) {
+	public function filesize( $path ) {
 		$wp_filesystem = $this->get_filesystem();
 		return $wp_filesystem->size( $path );
 	}
@@ -130,7 +130,7 @@ class FL_Filesystem {
 	 * Return an instance of WP_Filesystem.
 	 * @since 2.0.6
 	 */
-	function get_filesystem() {
+	public function get_filesystem() {
 
 		global $wp_filesystem;
 
@@ -169,7 +169,7 @@ class FL_Filesystem {
 	 * Sets method to direct.
 	 * @since 2.0.6
 	 */
-	function filesystem_method() {
+	public function filesystem_method() {
 		return 'direct';
 	}
 
@@ -177,10 +177,9 @@ class FL_Filesystem {
 	 * Sets credentials to true.
 	 * @since 2.0.6
 	 */
-	function request_filesystem_credentials() {
+	public function request_filesystem_credentials() {
 		return true;
 	}
-
 }
 
 /**

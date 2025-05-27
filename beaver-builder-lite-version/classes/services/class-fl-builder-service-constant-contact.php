@@ -74,7 +74,6 @@ final class FLBuilderServiceConstantContact extends FLBuilderService {
 	 */
 	public function render_connect_settings() {
 		ob_start();
-
 		FLBuilder::render_settings_field( 'api_key', array(
 			'row_class' => 'fl-builder-service-connect-row',
 			'class'     => 'fl-builder-service-connect-input',
@@ -92,8 +91,8 @@ final class FLBuilderServiceConstantContact extends FLBuilderService {
 			'type'        => 'text',
 			'label'       => __( 'Access Token', 'fl-builder' ),
 			'help'        => __( 'Your Constant Contact access token.', 'fl-builder' ),
-			/* translators: 1: account link: 2: api key link */
-			'description' => sprintf( __( 'You must register a <a%1$s>Developer Account</a> with Constant Contact to obtain an API key and access token. Please see <a%2$s>Getting an API key</a> for complete instructions.', 'fl-builder' ), ' href="https://constantcontact.mashery.com/member/register" target="_blank"', ' href="https://developer.constantcontact.com/home/api-keys.html" target="_blank"' ),
+			/* translators: 1: documentation link */
+			'description' => sprintf( __( 'You must already have registered a Developer Account with Constant Contact and obtained an API key and access token. <a%1$s>Creating new v2 API Keys</a> is no longer supported by Constant Contact. If you do not already have a v2 API key, please use the other Constant Contact option that supports the v3 API.', 'fl-builder' ), ' href="https://v2.developer.constantcontact.com/docs/developer-guides/api-documentation-index.html" target="_blank"' ),
 			'preview'     => array(
 				'type' => 'none',
 			),
@@ -213,7 +212,7 @@ final class FLBuilderServiceConstantContact extends FLBuilderService {
 					}
 
 					// Add an existing contact to the list.
-					$new_list                             = new stdClass;
+					$new_list                             = new stdClass();
 					$new_list->id                         = $list_id;
 					$new_list->status                     = 'ACTIVE';
 					$data->lists[ count( $data->lists ) ] = $new_list;
@@ -221,7 +220,7 @@ final class FLBuilderServiceConstantContact extends FLBuilderService {
 
 					// Add an existing contact that has no list.
 					$data->lists      = array();
-					$new_list         = new stdClass;
+					$new_list         = new stdClass();
 					$new_list->id     = $list_id;
 					$new_list->status = 'ACTIVE';
 					$data->lists[0]   = $new_list;

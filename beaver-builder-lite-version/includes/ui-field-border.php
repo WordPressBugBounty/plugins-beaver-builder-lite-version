@@ -93,6 +93,7 @@ var color = wp.template( 'fl-builder-field-color' )( {
 		show_reset: true,
 		show_alpha: true,
 	},
+	deferRendering: true,
 } );
 
 var width = wp.template( 'fl-builder-field-dimension' )( {
@@ -149,6 +150,7 @@ var shadow = wp.template( 'fl-builder-field-shadow' )( {
 	field: {
 		show_spread: true,
 	},
+	deferColorPickers: true,
 } );
 
 #>

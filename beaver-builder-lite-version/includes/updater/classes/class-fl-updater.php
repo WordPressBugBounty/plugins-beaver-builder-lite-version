@@ -61,7 +61,7 @@ final class FLUpdater {
 		} elseif ( 'theme' == $settings['type'] ) {
 			add_filter( 'pre_set_site_transient_update_themes', array( $this, 'update_check' ) );
 		}
-		add_action( 'fl_builder_cache_cleared', function() {
+		add_action( 'fl_builder_cache_cleared', function () {
 			delete_transient( 'fl_get_subscription_info' );
 		} );
 	}
@@ -78,7 +78,11 @@ final class FLUpdater {
 		if ( isset( FLUpdater::$_responses[ $slug ] ) ) {
 			return FLUpdater::$_responses[ $slug ];
 		}
-
+		if ( function_exists( 'wp_get_wp_version' ) ) {
+			$wp_version = wp_get_wp_version();
+		} else {
+			require ABSPATH . WPINC . '/version.php';
+		}
 		FLUpdater::$_responses[ $slug ] = FLUpdater::api_request(
 			FLUpdater::$_updates_api_url,
 			array(
@@ -89,6 +93,7 @@ final class FLUpdater {
 				'slug'          => $this->settings['slug'],
 				'version'       => self::verify_version( $this->settings['version'] ),
 				'php'           => phpversion(),
+				'wp'            => $wp_version,
 			)
 		);
 
@@ -223,17 +228,17 @@ final class FLUpdater {
 	 * Retrieves the data for the plugin info lightbox.
 	 *
 	 * @since 1.0
-	 * @param bool $false
+	 * @param bool $result
 	 * @param string $action
 	 * @param object $args
 	 * @return object|bool
 	 */
-	public function plugin_info( $false, $action, $args ) {
+	public function plugin_info( $result, $action, $args ) {
 		if ( 'plugin_information' != $action ) {
-			return $false;
+			return $result;
 		}
 		if ( ! isset( $args->slug ) || $args->slug != $this->settings['slug'] ) {
-			return $false;
+			return $result;
 		}
 
 		$response  = $this->get_response();
@@ -274,7 +279,7 @@ final class FLUpdater {
 			return apply_filters( 'fl_plugin_info_data', $info, $response );
 		}
 
-		return $false;
+		return $result;
 	}
 
 	/**
@@ -404,7 +409,7 @@ final class FLUpdater {
 	static public function save_subscription_license( $license ) {
 
 		if ( preg_match( '/[^a-zA-Z\d\s@\.\-_]/', $license ) ) {
-			$response        = new StdClass;
+			$response        = new StdClass();
 			$response->error = __( 'You submitted an invalid license. Non alphanumeric characters found.', 'fl-builder' );
 			return $response;
 		}
@@ -437,7 +442,7 @@ final class FLUpdater {
 	 * @return bool
 	 */
 	static public function get_subscription_info() {
-		//phpcs:ignore WordPress.CodeAnalysis.AssignmentInCondition.Found, Squiz.PHP.DisallowMultipleAssignments.FoundInControlStructure
+		//phpcs:ignore Generic.CodeAnalysis.AssignmentInCondition.Found, Squiz.PHP.DisallowMultipleAssignments.FoundInControlStructure
 		if ( false === ( $subscription_info = get_transient( 'fl_get_subscription_info' ) ) ) {
 			$subscription_info = self::api_request(
 				self::$_updates_api_url,

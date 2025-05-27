@@ -26,6 +26,7 @@ var color = wp.template( 'fl-builder-field-color' )({
 		show_reset: true,
 		show_alpha: true,
 	},
+	deferRendering: true
 });
 
 #>

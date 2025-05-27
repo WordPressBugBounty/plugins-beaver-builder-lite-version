@@ -56,6 +56,8 @@
 			FLBuilder.addHook( 'didDeleteModule', this.closeOnDeleteNode );
 		},
 
+
+
 		/**
 		 * Renders a settings form.
 		 *
@@ -123,156 +125,33 @@
 			}
 
 			// Clear any visible registered panels
-			const panel = FL.Builder.data.getSystemState().currentPanel
-			if ( null !== panel && 'outline' !== panel ) {
-				const actions = FL.Builder.data.getSystemActions()
-				actions.hideCurrentPanel()
+			if ( ! FLBuilder.isBlockEditor() ) {
+				const panel = FL.Builder.data.getSystemState().currentPanel
+				if ( null !== panel && 'outline' !== panel ) {
+					const actions = FL.Builder.data.getSystemActions()
+					actions.hideCurrentPanel()
+				}
 			}
 		},
 
-		/*
-		 * Cause the form to re-evaluate and re-render specific fields if necessary
+		/**
+		 * Re-render a top-level node settings form with new settings.
+		 *
+		 * @since 2.9
+		 * @param {String} nodeId
+		 * @param {Object} settings
 		 */
-		refresh: function( callback ) {
-			var form = $('.fl-builder-settings:visible', window.parent.document)
+		reRenderNodeSettings: function( nodeId, settings ) {
+			var form = $( 'form.fl-builder-settings[data-node="' + nodeId + '"]' );
+			var config = form.data( 'config' );
 
-			const config = this.config
-			const prevSettings = config.settings
-			config.settings = FLBuilder._getSettings( form )
+			if ( form.length ) {
+				config.legacy = null; // Clear so legacy settings are re-rendered
+				config.settings = settings;
+				config.preview.layout = null;
 
-			// Check fields for different variation
-			const tabs = this.getDirtyConfig( config.tabs, config.settings, prevSettings )
-
-
-			const isDirty = Object.values(tabs).some( tab => {
-				if ( true === tab.hasDirty ) {
-					return true
-				}
-				return Object.values(tab.sections).some( section => {
-					if ( true === section.hasDirty ) {
-						return true
-					}
-					return Object.values(section.fields).some( field => true === field.isDirty )
-				} )
-			} )
-
-			if ( isDirty ) {
-				this.selectivelyRender( config, callback )
-			} else {
-				callback()
-			}
-		},
-
-		replaceField: function( fieldName, field, settings ) { console.log('replace field', fieldName, field )
-			const form = $('.fl-builder-settings:visible', window.parent.document)
-			const node = { id: form.data('node'), type: form.data('type') }
-			const el = form.get(0).querySelector(`.fl-field#fl-field-${fieldName}`)
-			if ( el ) {
-				const html = FLBuilderSettingsForms.renderFieldRow( fieldName, field, settings, node ).trim()
-				var template = document.createElement('template')
-				template.innerHTML = html
-				const newEl = template.content.firstChild
-				el.replaceWith( newEl )
-			}
-		},
-
-		selectivelyRender: function( config, callback ) {
-			for( let tabName in config.tabs ) {
-				const tab = config.tabs[tabName]
-				if ( true === tab.hasDirty && undefined !== tab.sections ) {
-					for( let sectionName in tab.sections ) {
-						const section = tab.sections[sectionName]
-						if ( true === section.hasDirty && undefined !== section.fields ) {
-							for( let fieldName in section.fields ) {
-								const field = section.fields[fieldName]
-								if ( true === field.isDirty ) {
-									this.replaceField( fieldName, field, config.settings )
-								}
-							}
-						}
-					}
-				}
-			}
-			callback();
-		},
-
-		/*
-		 * Return form structures that need to be updated.
-		 */
-		getDirtyConfig: function( tabs, settings, previousSettings ) {
-
-			for( let tabName in tabs ) {
-				const tab = tabs[tabName]
-				if ( undefined !== tab.sections ) {
-					for( let sectionName in tab.sections ) {
-						const section = tab.sections[sectionName]
-						if ( undefined !== section.fields ) {
-							for( let fieldName in section.fields ) {
-								const field = section.fields[fieldName]
-
-								if ( undefined !== field.variations ) {
-									const prevVariationName = previousSettings[`${fieldName}_field_variation`]
-									const variationName = settings[`${fieldName}_field_variation`]
-
-									if ( variationName !== prevVariationName ) {
-										const newConfig = { ...field, ...field.variations[variationName] }
-
-										if ( JSON.stringify(newConfig) !== JSON.stringify(field) ) {
-
-											// Mark field and containers as dirty
-											tabs[tabName].hasDirty = true
-											tabs[tabName].sections[sectionName].hasDirty = true
-											tabs[tabName].sections[sectionName].fields[fieldName] = newConfig
-											tabs[tabName].sections[sectionName].fields[fieldName].isDirty = true
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-			return tabs
-		},
-
-		bindFormListener: function() {
-			const inputSelector =  `input:not(.fl-preview-ignore),
-									select:not(.fl-preview-ignore),
-									textarea:not(.fl-preview-ignore),
-									fieldset:not(.fl-preview-ignore)`
-
-			this.form = $('.fl-builder-settings:visible', window.parent.document)
-			this.lastSettings = FLBuilder._getSettings( this.form )
-			this.form.on( 'input change', inputSelector, this.watchFormChanges.bind(this) )
-		},
-
-		unbindFormListener: function() {
-			if ( ! this.form ) {
-				this.form = $('.fl-builder-settings:visible', window.parent.document)
-			}
-			const inputSelector =  `input:not(.fl-preview-ignore),
-									select:not(.fl-preview-ignore),
-									textarea:not(.fl-preview-ignore),
-									fieldset:not(.fl-preview-ignore)`
-			this.form.off( 'input change', inputSelector, this.watchFormChanges.bind(this) )
-		},
-
-		watchFormChanges: function( e ) {
-			if ( 0 < this.subscribers.length ) {
-				const lastSettings = this.lastSettings
-				const settings = FLBuilder._getSettings( this.form )
-				this.lastSettings = settings
-
-				for( let i in this.subscribers ) {
-					const callback = this.subscribers[i]
-					callback.apply( this, [ e, lastSettings, settings ] )
-				}
-			}
-		},
-
-		subscribe: function( callback ) {
-			if ( 'function' === typeof callback ) {
-				this.subscribers.push( callback )
+				FLBuilder._lightbox.empty();
+				this.render( config );
 			}
 		},
 
@@ -334,7 +213,7 @@
 
 			// Don't render a node form if it's already open.
 			if ( config.nodeId && config.nodeId === form.data( 'node' ) && ! config.lightbox ) {
-				FLBuilder._focusFirstSettingsControl();
+				FL?.Builder?.settingsForms.focusFirstSettingsControl();
 				return false;
 			}
 
@@ -356,6 +235,9 @@
 				config.activeTab = Object.keys( config.tabs ).shift();
 			}
 
+			// Ensure lightboxId gets added before template()
+			config.lightboxId = this.config.lightbox ? this.config.lightbox._id : FLBuilder._lightbox._id;
+
 			// Render the lightbox and form.
 			if ( ! config.lightbox ) {
 
@@ -375,7 +257,20 @@
 				config.lightbox.setContent( template( config ) );
 			}
 
-			FL.Builder.data.getOutlinePanelActions().setActiveNode( config.nodeId );
+			// Cache the form config.
+			$( 'form.fl-builder-settings:visible' ).data( 'config', config );
+
+			// Push form state after dom has been committed
+			const { state } = FL?.Builder?.settingsForms;
+			config.isNode = !! config.nodeId
+			config.isNested = !! ( 'general' === config.type && config.lightbox );
+			config.isNested ? state.pushForm( config ) : state.setForm( config );
+
+			// Set the active node in the outline panel.
+			if ( ! FL.Builder.utils.isBlockEditor() ) {
+				FL.Builder.data.getOutlinePanelActions().setActiveNode( config.nodeId );
+			}
+
 			return true;
 		},
 
@@ -416,8 +311,6 @@
 				this.cacheCurrentSettings();
 
 			}.bind( this ), 1 );
-
-			this.bindFormListener();
 		},
 
 		/**
@@ -429,8 +322,9 @@
 		 * @param {Object} settings
 		 * @return {String}
 		 */
-		renderFields: function( fields, settings, node ) {
+		renderFields: function( fields, settings, node, tabId, sectionId ) {
 			var template         = wp.template( 'fl-builder-settings-row' ),
+				groupRowTemplate = wp.template( 'fl-builder-settings-field-group-row' ),
 				html             = '',
 				field            = null,
 				name             = null,
@@ -484,6 +378,8 @@
 					globalSettings   : globalSettings,
 					template		 : $( '#tmpl-fl-builder-field-' + field.type ),
 					node             : node,
+					tabId,
+					sectionId
 				} );
 			}
 
@@ -616,7 +512,7 @@
 			} );
 
 			// Send a node ID if we have it, otherwise, send the settings.
-			if ( form.attr( 'data-node' ) ) {
+			if ( form.attr( 'data-node' ) && ! FLBuilder.isBlockEditor() ) {
 				data.node_id = form.attr( 'data-node' );
 			} else {
 				data.settings = FLBuilder._getOriginalSettings( form, true );
@@ -678,10 +574,30 @@
 				return;
 			}
 
+			// Need to grab field config object to see if it can be deferred to react
+			const getFieldConfig = name => {
+				for ( let tabId in this.config.tabs ) {
+					const tab = this.config.tabs[ tabId ];
+
+					for ( let sectionId in tab.sections ) {
+						const section = tab.sections[ sectionId ]
+
+						for ( let fieldName in section.fields ) {
+							if ( name === fieldName ) {
+								return section.fields[ fieldName ]
+							}
+						}
+					}
+				}
+				return false;
+			}
+
 			// Fields
 			for ( name in data.fields ) {
-				field = $( '#fl-field-' + name, window.parent.document ).attr( 'id', '' );
-				field.after( data.fields[ name ] ).remove();
+				if ( ! FL?.Builder?.settingsForms.canDeferField( getFieldConfig( name ), data ) ) {
+					field = $( '#fl-field-' + name, window.parent.document ).attr( 'id', '' );
+					field.after( data.fields[ name ] ).remove();
+				}
 			}
 
 			// Field extras
@@ -756,6 +672,8 @@
 
 			// Clear the legacy AJAX object.
 			this.legacyXhr = null;
+
+			FLBuilder.triggerHook( 'renderLegacySettingsComplete' );
 		},
 
 		/**
@@ -880,7 +798,7 @@
 			if ( undefined === name ) {
 				return null
 			}
-			return new FLBuilderSettingField( name, this.config )
+			return new FL.Builder.settingsForms.FieldController( name, this.config )
 		},
 		/**
 		 * escapeHTML function
@@ -951,6 +869,7 @@
 			FLBuilder.addHook( 'didApplyTemplateComplete', this.updateOnApplyTemplate.bind( this ) );
 			FLBuilder.addHook( 'didApplyRowTemplateComplete', this.updateOnApplyTemplate.bind( this ) );
 			FLBuilder.addHook( 'didApplyColTemplateComplete', this.updateOnApplyTemplate.bind( this ) );
+			FLBuilder.addHook( 'didApplyModuleTemplateComplete', this.updateOnApplyTemplate.bind( this ) );
 			FLBuilder.addHook( 'didSaveGlobalNodeTemplate', this.updateOnApplyTemplate.bind( this ) );
 
 			// Revisions and history
