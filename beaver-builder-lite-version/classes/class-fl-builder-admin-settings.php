@@ -694,10 +694,14 @@ final class FLBuilderAdminSettings {
 				 */
 				do_action( 'fl_builder_after_unzip_icon_set', $new_path );
 
-				$files = glob( trailingslashit( $new_path ) . '*' );
-				foreach ( $files as $file ) {
-					$validate = pathinfo( $file );
-					if ( isset( $validate['extension'] ) && 'php' === $validate['extension'] ) {
+				/**
+				 * Delete any files you accidentally added to the zipfile
+				 */
+				$it   = new RecursiveDirectoryIterator( $new_path );
+				$good = array( 'json', 'css', 'scss', 'eot', 'svg', 'ttf', 'woff', 'woff2' );
+				foreach ( new RecursiveIteratorIterator( $it ) as $file ) {
+					$ext = pathinfo( $file, PATHINFO_EXTENSION );
+					if ( $ext && ! in_array( $ext, $good ) ) {
 						fl_builder_filesystem()->unlink( $file );
 					}
 				}

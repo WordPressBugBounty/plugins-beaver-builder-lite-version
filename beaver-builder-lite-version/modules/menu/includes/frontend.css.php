@@ -433,16 +433,12 @@ if ( ( in_array( $settings->menu_layout, array( 'horizontal', 'vertical' ) ) && 
 	.fl-node-<?php echo $id; ?> .fl-menu-<?php echo $settings->menu_layout; ?>.fl-toggle-arrows .fl-menu-toggle,
 	.fl-node-<?php echo $id; ?> .fl-menu-<?php echo $settings->menu_layout; ?>.fl-toggle-none .fl-menu-toggle{
 		width: <?php echo $toggle_height; ?>px;
-		height: <?php echo $toggle_height; ?>px;
-		margin: -<?php echo $toggle_height / 2; ?>px 0 0;
 	}
 	.fl-node-<?php echo $id; ?> .fl-menu-horizontal.fl-toggle-arrows .fl-menu-toggle,
 	.fl-node-<?php echo $id; ?> .fl-menu-horizontal.fl-toggle-none .fl-menu-toggle,
 	.fl-node-<?php echo $id; ?> .fl-menu-vertical.fl-toggle-arrows .fl-menu-toggle,
 	.fl-node-<?php echo $id; ?> .fl-menu-vertical.fl-toggle-none .fl-menu-toggle{
 		width: <?php echo $toggle_width; ?>px;
-		height: <?php echo $toggle_height; ?>px;
-		margin: -<?php echo $toggle_height / 2; ?>px 0 0;
 	}
 <?php elseif ( ( in_array( $settings->menu_layout, array( 'horizontal', 'vertical' ) ) && 'plus' == $settings->submenu_hover_toggle ) || ( 'accordion' == $settings->menu_layout && 'plus' == $settings->submenu_click_toggle ) ) : ?>
 	.fl-node-<?php echo $id; ?> .fl-menu-<?php echo $settings->menu_layout; ?>.fl-toggle-plus .fl-has-submenu-container a{
@@ -451,14 +447,10 @@ if ( ( in_array( $settings->menu_layout, array( 'horizontal', 'vertical' ) ) && 
 
 	.fl-node-<?php echo $id; ?> .fl-menu-accordion.fl-toggle-plus .fl-menu-toggle{
 		width: <?php echo $toggle_height; ?>px;
-		height: <?php echo $toggle_height; ?>px;
-		margin: -<?php echo $toggle_height / 2; ?>px 0 0;
 	}
 	.fl-node-<?php echo $id; ?> .fl-menu-horizontal.fl-toggle-plus .fl-menu-toggle,
 	.fl-node-<?php echo $id; ?> .fl-menu-vertical.fl-toggle-plus .fl-menu-toggle{
 		width: <?php echo $toggle_width; ?>px;
-		height: <?php echo $toggle_height; ?>px;
-		margin: -<?php echo $toggle_height / 2; ?>px 0 0;
 	}
 	<?php
 endif;
@@ -877,7 +869,7 @@ if ( 'always' != $module->get_media_breakpoint() ) :
 	<?php endif; ?>
 
 	<?php if ( 'expanded' != $settings->mobile_toggle ) : ?>
-		.fl-node-<?php echo $id; ?> .fl-menu-mobile-toggle{
+		.fl-node-<?php echo $id; ?> .fl-menu .fl-menu-mobile-toggle{
 			display: none;
 		}
 	<?php endif; ?>
@@ -895,7 +887,7 @@ if ( isset( $settings->mobile_toggle ) && 'expanded' != $settings->mobile_toggle
 		FLBuilderCSS::responsive_rule( array(
 			'settings'     => $settings,
 			'setting_name' => 'menu_align',
-			'selector'     => ".fl-node-$id .fl-menu-mobile-toggle",
+			'selector'     => ".fl-node-$id .fl-menu .fl-menu-mobile-toggle",
 			'prop'         => 'float',
 			'ignore'       => array( 'center' ),
 		) );
@@ -903,7 +895,7 @@ if ( isset( $settings->mobile_toggle ) && 'expanded' != $settings->mobile_toggle
 		FLBuilderCSS::responsive_rule( array(
 			'settings'     => $settings,
 			'setting_name' => 'menu_align',
-			'selector'     => ".fl-node-$id .fl-menu-mobile-toggle",
+			'selector'     => ".fl-node-$id .fl-menu .fl-menu-mobile-toggle",
 			'props'        => array(
 				'float' => 'none',
 			),
@@ -913,7 +905,7 @@ if ( isset( $settings->mobile_toggle ) && 'expanded' != $settings->mobile_toggle
 		?>
 	<?php endif; ?>
 
-	.fl-node-<?php echo $id; ?> .fl-menu-mobile-toggle {
+	.fl-node-<?php echo $id; ?> .fl-menu .fl-menu-mobile-toggle {
 		<?php
 
 		if ( ! empty( $settings->mobile_toggle_color ) ) {
@@ -953,7 +945,8 @@ if ( isset( $settings->mobile_toggle ) && 'expanded' != $settings->mobile_toggle
 		padding-left: <?php echo $settings->mobile_toggle_padding_left . $settings->mobile_toggle_padding_unit; ?>;
 		border-color: rgba( 0,0,0,0.1 );
 	}
-	.fl-node-<?php echo $id; ?> .fl-menu-mobile-toggle rect{
+	.fl-node-<?php echo $id; ?> .fl-menu .fl-menu-mobile-toggle rect,
+	.fl-node-<?php echo $id; ?> .fl-menu .fl-menu-mobile-toggle.hamburger .hamburger-menu rect {
 		<?php
 		if ( ! empty( $settings->mobile_toggle_color ) ) {
 			echo 'fill: ' . FLBuilderColor::hex_or_rgb( $settings->mobile_toggle_color ) . ';';
@@ -962,8 +955,8 @@ if ( isset( $settings->mobile_toggle ) && 'expanded' != $settings->mobile_toggle
 		}
 		?>
 	}
-	.fl-node-<?php echo $id; ?> .fl-menu-mobile-toggle:hover,
-	.fl-node-<?php echo $id; ?> .fl-menu-mobile-toggle.fl-active{
+	.fl-node-<?php echo $id; ?> .fl-menu .fl-menu-mobile-toggle:hover,
+	.fl-node-<?php echo $id; ?> .fl-menu .fl-menu-mobile-toggle.fl-active {
 		<?php
 		if ( ! empty( $settings->mobile_toggle_hover_color ) ) {
 			echo 'color: ' . FLBuilderColor::hex_or_rgb( $settings->mobile_toggle_hover_color ) . ';';
@@ -978,8 +971,10 @@ if ( isset( $settings->mobile_toggle ) && 'expanded' != $settings->mobile_toggle
 		?>
 	}
 
-	.fl-node-<?php echo $id; ?> .fl-menu-mobile-toggle:hover rect,
-	.fl-node-<?php echo $id; ?> .fl-menu-mobile-toggle.fl-active rect{
+	.fl-node-<?php echo $id; ?> .fl-menu .fl-menu-mobile-toggle:hover rect,
+	.fl-node-<?php echo $id; ?> .fl-menu .fl-menu-mobile-toggle.fl-active rect,
+	.fl-node-<?php echo $id; ?> .fl-menu .fl-menu-mobile-toggle.hamburger:hover .hamburger-menu rect,
+	.fl-node-<?php echo $id; ?> .fl-menu .fl-menu-mobile-toggle.fl-active .hamburger-menu rect {
 		<?php
 		if ( ! empty( $settings->mobile_toggle_hover_color ) ) {
 			echo 'fill: ' . FLBuilderColor::hex_or_rgb( $settings->mobile_toggle_hover_color ) . ';';

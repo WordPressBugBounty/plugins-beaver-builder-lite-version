@@ -134,8 +134,8 @@ class FLControls {
 
 	static public function normalize_color_value( $value ) {
 
-		if ( FLBuilderUtils::ctype_xdigit( ltrim( $value, '#' ) ) ) {
-			return '#' . ltrim( $value, '#' );
+		if ( FLBuilderUtils::ctype_xdigit( ltrim( trim( $value ), '#' ) ) ) {
+			return '#' . ltrim( trim( $value ), '#' );
 		}
 
 		return $value;
@@ -214,9 +214,11 @@ class FLControls {
 	}
 
 	static public function get_attachment_sizes( $request ) {
-		$id    = $request->get_params()['id'];
-		$meta  = wp_get_attachment_metadata( $id );
-		$sizes = [];
+		$id       = $request->get_params()['id'];
+		$meta     = wp_get_attachment_metadata( $id );
+		$url      = wp_get_attachment_url( $id );
+		$filename = wp_basename( $url );
+		$sizes    = [];
 
 		if ( $meta ) {
 			$sizes    = $meta['sizes'];
@@ -225,6 +227,15 @@ class FLControls {
 			foreach ( $sizes as $key => $image ) {
 				$sizes[ $key ]['url'] = $basename . '/' . $image['file'];
 			}
+		}
+
+		if ( ! isset( $sizes['full'] ) ) {
+			$sizes['full'] = array(
+				'url'      => $url,
+				'filename' => isset( $meta['file'] ) ? $meta['file'] : $filename,
+				'width'    => isset( $meta['width'] ) ? $meta['width'] : '',
+				'height'   => isset( $meta['height'] ) ? $meta['height'] : '',
+			);
 		}
 
 		return new WP_REST_Response( [

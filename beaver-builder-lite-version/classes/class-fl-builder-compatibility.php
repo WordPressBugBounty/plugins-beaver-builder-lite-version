@@ -65,6 +65,7 @@ final class FLBuilderCompatibility {
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'remove_tour_fix' ) );
 		add_action( 'fl_before_sortable_enqueue', array( __CLASS__, 'fix_classicpress_v2' ) );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'fix_restaurant_woocommerce' ), 20 );
+		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'fix_wpd_plugins' ), 11 );
 
 		// Filters
 		add_filter( 'fl_builder_is_post_editable', array( __CLASS__, 'bp_pages_support' ), 11, 2 );
@@ -1027,21 +1028,9 @@ final class FLBuilderCompatibility {
 			return;
 		}
 
-		if ( ( $query->is_main_query() && is_post_type_archive( 'tribe_events' ) ) || ( 'fl-theme-layout' === get_post_type() ) ) {
+		if ( ( $query->is_main_query() && is_post_type_archive( 'tribe_events' ) ) || ( 'fl-theme-layout' === get_post_type() && ! isset( $_GET['fl_builder'] ) ) ) {
 			$events_per_page = (int) tribe_get_option( 'postsPerPage', 10 );
 			$query->set( 'posts_per_page', $events_per_page );
-		}
-	}
-
-	/**
-	 * Fix 'Hide From Event Listings' from the Event Options under the Event Edit Screen
-	 * not being picked up by the Posts Grid module set to 'custom_query'.
-	 *
-	 * @since 2.4.1
-	 */
-	public static function fix_tribe_events_hide_from_listings( $args ) {
-		if ( ! class_exists( 'Tribe__Events__Query' ) || is_admin() ) {
-			return $args;
 		}
 	}
 
@@ -1412,6 +1401,18 @@ final class FLBuilderCompatibility {
 		}
 
 		wp_dequeue_script( 'rms_jquery_ui_datepicker_script' );
+	}
+
+	/**
+	 * Dequeue wpd plugins js
+	 * @since 2.9.1
+	 */
+	public static function fix_wpd_plugins() {
+		if ( isset( $_GET['fl_builder'] ) ) {
+			wp_dequeue_script( 'wpd-value-slider' );
+			wp_dequeue_script( 'wpd-bb-popups-uabb-page-builder' );
+			wp_dequeue_script( 'wpd-bb-popups-powerpack-page-builder' );
+		}
 	}
 }
 FLBuilderCompatibility::init();

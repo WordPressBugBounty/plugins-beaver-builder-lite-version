@@ -8,7 +8,7 @@
 final class FLBuilderColor {
 
 	static public function is_hex_value( $value ) {
-		return FLBuilderUtils::ctype_xdigit( ltrim( $value, '#' ) );
+		return FLBuilderUtils::ctype_xdigit( ltrim( trim( $value ), '#' ) );
 	}
 
 	static public function is_rgb_value( $value ) {
@@ -47,7 +47,7 @@ final class FLBuilderColor {
 
 		list($r, $g, $b) = array_map( function ( $hex ) {
 			return hexdec( str_pad( $hex, 2, $hex ) );
-		}, str_split( ltrim( $hex, '#' ), strlen( $hex ) > 4 ? 2 : 1 ) );
+		}, str_split( ltrim( trim( $hex ), '#' ), strlen( $hex ) > 4 ? 2 : 1 ) );
 		return array(
 			'r' => $r,
 			'g' => $g,
@@ -99,7 +99,7 @@ final class FLBuilderColor {
 
 		// Handle Prepending # To hex values
 		if ( self::is_hex_value( $color ) ) {
-			$color = '#' . ltrim( $color, '#' );
+			$color = '#' . ltrim( trim( $color ), '#' );
 		}
 
 		return $color;

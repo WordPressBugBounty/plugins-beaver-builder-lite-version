@@ -60,8 +60,10 @@
 /* Toggle - General */
 .fl-menu .fl-menu-toggle{
 	position: absolute;
-	top: 50%;
+	top: 0;
 	right: 0;
+	bottom: 0;
+	height: 100%;
 	cursor: pointer;
 }
 .fl-menu .fl-toggle-arrows .fl-menu-toggle:before,
@@ -167,6 +169,9 @@ ul.fl-menu-horizontal li.mega-menu > ul.sub-menu ul.sub-menu {
 }
 
 /* Mobile menu - below row clone */
+:where(.fl-col-group-medium-reversed, .fl-col-group-responsive-reversed) > .fl-menu-mobile-clone {
+	flex: 1 1 100%;
+}
 .fl-menu-mobile-clone {
 	clear: both;
 }

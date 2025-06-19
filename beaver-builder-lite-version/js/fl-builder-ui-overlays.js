@@ -1031,7 +1031,7 @@
 							type    : 'submenu',
 							label   : overflowItems[ i ].find( '.fa, .fas, .far, svg, span' ).data( 'title' ),
 							submenu : overflowItems[ i ].find( '.fl-builder-submenu' )[0].outerHTML,
-							className : overflowItems[ i ].find( '> i, > svg' ).removeClass( function( i, c ) {
+							className : overflowItems[ i ].find( '> span, > i, > svg' ).removeClass( function( i, c ) {
 											return c.replace( /fl-block-([^\s]+)/, '' );
 										} ).attr( 'class' )
 						} );

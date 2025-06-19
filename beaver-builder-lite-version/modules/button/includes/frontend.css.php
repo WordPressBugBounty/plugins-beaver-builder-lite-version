@@ -114,7 +114,7 @@ FLBuilderCSS::border_field_rule( array(
 // theme based borders
 
 FLBuilderCSS::rule( array(
-	'enabled'  => ! empty( FLBuilderUtils::get_bb_theme_option( 'fl-button-border-hover-color' ) ),
+	'enabled'  => ! empty( FLBuilderUtils::get_bb_theme_option( 'fl-button-border-hover-color' ) ) && ! empty( FLBuilderUtils::get_bb_theme_option( 'fl-button-style' ) ),
 	'selector' => ".fl-builder-content .fl-module-button.fl-node-$id a.fl-button:hover, .fl-builder-content .fl-node-$id a.fl-button:focus, .fl-page .fl-builder-content .fl-module-button.fl-node-$id a.fl-button:hover, .fl-page .fl-builder-content .fl-node-$id a.fl-button:focus",
 	'props'    => array(
 		'border-color' => FLBuilderColor::hex_or_rgb( FLBuilderUtils::get_bb_theme_option( 'fl-button-border-hover-color' ) ),

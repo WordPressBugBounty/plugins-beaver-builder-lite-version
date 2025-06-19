@@ -49,6 +49,7 @@
 			else {
 				FLBuilderLayout._initNestedColsWidth();
 			}
+			$('body').removeClass( 'fl-no-js' );
 		},
 
 		/**
@@ -1325,7 +1326,7 @@
 
 		/**
 		 * Set parent column width of nested columns when it's zero or blank.
-		 * 
+		 *
 		 * @since 2.7.4
 		 * @access private
 		 * @method _initNestedColsWidth

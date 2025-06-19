@@ -548,8 +548,8 @@ final class FLBuilderCSS {
 
 				case 'color':
 					// Handle Hex values, otherwise leave it alone.
-					if ( FLBuilderUtils::ctype_xdigit( ltrim( $value, '#' ) ) ) {
-						$css .= sprintf( "\t%s: #%s;\n", $name, ltrim( $value, '#' ) );
+					if ( FLBuilderUtils::ctype_xdigit( ltrim( trim( $value ), '#' ) ) ) {
+						$css .= sprintf( "\t%s: #%s;\n", $name, ltrim( trim( $value ), '#' ) );
 						if ( isset( $args['opacity'] ) && '' !== $args['opacity'] ) {
 							$rgb  = implode( ',', FLBuilderColor::hex_to_rgb( $value ) );
 							$a    = $args['opacity'] / 100;

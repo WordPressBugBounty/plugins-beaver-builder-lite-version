@@ -52,7 +52,7 @@
 	-o-animation-duration: 0s;
 }
 
-.fl-lightbox *:not( i, svg, use, path, rect, circle, ellipse, g, line, .fl-control, .ace-tm [class^=ace_] ) {
+.fl-lightbox *:not( i, svg, use, path, rect, circle, ellipse, g, line, .fl-control, .dashicons, .ace-tm [class^=ace_] ) {
 	color: #333;
 	font-family: var(--fl-builder-font-family);
 	font-size: 12px;

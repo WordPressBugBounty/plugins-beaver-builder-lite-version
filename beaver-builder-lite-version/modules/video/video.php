@@ -277,7 +277,7 @@ class FLVideoModule extends FLBuilderModule {
 	 * @return string
 	 */
 	static public function mute_video( $output, $atts, $video, $post_id ) {
-		if ( false !== strpos( $output, 'autoplay="1"' ) && FLBuilderModel::get_post_id() == $post_id ) {
+		if ( preg_match( '/\sautoplay[\s|=]/', $output ) && FLBuilderModel::get_post_id() == $post_id ) {
 			$output = str_replace( '<video', '<video muted', $output );
 		}
 		return $output;

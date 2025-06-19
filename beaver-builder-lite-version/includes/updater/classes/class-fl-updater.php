@@ -58,6 +58,7 @@ final class FLUpdater {
 			add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'update_check' ) );
 			add_filter( 'plugins_api', array( $this, 'plugin_info' ), 99, 3 );
 			add_action( 'in_plugin_update_message-' . self::get_plugin_file( $settings['slug'] ), array( $this, 'update_message' ), 1, 2 );
+			add_action( 'admin_init', array( $this, 'wp_update_notice' ) );
 		} elseif ( 'theme' == $settings['type'] ) {
 			add_filter( 'pre_set_site_transient_update_themes', array( $this, 'update_check' ) );
 		}
@@ -108,7 +109,7 @@ final class FLUpdater {
 	 * @return object
 	 */
 	public function update_check( $transient ) {
-		global $pagenow;
+		global $pagenow, $wp_version;
 
 		if ( 'plugins.php' == $pagenow && is_multisite() ) {
 			return $transient;
@@ -163,6 +164,9 @@ final class FLUpdater {
 
 					if ( empty( $response->package ) ) {
 						$transient->response[ $plugin ]->upgrade_notice = FLUpdater::get_update_error_message( false, $this->settings );
+					}
+					if ( version_compare( $wp_version, '6.7', '<' ) ) {
+						$transient->response[ $plugin ]->upgrade_notice = $this->get_wp_66_text();
 					}
 				} else {
 					// no update, for wp 5.5 we have to add a mock item.
@@ -292,8 +296,12 @@ final class FLUpdater {
 	 * @return void
 	 */
 	public function update_message( $plugin_data, $response ) {
+		global $wp_version;
 		if ( empty( $response->package ) ) {
 			echo FLUpdater::get_update_error_message( $plugin_data );
+		}
+		if ( version_compare( $wp_version, '6.7', '<' ) ) {
+			printf( '<span style="display:block;margin:10px 0;">%s</span>', $this->get_wp_66_text() );
 		}
 	}
 
@@ -714,5 +722,30 @@ final class FLUpdater {
 			}
 		}
 		return $version;
+	}
+
+	/**
+	 * Add notice for users of WP 6.6 and lower
+	 * @since 2.9
+	 */
+	public function wp_update_notice() {
+		global $wp_version;
+		if ( version_compare( $wp_version, '6.6', '<' ) ) {
+			$args = array(
+				'id'      => 'required-version',
+				'cap'     => 'edit_posts',
+				'content' => $this->get_wp_66_text(),
+				'class'   => 'notice-warning',
+			);
+			FLBuilderAdminNotices::register_notice( $args );
+		}
+	}
+
+	/**
+	 * Get notice text
+	 * @since 2.9
+	 */
+	private function get_wp_66_text() {
+		return sprintf( '<span class="dashicons dashicons-warning"></span>&nbsp;<strong>%s</strong>', __( 'In version 2.10 of Beaver Builder, the required version of WordPress will be raised to 6.6', 'fl-builder' ) );
 	}
 }

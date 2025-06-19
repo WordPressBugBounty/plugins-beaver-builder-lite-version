@@ -75,6 +75,7 @@ final class FLBuilderModuleDataRepeater {
 		} else {
 			$this->data_source = $this->settings->data_source;
 		}
+		$this->data_source = apply_filters( 'fl_builder_module_data_repeater_data_source', $this->data_source, $this->settings );
 	}
 
 	/**
@@ -95,6 +96,9 @@ final class FLBuilderModuleDataRepeater {
 				break;
 			case 'taxonomy_query':
 				$this->query = FLBuilderLoop::query( $this->settings );
+				break;
+			default:
+				$this->query = apply_filters( 'fl_builder_module_data_repeater_query', $this->query, $this->settings );
 				break;
 		}
 	}

@@ -3178,7 +3178,7 @@ final class FLBuilderModel {
 		self::$modules[ $instance->slug ]->form = apply_filters( 'fl_builder_register_module_settings_form', self::$modules[ $instance->slug ]->form, $instance->slug );
 
 		// Load deprecations
-		if ( fl_builder_filesystem()->file_exists( $instance->dir . 'deprecated.php' ) ) {
+		if ( file_exists( $instance->dir . 'deprecated.php' ) ) {
 			require_once $instance->dir . 'deprecated.php';
 		}
 	}

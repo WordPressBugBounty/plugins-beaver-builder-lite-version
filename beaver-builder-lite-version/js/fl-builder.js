@@ -5547,7 +5547,9 @@
 							FLBuilder.triggerHook( 'didAddModule', {
 								nodeId: data.nodeId,
 								moduleType: settings.type,
-								settings: settings
+								settings: settings,
+								newNodes: data.newNodes,
+								updatedNodes: data.updatedNodes,
 							} );
 						}
 					}

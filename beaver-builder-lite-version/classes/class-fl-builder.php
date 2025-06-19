@@ -1339,7 +1339,7 @@ final class FLBuilder {
 				$classes[] = 'fl-theme-' . sanitize_title( $theme );
 			}
 		}
-
+		$classes[] = 'fl-no-js';
 		return apply_filters( 'fl_builder_body_classes', $classes );
 	}
 

@@ -366,3 +366,24 @@ function fl_theme_builder_has_post_grid() {
 
 	return false;
 }
+
+/**
+ * Global Styles polyfill for LITE
+ */
+if ( ! class_exists( 'FLBuilderGlobalStyles' ) && defined( 'FL_BUILDER_LITE' ) && true === FL_BUILDER_LITE ) {
+	class FLBuilderGlobalStyles {
+		public static function get_settings() {
+			return (object) [
+				'colors'            => [],
+				'button_color'      => '',
+				'button_background' => '',
+			];
+		}
+		public static function get_theme_json_js_config() {
+			return [ 'color' => [ 'palette' => [] ] ];
+		}
+		public static function generate_global_colors_css() {
+			return '';
+		}
+	}
+}

@@ -437,8 +437,10 @@ final class FLBuilderLoop {
 	static public function terms_query( $settings ) {
 
 		// Build the query.
-		$order_by = isset( $settings->term_order_by ) ? $settings->term_order_by : 'name';
-		$args     = array(
+		$order_by     = isset( $settings->term_order_by ) ? $settings->term_order_by : 'name';
+		$select_terms = isset( $settings->select_terms ) ? $settings->select_terms : 'all';
+
+		$args = array(
 			'taxonomy'   => $settings->terms_taxonomy,
 			'order'      => isset( $settings->term_order ) ? $settings->term_order : 'ASC',
 			'orderby'    => $order_by,
@@ -446,8 +448,12 @@ final class FLBuilderLoop {
 			'settings'   => $settings,
 		);
 
-		if ( 0 != $settings->term_parent ) {
+		if ( 0 != $settings->term_parent && 'child' == $select_terms ) {
 			$args['parent'] = $settings->term_parent;
+		}
+
+		if ( 'top' == $select_terms ) {
+			$args['parent'] = 0;
 		}
 
 		// Order by meta value arg.

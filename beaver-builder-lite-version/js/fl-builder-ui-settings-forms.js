@@ -952,7 +952,9 @@
 			if ( event.namespace.indexOf( 'didAdd' ) > -1 ) {
 				var nodeId = 'object' === typeof arguments[1] ? arguments[1].nodeId : arguments[1];
 				var settings = 'object' === typeof arguments[1] && arguments[1].settings ? arguments[1].settings : null;
-				this.addNode( nodeId, settings );
+				var newNodes = 'object' === typeof arguments[1] && arguments[1].newNodes ? arguments[1].newNodes : null;
+				var updatedNodes = 'object' === typeof arguments[1] && arguments[1].updatedNodes ? arguments[1].updatedNodes : null;
+				this.addNode( nodeId, settings, newNodes, updatedNodes );
 			} else if ( event.namespace.indexOf( 'didSaveNodeSettings' ) > -1 ) {
 				this.updateNode( arguments[1].nodeId, arguments[1].settings );
 			} else if ( event.namespace.indexOf( 'didDelete' ) > -1 ) {
@@ -1057,7 +1059,7 @@
 		 * @param {String} nodeId
 		 * @param {Object} settings
 		 */
-		addNode: function( nodeId, settings ) {
+		addNode: function( nodeId, settings, newNodes, updatedNodes ) {
 
 			var node 		= $( '.fl-node-' + nodeId ),
 				isRow 		= node.hasClass( 'fl-row' ),
@@ -1097,6 +1099,21 @@
 
 			if ( settings ) {
 				this.nodes[ nodeId ] = settings;
+			}
+
+			if ( newNodes ) {
+				for ( nodeId in newNodes ) {
+					this.nodes[ nodeId ] = newNodes[ nodeId ].settings;
+				}
+			}
+
+			if ( updatedNodes ) {
+				for ( nodeId in updatedNodes ) {
+					if ( updatedNodes[ nodeId ].settings === undefined ) {
+						continue;
+					}
+					this.nodes[ nodeId ] = { ...this.nodes[ nodeId ], ...updatedNodes[ nodeId ].settings };
+				}
 			}
 		},
 

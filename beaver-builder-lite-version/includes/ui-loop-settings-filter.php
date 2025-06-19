@@ -101,10 +101,30 @@ do_action( 'fl_builder_loop_settings_before_form', $settings );
 					'options' => FLBuilderLoop::get_taxonomy_options(),
 				), $settings);
 
+				FLBuilder::render_settings_field('select_terms', array(
+					'label'       => __( 'Select Terms to Display', 'fl-builder' ),
+					'type'        => 'button-group',
+					'fill_space'  => true,
+					'allow_empty' => false,
+					'default'     => 'all',
+					'help'        => __( 'Only hierarchical taxonomies allow for creating child terms.', 'fl-builder' ),
+					'options'     => array(
+						'all'   => __( 'All Terms', 'fl-builder' ),
+						'top'   => __( 'Top Level Terms', 'fl-builder' ),
+						'child' => __( 'Child Terms', 'fl-builder' ),
+					),
+					'toggle'      => array(
+						'child' => array(
+							'fields' => [ 'term_parent' ],
+						),
+					),
+				), $settings);
+
 				// Parent term
 				FLBuilder::render_settings_field('term_parent', array(
 					'type'    => 'select',
 					'label'   => __( 'Parent Term', 'fl-builder' ),
+					'help'    => __( 'Selecting None will show all terms.', 'fl-builder' ),
 					'default' => 0,
 					'options' => FLBuilderLoop::get_term_options( $terms_taxonomy ),
 				), $settings);

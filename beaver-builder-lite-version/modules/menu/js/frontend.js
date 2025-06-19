@@ -518,14 +518,18 @@
 					}
 					else {
 						var targetMenu = null;
-						
-						if ( self.mobileBelowRow ) {
-							targetMenu = $( this ).closest( '.fl-col' ).next( '.fl-menu-mobile-clone' );
 
-							if ( $( this ).closest( '.fl-col-group' ).hasClass( 'fl-col-group-responsive-reversed' ) ) {
-								$( '.fl-menu-mobile-clone' ).css( 'order', -1 );
-							} else {
-								$( '.fl-menu-mobile-clone' ).css( 'order', 2 );
+						if ( self.mobileBelowRow ) {
+							var $closestCol = $( this ).parents( '.fl-col, .fl-module-box' ),
+								$closestColGroup = $closestCol.length ? $closestCol.parent( '.fl-col-group' ) : null,
+								targetMenu  = $closestCol.length ? $closestCol.last().next( '.fl-menu-mobile-clone' ) : null;
+
+							if ( $closestColGroup.length ) {
+								if ( $closestColGroup.hasClass( 'fl-col-group-responsive-reversed' ) ) {
+									$closestColGroup.find( '.fl-menu-mobile-clone' ).css( 'order', -1 );
+								} else if ( $closestColGroup ) {
+									$closestColGroup.find( '.fl-menu-mobile-clone' ).css( 'order', 2 );
+								}
 							}
 						} else {
 							targetMenu = $( this ).closest( '.fl-menu' ).find( 'ul.menu' );
@@ -614,7 +618,7 @@
 		 * @return boolean
 		 */
 		_isMobileBelowRowEnabled: function() {
-			return this.mobileBelowRow && $( this.nodeClass ).closest( '.fl-col' ).length;
+			return this.mobileBelowRow && ( $( this.nodeClass ).parents( '.fl-col, .fl-module-box' ).length );
 		},
 
 		/**
@@ -632,7 +636,7 @@
 
 			var module = $( this.nodeClass ),
 				clone  = null,
-				col    = module.closest( '.fl-col' );
+				col    = module.parents( '.fl-col, .fl-module-box' ).last();
 
 			if ( module.length < 1 ) {
 				return;

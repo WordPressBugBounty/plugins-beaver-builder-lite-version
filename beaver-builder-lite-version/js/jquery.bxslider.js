@@ -296,7 +296,9 @@
         $(this).one('load error', function() {
           if (++count === total) { callback(); }
         }).each(function() {
-          if (this.complete) { $(this).trigger( 'load' ) }
+          setTimeout(() => {
+            if (this.complete || this.src == '') { $(this).trigger('load'); }
+          },0);
         });
       });
     };

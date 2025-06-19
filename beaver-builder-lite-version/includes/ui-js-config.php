@@ -29,6 +29,7 @@ echo 'FLBuilderConfig              = ' . FLBuilderUtils::json_encode( apply_filt
 	'postId'                     => $post_id,
 	'postStatus'                 => get_post_status(),
 	'postType'                   => get_post_type(),
+	'recentFonts'                => get_option( 'fl_builder_recent_fonts', array() ),
 	'services'                   => FLBuilderServices::get_services_data(),
 	'safemode'                   => isset( $_GET['safemode'] ) ? true : false,
 	'simpleUi'                   => $simple_ui ? true : false,

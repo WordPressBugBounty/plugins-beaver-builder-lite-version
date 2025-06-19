@@ -370,6 +370,12 @@ final class FL_Debug {
 		self::register( 'post_max', $args );
 
 		$args = array(
+			'name' => 'Max Upload Size',
+			'data' => FLBuilderUtils::formatbytes( wp_max_upload_size() ),
+		);
+		self::register( 'post_max_upload', $args );
+
+		$args = array(
 			'name' => 'PHP Max Input Vars',
 			'data' => self::safe_ini_get( 'max_input_vars' ),
 		);
@@ -382,10 +388,10 @@ final class FL_Debug {
 		self::register( 'post_max_time', $args );
 
 		$args = array(
-			'name' => 'Max Upload Size',
-			'data' => FLBuilderUtils::formatbytes( wp_max_upload_size() ),
+			'name' => 'Display Errors',
+			'data' => self::safe_ini_get( 'display_errors' ) ? 'Enabled' : 'Disabled',
 		);
-		self::register( 'post_max_upload', $args );
+		self::register( 'display_errors', $args );
 
 		$curl = ( function_exists( 'curl_version' ) ) ? curl_version() : false;
 		$args = array(

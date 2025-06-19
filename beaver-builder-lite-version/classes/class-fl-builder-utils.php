@@ -162,7 +162,7 @@ final class FLBuilderUtils {
 		$y_matches  = array();
 		$vm_matches = array();
 		$yt_pattern = '/^(?:(?:(?:https?:)?\/\/)?(?:www.)?(?:youtu(?:be.com|.be))\/(?:watch\?v\=|v\/|embed\/)?([\w\-]+))/is';
-		$vm_pattern = '#(?:https?://)?(?:www.)?(?:player.)?vimeo.com/(\d{6,11})(?:/([a-zA-Z0-9]+))?#';
+		$vm_pattern = '#(?:https?://)?(?:www\.)?(?:player\.)?vimeo\.com/(?:video/)?(\d{6,11})(?:/([a-zA-Z0-9]+))?#';
 		$video_data = array(
 			'type'     => 'mp4',
 			'video_id' => '',

@@ -60,28 +60,28 @@ final class FLBuilderAdminAdvanced {
 				'default'     => 1,
 				'callback'    => array( __CLASS__, 'disable_notifications' ),
 				'group'       => 'ui',
-				'description' => __( 'When disabled you will not receive alerts for new posts on the blog', 'fl-builder' ),
+				'description' => __( 'When disabled, alerts will not be received for new posts on the blog in the UI', 'fl-builder' ),
 			),
 			'lasttab_enabled'        => array(
 				'label'       => __( 'Remember last used tab', 'fl-builder' ),
 				'default'     => 1,
 				'callback'    => array( __CLASS__, 'disable_lastused' ),
 				'group'       => 'ui',
-				'description' => __( 'The Builder remembers the last tab used in the row/column/module settings window.', 'fl-builder' ),
+				'description' => __( 'When disabled, the Builder will not remember the last tab used in the row/column/module settings.', 'fl-builder' ),
 			),
 			'rowshapes_enabled'      => array(
 				'label'       => __( 'Custom Row Shapes', 'fl-builder' ),
 				'default'     => 1,
 				'callback'    => array( __CLASS__, 'disable_rowshapes' ),
 				'group'       => 'ui',
-				'description' => __( 'When enabled a custom row shapes tab will be added to the Global Settings.', 'fl-builder' ),
+				'description' => __( 'When enabled, a custom row shapes tab will be added to the Global Settings.', 'fl-builder' ),
 			),
 			'node_code'              => array(
 				'label'       => __( 'Enable Code Settings', 'fl-builder' ),
 				'default'     => 1,
 				'callback'    => array( __CLASS__, 'disable_node_code' ),
 				'group'       => 'ui',
-				'description' => __( 'When enabled CSS and JS settings will be available for rows, columns, and modules.', 'fl-builder' ),
+				'description' => __( 'When enabled, CSS and JS settings will be available for rows, columns, and modules.', 'fl-builder' ),
 			),
 			'limitrevisions_enabled' => array(
 				'label'       => __( 'Limit WP revisions for layouts', 'fl-builder' ),
@@ -97,7 +97,7 @@ final class FLBuilderAdminAdvanced {
 				'type'        => 'text',
 				'depends'     => 'limitrevisions_enabled',
 				'group'       => 'ui',
-				'description' => __( 'Set to 0 to completely disable revisions for layouts/pages controlled by the builder', 'fl-builder' ),
+				'description' => __( 'Set to 0 to completely disable revisions for layouts/pages controlled by the Builder', 'fl-builder' ),
 			),
 			'limithistory_enabled'   => array(
 				'label'       => __( 'Limit the amount of undo/redo history in Builder UI', 'fl-builder' ),
@@ -123,14 +123,14 @@ final class FLBuilderAdminAdvanced {
 				'link'     => 'https://docs.wpbeaverbuilder.com/beaver-builder/troubleshooting/common-issues/403-forbidden-or-blocked-error/',
 			),
 			'sort_enabled'           => array(
-				'label'       => __( 'Allow pages to be sortable', 'fl-builder' ),
+				'label'       => __( 'Add Filtering Option ', 'fl-builder' ),
 				'default'     => 1,
 				'callback'    => array( __CLASS__, 'disable_sorting' ),
 				'group'       => 'admin',
-				'description' => __( 'In WP admin lists of pages, posts, and custom post types in the back end, there is a Builder link in the list of post display filters, which limits the display to items that have Builder layouts.', 'fl-builder' ),
+				'description' => __( 'When enabled, a filter option is added for Builder enabled posts/pages in the post/page list', 'fl-builder' ),
 			),
 			'duplicate_enabled'      => array(
-				'label'    => __( 'Show duplicate action links in WP Admin', 'fl-builder' ),
+				'label'    => __( 'Show duplicate action links in post/page list view', 'fl-builder' ),
 				'default'  => 1,
 				'callback' => array( __CLASS__, 'disable_duplicate' ),
 				'group'    => 'admin',
@@ -143,7 +143,7 @@ final class FLBuilderAdminAdvanced {
 			),
 			'google_enabled'         => array(
 				'label'       => 'Google Fonts',
-				'description' => __( 'When disabled no Google Fonts will be enqueued or available in style options', 'fl-builder' ),
+				'description' => __( 'When disabled, no Google Fonts will be enqueued or available in style options.', 'fl-builder' ),
 				'default'     => 1,
 				'callback'    => array( __CLASS__, 'disable_google' ),
 				'group'       => 'assets',
@@ -157,7 +157,7 @@ final class FLBuilderAdminAdvanced {
 			),
 			'awesome_enabled'        => array(
 				'label'       => __( 'Font Awesome', 'fl-builder' ),
-				'description' => __( 'When disabled Font Awesome will NOT be enqueued, even if modules require it.', 'fl-builder' ),
+				'description' => __( 'When disabled, Font Awesome will not be enqueued, even if modules require it.', 'fl-builder' ),
 				'default'     => 1,
 				'callback'    => array( __CLASS__, 'disable_awesome' ),
 				'group'       => 'assets',
@@ -173,7 +173,7 @@ final class FLBuilderAdminAdvanced {
 				'default'     => 0,
 				'callback'    => array( __CLASS__, 'render_inline' ),
 				'group'       => 'frontend',
-				'description' => __( 'Instead of loading Builder CSS and JavaScript as an asset file, you can render the CSS inline.', 'fl-builder' ),
+				'description' => __( 'Instead of loading Builder CSS and JavaScript as an asset file, assets will render inline', 'fl-builder' ),
 				'link'        => 'https://docs.wpbeaverbuilder.com/beaver-builder/developer/how-to-tips/load-css-and-javascript-inline/',
 			),
 			'modules_enabled'        => array(
@@ -181,7 +181,7 @@ final class FLBuilderAdminAdvanced {
 				'default'     => 0,
 				'callback'    => array( __CLASS__, 'modules_enabled' ),
 				'group'       => 'admin',
-				'description' => __( 'Show detailed module usage on modules tab.', 'fl-builder' ),
+				'description' => __( 'Show detailed module usage on modules tab. Any disabled modules will be fully disabled and no longer render unless it is a dependency for another module.', 'fl-builder' ),
 				'link'        => 'https://docs.wpbeaverbuilder.com/beaver-builder/developer/tutorials-guides/common-beaver-builder-plugin-filter-examples/#show-which-modules-are-in-use-in-a-website',
 			),
 
@@ -212,26 +212,26 @@ final class FLBuilderAdminAdvanced {
 				'default'     => 1,
 				'callback'    => array( __CLASS__, 'disable_acf_blocks' ),
 				'group'       => 'ui',
-				'description' => __( 'Allow blocks built with ACF to be used in the builder.', 'fl-builder' ),
+				'description' => __( 'When enabled, this allows blocks built with ACF to be used in the builder.', 'fl-builder' ),
 			),
 			'collapse_default'       => array(
 				'label'       => __( 'Collapse All Settings', 'fl-builder' ),
 				'default'     => 0,
 				'callback'    => array( __CLASS__, 'collapse_default' ),
 				'group'       => 'ui',
-				'description' => __( 'Collapse all Settings Window setting sections', 'fl-builder' ),
+				'description' => __( 'When enabled, settings window sections will be collapsed.', 'fl-builder' ),
 			),
 			'theme_colors'           => array(
 				'label'       => __( 'Load Theme Colors', 'fl-builder' ),
 				'default'     => 0,
 				'group'       => 'ui',
-				'description' => __( 'Show Theme colors in color pickers', 'fl-builder' ),
+				'description' => __( 'When enabled, Theme colors will be shown in color pickers.', 'fl-builder' ),
 			),
 			'core_colors'            => array(
 				'label'       => __( 'Load WordPress Colors', 'fl-builder' ),
 				'default'     => 0,
 				'group'       => 'ui',
-				'description' => __( 'Show WordPress Core colors in color pickers', 'fl-builder' ),
+				'description' => __( 'When enabled, WordPress Core colors will be shown in color pickers.', 'fl-builder' ),
 			),
 			'module_wrappers'        => array(
 				'label'       => __( 'Force Module Wrapper Divs', 'fl-builder' ),
@@ -420,7 +420,7 @@ final class FLBuilderAdminAdvanced {
 	static public function init_hooks() {
 		foreach ( self::get_settings() as $key => $setting ) {
 			$option = get_option( "_fl_builder_{$key}" );
-			// make sure option is actually set to save db queries.
+			// Make sure option is actually set to save db queries.
 			if ( false === $option ) {
 				update_option( "_fl_builder_{$key}", $setting['default'] );
 				$option = $setting['default'];

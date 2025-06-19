@@ -1,3 +1,46 @@
+<h4>2.9.1.1 - 06/19/2025</h4>
+<p><strong>Hotfix</strong></p>
+<ul>
+	<li>Menu Module: Fix sub-menus on mobile being hard to open (#4162)</li>
+	<li>Video Module: Fix videos no longer autoplaying (#4146)</li>
+	<li>Fix filesystem initialization for deprecated module API (#4209)</li>
+	<li>Revert fix for pagination not working if page slug and rewrite slug are the same in the Posts module</li>
+	<li>Developer: add 2 filters to the Loop module <code>fl_builder_module_data_repeater_data_source</code> and <code>fl_builder_module_data_repeater_query</code></code></li>
+	<li>Dequeue some scripts from WPD Beaver Pop-ups and WPD Beaver Additions plugins when in the BB UI to prevent the UI from being broken (#4211)</li>
+	<li>Security: improve the icon set fix further only allow certain file types to be uploaded in an icon set</li>
+	<li>Background Field: make sure full size is available when using a photo (#4225)</li>
+	<li>Performance: Fix memory issues related to compound fields in some scenarios (#4143)</li>
+	<li>Lite version: Fix fatal errors relating to Global Styles and module blocks as well as JS error in icon picker when Icon module is used as a block (#4230)</li>
+</ul>
+
+<h4>2.9.1 - 06/09/2025</h4>
+<p><strong>Enhancements</strong></p>
+<ul>
+	<li>Loop Module: Add option to show top level terms in the Taxonomy query (#3980)<br />
+	<strong>There is a companion Themer release for this feature. Please update to Themer 1.5.0.4</strong></li>
+	<li>Debug Mode: Show display_errors value (#4130)</li>
+	<li>Security: Improve icon set fix to prevent PHP files from being uploaded regardless of directory (#4197)</li>
+</ul>
+
+<p><strong>Bug Fixes</strong></p>
+<ul>
+	<li>Color Picker: Fixed whitespace in hex values breaking CSS when updating to 2.9 (#4180)</li>
+	<li>Typography: Fixed recently used no longer showing in dropdown (#4156)</li>
+	<li>Button Module: Fix button using the BB theme border hover color even when button style is set to none in the theme (#3895)</li>
+	<li>Posts Modules: Fixed pagination not working if page slug and rewrite slug are the same (#3747)</li>
+	<li>Posts Module: Fixed formatting not working when content length is set but content type is full (#3704)</li>
+	<li>Menu Module: Fixed below row responsoive not being positioned properly (#3726)</li>
+	<li>Menu Module: Fixed responsive toggle styling not working when there's another menu module in the Header (#3946)</li>
+	<li>Fixed slider modules not working in FireFox when picture tags are used for images (#3983)</li>
+	<li>Fixed content being hidden when using animations and JS is disabled (#4069)</li>
+	<li>Fixed row background videos not working with all Vimeo URL formats (#4148)</li>
+	<li>Saved Nodes: fix missing items in saved tab when TEC is active (#4153)</li>
+	<li>WooCommerce: Fix archive Themer layout not rendering when Shop page is also set as home page (#4160)</li>
+	<li>Fix some template image URLs pointing to the wrong location causing performance issues (#4169)</li>
+	<li>Fixed module aliases with children causing settings to load when settings are opened for the first time after dropping</li>
+	<li>Fixed clicking top level menu items in the overlay more menu not working</li>
+</ul>
+
 <h4>2.9.0.5 - 05/22/2025</h4>
 <p><strong>Hotfix</strong></p>
 <ul>
