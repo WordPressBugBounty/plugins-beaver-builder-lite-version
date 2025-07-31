@@ -16,6 +16,7 @@ class FLButtonGroupModule extends FLBuilderModule {
 			'icon'            => 'button.svg',
 			'partial_refresh' => true,
 			'include_wrapper' => false,
+			'element_setting' => false,
 		));
 	}
 

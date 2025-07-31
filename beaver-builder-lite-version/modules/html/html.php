@@ -16,6 +16,7 @@ class FLHtmlModule extends FLBuilderModule {
 			'icon'            => 'editor-code.svg',
 			'partial_refresh' => true,
 			'include_wrapper' => false,
+			'element_setting' => false,
 		));
 	}
 }

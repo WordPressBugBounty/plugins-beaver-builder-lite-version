@@ -27,6 +27,7 @@ class FLPhotoModule extends FLBuilderModule {
 			'icon'            => 'format-image.svg',
 			'partial_refresh' => true,
 			'include_wrapper' => false,
+			'element_setting' => false,
 		));
 	}
 

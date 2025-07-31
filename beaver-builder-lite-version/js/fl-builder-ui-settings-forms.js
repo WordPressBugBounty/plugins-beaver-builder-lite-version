@@ -105,7 +105,8 @@
 				config = $.extend( true, config, forms[ config.id ] );
 			} else if ( 'module' === config.type && undefined !== modules[ config.id ] ) {
 				config = $.extend( true, config, modules[ config.id ] );
-			} else {
+				config = this.preprocessModuleConfig( config );
+			} else if ( 'dynamic' !== config.type ) {
 				return;
 			}
 
@@ -132,6 +133,38 @@
 					actions.hideCurrentPanel()
 				}
 			}
+		},
+
+		/**
+		 * Preprocesses module config before rendering.
+		 * 
+		 * @since 2.9
+		 * @param {Object} config
+		 */
+		preprocessModuleConfig: function( config ) {
+			const module = FLBuilderConfig.contentItems.module.filter( module => module.slug === config.id ).pop();
+			const deprecations = FLBuilderConfig.deprecations[ config.id ];
+			const node = FL.Builder.data.getNode( config.nodeId );
+			const version = node.version ? `v${ node.version }` : 'v1';
+
+			// Handle support for the container element setting in the
+			// module's advanced tab. Remove it if not supported.
+			if ( module && ! module.element_setting ) {
+				
+				// If this module is deprecated and still supports the element setting,
+				// then we don't need to remove it.
+				if ( deprecations && deprecations[ version ] && deprecations[ version ].config ) {
+					const deprecationConfig = deprecations[ version ].config;
+					if ( deprecationConfig.element_setting ) {
+						return config;
+					}
+				} 
+
+				// Remove the element setting.
+				delete config.tabs.advanced.sections.css_selectors.fields.container_element;
+			}
+
+			return config;
 		},
 
 		/**

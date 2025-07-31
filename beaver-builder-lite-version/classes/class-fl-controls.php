@@ -145,7 +145,7 @@ class FLControls {
 	 * Add Color presets to the saved array
 	 */
 	static public function set_color_presets( $request ) {
-		$color_presets = get_option( '_fl_builder_color_presets', [] );
+		$color_presets = (array) get_option( '_fl_builder_color_presets', [] );
 		$params        = $request->get_params();
 
 		if ( isset( $params['clearPresets'] ) && true === $params['clearPresets'] ) {
@@ -170,7 +170,7 @@ class FLControls {
 	 * Delete one or more presets from the saved array
 	 */
 	static public function delete_color_presets( $request ) {
-		$color_presets = get_option( '_fl_builder_color_presets' );
+		$color_presets = (array) get_option( '_fl_builder_color_presets', [] );
 		$params        = $request->get_params();
 
 		$new_presets = array_values( array_filter( $color_presets, function ( $color ) use ( $params ) {
@@ -192,7 +192,7 @@ class FLControls {
 	 * Get saved backgrounds
 	 */
 	static public function get_background_presets() {
-		$presets = get_option( '_fl_builder_background_presets', [] );
+		$presets = (array) get_option( '_fl_builder_color_presets', [] );
 		return $presets;
 	}
 
@@ -200,7 +200,7 @@ class FLControls {
 	 * Set saved backgrounds
 	 */
 	static public function set_background_presets( $request ) {
-		$presets     = get_option( '_fl_builder_background_presets', [] );
+		$presets     = (array) get_option( '_fl_builder_color_presets', [] );
 		$params      = $request->get_params();
 		$new_presets = array_merge( $presets, $params['addPresets'] );
 

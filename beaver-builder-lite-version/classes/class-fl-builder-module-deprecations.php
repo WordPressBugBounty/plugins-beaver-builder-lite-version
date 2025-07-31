@@ -50,6 +50,16 @@ class FLBuilderModuleDeprecations {
 	}
 
 	/**
+	 * Return all registered deprecations.
+	 *
+	 * @since 2.9
+	 * @return array
+	 */
+	static public function get_all_deprecations() {
+		return self::$deprecations;
+	}
+
+	/**
 	 * Adds a version to new modules in the layout data before
 	 * it is saved to the database.
 	 *
@@ -101,7 +111,7 @@ class FLBuilderModuleDeprecations {
 	 * @return array
 	 */
 	static public function force_node_wrappers( $data ) {
-		$force = apply_filters( 'fl_builder_force_module_wrappers', false );
+		$force = apply_filters( 'fl_builder_force_module_wrappers', false || isset( $_GET['safemode'] ) );
 
 		if ( $force ) {
 			foreach ( $data as $node_id => $node ) {

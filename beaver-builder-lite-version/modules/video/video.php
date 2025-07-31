@@ -21,6 +21,7 @@ class FLVideoModule extends FLBuilderModule {
 			'icon'            => 'format-video.svg',
 			'partial_refresh' => true,
 			'include_wrapper' => false,
+			'element_setting' => false,
 		));
 
 		$this->add_js( 'jquery-fitvids' );

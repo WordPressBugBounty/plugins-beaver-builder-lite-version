@@ -530,10 +530,57 @@ var init = function init(scope) {
  */
 var initSection = function initSection() {
   var wrap = jQuery(this);
+  var form = wrap.closest('form.fl-builder-settings');
+  var tab = wrap.closest('.fl-builder-settings-tab');
   var button = wrap.find('.fl-builder-settings-section-header');
+  var key = wrap.attr('id').replace('fl-builder-settings-section-', '');
+  var formGroup = form.attr('data-form-group');
+  var formId = form.attr('data-form-id');
+  if ('fl-builder-settings-tab-advanced' === tab.attr('id')) {
+    formGroup = 'general';
+    formId = 'advanced';
+  }
+  var collapsed = getSectionToggleCache(formGroup, formId, key);
+  if (null !== collapsed) {
+    if (collapsed) {
+      wrap.addClass('fl-builder-settings-section-collapsed');
+    } else {
+      wrap.removeClass('fl-builder-settings-section-collapsed');
+    }
+  }
   button.on('click', function () {
-    wrap.toggleClass('fl-builder-settings-section-collapsed');
+    if (wrap.hasClass('fl-builder-settings-section-collapsed')) {
+      wrap.removeClass('fl-builder-settings-section-collapsed');
+      setSectionToggleCache(formGroup, formId, key, false);
+    } else {
+      wrap.addClass('fl-builder-settings-section-collapsed');
+      setSectionToggleCache(formGroup, formId, key, true);
+    }
   });
+};
+var getSectionToggleCache = function getSectionToggleCache(formGroup, formId, key) {
+  var cache = localStorage.getItem('fl-builder-settings-sections');
+  if (!cache) {
+    return null;
+  } else {
+    cache = JSON.parse(cache);
+  }
+  if (cache[formGroup] && cache[formGroup][formId] && cache[formGroup][formId][key] !== undefined) {
+    return cache[formGroup][formId][key];
+  }
+  return null;
+};
+var setSectionToggleCache = function setSectionToggleCache(formGroup, formId, key, value) {
+  var cache = localStorage.getItem('fl-builder-settings-sections');
+  if (!cache) {
+    cache = {};
+  } else {
+    cache = JSON.parse(cache);
+  }
+  cache[formGroup] = cache[formGroup] || {};
+  cache[formGroup][formId] = cache[formGroup][formId] || {};
+  cache[formGroup][formId][key] = value;
+  localStorage.setItem('fl-builder-settings-sections', JSON.stringify(cache));
 };
 
 /***/ }),
@@ -926,8 +973,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var react_dom__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-dom */ "react-dom");
 /* harmony import */ var react_dom__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react_dom__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/i18n */ "@wordpress/i18n");
-/* harmony import */ var _wordpress_i18n__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_i18n__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var ui_i18n__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ui/i18n */ "./src/builder/ui/i18n/index.js");
 /* harmony import */ var fl_controls__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! fl-controls */ "fl-controls");
 /* harmony import */ var fl_controls__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(fl_controls__WEBPACK_IMPORTED_MODULE_3__);
 /* harmony import */ var _compound_field_controls__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./compound-field-controls */ "./src/builder-forms/ui/forms/form-content/compound-field-controls/index.js");
@@ -1173,7 +1219,7 @@ var Field = function Field(data) {
 var FieldError = function FieldError(_ref2) {
   var rest = _extends({}, (_objectDestructuringEmpty(_ref2), _ref2));
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(fl_controls__WEBPACK_IMPORTED_MODULE_3__.Error.DefaultError, _extends({
-    title: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_2__.__)('Field Type Error', 'fl-builder'),
+    title: (0,ui_i18n__WEBPACK_IMPORTED_MODULE_2__.__)('Field Type Error', 'fl-builder'),
     style: {
       boxShadow: '0 0 0 1px #ffc5c5',
       background: 'rgb(255 243 243)',
@@ -1811,6 +1857,37 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./src/builder/ui/i18n/index.js":
+/*!**************************************!*\
+  !*** ./src/builder/ui/i18n/index.js ***!
+  \**************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   __: () => (/* binding */ __)
+/* harmony export */ });
+/**
+ * @since 2.8
+ * @param {String} string
+ * @return {String}
+ */
+function __(string) {
+  if (typeof window.parent.FLBuilderStrings === 'undefined') {
+    return string;
+  }
+  var strings = window.parent.FLBuilderStrings.i18n;
+  if (typeof strings[string] !== 'undefined') {
+    return strings[string];
+  } else {
+    console.warn('No translation found for "' + string + '" Please add string to FLBuilderStrings.i18n object in includes/ui-js-config.php');
+    return string;
+  }
+}
+
+/***/ }),
+
 /***/ "@wordpress/hooks":
 /*!***************************!*\
   !*** external "wp.hooks" ***!
@@ -1819,17 +1896,6 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 module.exports = wp.hooks;
-
-/***/ }),
-
-/***/ "@wordpress/i18n":
-/*!**************************!*\
-  !*** external "wp.i18n" ***!
-  \**************************/
-/***/ ((module) => {
-
-"use strict";
-module.exports = wp.i18n;
 
 /***/ }),
 

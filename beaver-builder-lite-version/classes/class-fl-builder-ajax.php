@@ -246,7 +246,7 @@ final class FLBuilderAJAX {
 		 * Set header for JSON if headers have not been sent.
 		 */
 		if ( ! headers_sent() ) {
-			header( 'Content-Type:text/plain' );
+			header( 'Content-Type: application/json' );
 		}
 
 		if ( is_array( $result ) && ! empty( $result ) && 'fl_builder_autosuggest' !== $action['action'] && get_transient( 'fl_debug_mode' ) ) {

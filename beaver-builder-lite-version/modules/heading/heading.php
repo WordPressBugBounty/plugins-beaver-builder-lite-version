@@ -17,6 +17,7 @@ class FLHeadingModule extends FLBuilderModule {
 			'icon'            => 'text.svg',
 			'partial_refresh' => true,
 			'include_wrapper' => false,
+			'element_setting' => false,
 		));
 	}
 

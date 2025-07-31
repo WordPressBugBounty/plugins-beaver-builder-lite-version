@@ -1,3 +1,41 @@
+<h4>2.9.2.1 - 07/29/2025</h4>
+<p><strong>Hotfix</strong></p>
+<ul>
+    <li>Fixed issues when importing only Global Colors (#4283)</li>
+	<li>Color Picker: Fix JS error when trying to select a global color on breakpoints other than XL (#4291)</li>
+	<li>Fixed issue when saving when on Multi-Site/Networks (#4301)</li>
+	<li>Revert fix for pagination not working if page slug and rewrite slug are the same in the Posts module</li>
+	<li>Harden _fl_builder_color_presets so that it is always an array</li>
+	<li>Fixed not being able to edit or drag new widgets onto a layout (#4317)</li>
+</ul>
+
+<h4>2.9.2 - 07/17/2025</h4>
+<p><strong>Enhancements</strong></p>
+<ul>
+	<li>Performance: only check for available downloads for a license if a license exists (#3984)</li>
+	<li>Sections: use local storage to remember which sections are open/closed (#4232)</li>
+	<li>Background Field: Allow shortcodes for image URLs (#4213)</li>
+</ul>
+
+<p><strong>Bug Fixes</strong></p>
+<ul>
+	<li>Global Colors: Fixed color and name not being visible when a field is narrow (#3448)</li>
+	<li>Columns: Fixed whole number being saved in all cases when resizing via handle bar (#3979)</li>
+	<li>Button Module: Fixed the lightbox not scrolling with the content in on all screen sizes (#1699)</li>
+	<li>Loop Module: Fix PHP warning when using a taxonomy query when TEC is active (#4190)</li>
+	<li>Menu Module: Fix issues with parent menu items on mobile when there is a blank URL (#4257)</li>
+	<li>Photo Module: Ensure correct spacing in attributes (#4207)</li>
+	<li>Posts Module: Fix pagination not working if page slug and rewrite slug are the same (#3747)</li>
+	<li>Separator Module: remove min-height as it is no longer needed (#4221)</li></li>
+	<li>Text Editor Module: Fixed Row/Col text color overriding text color set in module (#4176)</li>
+	<li>WooCommerce: Fix horizontal text misalignment with select2 drop-downs when WooCommerce is active (#4182)</li>
+	<li>Fixed returning the wrong MIME type for JSON (#4228)</li>
+	<li>Safe Mode: Fixed modules without wrappers not being selectable (#4199)</li>
+	<li>Translations: Add additional texts to list of translateable strings (#4202)</li>
+	<li>Disable container element setting on unsupported modules (#4215)</li>
+	<li>Ensure that CSS that could affect module preview only applies when empty (#4221)</li>
+</ul>
+
 <h4>2.9.1.1 - 06/19/2025</h4>
 <p><strong>Hotfix</strong></p>
 <ul>

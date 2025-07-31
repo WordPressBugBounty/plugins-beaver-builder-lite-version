@@ -33,6 +33,7 @@ for ( $i = 0; $i < count( $settings->items ); $i++ ) :
 				},
 				<?php endif; ?>
 				closeBtnInside: true,
+				fixedContentPos: true,
 				tLoading: '<i class="fas fa-spinner fa-spin fa-3x fa-fw"></i>'
 			});
 		})(jQuery);

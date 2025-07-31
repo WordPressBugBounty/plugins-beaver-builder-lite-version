@@ -64,7 +64,7 @@
 		$( this.wrapperClass + ' ul.menu > li:last-child' ).on( 'focusout', $.proxy(function (e) {
 			if ( $( this.wrapperClass ).find( '.fl-menu-mobile-toggle' ).hasClass( 'fl-active' ) && ( 'expanded' !== this.mobileToggle ) ) {
 				if ( ! $( e.relatedTarget ).parent().hasClass( 'menu-item' ) ) {
-					$( this.wrapperClass ).find( '.fl-menu-mobile-toggle' ).trigger( 'click' );	
+					$( this.wrapperClass ).find( '.fl-menu-mobile-toggle' ).trigger( 'click' );
 				}
 			}
 		}, this ) );
@@ -307,17 +307,20 @@
 
 				var $link			= $( e.target ).parents( '.fl-has-submenu' ).first(),
 					$subMenu 		= $link.children( '.sub-menu' ).first(),
-					$href	 		= $link.children('.fl-has-submenu-container').first().find('> a').attr('href'),
+					$href	 		= $link.children('.fl-has-submenu-container').first().find('> a').attr('href') || false,
 					$subMenuParents = $( e.target ).parents( '.sub-menu' ),
 					$activeParents 	= $( e.target ).parents( '.fl-has-submenu.fl-active' );
-
-				if( ( !$subMenu.is(':visible') && 'none' === this.submenuIcon ) || $(e.target).hasClass('fl-menu-toggle')
-					|| ($subMenu.is(':visible') && (typeof $href === 'undefined' || $href == '#')) ){
+				if(
+					( ! $subMenu.is(':visible') && 'none' === this.submenuIcon )
+					|| $(e.target).hasClass('fl-menu-toggle')
+					|| ($subMenu.is(':visible') && (typeof $href === 'undefined'|| $href == '#'))
+					|| ( ! $href || '#' === $href )
+				){
 					e.preventDefault();
 				} else {
-					e.stopPropagation();
-					window.location.href = $href;
-					return;
+						e.stopPropagation();
+						window.location.href = $href;
+						return false;
 				}
 
 				if ($(this.wrapperClass).hasClass('fl-menu-accordion-collapse')) {
@@ -534,7 +537,7 @@
 						} else {
 							targetMenu = $( this ).closest( '.fl-menu' ).find( 'ul.menu' );
 						}
-						
+
 						if ( targetMenu.length ) {
 							$menu = $( targetMenu );
 						}
@@ -779,14 +782,14 @@
 
 		/**
 		 * Resize or reposition the Flyout Menu Panel.
-		 * 
+		 *
 		 * @since 2.8.1
 		 * @returns void
 		 */
 		_resizeFlyoutMenuPanel: function(){
 			const wrapper    = $( this.wrapperClass );
 			const wrapFlyout = wrapper.find( '.fl-menu-mobile-flyout' );
-				
+
 			if ( wrapFlyout.length > 0 ) {
 				wrapFlyout.css( this._getFlyoutMenuPanelPosition() );
 			}
@@ -794,7 +797,7 @@
 
 		/**
 		 * Compute the Flyout Menu Panel's position on the screen.
-		 * 
+		 *
 		 * @since 2.8.1
 		 * @returns object
 		 */
@@ -816,7 +819,7 @@
 			flyoutPosition[ side ]  = '0px';
 			flyoutPosition[ 'height' ]  = winHeight + 'px';
 			flyoutPosition[ 'top' ] = '0px';
-			
+
 			if ( adminBarHeight > 0 ) {
 				const diff = adminBarHeight - winTop;
 				flyoutPosition[ 'top' ] = diff <= 0 ? '0px' : (diff) + 'px';

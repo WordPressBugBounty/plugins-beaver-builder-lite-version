@@ -7,6 +7,7 @@ jQuery(function($) {
 			closeBtnInside: false,
 			tLoading: '',
 			preloader: true,
+			fixedContentPos: true,
 			image: {
 					titleSrc: function(item) {
 						<?php if ( 'below' == $settings->show_caption || 'hover' == $settings->show_caption ) : ?>

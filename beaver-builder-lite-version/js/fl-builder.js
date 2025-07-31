@@ -6908,9 +6908,11 @@
 					action          : 'verify_settings',
 					settings        : settings,
 				}, function( response ) {
-					if ( 'true' === response ) {
+					console.log(response)
+					if ( true === response ) {
 						finishSavingSettings()
 					} else {
+						console.log(response)
 						msg = '<p style="font-weight:bold;text-align:center;">' + FLBuilderStrings.noScriptWarn.heading + '</p>';
 						if ( FLBuilderConfig.userCaps.global_unfiltered_html ) {
 							msg += '<p>' + FLBuilderStrings.noScriptWarn.global + '</p>';
@@ -6922,7 +6924,7 @@
 						msg += '<p>' + FLBuilderStrings.noScriptWarn.footer + '</p>';
 						FLBuilderSettingsForms.hideLightboxLoader()
 						FLBuilder.alert( msg );
-						data = $.parseJSON(response);
+						data = FLBuilder._jsonParse(response);
 						if ( '' !== data.diff  ) {
 							$('.fl-diff', window.parent.document).html( data.diff );
 							$('.fl-diff', window.parent.document).prepend( '<p>' + FLBuilderStrings.codeErrorDetected + '</p>');
@@ -9469,18 +9471,18 @@
 			if (!FLBuilder._fontFamilyCache) {
 				const fonts = FLBuilderFontFamilies;
 				const recent = FLBuilderConfig.recentFonts || {};
-		
+
 				const createOption = (value, label) => {
 					const opt = document.createElement('option');
 					opt.value = value;
 					opt.textContent = label;
 					return opt;
 				};
-		
+
 				const fragment = document.createDocumentFragment();
-		
+
 				fragment.appendChild(createOption('Default', 'Default'));
-		
+
 				const recentKeys = Object.keys(recent).filter(f => f !== 'Default');
 				if (recentKeys.length) {
 					const group = document.createElement('optgroup');
@@ -9489,24 +9491,24 @@
 					recentKeys.forEach(name => group.appendChild(createOption(name, name)));
 					fragment.appendChild(group);
 				}
-		
+
 				const systemGroup = document.createElement('optgroup');
 				systemGroup.label = 'System';
 				Object.keys(fonts.system).forEach(name => {
 					systemGroup.appendChild(createOption(name, name));
 				});
 				fragment.appendChild(systemGroup);
-		
+
 				const googleGroup = document.createElement('optgroup');
 				googleGroup.label = 'Google';
 				Object.keys(fonts.google).forEach(name => {
 					googleGroup.appendChild(createOption(name, name));
 				});
 				fragment.appendChild(googleGroup);
-		
+
 				FLBuilder._fontFamilyCache = fragment;
 			}
-		
+
 			fontSelect.empty();
 			fontSelect.append(FLBuilder._fontFamilyCache.cloneNode(true)); // Clone cached
 		},
@@ -9625,8 +9627,7 @@
 				init     = null,
 				wrap     = null;
 
-			html = html.replace( /flbuildereditor/g , editorId );
-			config = FLBuilder._jsonParse( JSON.stringify( config ).replace( /flbuildereditor/g , editorId ) );
+			html   = html.replace( /flbuildereditor/g , editorId );
 			config = JSONfn.parse( JSONfn.stringify( config ).replace( /flbuildereditor/g , editorId ) );
 
 			textarea.after( html ).remove();
@@ -10438,7 +10439,12 @@
 
 			// Do the ajax call.
 			FLBuilder._ajaxRequest = $.post(FLBuilder._ajaxUrl(), data, function(response) {
-				debugdata = $.parseJSON(response) || false;
+				try {
+					debugdata = $.parseJSON(response) || false;
+				} catch(e) {
+					debugdata = response;
+				}
+
 				if ( debugdata && 'undefined' !== typeof debugdata.mem_usage ) {
 					console.log( 'AJAX: ' + debugdata.mem_usage );
 				}
@@ -11028,6 +11034,10 @@
 		 * @param {string} data JSON data
 		 */
 		_jsonParse: function( data ) {
+
+			if ( typeof data !== 'string' ) {
+				data = JSON.stringify(data)
+			}
 			try {
 					data = JSON.parse( data );
 					} catch (e) {

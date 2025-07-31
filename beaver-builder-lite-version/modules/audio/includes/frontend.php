@@ -25,7 +25,7 @@ if ( ( 'media_library' == $settings->audio_type ) && ( is_array( $settings->audi
 } else {
 
 	?>
-	<div 
+	<div
 	<?php
 	$module->render_attributes( $attrs );
 	FLBuilder::print_schema( ' itemscope itemtype="https://schema.org/AudioObject"' );
@@ -43,9 +43,13 @@ if ( ( 'media_library' == $settings->audio_type ) && ( is_array( $settings->audi
 		} else {
 			$audio_url = $settings->link;
 		}
-
+		if ( $audio_url ) {
 			echo '<meta itemprop="url" content="' . esc_url( do_shortcode( $audio_url ) ) . '" />';
 			echo '[audio src="' . preg_replace( '/\/?\?.*/', '', esc_url( do_shortcode( $audio_url ) ) ) . '"' . $autoplay . $loop . ']';
+		} else {
+			echo __( 'Please add an audio file', 'fl-builder' );
+		}
+
 		?>
 
 	</div>

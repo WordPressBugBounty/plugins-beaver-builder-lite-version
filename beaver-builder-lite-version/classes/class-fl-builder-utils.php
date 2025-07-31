@@ -303,8 +303,9 @@ final class FLBuilderUtils {
 	/**
 	 * @since 2.4
 	 */
-	public static function img_lazyload( $loading = 'load' ) {
-		return apply_filters( 'fl_lazyload', "loading='$loading'" );
+	public static function img_lazyload( $loading = 'load', $quotes = '"' ) {
+		$lazy = sprintf( 'loading=%s%s%s', $quotes, $loading, $quotes );
+		return apply_filters( 'fl_lazyload', $lazy );
 	}
 
 	/**

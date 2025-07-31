@@ -2302,9 +2302,9 @@ var resizeColumn = function resizeColumn(id, width, siblingId, siblingWidth) {
   return {
     type: 'RESIZE_COLUMN',
     id: id,
-    width: parseInt(width),
+    width: parseFloat(width),
     siblingId: siblingId,
-    siblingWidth: parseInt(siblingWidth),
+    siblingWidth: parseFloat(siblingWidth),
     shouldPersist: shouldPersist
   };
 };
@@ -5291,11 +5291,14 @@ __webpack_require__.r(__webpack_exports__);
  * @return {String}
  */
 function __(string) {
-  var strings = window.FLBuilderStrings.i18n;
+  if (typeof window.parent.FLBuilderStrings === 'undefined') {
+    return string;
+  }
+  var strings = window.parent.FLBuilderStrings.i18n;
   if (typeof strings[string] !== 'undefined') {
     return strings[string];
   } else {
-    console.warn('No translation found for "' + string + '" Please add string to includes/ui-js-config.php');
+    console.warn('No translation found for "' + string + '" Please add string to FLBuilderStrings.i18n object in includes/ui-js-config.php');
     return string;
   }
 }

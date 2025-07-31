@@ -4,6 +4,7 @@
 			type: 'iframe',
 			mainClass: 'fl-video-lightbox-wrap',
 			closeBtnInside: true,
+			fixedContentPos: true,
 			tLoading: '<i class="fas fa-spinner fa-spin fa-3x fa-fw"></i>',
 		});
 

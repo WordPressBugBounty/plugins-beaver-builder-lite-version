@@ -14,8 +14,8 @@ $wrapper_attrs = [
 	'class' => $module->get_wrapper_classes(),
 ];
 
-if ( false === strpos( $attrs, 'loading=' ) ) {
-	$attrs .= FLBuilderUtils::img_lazyload( 'lazy' );
+if ( false === strpos( $attrs, 'loading=' ) && false === strpos( $attrs, 'no-lazy' ) ) {
+	$attrs = rtrim( $attrs ) . ' ' . FLBuilderUtils::img_lazyload( 'lazy' );
 }
 
 ?>

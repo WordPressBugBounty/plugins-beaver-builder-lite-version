@@ -3629,17 +3629,20 @@ final class FLBuilder {
 
 		// Custom Global CSS (included here for proper specificity)
 		if ( 'published' == $node_status && $include_global ) {
-			$css .= self::js_comment( 'Global CSS', self::maybe_do_shortcode( $global_settings->css ) );
+			$css .= self::js_comment( 'Global CSS', $global_settings->css );
 		}
 
 		// Custom Global Nodes CSS
-		$css .= self::js_comment( 'Global Nodes CSS', self::maybe_do_shortcode( self::render_global_nodes_custom_code( 'css' ) ) );
+		$css .= self::js_comment( 'Global Nodes CSS', self::render_global_nodes_custom_code( 'css' ) );
 
 		// Custom Layout CSS
 		if ( ( 'published' == $node_status || $post_id !== $wp_the_query->post->ID ) && ! in_array( 'global-layout-css-' . $post_id, self::$rendered_assets ) ) {
 			self::$rendered_assets[] = 'global-layout-css-' . $post_id;
-			$css                    .= self::js_comment( 'Layout CSS', self::maybe_do_shortcode( FLBuilderModel::get_layout_settings()->css ) );
+			$css                    .= self::js_comment( 'Layout CSS', FLBuilderModel::get_layout_settings()->css );
 		}
+
+		// Do shortcodes in the CSS.
+		$css = self::maybe_do_shortcode( $css );
 
 		/**
 		 * Use this filter to modify the CSS that is compiled and cached for each builder layout.

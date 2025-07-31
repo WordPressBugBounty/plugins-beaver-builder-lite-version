@@ -450,6 +450,12 @@ final class FLUpdater {
 	 * @return bool
 	 */
 	static public function get_subscription_info() {
+		$license = FLUpdater::get_subscription_license();
+		if ( ! $license ) {
+			$subscription_info         = new StdClass();
+			$subscription_info->active = false;
+			return $subscription_info;
+		}
 		//phpcs:ignore Generic.CodeAnalysis.AssignmentInCondition.Found, Squiz.PHP.DisallowMultipleAssignments.FoundInControlStructure
 		if ( false === ( $subscription_info = get_transient( 'fl_get_subscription_info' ) ) ) {
 			$subscription_info = self::api_request(
@@ -457,7 +463,7 @@ final class FLUpdater {
 				array(
 					'fl-api-method' => 'subscription_info',
 					'domain'        => FLUpdater::validate_domain( network_home_url() ),
-					'license'       => FLUpdater::get_subscription_license(),
+					'license'       => $license,
 				)
 			);
 			if ( is_object( $subscription_info ) && ! isset( $subscription_info->error ) ) {

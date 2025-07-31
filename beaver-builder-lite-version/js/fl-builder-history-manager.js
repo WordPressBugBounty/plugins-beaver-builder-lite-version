@@ -107,7 +107,7 @@
 
 			const actions = FL.Builder.data.getLayoutActions()
 			const callback = function( response ) {
-				var data = JSON.parse( response )
+				var data = FLBuilder._jsonParse( response )
 				if ( ! data.error ) {
 					self.position = parseInt( data.position )
 					FLBuilder.triggerHook( 'didRestoreHistoryComplete', data )

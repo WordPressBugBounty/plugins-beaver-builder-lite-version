@@ -151,6 +151,12 @@ class FLBuilderGlobalImportExport {
 				if ( isset( $data->global_colors_prefix ) ) {
 					$globals->prefix = $data->global_colors_prefix;
 				}
+				// if no 0 key shift everything down
+				if ( ! isset( $globals->colors[0] ) && ! empty( $globals->colors ) ) {
+					$fixed_globals    = array();
+					$fixed_globals[0] = array_shift( $globals->colors );
+					$globals->colors  = array_merge( $fixed_globals, $globals->colors );
+				}
 				FLBuilderUtils::update_option( '_fl_builder_styles', $globals, true );
 			}
 			FLBuilderModel::delete_asset_cache_for_all_posts();

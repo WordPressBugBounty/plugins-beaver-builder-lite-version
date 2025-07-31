@@ -33,6 +33,7 @@ if ( isset( $settings->click_action ) && 'lightbox' == $settings->click_action )
 		},
 		<?php endif; ?>
 		closeBtnInside: true,
+		fixedContentPos: true,
 		tLoading: '<i class="fas fa-spinner fa-spin fa-3x fa-fw"></i>',
 	});
 })(jQuery);

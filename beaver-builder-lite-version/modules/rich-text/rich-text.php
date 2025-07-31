@@ -16,6 +16,7 @@ class FLRichTextModule extends FLBuilderModule {
 			'icon'            => 'text.svg',
 			'partial_refresh' => true,
 			'include_wrapper' => false,
+			'element_setting' => false,
 		));
 	}
 }
@@ -59,9 +60,8 @@ FLBuilder::register_module('FLRichTextModule', array(
 						'show_alpha'  => true,
 						'preview'     => array(
 							'type'      => 'css',
-							'selector'  => '{node} .fl-rich-text, {node} .fl-rich-text *, {node}.fl-rich-text, {node}.fl-rich-text *',  // Use {node}.class to support v2 markup
+							'selector'  => '{node} .fl-rich-text, {node} .fl-rich-text *, {node}.fl-module-rich-text.fl-rich-text, {node}.fl-module-rich-text.fl-rich-text *',  // Use {node}.class to support v2 markup
 							'property'  => 'color',
-							'important' => true,
 						),
 					),
 					'typography' => array(
@@ -70,7 +70,7 @@ FLBuilder::register_module('FLRichTextModule', array(
 						'responsive' => true,
 						'preview'    => array(
 							'type'     => 'css',
-							'selector' => '.fl-rich-text, .fl-rich-text *:not(b, strong), {node}.fl-rich-text, {node}.fl-rich-text *:not(b, strong)',  // Use {node}.class to support v2 markup
+							'selector' => '.fl-rich-text, .fl-rich-text *:not(b, strong), {node}.fl-module-rich-text.fl-rich-text, {node}.fl-module-rich-text.fl-rich-text *:not(b, strong)',  // Use {node}.class to support v2 markup
 						),
 					),
 				),

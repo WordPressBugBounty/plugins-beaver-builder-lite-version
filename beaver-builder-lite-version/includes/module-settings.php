@@ -6,6 +6,7 @@ FLBuilder::register_settings_form('module_advanced', array(
 	'title'    => __( 'Advanced', 'fl-builder' ),
 	'sections' => array(
 		'margins'       => array(
+			'title'  => __( 'Spacing', 'fl-builder' ),
 			'fields' => array(
 				'margin' => array(
 					'type'       => 'dimension',

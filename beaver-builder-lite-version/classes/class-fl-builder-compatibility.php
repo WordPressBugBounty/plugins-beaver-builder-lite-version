@@ -1297,7 +1297,7 @@ final class FLBuilderCompatibility {
 			return $query;
 		}
 
-		if ( empty( $settings->data_source ) || $query->post_count < 1 ) {
+		if ( empty( $settings->data_source ) || ! isset( $query->post_count ) || $query->post_count < 1 ) {
 			return $query;
 		}
 

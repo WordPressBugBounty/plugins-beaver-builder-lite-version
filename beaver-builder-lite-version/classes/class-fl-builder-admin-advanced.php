@@ -204,7 +204,6 @@ final class FLBuilderAdminAdvanced {
 				'default'     => 0,
 				'callback'    => array( __CLASS__, 'shortcodes_enabled' ),
 				'group'       => 'ui',
-				'description' => __( 'Error checking in the code editor is disabled when this is enabled.', 'fl-builder' ),
 				'link'        => 'https://docs.wpbeaverbuilder.com/beaver-builder/advanced-builder-techniques/shortcodes/use-shortcodes-in-tools-menu-css-or-js/',
 			),
 			'acf_blocks_enabled'     => array(

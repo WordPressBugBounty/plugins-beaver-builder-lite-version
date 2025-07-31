@@ -21,6 +21,7 @@ class FLAudioModule extends FLBuilderModule {
 			'icon'            => 'format-audio.svg',
 			'partial_refresh' => true,
 			'include_wrapper' => false,
+			'element_setting' => false,
 		));
 	}
 

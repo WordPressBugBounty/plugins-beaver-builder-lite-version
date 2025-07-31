@@ -3205,7 +3205,7 @@ button.fl-builder-button.fl-builder-bar-title-caret:focus {
 }
 
 /* Content */
-:where( .fl-builder-content-editing .fl-module ) {
+:where( .fl-builder-content-editing .fl-module:not(:has(*)) ) {
 	min-height: var(--fl-builder-min-node-size);
 }
 

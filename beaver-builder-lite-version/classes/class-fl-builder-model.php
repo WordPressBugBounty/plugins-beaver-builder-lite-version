@@ -3949,6 +3949,7 @@ final class FLBuilderModel {
 		$data[ $module_node_id ]->parent   = $parent_id;
 		$data[ $module_node_id ]->position = self::next_node_position( 'module', $parent_id );
 		$data[ $module_node_id ]->settings = $settings;
+		$data[ $module_node_id ]->version  = FLBuilderModuleDeprecations::get_module_version( $type );
 
 		// Add node template data.
 		if ( self::is_node_global( $parent ) ) {
@@ -5184,6 +5185,9 @@ final class FLBuilderModel {
 						$cleaned[ $node->node ]->parent   = $node->parent;
 						$cleaned[ $node->node ]->position = $node->position;
 						$cleaned[ $node->node ]->settings = $node->settings;
+						if ( isset( $node->version ) ) {
+							$cleaned[ $node->node ]->version = $node->version;
+						}
 					} else {
 						$cleaned[ $node->node ] = $node;
 					}

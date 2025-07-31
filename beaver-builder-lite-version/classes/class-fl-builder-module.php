@@ -147,6 +147,15 @@ class FLBuilderModule {
 	public $include_wrapper = true;
 
 	/**
+	 * Whether this module supports the Container Element setting
+	 * in the Advanced tab or not. If set to false, that setting
+	 * will not be displayed in the UI.
+	 *
+	 * @var boolean $element_setting
+	 */
+	public $element_setting = true;
+
+	/**
 	 * An array of module keys this module accepts as children.
 	 * Set to 'all' for all children. Leave empty for none.
 	 *
@@ -246,6 +255,7 @@ class FLBuilderModule {
 		$this->editor_export   = isset( $params['editor_export'] ) ? $params['editor_export'] : true;
 		$this->partial_refresh = isset( $params['partial_refresh'] ) ? $params['partial_refresh'] : false;
 		$this->include_wrapper = isset( $params['include_wrapper'] ) ? $params['include_wrapper'] : true;
+		$this->element_setting = isset( $params['element_setting'] ) ? $params['element_setting'] : true;
 		$this->accepts         = isset( $params['accepts'] ) ? $params['accepts'] : [];
 		$this->parents         = isset( $params['parents'] ) ? $params['parents'] : 'all';
 		$this->template        = isset( $params['template'] ) ? $params['template'] : [];
