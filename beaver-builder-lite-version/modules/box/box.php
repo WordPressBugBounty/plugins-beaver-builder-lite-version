@@ -638,7 +638,7 @@ FLBuilder::register_module( 'FLBuilderBoxModule', [
 			],
 			'sizing'  => [
 				'title'       => __( 'Sizing & Placement', 'fl-builder' ),
-				'description' => __( 'These settings allow you to control how this box fits within its parent container.', 'fl-builder' ),
+				'description' => __( 'These settings allow you to control how this box renders within its parent container.', 'fl-builder' ),
 				'collapsed'   => true,
 				'fields'      => [
 
@@ -770,6 +770,36 @@ FLBuilder::register_module( 'FLBuilderBoxModule', [
 									],
 								],
 							],
+						],
+					],
+					'margin_inline'        => [
+						'label'      => __( 'Alignment', 'fl-builder' ),
+						'type'       => 'button-group',
+						'default'    => '',
+						'responsive' => true,
+						'fill_space' => true,
+						'options'    => [
+							'0 auto' => __( 'Left', 'fl-builder' ),
+							'auto' => __( 'Center', 'fl-builder' ),
+							'auto 0' => __( 'Right', 'fl-builder' ),
+						],
+						'preview'    => [
+							'type'  => 'css',
+							'auto'  => true,
+							'property' => 'margin-inline',
+							'format_value' => '%s !important', // Prevent regular margins from overriding
+						],
+					],
+					'order' => [
+						'label'      => __( 'Order', 'fl-builder' ),
+						'help'       => __( 'Affects the order of this box when placed in a flex or grid parent.', 'fl-builder' ),
+						'type'       => 'unit',
+						'default'    => '',
+						'responsive' => true,
+						'preview'    => [
+							'type'     => 'css',
+							'auto'     => true,
+							'property' => 'order',
 						],
 					],
 				],

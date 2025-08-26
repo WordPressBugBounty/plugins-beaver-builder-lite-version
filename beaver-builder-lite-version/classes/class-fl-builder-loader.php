@@ -48,7 +48,7 @@ if ( ! class_exists( 'FLBuilderLoader' ) ) {
 		 * @return void
 		 */
 		static private function define_constants() {
-			define( 'FL_BUILDER_VERSION', '2.9.2.1' );
+			define( 'FL_BUILDER_VERSION', '2.9.3.1' );
 			define( 'FL_BUILDER_FILE', trailingslashit( dirname( __DIR__, 1 ) ) . 'fl-builder.php' );
 			define( 'FL_BUILDER_DIR', plugin_dir_path( FL_BUILDER_FILE ) );
 			define( 'FL_BUILDER_URL', esc_url( plugins_url( '/', FL_BUILDER_FILE ) ) );

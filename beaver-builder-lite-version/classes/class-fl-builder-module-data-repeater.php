@@ -75,6 +75,9 @@ final class FLBuilderModuleDataRepeater {
 		} else {
 			$this->data_source = $this->settings->data_source;
 		}
+		/**
+		 * @see fl_builder_module_data_repeater_data_source
+		 */
 		$this->data_source = apply_filters( 'fl_builder_module_data_repeater_data_source', $this->data_source, $this->settings );
 	}
 
@@ -111,20 +114,26 @@ final class FLBuilderModuleDataRepeater {
 	 */
 	public function has_items() {
 
+		$has_items = false;
+
 		switch ( $this->data_source ) {
 			case 'custom_query':
 			case 'main_query':
-				return $this->query->have_posts();
-			break;
+				$has_items = $this->query->have_posts();
+				break;
 
 			case 'taxonomy_query':
-				return $this->query->have_terms();
-			break;
+				$has_items = $this->query->have_terms();
+				break;
 
 			case 'acf_repeater':
-				return have_rows( $this->settings->acf_repeater_key );
-			break;
+				$has_items = have_rows( $this->settings->acf_repeater_key );
+				break;
 		}
+		/**
+		 * @see fl_builder_module_data_repeater_has_items
+		 */
+		return apply_filters( 'fl_builder_module_data_repeater_has_items', $has_items, $this );
 	}
 
 	/**
@@ -134,6 +143,10 @@ final class FLBuilderModuleDataRepeater {
 	 * @return void
 	 */
 	public function setup_item() {
+		/**
+		 * @see fl_builder_module_data_repeater_setup_item_before
+		 */
+		do_action( 'fl_builder_module_data_repeater_setup_item_before', $this );
 
 		switch ( $this->data_source ) {
 
@@ -150,6 +163,10 @@ final class FLBuilderModuleDataRepeater {
 				the_row();
 				break;
 		}
+		/**
+		 * @see fl_builder_module_data_repeater_setup_item_after
+		 */
+		do_action( 'fl_builder_module_data_repeater_setup_item_after', $this );
 	}
 
 	/**
@@ -160,13 +177,18 @@ final class FLBuilderModuleDataRepeater {
 	 */
 	public function can_paginate() {
 
+		$can_paginate = false;
+
 		switch ( $this->data_source ) {
 			case 'custom_query':
 			case 'main_query':
-				return $this->has_pages();
-			break;
+				$can_paginate = $this->has_pages();
+				break;
 		}
-		return false;
+		/**
+		 * @see fl_builder_module_data_repeater_can_paginate
+		 */
+		return apply_filters( 'fl_builder_module_data_repeater_can_paginate', $can_paginate, $this );
 	}
 
 	/**
@@ -203,6 +225,10 @@ final class FLBuilderModuleDataRepeater {
 	 * @return void
 	 */
 	public function cleanup() {
+		/**
+		 * @see fl_builder_module_data_repeater_before_cleanup
+		 */
+		do_action( 'fl_builder_module_data_repeater_before_cleanup', $this );
 
 		switch ( $this->data_source ) {
 			case 'custom_query':
@@ -215,5 +241,19 @@ final class FLBuilderModuleDataRepeater {
 				$this->query->reset_term_data();
 				break;
 		}
+		/**
+		 * @see fl_builder_module_data_repeater_after_cleanup
+		 */
+		do_action( 'fl_builder_module_data_repeater_after_cleanup', $this );
+	}
+
+	/**
+	 * Get the settings for this repeater instance.
+	 *
+	 * @since 2.10
+	 * @return object The settings object.
+	 */
+	public function get_settings() {
+		return $this->settings;
 	}
 }

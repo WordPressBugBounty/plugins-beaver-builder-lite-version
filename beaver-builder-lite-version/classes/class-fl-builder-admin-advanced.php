@@ -200,11 +200,11 @@ final class FLBuilderAdminAdvanced {
 				'description' => __( 'Show custom labels for Nodes.', 'fl-builder' ),
 			),
 			'shortcodes_enabled'     => array(
-				'label'       => __( 'Render shortcodes in CSS/JS', 'fl-builder' ),
-				'default'     => 0,
-				'callback'    => array( __CLASS__, 'shortcodes_enabled' ),
-				'group'       => 'ui',
-				'link'        => 'https://docs.wpbeaverbuilder.com/beaver-builder/advanced-builder-techniques/shortcodes/use-shortcodes-in-tools-menu-css-or-js/',
+				'label'    => __( 'Render shortcodes in CSS/JS', 'fl-builder' ),
+				'default'  => 0,
+				'callback' => array( __CLASS__, 'shortcodes_enabled' ),
+				'group'    => 'ui',
+				'link'     => 'https://docs.wpbeaverbuilder.com/beaver-builder/advanced-builder-techniques/shortcodes/use-shortcodes-in-tools-menu-css-or-js/',
 			),
 			'acf_blocks_enabled'     => array(
 				'label'       => __( 'ACF Blocks', 'fl-builder' ),
@@ -271,6 +271,8 @@ final class FLBuilderAdminAdvanced {
 		add_filter( 'fl_builder_duplicatemenu_enabled', '__return_true', 11 );
 	}
 	static private function disable_google() {
+		add_filter( 'fl_builder_font_families_google', '__return_empty_array', 11 );
+		add_filter( 'fl_enable_google_fonts_enqueue', '__return_false', 11 );
 	}
 	static private function google_auto() {
 		add_filter( 'fl_builder_google_auto', '__return_true' );

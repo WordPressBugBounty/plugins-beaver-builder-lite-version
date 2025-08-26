@@ -8565,38 +8565,34 @@ var HWBTab = function HWBTab() {
         if (alpha !== _alpha) {
           setAlpha(_alpha);
         }
-
-        // Only interested in sRGB color values
         var spaces = ['sRGB', 'Linear sRGB', 'HSL', 'HSV', 'HWB'];
         if (spaces.includes(space.name)) {
           var _hsl = _slicedToArray(hsl, 3),
             h = _hsl[0],
             s = _hsl[1],
             l = _hsl[2];
-          var v = hsv[2];
-          if (hue !== h && 'NaN' !== typeof h) {
-            /**
-             * hue 0 and 360 are functionally the same and can get swapped during syntax translation
-             * To avoid jitter, leave 360 alone if the new value is 0
-             */
+          var _hsv = _slicedToArray(hsv, 3),
+            hsvH = _hsv[0],
+            hsvS = _hsv[1],
+            hsvV = _hsv[2];
+          if (hue !== hsvH && !isNaN(hsvH)) {
             var threshlold = 10;
-            var isHueDifferent = hue - h < 360 && (h >= hue + threshlold || h <= hue - threshlold);
+            var isHueDifferent = hue - hsvH < 360 && (hsvH >= hue + threshlold || hsvH <= hue - threshlold);
             if (isHueDifferent) {
-              setHue(h);
+              setHue(hsvH);
             }
           }
           if (lightness !== l) {
             setLightness(l);
           }
-          if (saturation !== s) {
-            setSaturation(s);
+          if (saturation !== hsvS) {
+            setSaturation(hsvS);
           }
-          if (hsvValue !== v) {
-            setHSVValue(v);
+          if (hsvValue !== hsvV) {
+            setHSVValue(hsvV);
           }
         }
       } catch (error) {
-
         // Can't parse, don't worry about it
       }
     }
@@ -11583,6 +11579,33 @@ var ColorField = function ColorField(_ref) {
     return value;
   };
   var _value = processValue(value);
+  (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
+    var el = input.current;
+    if (!el) return;
+    var currentValue = el.value;
+
+    // Define custom getter/setter for `.value`
+    Object.defineProperty(el, 'value', {
+      get: function get() {
+        return currentValue;
+      },
+      set: function set(newVal) {
+        if (newVal !== currentValue) {
+          currentValue = newVal;
+          setValue(newVal);
+        }
+      },
+      configurable: true
+    });
+
+    // Set initial value (triggers setter if changed)
+    el.value = el.value;
+
+    // Cleanup: restore default behavior
+    return function () {
+      delete el.value;
+    };
+  }, [setValue]);
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement((react__WEBPACK_IMPORTED_MODULE_0___default().Fragment), null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default().createElement(_components__WEBPACK_IMPORTED_MODULE_1__.Color.Picker, {
     ref: picker,
     value: _value,

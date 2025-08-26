@@ -3167,9 +3167,6 @@ final class FLBuilderModel {
 		// Add Advanced tab last
 		self::$modules[ $instance->slug ]->form['advanced'] = self::$settings_forms['module_advanced'];
 
-		// Allows for module-specific changes to the form
-		self::$modules[ $instance->slug ] = self::filter_module( self::$modules[ $instance->slug ] );
-
 		/**
 		 * Use this filter to modify the config array for a settings form when it is registered.
 		 * @see fl_builder_register_module_settings_form
@@ -3181,21 +3178,6 @@ final class FLBuilderModel {
 		if ( file_exists( $instance->dir . 'deprecated.php' ) ) {
 			require_once $instance->dir . 'deprecated.php';
 		}
-	}
-
-	/**
-	 * Allow the module to filter the full form after advanced tab is added.
-	 *
-	 * @param Object $module
-	 * @return Object $module
-	 */
-	static public function filter_module( $module ) {
-
-		// Handle css selectors when include_wrapper is false
-		if ( ! $module->config( 'include_wrapper' ) ) {
-			$module->form['advanced']['sections']['margins']['fields']['margin']['preview']['selector'] = '';
-		}
-		return $module;
 	}
 
 	/**

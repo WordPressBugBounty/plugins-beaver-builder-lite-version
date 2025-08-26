@@ -211,7 +211,7 @@ final class FLBuilderAdminSettings {
 			echo '<img role="presentation" src="' . $icon . '" />';
 		}
 		/* translators: %s: builder branded name */
-		echo '<span>' . sprintf( _x( '%s Settings', '%s stands for custom branded "Page Builder" name.', 'fl-builder' ), FLBuilderModel::get_branding() ) . '</span>';
+		echo '<span>' . sprintf( __( '%s Settings', 'fl-builder' ), FLBuilderModel::get_branding() ) . '</span>';
 	}
 
 	/**

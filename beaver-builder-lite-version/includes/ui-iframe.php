@@ -49,7 +49,7 @@ if ( isset( $settings['position'] ) && '' !== $settings['position'] ) {
 				<iframe
 					id="fl-builder-ui-iframe"
 					class="fl-builder-ui-iframe"
-					src="<?php echo FLBuilderModel::get_edit_url( false, false ); ?>"
+					src="<?php echo esc_url( FLBuilderModel::get_edit_url( false, false ) ); ?>"
 					frameborder="0"
 				></iframe>
 			</div>

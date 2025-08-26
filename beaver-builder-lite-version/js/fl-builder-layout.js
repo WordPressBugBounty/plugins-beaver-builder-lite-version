@@ -1132,11 +1132,17 @@
 
 					if ( undefined != element.attr( 'id' ) && window.location.hash !== '#' + element.attr( 'id' ) ) {
 
-						if ( history.pushState ) {
-							history.pushState( null, null, '#' + element.attr( 'id' ) );
-						}
-						else {
+						var firefox_version = window.navigator.userAgent.match( /Firefox\/(\d+)\./ ),
+							firefox_version = firefox_version ? parseInt( firefox_version[1], 10 ) : null;
+
+						if ( firefox_version !== null && firefox_version < 135 ) {
 							window.location.hash = element.attr( 'id' );
+						} else {
+							if ( history.pushState ) {
+								history.pushState( null, null, '#' + element.attr( 'id' ) );
+							} else {
+								window.location.hash = element.attr( 'id' );
+							}
 						}
 					}
 				} );

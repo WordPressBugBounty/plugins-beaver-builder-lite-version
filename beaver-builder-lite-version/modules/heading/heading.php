@@ -202,6 +202,7 @@ FLBuilder::register_module('FLHeadingModule', array(
 						'connections' => array( 'color' ),
 						'show_reset'  => true,
 						'show_alpha'  => true,
+						'responsive'  => true,
 						'label'       => __( 'Color', 'fl-builder' ),
 						'preview'     => array(
 							'type'      => 'css',
@@ -215,9 +216,8 @@ FLBuilder::register_module('FLHeadingModule', array(
 						'label'      => __( 'Typography', 'fl-builder' ),
 						'responsive' => true,
 						'preview'    => array(
-							'type'      => 'css',
-							'selector'  => '{node}.fl-module-heading, {node}.fl-module-heading :where(a, q, p, span)',
-							'important' => true,
+							'type'     => 'css',
+							'selector' => '{node}.fl-module-heading, {node}.fl-module-heading :not(.fl-block-overlay :where(a, q, p, span))',
 						),
 					),
 				),

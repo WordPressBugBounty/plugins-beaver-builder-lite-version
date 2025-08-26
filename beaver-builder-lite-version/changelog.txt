@@ -1,3 +1,50 @@
+<h4>2.9.3.1 - 08/26/2025</h4>
+<p><strong>Hotfix</strong></p>
+<ul>
+	<li>Security: Add escaping to iFrame UI URL to prevent potential XSS issue (#4394)</li>
+	<li>Fix overlay submens closing immediately in some circumstances (#4379)</li>
+	<li>Box Module: Fix container element setting being missing (#4391)</li>
+	<li>Fix toggle to disable Google Fonts not working</li>
+	<li>Color Picker: fix issues with color selected changing when adjusting transparency and color swatch not matching when using some colors (#3994)</li>
+</ul>
+
+<h4>2.9.3 - 08/14/2025</h4>
+<p><strong>Security</strong></p>
+<ul>
+	<li>Security: Fixed possible XSS issue in the Testimonials Module with auto play by ensuring the setting is a boolean</li>
+</ul>
+
+<p><strong>Enhancements</strong></p>
+<ul>
+	<li>Box Module: Add new alignment and order fields (#4254)</li>
+	<li>Change drop text when dropping a saved Box module as a top level container (#3959)</li>
+	<li>Heading Module: color field is now responsive (#4127)</li>
+	<li>Update version of jquery validate script (#4287)</li>
+</ul>
+
+<p><strong>Bug Fixes</strong></p>
+<ul>
+	<li>Fixed incorrect margin preview selector for legacy modules (#4364)</li>
+	<li>Color Picker: try to reduce accidental clicks on presets by making some styling adjustments (#4166)</li>
+	<li>Color Picker: keep color value when disconnecting a global color from a color field (#4049)</li>
+	<li>Fixed issue with Module blocks settings not opening and not previewing (#4328)</li>
+	<li>Loop Module: fix issues with button module lightbox rendering the wrong content (#4252)</li>
+	<li>Additional changes to prevent conflict with WP Developer plugins (#4211)</li>
+	<li>Menu Module: Fix submenu spacing not working when using Expanded layout (#4164)</li>
+	<li>Fix some styling in modules affecting the parent menu for nodes (#4070)</li>
+	<li>Prevent history post type from being exportable (#4329)</li>
+	<li>Fixed issue with back button and anchor links (#3925)</li>
+	<li>Fixed conflict with Nested Pages plugin in the WP Admin (#1670)</li>
+	<li>Fixed conflict with Ultimate Member where shortcodes are parsed when BB is active (#3714)</li>
+	<li>Fixed looping issue with when using the builder for Toolset content (#1472) </li>
+	<li>Fixed fatal error on settings page when using Persian language</li>
+</ul>
+
+<p><strong>Developer</strong></p>
+<ul>
+	<li>Loop Module: add new hooks <code>fl_builder_module_data_repeater_has_items</code>, <code>fl_builder_module_data_repeater_setup_item_before</code>, <code>fl_builder_module_data_repeater_setup_item_after</code>, <code>fl_builder_module_data_repeater_can_paginate</code>, <code>fl_builder_module_data_repeater_before_cleanup</code>, and <code>fl_builder_module_data_repeater_after_cleanup</code></li>
+</ul>
+
 <h4>2.9.2.1 - 07/29/2025</h4>
 <p><strong>Hotfix</strong></p>
 <ul>

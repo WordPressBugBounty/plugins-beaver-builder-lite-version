@@ -361,7 +361,7 @@ final class FLBuilderAdminPosts {
 					$duplicate_text = sprintf( __( 'Duplicate %s', 'fl-builder' ), $singular_name );
 					/* translators: %1$s: post type being duplicated: %2$s: Branding name */
 					$duplicate_alt                   = esc_attr( sprintf( __( 'Duplicate %1$s with %2$s', 'fl-builder' ), $singular_name, FLBuilderModel::get_branding() ) );
-					$actions['fl-builder-duplicate'] = sprintf( '<a title="%s" href="%s">%s</a>%s', $duplicate_alt, $url, $duplicate_text, $dot );
+					$actions['fl-builder-duplicate'] = sprintf( '<a title="%s" href="%s">%s%s</a>', $duplicate_alt, $url, $duplicate_text, $dot );
 				}
 			}
 		}

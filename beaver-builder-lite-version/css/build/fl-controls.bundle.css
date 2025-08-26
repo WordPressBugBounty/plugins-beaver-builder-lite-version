@@ -324,16 +324,18 @@ body div.fl-color-picker-toolbar .picker-input-wrap > input {
   --color: black;
   display: grid;
   place-content: center;
+  max-width: var(--fl-builder-target-size);
+  max-height: var(--fl-builder-target-size);
   border-radius: 50%;
   padding: 0;
   border: none;
   background: transparent;
   background-color: transparent;
+  margin-left: auto;
   translate: 50% -50%;
   z-index: 1;
   transition-duration: 0.25s;
   transition-property: scale, opacity;
-  opacity: 0;
   scale: 0;
   pointer-events: none;
 }

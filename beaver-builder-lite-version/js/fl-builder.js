@@ -1221,9 +1221,9 @@
 			var parent  = $(this);
 			var submenu = parent.find('.fl-builder-submenu');
 			var timeout = setTimeout( function() {
-				$('.fl-builder-submenu-right').removeClass('fl-builder-submenu-right');
-				$('.fl-builder-submenu-open').removeClass('fl-builder-submenu-open');
-				$('.fl-row-menu-active').removeClass('fl-row-menu-active');
+				parent.removeClass('fl-builder-submenu-right');
+				parent.removeClass('fl-builder-submenu-open');
+				parent.closest('.fl-row-overlay').removeClass('fl-row-menu-active');
 			}, 500 );
 
 			submenu.data( 'timeout', timeout );
@@ -2769,6 +2769,9 @@
 					} else {
 						title = FLBuilderStrings.newRow;
 					}
+				}
+				else if(ui.item.hasClass('fl-builder-block-saved-module')) {
+					title = ui.item.find('.fl-builder-block-title').text();
 				}
 				else {
 					title = FLBuilderStrings.newRow;
@@ -6053,7 +6056,7 @@
 					parentId = parent.attr( 'data-node' );
 				}
 				// Dropped into a container module WITH a wrapper.
-				else if ( parent.hasClass( 'fl-module-content' ) ) {
+				else if ( parent.hasClass( 'fl-module-content' ) || parent.hasClass( 'fl-loop-item' ) ) {
 					position = parent.find( '> .fl-module, .fl-builder-block' ).index( item );
 					parentId = item.closest( '.fl-module' ).attr( 'data-node' );
 				}

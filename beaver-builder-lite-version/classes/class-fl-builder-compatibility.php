@@ -65,6 +65,8 @@ final class FLBuilderCompatibility {
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'remove_tour_fix' ) );
 		add_action( 'fl_before_sortable_enqueue', array( __CLASS__, 'fix_classicpress_v2' ) );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'fix_restaurant_woocommerce' ), 20 );
+		add_action( 'um_profile_header', array( __CLASS__, 'um_prevent_shortcode_parse' ) );
+		add_action( 'um_after_header_meta', array( __CLASS__, 'um_restore_shortcode_parse' ) );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'fix_wpd_plugins' ), 11 );
 
 		// Filters
@@ -101,6 +103,7 @@ final class FLBuilderCompatibility {
 		add_filter( 'woocommerce_tab_manager_tab_panel_content', array( __CLASS__, 'fix_woo_tab_manager_missing_content' ), 10, 3 );
 		add_filter( 'fl_builder_loop_query_args', array( __CLASS__, 'hide_tribe_child_recurring_events_custom_query' ) );
 		add_filter( 'fl_builder_render_assets_inline', array( __CLASS__, 'fix_ultimate_dashboard_pro' ), 1001 );
+		add_filter( 'fl_builder_render_assets_inline', array( __CLASS__, 'fix_toolset_views_background' ) );
 		add_filter( 'the_content', __CLASS__ . '::render_tribe_event_template', 11 );
 		add_filter( 'fl_builder_loop_query', array( __CLASS__, 'fix_tribe_events_pagination' ), 20, 2 );
 		add_filter( 'option_iubenda_cookie_law_solution', array( __CLASS__, 'fix_iubenda' ) );
@@ -1269,6 +1272,21 @@ final class FLBuilderCompatibility {
 	}
 
 	/**
+	 * Fixes background image on toolset content template
+	 * Render inline when using toolset view.
+	 * @since 2.8.6
+	 */
+	public static function fix_toolset_views_background( $enabled ) {
+
+		if ( function_exists( 'has_wpv_content_template' ) ) {
+			if ( has_wpv_content_template( get_the_ID() ) > 0 ) {
+				return true;
+			}
+		}
+		return $enabled;
+	}
+
+	/**
 	 * @since 2.5.5
 	 */
 	public static function convert_box_bb() {
@@ -1403,6 +1421,19 @@ final class FLBuilderCompatibility {
 		wp_dequeue_script( 'rms_jquery_ui_datepicker_script' );
 	}
 
+	/* Ultimate Member: Prevent Shortcode Parse */
+	public static function um_prevent_shortcode_parse() {
+		if ( ! class_exists( 'FLBuilder' ) ) {
+			return;
+		}
+		remove_filter( 'the_content', 'do_shortcode', 11 );
+	}
+
+	/* Ultimate Member: Restore Shortcode Parse */
+	public static function um_restore_shortcode_parse() {
+		add_filter( 'the_content', 'do_shortcode', 11 );
+	}
+
 	/**
 	 * Dequeue wpd plugins js
 	 * @since 2.9.1
@@ -1412,6 +1443,8 @@ final class FLBuilderCompatibility {
 			wp_dequeue_script( 'wpd-value-slider' );
 			wp_dequeue_script( 'wpd-bb-popups-uabb-page-builder' );
 			wp_dequeue_script( 'wpd-bb-popups-powerpack-page-builder' );
+			wp_dequeue_script( 'wpd-module-animation-speed' );
+			wp_dequeue_script( 'wpd-google-places-autocomplete' );
 		}
 	}
 }

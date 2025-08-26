@@ -14,6 +14,7 @@
 			FLBuilder.addHook( 'didAddColumnGroup', LoopContainers.columnAdded )
 			FLBuilder.addHook( 'didSaveNodeSettings', LoopContainers.moduleAdded )
 			FLBuilder.addHook( 'didDuplicateModule', LoopContainers.copyModule )
+			FLBuilder.addHook( 'didApplyModuleTemplateComplete', LoopContainers.moduleTemplateAdded )
 		},
 
 		getLoopContainer: ( nodeId ) => {
@@ -38,6 +39,18 @@
 
 		copyModule: ( e, { oldNodeId } ) => {
 			LoopContainers.updateLoopForChild( oldNodeId )
+		},
+
+		moduleTemplateAdded: ( e, { nodes } ) => {
+			$.each( nodes, function( nodeId ) {
+				setTimeout(function() {
+					const currentNode = $( `.fl-node-${ nodeId }` );
+					const moduleCount = $( `.fl-module.fl-node-${ nodeId }` ).length;
+					if ( moduleCount == 1 ) {
+						LoopContainers.updateLoopForChild( nodeId )
+					}
+				}, 20 );
+			});
 		},
 
 		moduleAdded: ( e, { nodeId } ) => {

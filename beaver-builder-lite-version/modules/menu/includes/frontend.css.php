@@ -868,6 +868,22 @@ if ( 'always' != $module->get_media_breakpoint() ) :
 
 	<?php endif; ?>
 
+	<?php
+	if ( 'expanded' == $settings->menu_layout ) :
+		FLBuilderCSS::dimension_field_rule( array(
+			'settings'     => $settings,
+			'setting_name' => 'submenu_spacing',
+			'selector'     => ".fl-builder-content .fl-node-$id ul.sub-menu",
+			'props'        => array(
+				'padding-top'    => 'submenu_spacing_top',
+				'padding-right'  => 'submenu_spacing_right',
+				'padding-bottom' => 'submenu_spacing_bottom',
+				'padding-left'   => 'submenu_spacing_left',
+			),
+		) );
+	endif;
+	?>
+
 	<?php if ( 'expanded' != $settings->mobile_toggle ) : ?>
 		.fl-node-<?php echo $id; ?> .fl-menu .fl-menu-mobile-toggle{
 			display: none;

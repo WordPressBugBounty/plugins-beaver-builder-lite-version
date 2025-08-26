@@ -142,26 +142,62 @@
 		 * @param {Object} config
 		 */
 		preprocessModuleConfig: function( config ) {
-			const module = FLBuilderConfig.contentItems.module.filter( module => module.slug === config.id ).pop();
+			const module = FLBuilderConfig.contentItems.module.filter( module => {
+				return ! module.isAlias && module.slug === config.id;
+			} ).pop();
 			const deprecations = FLBuilderConfig.deprecations[ config.id ];
-			const node = FL.Builder.data.getNode( config.nodeId );
-			const version = node.version ? `v${ node.version }` : 'v1';
+			let version = null;
+
+			if ( ! module ) {
+				return config;
+			} else if ( FL.Builder.utils.isBlockEditor() ) {
+				const block = wp.data.select( 'core/block-editor' ).getBlock( config.nodeId );
+				version = block && block.attributes.version ? `v${ block.attributes.version }` : 'v1';
+			} else {
+				const node = FL.Builder.data.getNode( config.nodeId );
+				version = node.version ? `v${ node.version }` : 'v1';
+			}
 
 			// Handle support for the container element setting in the
 			// module's advanced tab. Remove it if not supported.
-			if ( module && ! module.element_setting ) {
+			if ( ! module.element_setting ) {
 				
 				// If this module is deprecated and still supports the element setting,
 				// then we don't need to remove it.
+				let enableElementSetting = false;
+
 				if ( deprecations && deprecations[ version ] && deprecations[ version ].config ) {
 					const deprecationConfig = deprecations[ version ].config;
 					if ( deprecationConfig.element_setting ) {
-						return config;
+						enableElementSetting = true;
 					}
 				} 
 
 				// Remove the element setting.
-				delete config.tabs.advanced.sections.css_selectors.fields.container_element;
+				if ( ! enableElementSetting ) {
+					delete config.tabs.advanced.sections.css_selectors.fields.container_element;
+				}
+			}
+
+			// Set the margin preview selector to the root element 
+			// if the module does not include a wrapper.
+			if ( ! module.include_wrapper ) {
+
+				// If this module is deprecated and still includes the wrapper,
+				// then we don't need change the selector.
+				let updateMarginSelector = true;
+
+				if ( deprecations && deprecations[ version ] && deprecations[ version ].config ) {
+					const deprecationConfig = deprecations[ version ].config;
+					if ( deprecationConfig.include_wrapper ) {
+						updateMarginSelector = false;
+					}
+				} 
+
+				// Update the margin preview selector.
+				if ( updateMarginSelector ) {
+					config.tabs.advanced.sections.margins.fields.margin.preview.selector = '';
+				}
 			}
 
 			return config;

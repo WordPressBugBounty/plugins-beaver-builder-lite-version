@@ -1034,6 +1034,36 @@
     "fallback": "sans-serif"
   }
 }, {
+  "Bitcount": {
+    "variants": ["100", "200", "300", "regular", "500", "600", "700", "800", "900"],
+    "fallback": "sans-serif"
+  }
+}, {
+  "Bitcount Grid Double": {
+    "variants": ["100", "200", "300", "regular", "500", "600", "700", "800", "900"],
+    "fallback": "sans-serif"
+  }
+}, {
+  "Bitcount Grid Single": {
+    "variants": ["100", "200", "300", "regular", "500", "600", "700", "800", "900"],
+    "fallback": "sans-serif"
+  }
+}, {
+  "Bitcount Prop Double": {
+    "variants": ["100", "200", "300", "regular", "500", "600", "700", "800", "900"],
+    "fallback": "sans-serif"
+  }
+}, {
+  "Bitcount Prop Single": {
+    "variants": ["100", "200", "300", "regular", "500", "600", "700", "800", "900"],
+    "fallback": "sans-serif"
+  }
+}, {
+  "Bitcount Single": {
+    "variants": ["100", "200", "300", "regular", "500", "600", "700", "800", "900"],
+    "fallback": "sans-serif"
+  }
+}, {
   "Bitter": {
     "variants": ["100", "200", "300", "regular", "500", "600", "700", "800", "900", "100italic", "200italic", "300italic", "italic", "500italic", "600italic", "700italic", "800italic", "900italic"],
     "fallback": "serif"
@@ -1522,6 +1552,11 @@
   "Chilanka": {
     "variants": ["regular"],
     "fallback": "cursive"
+  }
+}, {
+  "Chiron Hei HK": {
+    "variants": ["200", "300", "regular", "500", "600", "700", "800", "900", "200italic", "300italic", "italic", "500italic", "600italic", "700italic", "800italic", "900italic"],
+    "fallback": "sans-serif"
   }
 }, {
   "Chiron Sung HK": {
@@ -2744,6 +2779,11 @@
     "fallback": "sans-serif"
   }
 }, {
+  "Google Sans Code": {
+    "variants": ["300", "regular", "500", "600", "700", "800", "300italic", "italic", "500italic", "600italic", "700italic", "800italic"],
+    "fallback": "monospace"
+  }
+}, {
   "Gorditas": {
     "variants": ["regular", "700"],
     "fallback": "sans-serif"
@@ -3252,6 +3292,11 @@
   "Instrument Serif": {
     "variants": ["regular", "italic"],
     "fallback": "serif"
+  }
+}, {
+  "Intel One Mono": {
+    "variants": ["300", "300italic", "regular", "italic", "500", "500italic", "600", "600italic", "700", "700italic"],
+    "fallback": "monospace"
   }
 }, {
   "Inter": {
@@ -3934,6 +3979,26 @@
     "fallback": "sans-serif"
   }
 }, {
+  "Libertinus Math": {
+    "variants": ["regular"],
+    "fallback": "sans-serif"
+  }
+}, {
+  "Libertinus Mono": {
+    "variants": ["regular"],
+    "fallback": "monospace"
+  }
+}, {
+  "Libertinus Sans": {
+    "variants": ["regular", "italic", "700"],
+    "fallback": "sans-serif"
+  }
+}, {
+  "Libertinus Serif": {
+    "variants": ["regular", "italic", "600", "600italic", "700", "700italic"],
+    "fallback": "serif"
+  }
+}, {
   "Libre Barcode 128": {
     "variants": ["regular"],
     "fallback": "sans-serif"
@@ -4274,6 +4339,11 @@
     "fallback": "serif"
   }
 }, {
+  "Manufacturing Consent": {
+    "variants": ["regular"],
+    "fallback": "sans-serif"
+  }
+}, {
   "Marcellus": {
     "variants": ["regular"],
     "fallback": "serif"
@@ -4442,6 +4512,11 @@
   "Meie Script": {
     "variants": ["regular"],
     "fallback": "cursive"
+  }
+}, {
+  "Menbere": {
+    "variants": ["100", "200", "300", "regular", "500", "600", "700"],
+    "fallback": "sans-serif"
   }
 }, {
   "Meow Script": {
@@ -4704,6 +4779,16 @@
     "fallback": "sans-serif"
   }
 }, {
+  "Mozilla Headline": {
+    "variants": ["200", "300", "regular", "500", "600", "700"],
+    "fallback": "sans-serif"
+  }
+}, {
+  "Mozilla Text": {
+    "variants": ["200", "300", "regular", "500", "600", "700"],
+    "fallback": "sans-serif"
+  }
+}, {
   "Mr Bedfort": {
     "variants": ["regular"],
     "fallback": "cursive"
@@ -4826,6 +4911,11 @@
 }, {
   "Narnoor": {
     "variants": ["regular", "500", "600", "700", "800"],
+    "fallback": "sans-serif"
+  }
+}, {
+  "Nata Sans": {
+    "variants": ["100", "200", "300", "regular", "500", "600", "700", "800", "900"],
     "fallback": "sans-serif"
   }
 }, {
@@ -5619,6 +5709,11 @@
     "fallback": "sans-serif"
   }
 }, {
+  "Noto Sans Sunuwar": {
+    "variants": ["regular"],
+    "fallback": "sans-serif"
+  }
+}, {
   "Noto Sans Syloti Nagri": {
     "variants": ["regular"],
     "fallback": "sans-serif"
@@ -5796,7 +5891,7 @@
 }, {
   "Noto Serif Dives Akuru": {
     "variants": ["regular"],
-    "fallback": "sans-serif"
+    "fallback": "serif"
   }
 }, {
   "Noto Serif Dogra": {
@@ -6267,6 +6362,11 @@
   "Paprika": {
     "variants": ["regular"],
     "fallback": "sans-serif"
+  }
+}, {
+  "Parastoo": {
+    "variants": ["regular", "500", "600", "700"],
+    "fallback": "serif"
   }
 }, {
   "Parisienne": {
@@ -8230,7 +8330,7 @@
   }
 }, {
   "Special Gothic": {
-    "variants": ["regular"],
+    "variants": ["regular", "500", "600", "700"],
     "fallback": "sans-serif"
   }
 }, {
@@ -8554,6 +8654,11 @@
     "fallback": "serif"
   }
 }, {
+  "TikTok Sans": {
+    "variants": ["300", "regular", "500", "600", "700", "800", "900"],
+    "fallback": "sans-serif"
+  }
+}, {
   "Tillana": {
     "variants": ["regular", "500", "600", "700", "800"],
     "fallback": "sans-serif"
@@ -8796,6 +8901,11 @@
 }, {
   "Unna": {
     "variants": ["regular", "italic", "700", "700italic"],
+    "fallback": "serif"
+  }
+}, {
+  "UoqMunThenKhung": {
+    "variants": ["regular"],
     "fallback": "serif"
   }
 }, {

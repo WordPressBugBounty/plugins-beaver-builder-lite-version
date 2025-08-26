@@ -170,6 +170,8 @@ final class FLBuilderHistoryManager {
 			'publicly_queryable'  => false,
 			'exclude_from_search' => true,
 			'show_in_rest'        => false,
+			'can_export'          => false,
+			'label'               => __( 'Builder History', 'fl-builder' ),
 		] );
 	}
 

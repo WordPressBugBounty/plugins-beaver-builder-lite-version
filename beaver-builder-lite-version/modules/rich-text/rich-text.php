@@ -59,9 +59,9 @@ FLBuilder::register_module('FLRichTextModule', array(
 						'show_reset'  => true,
 						'show_alpha'  => true,
 						'preview'     => array(
-							'type'      => 'css',
-							'selector'  => '{node} .fl-rich-text, {node} .fl-rich-text *, {node}.fl-module-rich-text.fl-rich-text, {node}.fl-module-rich-text.fl-rich-text *',  // Use {node}.class to support v2 markup
-							'property'  => 'color',
+							'type'     => 'css',
+							'selector' => '{node} .fl-rich-text, {node} .fl-rich-text *, {node}.fl-module-rich-text.fl-rich-text, {node}.fl-module-rich-text.fl-rich-text *',  // Use {node}.class to support v2 markup
+							'property' => 'color',
 						),
 					),
 					'typography' => array(
