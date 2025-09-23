@@ -4125,10 +4125,10 @@ final class FLBuilderModel {
 			if ( in_array( $class, $exclude ) ) {
 				continue;
 			}
-			$widget->class            = $class;
+			$widget->class                     = $class;
 			$widget->isWidget         = true; // @codingStandardsIgnoreLine
-			$widget->fl_category      = __( 'WordPress Widgets', 'fl-builder' );
-			$widgets[ $widget->name ] = $widget;
+			$widget->fl_category               = __( 'WordPress Widgets', 'fl-builder' );
+			$widgets[ (string) $widget->name ] = $widget;
 		}
 
 		ksort( $widgets );

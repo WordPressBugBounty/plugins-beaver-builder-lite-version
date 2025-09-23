@@ -43,11 +43,31 @@ final class FLBuilderPopupMaker {
 			if ( is_string( $value ) && strstr( $value, '#popmake-' ) ) {
 				$parts = explode( '-', $value );
 				if ( isset( $parts[1] ) && is_numeric( $parts[1] ) && get_post_status( $parts[1] ) ) {
-					PUM_Site_Popups::preload_popup( pum_get_popup( $parts[1] ) );
+					FLBuilderPopupMaker::preload_popup( $parts[1] );
 				}
 			} elseif ( is_array( $value ) || is_object( $value ) ) {
 				self::preload_popups_from_settings( $value );
 			}
+		}
+	}
+
+	static public function preload_popup( $id ) {
+		if ( version_compare( POPMAKE_VERSION, '1.21', '>=' ) ) {
+			\PopupMaker\plugin()
+				->get_controller( 'Frontend\Popups' )
+				->preload_popup( pum_get_popup( $id ) );
+		} else {
+			PUM_Site_Popups::preload_popup( pum_get_popup( $id ) );
+		}
+	}
+
+	static public function maybe_preload_popup( $id ) {
+		if ( version_compare( POPMAKE_VERSION, '1.21', '>=' ) ) {
+			\PopupMaker\plugin()
+				->get_controller( 'Frontend\Popups' )
+				->maybe_preload_popup( $id );
+		} else {
+			PUM_Site_Popups::preload_popup_by_id_if_enabled( $id );
 		}
 	}
 
@@ -89,7 +109,7 @@ final class FLBuilderPopupMaker {
 	static public function load_frontend_editing_template( $template ) {
 		if ( 'popup' === get_post_type() && FLBuilderModel::is_builder_active() ) {
 			if ( current_theme_supports( 'block-templates' ) ) {
-				PUM_Site_Popups::preload_popup_by_id_if_enabled( get_the_ID() );
+				FLBuilderPopupMaker::maybe_preload_popup( get_the_ID() );
 				add_filter( 'the_content', '__return_empty_string' );
 			} else {
 				return FL_BUILDER_POPUP_MAKER_DIR . 'includes/edit.php';
