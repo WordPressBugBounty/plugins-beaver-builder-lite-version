@@ -66,12 +66,16 @@ class ConvertKit {
 	* @param string $form_id Form ID
 	* @param array  $options Array of user data
 	*/
-	public function form_subscribe($form_id, $options) {
+	public function form_subscribe($form_id, $options, $custom_fields) {
 		$request = sprintf('forms/%s/subscribe', $form_id);
 		$args    = array(
 		  'email' => $options['email'],
 		  'first_name' => isset( $options['fname'] ) ? $options['fname'] : '',
 		);
+
+		if( $custom_fields ) {
+			$args['fields']	= $custom_fields;
+		}
 		return $this->make_request($request, 'POST', $args);
 	}
 

@@ -121,6 +121,7 @@ final class FLBuilderAJAX {
 		self::add_action( 'copy_col', 'FLBuilderAJAXLayout::copy_col', array( 'node_id', 'settings', 'settings_id' ) );
 		self::add_action( 'render_new_module', 'FLBuilderAJAXLayout::render_new_module', array( 'parent_id', 'position', 'type', 'alias', 'template_id', 'template_type' ) );
 		self::add_action( 'copy_module', 'FLBuilderAJAXLayout::copy_module', array( 'node_id', 'settings' ) );
+		self::add_action( 'unlink_global_node', 'FLBuilderAJAXLayout::unlink_global_node', array( 'node_id' ) );
 
 		// FLBuilderUISettingsForms
 		self::add_action( 'render_legacy_settings', 'FLBuilderUISettingsForms::render_legacy_settings', array( 'data', 'form', 'group', 'lightbox' ) );
@@ -150,6 +151,9 @@ final class FLBuilderAJAX {
 
 		self::add_action( 'save_browser_stats', 'FLBuilderUsage::browser_stats', array( 'browser_data' ) );
 		//  self::add_action( 'clear_cache_for_layout', 'FLBuilderAJAXLayout::refresh_layout_cache' );
+
+		// FLBuilderDynamicGlobal
+		self::add_action( 'get_dynamic_node_tabs', 'FLBuilderDynamicGlobal::get_dynamic_node_tabs', array( 'node_id' ) );
 	}
 
 	/**

@@ -5,43 +5,6 @@ class FLControls {
 		add_action( 'rest_api_init', __CLASS__ . '::register_rest_endpoints' );
 	}
 
-	static public function register() {
-		$ver       = FL_BUILDER_VERSION;
-		$css_build = FLBuilder::plugin_url() . 'css/build/';
-		$js_build  = FLBuilder::plugin_url() . 'js/build/';
-		$tag       = FLBuilder::is_debug() ? '.bundle' : '.bundle.min';
-		$ext       = FLBuilder::is_debug() ? '.bundle.js' : '.bundle.min.js';
-
-		// Shared FL.Symbols API
-		wp_register_script( 'fl-symbols', $js_build . 'fl-symbols' . $ext, [ 'react' ], $ver );
-
-		// FL.Controls API
-		$handle  = 'fl-controls';
-		$js_deps = [
-			'react',
-			'react-dom',
-			'redux',
-			'wp-i18n',
-			'wp-hooks',
-			'wp-api-fetch',
-			'jquery',
-			'jquery-ui-sortable',
-			'fl-builder-utils',
-			'fl-symbols',
-		];
-		wp_register_style( $handle, "{$css_build}fl-controls{$tag}.css", [], $ver );
-		wp_register_script( $handle, "{$js_build}fl-controls{$tag}.js", $js_deps, $ver, false );
-	}
-
-	static public function enqueue() {
-
-		// Needed for FL.Controls (background field)
-		wp_enqueue_media();
-
-		wp_enqueue_script( 'fl-controls' );
-		wp_enqueue_style( 'fl-controls' );
-	}
-
 	static public function register_rest_endpoints() {
 
 		register_rest_route( 'fl-controls/v1', '/state/', array(
@@ -53,19 +16,19 @@ class FLControls {
 		register_rest_route( 'fl-controls/v1', '/color_presets/', array(
 			'methods'             => WP_REST_Server::CREATABLE,
 			'callback'            => __CLASS__ . '::set_color_presets',
-			'permission_callback' => __CLASS__ . '::check_permission',
+			'permission_callback' => __CLASS__ . '::check_write_permission',
 		) );
 
 		register_rest_route( 'fl-controls/v1', '/color_presets/', array(
 			'methods'             => WP_REST_Server::DELETABLE,
 			'callback'            => __CLASS__ . '::delete_color_presets',
-			'permission_callback' => __CLASS__ . '::check_permission',
+			'permission_callback' => __CLASS__ . '::check_write_permission',
 		) );
 
 		register_rest_route( 'fl-controls/v1', '/background_presets/', array(
 			'methods'             => WP_REST_Server::CREATABLE,
 			'callback'            => __CLASS__ . '::set_background_presets',
-			'permission_callback' => __CLASS__ . '::check_permission',
+			'permission_callback' => __CLASS__ . '::check_write_permission',
 		) );
 
 		register_rest_route( 'fl-controls/v1', '/attachment_sizes/', array(
@@ -220,6 +183,14 @@ class FLControls {
 		$filename = wp_basename( $url );
 		$sizes    = [];
 
+		if ( ! current_user_can( 'read_private_posts' ) ) {
+			$post    = get_post( $id );
+			$user_id = get_current_user_id();
+			if ( $post->post_author !== $user_id ) {
+				return new WP_REST_Response( null, 403, [] );
+			}
+		}
+
 		if ( $meta ) {
 			$sizes    = $meta['sizes'];
 			$basename = dirname( wp_get_attachment_url( $id ) );
@@ -245,12 +216,21 @@ class FLControls {
 	}
 
 	/**
-	 * Checks permission.
+	 * Checks permission for read access.
 	 *
 	 * @return boolean
 	 */
 	static public function check_permission() {
 		return FLBuilderUserAccess::current_user_can( 'builder_access' );
+	}
+
+	/**
+	 * Checks permission for write access.
+	 *
+	 * @return boolean
+	 */
+	static public function check_write_permission() {
+		return ( FLBuilderUserAccess::current_user_can( 'unrestricted_editing' ) && FLBuilderUserAccess::current_user_can( 'builder_access' ) );
 	}
 }
 

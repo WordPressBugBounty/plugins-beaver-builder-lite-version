@@ -7,7 +7,7 @@ function fl_welcome_utm( $campaign ) {
 		'utm_campaign' => $campaign,
 	);
 }
-$blog_post_url   = FLBuilderModel::get_store_url( 'beaver-builder-2-9', fl_welcome_utm( 'settings-welcome-blog-post' ) );
+$blog_post_url   = FLBuilderModel::get_store_url( 'beaver-builder-2-10', fl_welcome_utm( 'settings-welcome-blog-post' ) );
 $change_logs_url = FLBuilderModel::get_store_url( 'change-logs', fl_welcome_utm( 'settings-welcome-change-logs' ) );
 $upgrade_url     = FLBuilderModel::get_upgrade_url( fl_welcome_utm( 'settings-welcome-upgrade' ) );
 $support_url     = FLBuilderModel::get_store_url( 'beaver-builder-support', fl_welcome_utm( 'settings-welcome-support' ) );
@@ -15,8 +15,8 @@ $faqs_url        = FLBuilderModel::get_store_url( 'frequently-asked-questions', 
 $forums_url      = FLBuilderModel::get_store_url( 'go/forum', fl_welcome_utm( 'settings-welcome-forums' ) );
 $docs_url        = FLBuilderModel::get_store_url( 'go/docs', fl_welcome_utm( 'settings-welcome-docs' ) );
 $fb_url          = 'https://www.facebook.com/groups/beaverbuilders/';
-$release_ver     = '2.9';
-$release_name    = '&#8220;Coyote&#8221;';
+$release_ver     = '2.10';
+$release_name    = '&#8220;Monticello&#8221;';
 ?>
 <div id="fl-welcome-form" class="fl-settings-form">
 
@@ -63,17 +63,17 @@ $release_name    = '&#8220;Coyote&#8221;';
 				<?php /* translators: 1: version: 2: codename*/ ?>
 				<p><?php printf( __( 'We\'re thrilled to announce Beaver Builder %1$s %2$s. Beaver Builder %1$s brings a number of workflow enhancements.', 'fl-builder' ), $release_ver, $release_name ); ?></p>
 				<ul>
-					<li class="dashicons-before dashicons-plus-alt"><?php _e( 'With the brand new color and gradient pickers the color possibilities are endless! ', 'fl-builder' ); ?></li>
-					<li class="dashicons-before dashicons-plus-alt"><?php _e( 'A brand new multi-layer background field has been added to rows, columns and the box module.', 'fl-builder' ); ?></li>
-					<li class="dashicons-before dashicons-plus-alt"><?php _e( 'A limited selection of modules can now be used in the Block Editor.', 'fl-builder' ); ?></li>
-					<li class="dashicons-before dashicons-plus-alt"><?php _e( 'The companion Themer Release, 1.5, brings a new visual loop builder, the Loop Module!', 'fl-builder' ); ?></li>
+					<li class="dashicons-before dashicons-plus-alt"><?php _e( 'Components add the ability to select fields that can be edited per-page for global templates, allowing you to override the global defaults on a per-page basis. ', 'fl-builder' ); ?></li>
+					<li class="dashicons-before dashicons-plus-alt"><?php _e( '60+ new Box module pre-made templates to help you get going with the Box module faster!', 'fl-builder' ); ?></li>
+					<li class="dashicons-before dashicons-plus-alt"><?php _e( 'A new Star Rating module to easily display ratings to create testimonial sections and more!', 'fl-builder' ); ?></li>
+					<li class="dashicons-before dashicons-plus-alt"><?php _e( 'We also added an integration with our Assistant plugin and improvements to the Box module!', 'fl-builder' ); ?></li>
 				</ul>
 				<?php /* translators: 1: blog post url: 2: changelog url */ ?>
 				<p><?php printf( __( 'There\'s a whole lot more, too! Read about everything else on our <a href="%1$s" target="_blank">update post</a> or <a href="%2$s" target="_blank">change logs</a>.', 'fl-builder' ), $blog_post_url, $change_logs_url ); ?></p>
 			</div>
 
 			<div class="fl-welcome-col">
-				<a href="https://youtube.com/watch?v=VqubHDyFPG8" target="_blank"><img class="fl-welcome-img" src="<?php echo FLBuilder::plugin_url(); ?>img/welcome-video_thumb--2.9.png" alt="" /></a>
+				<a href="https://www.youtube.com/watch?v=VJ0fpPZHnzY" target="_blank"><img class="fl-welcome-img" src="<?php echo FLBuilder::plugin_url(); ?>img/welcome-video_thumb--2.10.png" alt="" /></a>
 			</div>
 
 		</div>

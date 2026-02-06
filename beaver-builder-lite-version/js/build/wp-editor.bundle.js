@@ -1,998 +1,131 @@
+/*
+ * ATTENTION: The "eval" devtool has been used (maybe by default in mode: "development").
+ * This devtool is neither made for production nor for readable output files.
+ * It uses "eval()" calls to create a separate source file in the browser devtools.
+ * If you are trying to read the output file, select a different devtool (https://webpack.js.org/configuration/devtool/)
+ * or disable the default devtool with "devtool: false".
+ * If you are looking for production-ready output files, see mode: "production" (https://webpack.js.org/configuration/mode/).
+ */
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ "./src/wp-editor/layout-block/edit-pre-5-3.js":
-/*!****************************************************!*\
-  !*** ./src/wp-editor/layout-block/edit-pre-5-3.js ***!
-  \****************************************************/
+/***/ "./src/wp/wp-editor/index.js":
+/*!***********************************!*\
+  !*** ./src/wp/wp-editor/index.js ***!
+  \***********************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   LayoutBlockEditConnectedPre_5_3: () => (/* binding */ LayoutBlockEditConnectedPre_5_3)
-/* harmony export */ });
-function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
-function _classCallCheck(a, n) { if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function"); }
-function _defineProperties(e, r) { for (var t = 0; t < r.length; t++) { var o = r[t]; o.enumerable = o.enumerable || !1, o.configurable = !0, "value" in o && (o.writable = !0), Object.defineProperty(e, _toPropertyKey(o.key), o); } }
-function _createClass(e, r, t) { return r && _defineProperties(e.prototype, r), t && _defineProperties(e, t), Object.defineProperty(e, "prototype", { writable: !1 }), e; }
-function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
-function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
-function _callSuper(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct() ? Reflect.construct(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-function _possibleConstructorReturn(t, e) { if (e && ("object" == _typeof(e) || "function" == typeof e)) return e; if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined"); return _assertThisInitialized(t); }
-function _assertThisInitialized(e) { if (void 0 === e) throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); return e; }
-function _isNativeReflectConstruct() { try { var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct = function _isNativeReflectConstruct() { return !!t; })(); }
-function _getPrototypeOf(t) { return _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function (t) { return t.__proto__ || Object.getPrototypeOf(t); }, _getPrototypeOf(t); }
-function _inherits(t, e) { if ("function" != typeof e && null !== e) throw new TypeError("Super expression must either be null or a function"); t.prototype = Object.create(e && e.prototype, { constructor: { value: t, writable: !0, configurable: !0 } }), Object.defineProperty(t, "prototype", { writable: !1 }), e && _setPrototypeOf(t, e); }
-function _setPrototypeOf(t, e) { return _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function (t, e) { return t.__proto__ = e, t; }, _setPrototypeOf(t, e); }
-var _FLBuilderConfig = FLBuilderConfig,
-  builder = _FLBuilderConfig.builder,
-  strings = _FLBuilderConfig.strings,
-  urls = _FLBuilderConfig.urls;
-var _wp$blocks = wp.blocks,
-  rawHandler = _wp$blocks.rawHandler,
-  serialize = _wp$blocks.serialize;
-var _wp$components = wp.components,
-  Button = _wp$components.Button,
-  Placeholder = _wp$components.Placeholder,
-  Spinner = _wp$components.Spinner;
-var compose = wp.compose.compose;
-var _wp$data = wp.data,
-  subscribe = _wp$data.subscribe,
-  withDispatch = _wp$data.withDispatch,
-  withSelect = _wp$data.withSelect;
-var Component = wp.element.Component;
-
-/**
- * Edit component for WordPress versions before 5.3.
- */
-var LayoutBlockEditPre_5_3 = /*#__PURE__*/function (_Component) {
-  function LayoutBlockEditPre_5_3() {
-    var _this;
-    _classCallCheck(this, LayoutBlockEditPre_5_3);
-    _this = _callSuper(this, LayoutBlockEditPre_5_3, arguments);
-    _this.unsubscribe = subscribe(_this.storeDidUpdate.bind(_this));
-    return _this;
-  }
-  _inherits(LayoutBlockEditPre_5_3, _Component);
-  return _createClass(LayoutBlockEditPre_5_3, [{
-    key: "storeDidUpdate",
-    value: function storeDidUpdate() {
-      var _this$props = this.props,
-        isLaunching = _this$props.isLaunching,
-        isSavingPost = _this$props.isSavingPost;
-      if (isLaunching && !isSavingPost) {
-        this.unsubscribe();
-        this.redirectToBuilder();
-      }
-    }
-  }, {
-    key: "componentDidMount",
-    value: function componentDidMount() {
-      var blockCount = this.props.blockCount;
-      if (1 === blockCount) {
-        this.toggleEditor('disable');
-      }
-    }
-  }, {
-    key: "componentWillUnmount",
-    value: function componentWillUnmount() {
-      this.unsubscribe();
-      this.toggleEditor('enable');
-    }
-  }, {
-    key: "render",
-    value: function render() {
-      var _this$props2 = this.props,
-        blockCount = _this$props2.blockCount,
-        onReplace = _this$props2.onReplace,
-        isLaunching = _this$props2.isLaunching;
-      var label, callback, description;
-      if (1 === blockCount) {
-        label = builder.access ? strings.launch : strings.view;
-        callback = this.launchBuilder.bind(this);
-      } else {
-        label = strings.convert;
-        callback = this.convertToBuilder.bind(this);
-      }
-      if (builder.enabled) {
-        description = strings.active;
-      } else {
-        description = strings.description;
-      }
-      if (false === builder.showui) {
-        return '';
-      }
-      return /*#__PURE__*/React.createElement(Placeholder, {
-        key: "placeholder",
-        instructions: description,
-        icon: "welcome-widgets-menus",
-        label: strings.title,
-        className: "fl-builder-layout-launch-view"
-      }, isLaunching && /*#__PURE__*/React.createElement(Spinner, null), !isLaunching && /*#__PURE__*/React.createElement(Button, {
-        isLarge: true,
-        isPrimary: true,
-        type: "submit",
-        onClick: callback
-      }, label), !isLaunching && /*#__PURE__*/React.createElement(Button, {
-        isLarge: true,
-        type: "submit",
-        onClick: this.convertToBlocks.bind(this)
-      }, strings.editor));
-    }
-  }, {
-    key: "toggleEditor",
-    value: function toggleEditor() {
-      var method = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'enable';
-      var classList = document.body.classList;
-      var enabledClass = 'fl-builder-layout-enabled';
-      if ('enable' === method) {
-        if (classList.contains(enabledClass)) {
-          classList.remove(enabledClass);
-        }
-      } else {
-        if (!classList.contains(enabledClass)) {
-          classList.add(enabledClass);
-        }
-      }
-    }
-  }, {
-    key: "redirectToBuilder",
-    value: function redirectToBuilder() {
-      window.location.href = builder.access ? urls.edit : urls.view;
-    }
-  }, {
-    key: "launchBuilder",
-    value: function launchBuilder() {
-      var _this$props3 = this.props,
-        savePost = _this$props3.savePost,
-        setLaunching = _this$props3.setLaunching;
-      setLaunching(true);
-      savePost();
-    }
-  }, {
-    key: "convertToBuilder",
-    value: function convertToBuilder() {
-      var _this$props4 = this.props,
-        clientId = _this$props4.clientId,
-        blocks = _this$props4.blocks,
-        setAttributes = _this$props4.setAttributes,
-        removeBlocks = _this$props4.removeBlocks;
-      var content = serialize(blocks);
-      var clientIds = blocks.map(function (block) {
-        return block.clientId;
-      }).filter(function (id) {
-        return id !== clientId;
-      });
-      setAttributes({
-        content: content.replace(/<!--(.*?)-->/g, '')
-      });
-      removeBlocks(clientIds);
-      this.launchBuilder();
-    }
-  }, {
-    key: "convertToBlocks",
-    value: function convertToBlocks() {
-      var _this$props5 = this.props,
-        attributes = _this$props5.attributes,
-        clientId = _this$props5.clientId,
-        replaceBlocks = _this$props5.replaceBlocks,
-        onReplace = _this$props5.onReplace;
-      if (attributes.content && !confirm(strings.warning)) {
-        return;
-      } else if (attributes.content) {
-        replaceBlocks([clientId], rawHandler({
-          HTML: attributes.content,
-          mode: 'BLOCKS'
-        }));
-      } else {
-        onReplace([]);
-      }
-    }
-  }]);
-}(Component);
-/**
- * Connect the edit component to editor data.
- */
-var LayoutBlockEditConnectedPre_5_3 = compose(withDispatch(function (dispatch, ownProps) {
-  var editor = dispatch('core/editor');
-  var builder = dispatch('fl-builder');
-  return {
-    savePost: editor.savePost,
-    removeBlocks: editor.removeBlocks,
-    replaceBlocks: editor.replaceBlocks,
-    setLaunching: builder.setLaunching
-  };
-}), withSelect(function (select) {
-  var editor = select('core/editor');
-  var builder = select('fl-builder');
-  return {
-    blockCount: editor.getBlockCount(),
-    blocks: editor.getBlocks(),
-    isSavingPost: editor.isSavingPost(),
-    isLaunching: builder.isLaunching()
-  };
-}))(LayoutBlockEditPre_5_3);
+eval("{__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _wordpress__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./wordpress */ \"./src/wp/wp-editor/wordpress/index.js\");\n/* harmony import */ var _store__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./store */ \"./src/wp/wp-editor/store/index.js\");\n/* harmony import */ var _store__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_store__WEBPACK_IMPORTED_MODULE_1__);\n/* harmony import */ var _layout_block__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./layout-block */ \"./src/wp/wp-editor/layout-block/index.js\");\n/* harmony import */ var _more_menu__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./more-menu */ \"./src/wp/wp-editor/more-menu/index.js\");\n\n\n\n\n\n//# sourceURL=webpack://bb-plugin/./src/wp/wp-editor/index.js?\n}");
 
 /***/ }),
 
-/***/ "./src/wp-editor/layout-block/edit.js":
-/*!********************************************!*\
-  !*** ./src/wp-editor/layout-block/edit.js ***!
-  \********************************************/
+/***/ "./src/wp/wp-editor/layout-block/edit-pre-5-3.js":
+/*!*******************************************************!*\
+  !*** ./src/wp/wp-editor/layout-block/edit-pre-5-3.js ***!
+  \*******************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   LayoutBlockEditConnected: () => (/* binding */ LayoutBlockEditConnected)
-/* harmony export */ });
-function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
-function _classCallCheck(a, n) { if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function"); }
-function _defineProperties(e, r) { for (var t = 0; t < r.length; t++) { var o = r[t]; o.enumerable = o.enumerable || !1, o.configurable = !0, "value" in o && (o.writable = !0), Object.defineProperty(e, _toPropertyKey(o.key), o); } }
-function _createClass(e, r, t) { return r && _defineProperties(e.prototype, r), t && _defineProperties(e, t), Object.defineProperty(e, "prototype", { writable: !1 }), e; }
-function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
-function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
-function _callSuper(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct() ? Reflect.construct(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-function _possibleConstructorReturn(t, e) { if (e && ("object" == _typeof(e) || "function" == typeof e)) return e; if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined"); return _assertThisInitialized(t); }
-function _assertThisInitialized(e) { if (void 0 === e) throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); return e; }
-function _isNativeReflectConstruct() { try { var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct = function _isNativeReflectConstruct() { return !!t; })(); }
-function _getPrototypeOf(t) { return _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function (t) { return t.__proto__ || Object.getPrototypeOf(t); }, _getPrototypeOf(t); }
-function _inherits(t, e) { if ("function" != typeof e && null !== e) throw new TypeError("Super expression must either be null or a function"); t.prototype = Object.create(e && e.prototype, { constructor: { value: t, writable: !0, configurable: !0 } }), Object.defineProperty(t, "prototype", { writable: !1 }), e && _setPrototypeOf(t, e); }
-function _setPrototypeOf(t, e) { return _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function (t, e) { return t.__proto__ = e, t; }, _setPrototypeOf(t, e); }
-var _FLBuilderConfig = FLBuilderConfig,
-  builder = _FLBuilderConfig.builder,
-  strings = _FLBuilderConfig.strings,
-  urls = _FLBuilderConfig.urls;
-var _wp$blocks = wp.blocks,
-  rawHandler = _wp$blocks.rawHandler,
-  serialize = _wp$blocks.serialize;
-var _wp$components = wp.components,
-  Button = _wp$components.Button,
-  Placeholder = _wp$components.Placeholder,
-  Spinner = _wp$components.Spinner;
-var compose = wp.compose.compose;
-var _wp$data = wp.data,
-  withDispatch = _wp$data.withDispatch,
-  withSelect = _wp$data.withSelect;
-var Component = wp.element.Component;
-
-/**
- * Edit Component
- */
-var LayoutBlockEdit = /*#__PURE__*/function (_Component) {
-  function LayoutBlockEdit() {
-    _classCallCheck(this, LayoutBlockEdit);
-    return _callSuper(this, LayoutBlockEdit, arguments);
-  }
-  _inherits(LayoutBlockEdit, _Component);
-  return _createClass(LayoutBlockEdit, [{
-    key: "componentDidMount",
-    value: function componentDidMount() {
-      var blockCount = this.props.blockCount;
-      if (1 === blockCount) {
-        this.toggleEditor('disable');
-      }
-    }
-  }, {
-    key: "componentWillUnmount",
-    value: function componentWillUnmount() {
-      this.toggleEditor('enable');
-    }
-  }, {
-    key: "render",
-    value: function render() {
-      var _this$props = this.props,
-        blockCount = _this$props.blockCount,
-        onReplace = _this$props.onReplace,
-        isLaunching = _this$props.isLaunching;
-      var label, callback, description;
-      if (1 === blockCount) {
-        label = builder.access ? strings.launch : strings.view;
-        callback = this.launchBuilder.bind(this);
-      } else {
-        label = strings.convert;
-        callback = this.convertToBuilder.bind(this);
-      }
-      if (builder.enabled) {
-        description = strings.active;
-      } else {
-        description = strings.description;
-      }
-      if (false === builder.showui) {
-        return '';
-      }
-      return /*#__PURE__*/React.createElement(Placeholder, {
-        key: "placeholder",
-        instructions: description,
-        label: strings.title,
-        className: "fl-builder-layout-launch-view"
-      }, isLaunching && /*#__PURE__*/React.createElement(Spinner, null), !isLaunching && /*#__PURE__*/React.createElement(Button, {
-        isLarge: true,
-        isPrimary: true,
-        type: "submit",
-        onClick: callback
-      }, label), !isLaunching && /*#__PURE__*/React.createElement(Button, {
-        isLarge: true,
-        type: "submit",
-        onClick: this.convertToBlocks.bind(this)
-      }, strings.editor));
-    }
-  }, {
-    key: "toggleEditor",
-    value: function toggleEditor() {
-      var method = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'enable';
-      var classList = document.body.classList;
-      var enabledClass = 'fl-builder-layout-enabled';
-      if ('enable' === method) {
-        if (classList.contains(enabledClass)) {
-          classList.remove(enabledClass);
-        }
-      } else {
-        if (!classList.contains(enabledClass)) {
-          classList.add(enabledClass);
-        }
-      }
-    }
-  }, {
-    key: "launchBuilder",
-    value: function launchBuilder() {
-      var _this$props2 = this.props,
-        savePost = _this$props2.savePost,
-        setLaunching = _this$props2.setLaunching;
-      setLaunching(true);
-      /**
-       * WP 6.4 will NOT save a post with no title.
-       */
-      var title = wp.data.select("core/editor").getEditedPostAttribute('title');
-      if (!title) {
-        wp.data.dispatch('core/editor').editPost({
-          title: wp.i18n.__('(no title)')
-        });
-      }
-      savePost().then(function () {
-        setTimeout(function () {
-          window.top.location.href = builder.access ? urls.edit : urls.view;
-        }, 2000);
-      });
-    }
-  }, {
-    key: "convertToBuilder",
-    value: function convertToBuilder() {
-      var _this$props3 = this.props,
-        clientId = _this$props3.clientId,
-        blocks = _this$props3.blocks,
-        setAttributes = _this$props3.setAttributes,
-        removeBlocks = _this$props3.removeBlocks;
-      var content = serialize(blocks);
-      var clientIds = blocks.map(function (block) {
-        return block.clientId;
-      }).filter(function (id) {
-        return id !== clientId;
-      });
-      setAttributes({
-        content: content.replace(/<!--(.*?)-->/g, '')
-      });
-      removeBlocks(clientIds);
-      this.launchBuilder();
-    }
-  }, {
-    key: "convertToBlocks",
-    value: function convertToBlocks() {
-      var _this$props4 = this.props,
-        attributes = _this$props4.attributes,
-        clientId = _this$props4.clientId,
-        replaceBlocks = _this$props4.replaceBlocks,
-        onReplace = _this$props4.onReplace;
-      if (attributes.content && !confirm(strings.warning)) {
-        return;
-      } else if (attributes.content) {
-        replaceBlocks([clientId], rawHandler({
-          HTML: attributes.content,
-          mode: 'BLOCKS'
-        }));
-      } else {
-        onReplace([]);
-      }
-    }
-  }]);
-}(Component);
-/**
- * Connect the edit component to editor data.
- */
-var LayoutBlockEditConnected = compose(withDispatch(function (dispatch, ownProps) {
-  var blockEditor = dispatch('core/block-editor');
-  var editor = dispatch('core/editor');
-  var builder = dispatch('fl-builder');
-  return {
-    removeBlocks: blockEditor.removeBlocks,
-    replaceBlocks: blockEditor.replaceBlocks,
-    savePost: editor.savePost,
-    setLaunching: builder.setLaunching
-  };
-}), withSelect(function (select) {
-  var blockEditor = select('core/block-editor');
-  var editor = select('core/editor');
-  var builder = select('fl-builder');
-  return {
-    blockCount: blockEditor.getBlockCount(),
-    blocks: blockEditor.getBlocks(),
-    isLaunching: builder.isLaunching()
-  };
-}))(LayoutBlockEdit);
+eval("{__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   LayoutBlockEditConnectedPre_5_3: () => (/* binding */ LayoutBlockEditConnectedPre_5_3)\n/* harmony export */ });\nconst {\n  builder,\n  strings,\n  urls\n} = FLBuilderConfig;\nconst {\n  rawHandler,\n  serialize\n} = wp.blocks;\nconst {\n  Button,\n  Placeholder,\n  Spinner\n} = wp.components;\nconst {\n  compose\n} = wp.compose;\nconst {\n  subscribe,\n  withDispatch,\n  withSelect\n} = wp.data;\nconst {\n  Component\n} = wp.element;\n\n/**\n * Edit component for WordPress versions before 5.3.\n */\nclass LayoutBlockEditPre_5_3 extends Component {\n  constructor() {\n    super(...arguments);\n    this.unsubscribe = subscribe(this.storeDidUpdate.bind(this));\n  }\n  storeDidUpdate() {\n    const {\n      isLaunching,\n      isSavingPost\n    } = this.props;\n    if (isLaunching && !isSavingPost) {\n      this.unsubscribe();\n      this.redirectToBuilder();\n    }\n  }\n  componentDidMount() {\n    const {\n      blockCount\n    } = this.props;\n    if (1 === blockCount) {\n      this.toggleEditor('disable');\n    }\n  }\n  componentWillUnmount() {\n    this.unsubscribe();\n    this.toggleEditor('enable');\n  }\n  render() {\n    const {\n      blockCount,\n      onReplace,\n      isLaunching\n    } = this.props;\n    let label, callback, description;\n    if (1 === blockCount) {\n      label = builder.access ? strings.launch : strings.view;\n      callback = this.launchBuilder.bind(this);\n    } else {\n      label = strings.convert;\n      callback = this.convertToBuilder.bind(this);\n    }\n    if (builder.enabled) {\n      description = strings.active;\n    } else {\n      description = strings.description;\n    }\n    if (false === builder.showui) {\n      return '';\n    }\n    return /*#__PURE__*/React.createElement(Placeholder, {\n      key: \"placeholder\",\n      instructions: description,\n      icon: \"welcome-widgets-menus\",\n      label: strings.title,\n      className: \"fl-builder-layout-launch-view\"\n    }, isLaunching && /*#__PURE__*/React.createElement(Spinner, null), !isLaunching && /*#__PURE__*/React.createElement(Button, {\n      isLarge: true,\n      isPrimary: true,\n      type: \"submit\",\n      onClick: callback\n    }, label), !isLaunching && /*#__PURE__*/React.createElement(Button, {\n      isLarge: true,\n      type: \"submit\",\n      onClick: this.convertToBlocks.bind(this)\n    }, strings.editor));\n  }\n  toggleEditor(method = 'enable') {\n    const {\n      classList\n    } = document.body;\n    const enabledClass = 'fl-builder-layout-enabled';\n    if ('enable' === method) {\n      if (classList.contains(enabledClass)) {\n        classList.remove(enabledClass);\n      }\n    } else {\n      if (!classList.contains(enabledClass)) {\n        classList.add(enabledClass);\n      }\n    }\n  }\n  redirectToBuilder() {\n    window.location.href = builder.access ? urls.edit : urls.view;\n  }\n  launchBuilder() {\n    const {\n      savePost,\n      setLaunching\n    } = this.props;\n    setLaunching(true);\n    savePost();\n  }\n  convertToBuilder() {\n    const {\n      clientId,\n      blocks,\n      setAttributes,\n      removeBlocks\n    } = this.props;\n    const content = serialize(blocks);\n    const clientIds = blocks.map(block => block.clientId).filter(id => id !== clientId);\n    setAttributes({\n      content: content.replace(/<!--(.*?)-->/g, '')\n    });\n    removeBlocks(clientIds);\n    this.launchBuilder();\n  }\n  convertToBlocks() {\n    const {\n      attributes,\n      clientId,\n      replaceBlocks,\n      onReplace\n    } = this.props;\n    if (attributes.content && !confirm(strings.warning)) {\n      return;\n    } else if (attributes.content) {\n      replaceBlocks([clientId], rawHandler({\n        HTML: attributes.content,\n        mode: 'BLOCKS'\n      }));\n    } else {\n      onReplace([]);\n    }\n  }\n}\n\n/**\n * Connect the edit component to editor data.\n */\nconst LayoutBlockEditConnectedPre_5_3 = compose(withDispatch((dispatch, ownProps) => {\n  const editor = dispatch('core/editor');\n  const builder = dispatch('fl-builder');\n  return {\n    savePost: editor.savePost,\n    removeBlocks: editor.removeBlocks,\n    replaceBlocks: editor.replaceBlocks,\n    setLaunching: builder.setLaunching\n  };\n}), withSelect(select => {\n  const editor = select('core/editor');\n  const builder = select('fl-builder');\n  return {\n    blockCount: editor.getBlockCount(),\n    blocks: editor.getBlocks(),\n    isSavingPost: editor.isSavingPost(),\n    isLaunching: builder.isLaunching()\n  };\n}))(LayoutBlockEditPre_5_3);\n\n//# sourceURL=webpack://bb-plugin/./src/wp/wp-editor/layout-block/edit-pre-5-3.js?\n}");
 
 /***/ }),
 
-/***/ "./src/wp-editor/layout-block/index.js":
-/*!*********************************************!*\
-  !*** ./src/wp-editor/layout-block/index.js ***!
-  \*********************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _edit__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./edit */ "./src/wp-editor/layout-block/edit.js");
-/* harmony import */ var _edit_pre_5_3__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./edit-pre-5-3 */ "./src/wp-editor/layout-block/edit-pre-5-3.js");
-/* harmony import */ var _index_scss__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./index.scss */ "./src/wp-editor/layout-block/index.scss");
-
-
-
-var _FLBuilderConfig = FLBuilderConfig,
-  builder = _FLBuilderConfig.builder,
-  strings = _FLBuilderConfig.strings;
-var version = FLBuilderConfig.wp.version;
-var registerBlockType = wp.blocks.registerBlockType;
-var RawHTML = wp.element.RawHTML;
-var getBlockEdit = function getBlockEdit() {
-  if (parseFloat(version) < 5.3) {
-    return _edit_pre_5_3__WEBPACK_IMPORTED_MODULE_1__.LayoutBlockEditConnectedPre_5_3;
-  }
-  return _edit__WEBPACK_IMPORTED_MODULE_0__.LayoutBlockEditConnected;
-};
-
-/**
- * Register the block.
- */
-if (builder.access && builder.unrestricted || builder.enabled) {
-  registerBlockType('fl-builder/layout', {
-    title: strings.title,
-    description: strings.description,
-    icon: 'welcome-widgets-menus',
-    category: 'layout',
-    useOnce: true,
-    supports: {
-      customClassName: false,
-      className: false,
-      html: false
-    },
-    attributes: {
-      content: {
-        type: 'string',
-        source: 'html'
-      }
-    },
-    edit: getBlockEdit(),
-    save: function save(_ref) {
-      var attributes = _ref.attributes;
-      return /*#__PURE__*/React.createElement(RawHTML, null, attributes.content);
-    }
-  });
-}
-
-/***/ }),
-
-/***/ "./src/wp-editor/layout-block/index.scss":
+/***/ "./src/wp/wp-editor/layout-block/edit.js":
 /*!***********************************************!*\
-  !*** ./src/wp-editor/layout-block/index.scss ***!
+  !*** ./src/wp/wp-editor/layout-block/edit.js ***!
   \***********************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-// extracted by mini-css-extract-plugin
-
+eval("{__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   LayoutBlockEditConnected: () => (/* binding */ LayoutBlockEditConnected)\n/* harmony export */ });\nconst {\n  builder,\n  strings,\n  urls\n} = FLBuilderConfig;\nconst {\n  rawHandler,\n  serialize\n} = wp.blocks;\nconst {\n  Button,\n  Placeholder,\n  Spinner\n} = wp.components;\nconst {\n  compose\n} = wp.compose;\nconst {\n  withDispatch,\n  withSelect\n} = wp.data;\nconst {\n  Component\n} = wp.element;\n\n/**\n * Edit Component\n */\nclass LayoutBlockEdit extends Component {\n  constructor() {\n    super(...arguments);\n  }\n  componentDidMount() {\n    const {\n      blockCount\n    } = this.props;\n    if (1 === blockCount) {\n      this.toggleEditor('disable');\n    }\n  }\n  componentWillUnmount() {\n    this.toggleEditor('enable');\n  }\n  render() {\n    const {\n      blockCount,\n      onReplace,\n      isLaunching\n    } = this.props;\n    let label, callback, description;\n    if (1 === blockCount) {\n      label = builder.access ? strings.launch : strings.view;\n      callback = this.launchBuilder.bind(this);\n    } else {\n      label = strings.convert;\n      callback = this.convertToBuilder.bind(this);\n    }\n    if (builder.enabled) {\n      description = strings.active;\n    } else {\n      description = strings.description;\n    }\n    if (false === builder.showui) {\n      return '';\n    }\n    return /*#__PURE__*/React.createElement(Placeholder, {\n      key: \"placeholder\",\n      instructions: description,\n      label: strings.title,\n      className: \"fl-builder-layout-launch-view\"\n    }, isLaunching && /*#__PURE__*/React.createElement(Spinner, null), !isLaunching && /*#__PURE__*/React.createElement(Button, {\n      isLarge: true,\n      isPrimary: true,\n      type: \"submit\",\n      onClick: callback\n    }, label), !isLaunching && /*#__PURE__*/React.createElement(Button, {\n      isLarge: true,\n      type: \"submit\",\n      onClick: this.convertToBlocks.bind(this)\n    }, strings.editor));\n  }\n  toggleEditor(method = 'enable') {\n    const {\n      classList\n    } = document.body;\n    const enabledClass = 'fl-builder-layout-enabled';\n    if ('enable' === method) {\n      if (classList.contains(enabledClass)) {\n        classList.remove(enabledClass);\n      }\n    } else {\n      if (!classList.contains(enabledClass)) {\n        classList.add(enabledClass);\n      }\n    }\n  }\n  launchBuilder() {\n    const {\n      savePost,\n      setLaunching\n    } = this.props;\n    setLaunching(true);\n    /**\n     * WP 6.4 will NOT save a post with no title.\n     */\n    const title = wp.data.select(\"core/editor\").getEditedPostAttribute('title');\n    if (!title) {\n      wp.data.dispatch('core/editor').editPost({\n        title: wp.i18n.__('(no title)')\n      });\n    }\n    savePost().then(() => {\n      setTimeout(function () {\n        window.top.location.href = builder.access ? urls.edit : urls.view;\n      }, 2000);\n    });\n  }\n  convertToBuilder() {\n    const {\n      clientId,\n      blocks,\n      setAttributes,\n      removeBlocks\n    } = this.props;\n    const content = serialize(blocks);\n    const clientIds = blocks.map(block => block.clientId).filter(id => id !== clientId);\n    setAttributes({\n      content: content.replace(/<!--(.*?)-->/g, '')\n    });\n    removeBlocks(clientIds);\n    this.launchBuilder();\n  }\n  convertToBlocks() {\n    const {\n      attributes,\n      clientId,\n      replaceBlocks,\n      onReplace\n    } = this.props;\n    if (attributes.content && !confirm(strings.warning)) {\n      return;\n    } else if (attributes.content) {\n      replaceBlocks([clientId], rawHandler({\n        HTML: attributes.content,\n        mode: 'BLOCKS'\n      }));\n    } else {\n      onReplace([]);\n    }\n  }\n}\n\n/**\n * Connect the edit component to editor data.\n */\nconst LayoutBlockEditConnected = compose(withDispatch((dispatch, ownProps) => {\n  const blockEditor = dispatch('core/block-editor');\n  const editor = dispatch('core/editor');\n  const builder = dispatch('fl-builder');\n  return {\n    removeBlocks: blockEditor.removeBlocks,\n    replaceBlocks: blockEditor.replaceBlocks,\n    savePost: editor.savePost,\n    setLaunching: builder.setLaunching\n  };\n}), withSelect(select => {\n  const blockEditor = select('core/block-editor');\n  const editor = select('core/editor');\n  const builder = select('fl-builder');\n  return {\n    blockCount: blockEditor.getBlockCount(),\n    blocks: blockEditor.getBlocks(),\n    isLaunching: builder.isLaunching()\n  };\n}))(LayoutBlockEdit);\n\n//# sourceURL=webpack://bb-plugin/./src/wp/wp-editor/layout-block/edit.js?\n}");
 
 /***/ }),
 
-/***/ "./src/wp-editor/more-menu/index.js":
-/*!******************************************!*\
-  !*** ./src/wp-editor/more-menu/index.js ***!
-  \******************************************/
+/***/ "./src/wp/wp-editor/layout-block/index.js":
+/*!************************************************!*\
+  !*** ./src/wp/wp-editor/layout-block/index.js ***!
+  \************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _menu_item__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./menu-item */ "./src/wp-editor/more-menu/menu-item.js");
-/* harmony import */ var _menu_item_pre_5_3__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./menu-item-pre-5-3 */ "./src/wp-editor/more-menu/menu-item-pre-5-3.js");
-
-
-var version = FLBuilderConfig.wp.version;
-var registerPlugin = wp.plugins.registerPlugin;
-var getMenuItemComponent = function getMenuItemComponent() {
-  if (parseFloat(version) < 5.3) {
-    return _menu_item_pre_5_3__WEBPACK_IMPORTED_MODULE_1__.BuilderMoreMenuItemConnectedPre_5_3;
-  }
-  return _menu_item__WEBPACK_IMPORTED_MODULE_0__.BuilderMoreMenuItemConnected;
-};
-
-/**
- * Register the builder more menu plugin.
- */
-registerPlugin('fl-builder-plugin-sidebar', {
-  icon: 'welcome-widgets-menus',
-  render: getMenuItemComponent()
-});
+eval("{__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _edit__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./edit */ \"./src/wp/wp-editor/layout-block/edit.js\");\n/* harmony import */ var _edit_pre_5_3__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./edit-pre-5-3 */ \"./src/wp/wp-editor/layout-block/edit-pre-5-3.js\");\n/* harmony import */ var _index_scss__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./index.scss */ \"./src/wp/wp-editor/layout-block/index.scss\");\n\n\n\nconst {\n  builder,\n  strings\n} = FLBuilderConfig;\nconst {\n  version\n} = FLBuilderConfig.wp;\nconst {\n  registerBlockType\n} = wp.blocks;\nconst {\n  RawHTML\n} = wp.element;\nconst getBlockEdit = () => {\n  if (parseFloat(version) < 5.3) {\n    return _edit_pre_5_3__WEBPACK_IMPORTED_MODULE_1__.LayoutBlockEditConnectedPre_5_3;\n  }\n  return _edit__WEBPACK_IMPORTED_MODULE_0__.LayoutBlockEditConnected;\n};\n\n/**\n * Register the block.\n */\nif (builder.access && builder.unrestricted || builder.enabled) {\n  registerBlockType('fl-builder/layout', {\n    title: strings.title,\n    description: strings.description,\n    icon: 'welcome-widgets-menus',\n    category: 'layout',\n    useOnce: true,\n    supports: {\n      customClassName: false,\n      className: false,\n      html: false\n    },\n    attributes: {\n      content: {\n        type: 'string',\n        source: 'html'\n      }\n    },\n    edit: getBlockEdit(),\n    save({\n      attributes\n    }) {\n      return /*#__PURE__*/React.createElement(RawHTML, null, attributes.content);\n    }\n  });\n}\n\n//# sourceURL=webpack://bb-plugin/./src/wp/wp-editor/layout-block/index.js?\n}");
 
 /***/ }),
 
-/***/ "./src/wp-editor/more-menu/menu-item-pre-5-3.js":
-/*!******************************************************!*\
-  !*** ./src/wp-editor/more-menu/menu-item-pre-5-3.js ***!
-  \******************************************************/
+/***/ "./src/wp/wp-editor/layout-block/index.scss":
+/*!**************************************************!*\
+  !*** ./src/wp/wp-editor/layout-block/index.scss ***!
+  \**************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   BuilderMoreMenuItemConnectedPre_5_3: () => (/* binding */ BuilderMoreMenuItemConnectedPre_5_3)
-/* harmony export */ });
-/* harmony import */ var _menu_item_pre_5_3_scss__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./menu-item-pre-5-3.scss */ "./src/wp-editor/more-menu/menu-item-pre-5-3.scss");
-function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
-function _classCallCheck(a, n) { if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function"); }
-function _defineProperties(e, r) { for (var t = 0; t < r.length; t++) { var o = r[t]; o.enumerable = o.enumerable || !1, o.configurable = !0, "value" in o && (o.writable = !0), Object.defineProperty(e, _toPropertyKey(o.key), o); } }
-function _createClass(e, r, t) { return r && _defineProperties(e.prototype, r), t && _defineProperties(e, t), Object.defineProperty(e, "prototype", { writable: !1 }), e; }
-function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
-function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
-function _callSuper(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct() ? Reflect.construct(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-function _possibleConstructorReturn(t, e) { if (e && ("object" == _typeof(e) || "function" == typeof e)) return e; if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined"); return _assertThisInitialized(t); }
-function _assertThisInitialized(e) { if (void 0 === e) throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); return e; }
-function _isNativeReflectConstruct() { try { var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct = function _isNativeReflectConstruct() { return !!t; })(); }
-function _getPrototypeOf(t) { return _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function (t) { return t.__proto__ || Object.getPrototypeOf(t); }, _getPrototypeOf(t); }
-function _inherits(t, e) { if ("function" != typeof e && null !== e) throw new TypeError("Super expression must either be null or a function"); t.prototype = Object.create(e && e.prototype, { constructor: { value: t, writable: !0, configurable: !0 } }), Object.defineProperty(t, "prototype", { writable: !1 }), e && _setPrototypeOf(t, e); }
-function _setPrototypeOf(t, e) { return _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function (t, e) { return t.__proto__ = e, t; }, _setPrototypeOf(t, e); }
-
-var _FLBuilderConfig = FLBuilderConfig,
-  strings = _FLBuilderConfig.strings;
-var _wp$blocks = wp.blocks,
-  createBlock = _wp$blocks.createBlock,
-  serialize = _wp$blocks.serialize;
-var Button = wp.components.Button;
-var compose = wp.compose.compose;
-var _wp$data = wp.data,
-  withDispatch = _wp$data.withDispatch,
-  withSelect = _wp$data.withSelect;
-var PluginSidebarMoreMenuItem = wp.editPost.PluginSidebarMoreMenuItem;
-var Component = wp.element.Component;
-
-/**
- * Builder menu item for the more menu pre WordPress 5.3.
- *
- * More menu items currently only support opening a sidebar.
- * However, we need a click event. For now, that is done in a
- * hacky manner with an absolute div that contains the event.
- * This should be reworked in the future when API supports it.
- */
-var BuilderMoreMenuItemPre_5_3 = /*#__PURE__*/function (_Component) {
-  function BuilderMoreMenuItemPre_5_3() {
-    _classCallCheck(this, BuilderMoreMenuItemPre_5_3);
-    return _callSuper(this, BuilderMoreMenuItemPre_5_3, arguments);
-  }
-  _inherits(BuilderMoreMenuItemPre_5_3, _Component);
-  return _createClass(BuilderMoreMenuItemPre_5_3, [{
-    key: "render",
-    value: function render() {
-      return /*#__PURE__*/React.createElement(PluginSidebarMoreMenuItem, null, /*#__PURE__*/React.createElement("div", {
-        className: "fl-builder-plugin-sidebar-button",
-        onClick: this.menuItemClicked.bind(this)
-      }), this.hasBuilderBlock() ? strings.launch : strings.convert);
-    }
-  }, {
-    key: "hasBuilderBlock",
-    value: function hasBuilderBlock() {
-      var blocks = this.props.blocks;
-      var builder = blocks.filter(function (block) {
-        return 'fl-builder/layout' === block.name;
-      });
-      return !!builder.length;
-    }
-  }, {
-    key: "menuItemClicked",
-    value: function menuItemClicked() {
-      var closeGeneralSidebar = this.props.closeGeneralSidebar;
-      if (this.hasBuilderBlock()) {
-        this.launchBuilder();
-      } else {
-        this.convertToBuilder();
-      }
-
-      // Another hack because we can't have click events yet :(
-      setTimeout(closeGeneralSidebar, 100);
-    }
-  }, {
-    key: "convertToBuilder",
-    value: function convertToBuilder() {
-      var _this$props = this.props,
-        blocks = _this$props.blocks,
-        insertBlock = _this$props.insertBlock,
-        removeBlocks = _this$props.removeBlocks;
-      var clientIds = blocks.map(function (block) {
-        return block.clientId;
-      });
-      var content = serialize(blocks).replace(/<!--(.*?)-->/g, '');
-      var block = createBlock('fl-builder/layout', {
-        content: content
-      });
-      insertBlock(block, 0);
-      removeBlocks(clientIds);
-    }
-  }, {
-    key: "launchBuilder",
-    value: function launchBuilder() {
-      var _this$props2 = this.props,
-        savePost = _this$props2.savePost,
-        setLaunching = _this$props2.setLaunching;
-      setLaunching(true);
-      savePost();
-    }
-  }]);
-}(Component);
-/**
- * Connect the menu item to editor data.
- */
-var BuilderMoreMenuItemConnectedPre_5_3 = compose(withDispatch(function (dispatch, ownProps) {
-  var editor = dispatch('core/editor');
-  var editPost = dispatch('core/edit-post');
-  var builder = dispatch('fl-builder');
-  return {
-    savePost: editor.savePost,
-    insertBlock: editor.insertBlock,
-    removeBlocks: editor.removeBlocks,
-    closeGeneralSidebar: editPost.closeGeneralSidebar,
-    setLaunching: builder.setLaunching
-  };
-}), withSelect(function (select) {
-  var editor = select('core/editor');
-  return {
-    blocks: editor.getBlocks()
-  };
-}))(BuilderMoreMenuItemPre_5_3);
+eval("{__webpack_require__.r(__webpack_exports__);\n// extracted by mini-css-extract-plugin\n\n\n//# sourceURL=webpack://bb-plugin/./src/wp/wp-editor/layout-block/index.scss?\n}");
 
 /***/ }),
 
-/***/ "./src/wp-editor/more-menu/menu-item-pre-5-3.scss":
-/*!********************************************************!*\
-  !*** ./src/wp-editor/more-menu/menu-item-pre-5-3.scss ***!
-  \********************************************************/
+/***/ "./src/wp/wp-editor/more-menu/index.js":
+/*!*********************************************!*\
+  !*** ./src/wp/wp-editor/more-menu/index.js ***!
+  \*********************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-// extracted by mini-css-extract-plugin
-
+eval("{__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _menu_item__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./menu-item */ \"./src/wp/wp-editor/more-menu/menu-item.js\");\n/* harmony import */ var _menu_item_pre_5_3__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./menu-item-pre-5-3 */ \"./src/wp/wp-editor/more-menu/menu-item-pre-5-3.js\");\n\n\nconst {\n  version\n} = FLBuilderConfig.wp;\nconst {\n  registerPlugin\n} = wp.plugins;\nconst getMenuItemComponent = () => {\n  if (parseFloat(version) < 5.3) {\n    return _menu_item_pre_5_3__WEBPACK_IMPORTED_MODULE_1__.BuilderMoreMenuItemConnectedPre_5_3;\n  }\n  return _menu_item__WEBPACK_IMPORTED_MODULE_0__.BuilderMoreMenuItemConnected;\n};\n\n/**\n * Register the builder more menu plugin.\n */\nregisterPlugin('fl-builder-plugin-sidebar', {\n  icon: 'welcome-widgets-menus',\n  render: getMenuItemComponent()\n});\n\n//# sourceURL=webpack://bb-plugin/./src/wp/wp-editor/more-menu/index.js?\n}");
 
 /***/ }),
 
-/***/ "./src/wp-editor/more-menu/menu-item.js":
-/*!**********************************************!*\
-  !*** ./src/wp-editor/more-menu/menu-item.js ***!
-  \**********************************************/
+/***/ "./src/wp/wp-editor/more-menu/menu-item-pre-5-3.js":
+/*!*********************************************************!*\
+  !*** ./src/wp/wp-editor/more-menu/menu-item-pre-5-3.js ***!
+  \*********************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   BuilderMoreMenuItemConnected: () => (/* binding */ BuilderMoreMenuItemConnected)
-/* harmony export */ });
-function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
-function _classCallCheck(a, n) { if (!(a instanceof n)) throw new TypeError("Cannot call a class as a function"); }
-function _defineProperties(e, r) { for (var t = 0; t < r.length; t++) { var o = r[t]; o.enumerable = o.enumerable || !1, o.configurable = !0, "value" in o && (o.writable = !0), Object.defineProperty(e, _toPropertyKey(o.key), o); } }
-function _createClass(e, r, t) { return r && _defineProperties(e.prototype, r), t && _defineProperties(e, t), Object.defineProperty(e, "prototype", { writable: !1 }), e; }
-function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
-function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
-function _callSuper(t, o, e) { return o = _getPrototypeOf(o), _possibleConstructorReturn(t, _isNativeReflectConstruct() ? Reflect.construct(o, e || [], _getPrototypeOf(t).constructor) : o.apply(t, e)); }
-function _possibleConstructorReturn(t, e) { if (e && ("object" == _typeof(e) || "function" == typeof e)) return e; if (void 0 !== e) throw new TypeError("Derived constructors may only return object or undefined"); return _assertThisInitialized(t); }
-function _assertThisInitialized(e) { if (void 0 === e) throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); return e; }
-function _isNativeReflectConstruct() { try { var t = !Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); } catch (t) {} return (_isNativeReflectConstruct = function _isNativeReflectConstruct() { return !!t; })(); }
-function _getPrototypeOf(t) { return _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function (t) { return t.__proto__ || Object.getPrototypeOf(t); }, _getPrototypeOf(t); }
-function _inherits(t, e) { if ("function" != typeof e && null !== e) throw new TypeError("Super expression must either be null or a function"); t.prototype = Object.create(e && e.prototype, { constructor: { value: t, writable: !0, configurable: !0 } }), Object.defineProperty(t, "prototype", { writable: !1 }), e && _setPrototypeOf(t, e); }
-function _setPrototypeOf(t, e) { return _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function (t, e) { return t.__proto__ = e, t; }, _setPrototypeOf(t, e); }
-var _FLBuilderConfig = FLBuilderConfig,
-  builder = _FLBuilderConfig.builder,
-  strings = _FLBuilderConfig.strings,
-  urls = _FLBuilderConfig.urls;
-var _wp$blocks = wp.blocks,
-  createBlock = _wp$blocks.createBlock,
-  serialize = _wp$blocks.serialize;
-var Button = wp.components.Button;
-var compose = wp.compose.compose;
-var _wp$data = wp.data,
-  withDispatch = _wp$data.withDispatch,
-  withSelect = _wp$data.withSelect;
-var PluginMoreMenuItem = wp.editPost.PluginMoreMenuItem;
-var Component = wp.element.Component;
-
-/**
- * Builder menu item for the more menu.
- */
-var BuilderMoreMenuItem = /*#__PURE__*/function (_Component) {
-  function BuilderMoreMenuItem() {
-    _classCallCheck(this, BuilderMoreMenuItem);
-    return _callSuper(this, BuilderMoreMenuItem, arguments);
-  }
-  _inherits(BuilderMoreMenuItem, _Component);
-  return _createClass(BuilderMoreMenuItem, [{
-    key: "render",
-    value: function render() {
-      if (this.hasBuilderBlock()) {
-        jQuery('body').addClass('fl-builder-blocks');
-        jQuery(document).trigger('fl-builder-fix-blocks');
-      }
-      return /*#__PURE__*/React.createElement(PluginMoreMenuItem, {
-        onClick: this.menuItemClicked.bind(this)
-      }, this.hasBuilderBlock() ? strings.launch : strings.convert);
-    }
-  }, {
-    key: "hasBuilderBlock",
-    value: function hasBuilderBlock() {
-      var blocks = this.props.blocks;
-      var builder = blocks.filter(function (block) {
-        return 'fl-builder/layout' === block.name;
-      });
-      return !!builder.length;
-    }
-  }, {
-    key: "menuItemClicked",
-    value: function menuItemClicked() {
-      if (this.hasBuilderBlock()) {
-        this.launchBuilder();
-      } else {
-        this.convertToBuilder();
-      }
-    }
-  }, {
-    key: "convertToBuilder",
-    value: function convertToBuilder() {
-      var _this$props = this.props,
-        blocks = _this$props.blocks,
-        insertBlock = _this$props.insertBlock,
-        removeBlocks = _this$props.removeBlocks;
-      var clientIds = blocks.map(function (block) {
-        return block.clientId;
-      });
-      var content = serialize(blocks).replace(/<!--(.*?)-->/g, '');
-      var block = createBlock('fl-builder/layout', {
-        content: content
-      });
-      insertBlock(block, 0);
-      removeBlocks(clientIds);
-    }
-  }, {
-    key: "launchBuilder",
-    value: function launchBuilder() {
-      var _this$props2 = this.props,
-        savePost = _this$props2.savePost,
-        setLaunching = _this$props2.setLaunching;
-      setLaunching(true);
-      /**
-       * WP 6.4 will NOT save a post with no title.
-       */
-      var title = wp.data.select("core/editor").getEditedPostAttribute('title');
-      if (!title) {
-        wp.data.dispatch('core/editor').editPost({
-          title: wp.i18n.__('(no title)')
-        });
-      }
-      savePost().then(function () {
-        setTimeout(function () {
-          window.location.href = builder.access ? urls.edit : urls.view;
-        }, 2000);
-      });
-    }
-  }]);
-}(Component);
-/**
- * Connect the menu item to editor data.
- */
-var BuilderMoreMenuItemConnected = compose(withDispatch(function (dispatch, ownProps) {
-  var blockEditor = dispatch('core/block-editor');
-  var editor = dispatch('core/editor');
-  var builder = dispatch('fl-builder');
-  return {
-    insertBlock: blockEditor.insertBlock,
-    removeBlocks: blockEditor.removeBlocks,
-    savePost: editor.savePost,
-    setLaunching: builder.setLaunching
-  };
-}), withSelect(function (select) {
-  var blockEditor = select('core/block-editor');
-  return {
-    blocks: blockEditor.getBlocks()
-  };
-}))(BuilderMoreMenuItem);
+eval("{__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   BuilderMoreMenuItemConnectedPre_5_3: () => (/* binding */ BuilderMoreMenuItemConnectedPre_5_3)\n/* harmony export */ });\n/* harmony import */ var _menu_item_pre_5_3_scss__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./menu-item-pre-5-3.scss */ \"./src/wp/wp-editor/more-menu/menu-item-pre-5-3.scss\");\n\nconst {\n  strings\n} = FLBuilderConfig;\nconst {\n  createBlock,\n  serialize\n} = wp.blocks;\nconst {\n  Button\n} = wp.components;\nconst {\n  compose\n} = wp.compose;\nconst {\n  withDispatch,\n  withSelect\n} = wp.data;\nconst {\n  PluginSidebarMoreMenuItem\n} = wp.editPost;\nconst {\n  Component\n} = wp.element;\n\n/**\n * Builder menu item for the more menu pre WordPress 5.3.\n *\n * More menu items currently only support opening a sidebar.\n * However, we need a click event. For now, that is done in a\n * hacky manner with an absolute div that contains the event.\n * This should be reworked in the future when API supports it.\n */\nclass BuilderMoreMenuItemPre_5_3 extends Component {\n  render() {\n    return /*#__PURE__*/React.createElement(PluginSidebarMoreMenuItem, null, /*#__PURE__*/React.createElement(\"div\", {\n      className: \"fl-builder-plugin-sidebar-button\",\n      onClick: this.menuItemClicked.bind(this)\n    }), this.hasBuilderBlock() ? strings.launch : strings.convert);\n  }\n  hasBuilderBlock() {\n    const {\n      blocks\n    } = this.props;\n    const builder = blocks.filter(block => 'fl-builder/layout' === block.name);\n    return !!builder.length;\n  }\n  menuItemClicked() {\n    const {\n      closeGeneralSidebar\n    } = this.props;\n    if (this.hasBuilderBlock()) {\n      this.launchBuilder();\n    } else {\n      this.convertToBuilder();\n    }\n\n    // Another hack because we can't have click events yet :(\n    setTimeout(closeGeneralSidebar, 100);\n  }\n  convertToBuilder() {\n    const {\n      blocks,\n      insertBlock,\n      removeBlocks\n    } = this.props;\n    const clientIds = blocks.map(block => block.clientId);\n    const content = serialize(blocks).replace(/<!--(.*?)-->/g, '');\n    const block = createBlock('fl-builder/layout', {\n      content\n    });\n    insertBlock(block, 0);\n    removeBlocks(clientIds);\n  }\n  launchBuilder() {\n    const {\n      savePost,\n      setLaunching\n    } = this.props;\n    setLaunching(true);\n    savePost();\n  }\n}\n\n/**\n * Connect the menu item to editor data.\n */\nconst BuilderMoreMenuItemConnectedPre_5_3 = compose(withDispatch((dispatch, ownProps) => {\n  const editor = dispatch('core/editor');\n  const editPost = dispatch('core/edit-post');\n  const builder = dispatch('fl-builder');\n  return {\n    savePost: editor.savePost,\n    insertBlock: editor.insertBlock,\n    removeBlocks: editor.removeBlocks,\n    closeGeneralSidebar: editPost.closeGeneralSidebar,\n    setLaunching: builder.setLaunching\n  };\n}), withSelect(select => {\n  const editor = select('core/editor');\n  return {\n    blocks: editor.getBlocks()\n  };\n}))(BuilderMoreMenuItemPre_5_3);\n\n//# sourceURL=webpack://bb-plugin/./src/wp/wp-editor/more-menu/menu-item-pre-5-3.js?\n}");
 
 /***/ }),
 
-/***/ "./src/wp-editor/store/index.js":
-/*!**************************************!*\
-  !*** ./src/wp-editor/store/index.js ***!
-  \**************************************/
+/***/ "./src/wp/wp-editor/more-menu/menu-item-pre-5-3.scss":
+/*!***********************************************************!*\
+  !*** ./src/wp/wp-editor/more-menu/menu-item-pre-5-3.scss ***!
+  \***********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+eval("{__webpack_require__.r(__webpack_exports__);\n// extracted by mini-css-extract-plugin\n\n\n//# sourceURL=webpack://bb-plugin/./src/wp/wp-editor/more-menu/menu-item-pre-5-3.scss?\n}");
+
+/***/ }),
+
+/***/ "./src/wp/wp-editor/more-menu/menu-item.js":
+/*!*************************************************!*\
+  !*** ./src/wp/wp-editor/more-menu/menu-item.js ***!
+  \*************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+eval("{__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   BuilderMoreMenuItemConnected: () => (/* binding */ BuilderMoreMenuItemConnected)\n/* harmony export */ });\nconst {\n  builder,\n  strings,\n  urls\n} = FLBuilderConfig;\nconst {\n  createBlock,\n  serialize\n} = wp.blocks;\nconst {\n  Button\n} = wp.components;\nconst {\n  compose\n} = wp.compose;\nconst {\n  withDispatch,\n  withSelect\n} = wp.data;\nconst {\n  PluginMoreMenuItem\n} = wp.editPost;\nconst {\n  Component\n} = wp.element;\n\n/**\n * Builder menu item for the more menu.\n */\nclass BuilderMoreMenuItem extends Component {\n  render() {\n    if (this.hasBuilderBlock()) {\n      jQuery('body').addClass('fl-builder-blocks');\n      jQuery(document).trigger('fl-builder-fix-blocks');\n    }\n    return /*#__PURE__*/React.createElement(PluginMoreMenuItem, {\n      onClick: this.menuItemClicked.bind(this)\n    }, this.hasBuilderBlock() ? strings.launch : strings.convert);\n  }\n  hasBuilderBlock() {\n    const {\n      blocks\n    } = this.props;\n    const builder = blocks.filter(block => 'fl-builder/layout' === block.name);\n    return !!builder.length;\n  }\n  menuItemClicked() {\n    if (this.hasBuilderBlock()) {\n      this.launchBuilder();\n    } else {\n      this.convertToBuilder();\n    }\n  }\n  convertToBuilder() {\n    const {\n      blocks,\n      insertBlock,\n      removeBlocks\n    } = this.props;\n    const clientIds = blocks.map(block => block.clientId);\n    const content = serialize(blocks).replace(/<!--(.*?)-->/g, '');\n    const block = createBlock('fl-builder/layout', {\n      content\n    });\n    insertBlock(block, 0);\n    removeBlocks(clientIds);\n  }\n  launchBuilder() {\n    const {\n      savePost,\n      setLaunching\n    } = this.props;\n    setLaunching(true);\n    /**\n     * WP 6.4 will NOT save a post with no title.\n     */\n    const title = wp.data.select(\"core/editor\").getEditedPostAttribute('title');\n    if (!title) {\n      wp.data.dispatch('core/editor').editPost({\n        title: wp.i18n.__('(no title)')\n      });\n    }\n    savePost().then(() => {\n      setTimeout(function () {\n        window.location.href = builder.access ? urls.edit : urls.view;\n      }, 2000);\n    });\n  }\n}\n\n/**\n * Connect the menu item to editor data.\n */\nconst BuilderMoreMenuItemConnected = compose(withDispatch((dispatch, ownProps) => {\n  const blockEditor = dispatch('core/block-editor');\n  const editor = dispatch('core/editor');\n  const builder = dispatch('fl-builder');\n  return {\n    insertBlock: blockEditor.insertBlock,\n    removeBlocks: blockEditor.removeBlocks,\n    savePost: editor.savePost,\n    setLaunching: builder.setLaunching\n  };\n}), withSelect(select => {\n  const blockEditor = select('core/block-editor');\n  return {\n    blocks: blockEditor.getBlocks()\n  };\n}))(BuilderMoreMenuItem);\n\n//# sourceURL=webpack://bb-plugin/./src/wp/wp-editor/more-menu/menu-item.js?\n}");
+
+/***/ }),
+
+/***/ "./src/wp/wp-editor/store/index.js":
+/*!*****************************************!*\
+  !*** ./src/wp/wp-editor/store/index.js ***!
+  \*****************************************/
 /***/ (() => {
 
-var registerStore = wp.data.registerStore;
-var DEFAULT_STATE = {
-  launching: false
-};
-var actions = {
-  setLaunching: function setLaunching(launching) {
-    return {
-      type: 'SET_LAUNCHING',
-      launching: launching
-    };
-  }
-};
-var selectors = {
-  isLaunching: function isLaunching(state) {
-    return state.launching;
-  }
-};
-registerStore('fl-builder', {
-  reducer: function reducer() {
-    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : DEFAULT_STATE;
-    var action = arguments.length > 1 ? arguments[1] : undefined;
-    switch (action.type) {
-      case 'SET_LAUNCHING':
-        state.launching = action.launching;
-    }
-    return state;
-  },
-  actions: actions,
-  selectors: selectors
-});
+eval("{const {\n  registerStore\n} = wp.data;\nconst DEFAULT_STATE = {\n  launching: false\n};\nconst actions = {\n  setLaunching(launching) {\n    return {\n      type: 'SET_LAUNCHING',\n      launching\n    };\n  }\n};\nconst selectors = {\n  isLaunching(state) {\n    return state.launching;\n  }\n};\nregisterStore('fl-builder', {\n  reducer(state = DEFAULT_STATE, action) {\n    switch (action.type) {\n      case 'SET_LAUNCHING':\n        state.launching = action.launching;\n    }\n    return state;\n  },\n  actions,\n  selectors\n});\n\n//# sourceURL=webpack://bb-plugin/./src/wp/wp-editor/store/index.js?\n}");
 
 /***/ }),
 
-/***/ "./src/wp-editor/wordpress/index.js":
-/*!******************************************!*\
-  !*** ./src/wp-editor/wordpress/index.js ***!
-  \******************************************/
+/***/ "./src/wp/wp-editor/wordpress/index.js":
+/*!*********************************************!*\
+  !*** ./src/wp/wp-editor/wordpress/index.js ***!
+  \*********************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
-/* harmony export */ });
-function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
-// FUNCTION: Recover block
-var _recoverBlock = function recoverBlock() {
-  var block = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
-  var autoSave = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-  // DECONSTRUCT: WP object
-  var _ref = window || {},
-    _ref$wp = _ref.wp,
-    wp = _ref$wp === void 0 ? {} : _ref$wp;
-  var _wp$data = wp.data,
-    data = _wp$data === void 0 ? {} : _wp$data,
-    _wp$blocks = wp.blocks,
-    blocks = _wp$blocks === void 0 ? {} : _wp$blocks;
-  var dispatch = data.dispatch,
-    select = data.select;
-  var createBlock = blocks.createBlock;
-  var _dispatch = dispatch('core/block-editor'),
-    replaceBlock = _dispatch.replaceBlock;
-  var wpRecoverBlock = function wpRecoverBlock(_ref2) {
-    var _ref2$name = _ref2.name,
-      name = _ref2$name === void 0 ? '' : _ref2$name,
-      _ref2$attributes = _ref2.attributes,
-      attributes = _ref2$attributes === void 0 ? {} : _ref2$attributes,
-      _ref2$innerBlocks = _ref2.innerBlocks,
-      innerBlocks = _ref2$innerBlocks === void 0 ? [] : _ref2$innerBlocks;
-    return createBlock(name, attributes, innerBlocks);
-  };
-
-  // DEFINE: Validation variables
-  var blockIsValid = block !== null && _typeof(block) === 'object' && block.clientId !== null && typeof block.clientId === 'string';
-
-  // IF: Block is not valid
-  if (blockIsValid !== true) {
-    return false;
-  }
-
-  // GET: Block based on ID, to make sure it exists
-  var currentBlock = select('core/block-editor').getBlock(block.clientId);
-
-  // IF: Block was found
-  if (!currentBlock !== true) {
-    // DECONSTRUCT: Block
-    var _currentBlock$clientI = currentBlock.clientId,
-      blockId = _currentBlock$clientI === void 0 ? '' : _currentBlock$clientI,
-      _currentBlock$isValid = currentBlock.isValid,
-      _blockIsValid = _currentBlock$isValid === void 0 ? true : _currentBlock$isValid,
-      _currentBlock$innerBl = currentBlock.innerBlocks,
-      blockInnerBlocks = _currentBlock$innerBl === void 0 ? [] : _currentBlock$innerBl;
-
-    // DEFINE: Validation variables
-    var blockInnerBlocksHasLength = blockInnerBlocks !== null && Array.isArray(blockInnerBlocks) && blockInnerBlocks.length >= 1;
-
-    // IF: Block is not valid
-    if (_blockIsValid !== true) {
-      // DEFINE: New recovered block
-      var recoveredBlock = wpRecoverBlock(currentBlock);
-
-      // REPLACE: Broke block
-      replaceBlock(blockId, recoveredBlock);
-
-      // IF: Auto save post
-      if (autoSave === true) {
-        wp.data.dispatch("core/editor").savePost();
-      }
-    }
-
-    // IF: Inner blocks has length
-    if (blockInnerBlocksHasLength) {
-      blockInnerBlocks.forEach(function () {
-        var innerBlock = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-        _recoverBlock(innerBlock, autoSave);
-      });
-    }
-  }
-
-  // RETURN
-  return false;
-};
-
-// FUNCTION: Attempt to recover broken blocks
-var autoRecoverBlocks = function autoRecoverBlocks() {
-  var autoSave = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
-  // DECONSTRUCT: WP object
-  var _ref3 = window || {},
-    _ref3$wp = _ref3.wp,
-    wp = _ref3$wp === void 0 ? {} : _ref3$wp;
-  var domReady = wp.domReady,
-    _wp$data2 = wp.data,
-    data = _wp$data2 === void 0 ? {} : _wp$data2;
-  var select = data.select;
-
-  // AWAIT: For dom to get ready
-  domReady(function () {
-    setTimeout(function () {
-      // DEFINE: Basic variables
-      var blocksArray = select('core/block-editor').getBlocks();
-      var blocksArrayHasLength = Array.isArray(blocksArray) && blocksArray.length >= 1;
-
-      // IF: Blocks array has length
-      if (blocksArrayHasLength === true) {
-        blocksArray.forEach(function () {
-          var element = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-          _recoverBlock(element, autoSave);
-        });
-      }
-    }, 1);
-  });
-};
-
-// EXPORT
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (autoRecoverBlocks);
-
-// DECONSTRUCT: WP
-var _ref4 = window || {},
-  _ref4$wp = _ref4.wp,
-  wp = _ref4$wp === void 0 ? {} : _ref4$wp;
-var domReady = wp.domReady,
-  data = wp.data;
-
-// AWAIT: jQuery to get ready
-jQuery(document).on('fl-builder-fix-blocks', function () {
-  // DEFINE: Validation variables
-  var hasGutenbergClasses = jQuery('body').hasClass('post-php') === true && jQuery('.block-editor').length >= 1 && jQuery('body').hasClass('fl-builder-blocks');
-  var gutenbergHasObject = domReady !== undefined && data !== undefined;
-  var gutenbergIsPresent = hasGutenbergClasses === true && gutenbergHasObject === true;
-
-  // IF: Gutenberg editor is present
-  if (gutenbergIsPresent === true) {
-    autoRecoverBlocks(false);
-  }
-});
+eval("{__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   \"default\": () => (__WEBPACK_DEFAULT_EXPORT__)\n/* harmony export */ });\n// FUNCTION: Recover block\nconst recoverBlock = (block = null, autoSave = false) => {\n  // DECONSTRUCT: WP object\n  const {\n    wp = {}\n  } = window || {};\n  const {\n    data = {},\n    blocks = {}\n  } = wp;\n  const {\n    dispatch,\n    select\n  } = data;\n  const {\n    createBlock\n  } = blocks;\n  const {\n    replaceBlock\n  } = dispatch('core/block-editor');\n  const wpRecoverBlock = ({\n    name = '',\n    attributes = {},\n    innerBlocks = []\n  }) => createBlock(name, attributes, innerBlocks);\n\n  // DEFINE: Validation variables\n  const blockIsValid = block !== null && typeof block === 'object' && block.clientId !== null && typeof block.clientId === 'string';\n\n  // IF: Block is not valid\n  if (blockIsValid !== true) {\n    return false;\n  }\n\n  // GET: Block based on ID, to make sure it exists\n  const currentBlock = select('core/block-editor').getBlock(block.clientId);\n\n  // IF: Block was found\n  if (!currentBlock !== true) {\n    // DECONSTRUCT: Block\n    const {\n      clientId: blockId = '',\n      isValid: blockIsValid = true,\n      innerBlocks: blockInnerBlocks = []\n    } = currentBlock;\n\n    // DEFINE: Validation variables\n    const blockInnerBlocksHasLength = blockInnerBlocks !== null && Array.isArray(blockInnerBlocks) && blockInnerBlocks.length >= 1;\n\n    // IF: Block is not valid\n    if (blockIsValid !== true) {\n      // DEFINE: New recovered block\n      const recoveredBlock = wpRecoverBlock(currentBlock);\n\n      // REPLACE: Broke block\n      replaceBlock(blockId, recoveredBlock);\n\n      // IF: Auto save post\n      if (autoSave === true) {\n        wp.data.dispatch(\"core/editor\").savePost();\n      }\n    }\n\n    // IF: Inner blocks has length\n    if (blockInnerBlocksHasLength) {\n      blockInnerBlocks.forEach((innerBlock = {}) => {\n        recoverBlock(innerBlock, autoSave);\n      });\n    }\n  }\n\n  // RETURN\n  return false;\n};\n\n// FUNCTION: Attempt to recover broken blocks\nconst autoRecoverBlocks = (autoSave = false) => {\n  // DECONSTRUCT: WP object\n  const {\n    wp = {}\n  } = window || {};\n  const {\n    domReady,\n    data = {}\n  } = wp;\n  const {\n    select\n  } = data;\n\n  // AWAIT: For dom to get ready\n  domReady(function () {\n    setTimeout(function () {\n      // DEFINE: Basic variables\n      const blocksArray = select('core/block-editor').getBlocks();\n      const blocksArrayHasLength = Array.isArray(blocksArray) && blocksArray.length >= 1;\n\n      // IF: Blocks array has length\n      if (blocksArrayHasLength === true) {\n        blocksArray.forEach((element = {}) => {\n          recoverBlock(element, autoSave);\n        });\n      }\n    }, 1);\n  });\n};\n\n// EXPORT\n/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (autoRecoverBlocks);\n\n// DECONSTRUCT: WP\nconst {\n  wp = {}\n} = window || {};\nconst {\n  domReady,\n  data\n} = wp;\n\n// AWAIT: jQuery to get ready\njQuery(document).on('fl-builder-fix-blocks', function () {\n  // DEFINE: Validation variables\n  const hasGutenbergClasses = jQuery('body').hasClass('post-php') === true && jQuery('.block-editor').length >= 1 && jQuery('body').hasClass('fl-builder-blocks');\n  const gutenbergHasObject = domReady !== undefined && data !== undefined;\n  const gutenbergIsPresent = hasGutenbergClasses === true && gutenbergHasObject === true;\n\n  // IF: Gutenberg editor is present\n  if (gutenbergIsPresent === true) {\n    autoRecoverBlocks(false);\n  }\n});\n\n//# sourceURL=webpack://bb-plugin/./src/wp/wp-editor/wordpress/index.js?\n}");
 
 /***/ })
 
@@ -1064,24 +197,11 @@ jQuery(document).on('fl-builder-fix-blocks', function () {
 /******/ 	})();
 /******/ 	
 /************************************************************************/
-var __webpack_exports__ = {};
-// This entry needs to be wrapped in an IIFE because it needs to be in strict mode.
-(() => {
-"use strict";
-/*!********************************!*\
-  !*** ./src/wp-editor/index.js ***!
-  \********************************/
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _wordpress__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./wordpress */ "./src/wp-editor/wordpress/index.js");
-/* harmony import */ var _store__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./store */ "./src/wp-editor/store/index.js");
-/* harmony import */ var _store__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_store__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _layout_block__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./layout-block */ "./src/wp-editor/layout-block/index.js");
-/* harmony import */ var _more_menu__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./more-menu */ "./src/wp-editor/more-menu/index.js");
-
-
-
-
-})();
-
+/******/ 	
+/******/ 	// startup
+/******/ 	// Load entry module and return exports
+/******/ 	// This entry module can't be inlined because the eval devtool is used.
+/******/ 	var __webpack_exports__ = __webpack_require__("./src/wp/wp-editor/index.js");
+/******/ 	
 /******/ })()
 ;

@@ -555,7 +555,30 @@ class FLBuilderMailChimp
 		$email_hash = $this->subscriberHash( $data[ 'email' ] );
 		$results = $this->put( 'lists/' . $list_id . '/members/' . $email_hash, $args );
 
+		if ( isset( $data['tags'] ) && is_array( $data['tags'] ) ) {
+			$this->add_tags( $list_id, $email_hash, $data['tags'] );
+		}
+
 		return $results;
+	}
+
+	/**
+	 * Add tags to a Mailchimp contact.
+	 *
+	 * @param string $list_id
+	 * @param string $email_hash
+	 * @param array  $tags
+	 *
+	 * @return array The Mailchimp API response.
+	 */
+	public function add_tags( $list_id, $email_hash, $tags ) {
+		$tag_data = array(
+			'tags' => array_map( function ( $tag ) {
+				return array( 'name' => $tag, 'status' => 'active' );
+			}, $tags )
+		);
+
+		return $this->post( 'lists/' . $list_id . '/members/' . $email_hash . '/tags', $tag_data );
 	}
 
 	/**

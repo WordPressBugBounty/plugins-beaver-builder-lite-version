@@ -492,47 +492,76 @@ class FLBuilderUISettingsForms {
 				continue;
 			}
 
-			foreach ( $node->settings as $key => $value ) {
-
-				// Look for image attachments.
-				if ( strstr( $key, '_src' ) ) {
-
-					$base = str_replace( '_src', '', $key );
-
-					if ( isset( $node->settings->$base ) ) {
-
-						if ( is_numeric( $node->settings->$base ) ) {
-							$id   = $node->settings->$base;
-							$data = self::prep_attachment_for_js_config( $id );
-							if ( $data ) {
-								$attachments[ $id ] = $data;
-							}
-						} elseif ( is_array( $node->settings->$base ) ) {
-							foreach ( $node->settings->$base as $id ) {
-								$data = self::prep_attachment_for_js_config( $id );
-								if ( $data ) {
-									$attachments[ $id ] = $data;
-								}
-							}
-						}
-					}
+			if ( ! empty( $node->dynamic ) ) {
+				$dynamic_child_nodes = FLBuilderDynamicGlobal::get_dynamic_child_nodes( $node );
+				foreach ( $dynamic_child_nodes as $child_node_id => $child_node ) {
+					$child_node_attachments = self::get_node_attachments( $child_node );
+					$attachments            = array_merge( $attachments, $child_node_attachments );
 				}
+			}
 
-				// Look for video attachments.
-				if ( isset( $fields[ $key ] ) && 'video' === $fields[ $key ]['type'] ) {
+			$node_attachments = self::get_node_attachments( $node );
+			$attachments      = array_merge( $attachments, $node_attachments );
 
-					if ( is_numeric( $value ) ) {
-						$id   = $value;
+		}
+
+		return $attachments;
+	}
+
+	/**
+	 * Gathers and prepares attachments for a specific node.
+	 *
+	 * @since 2.10
+	 * @param object $node
+	 * @return array
+	 */
+	static private function get_node_attachments( $node ) {
+		$attachments = [];
+
+		if ( empty( $node ) || empty( $node->settings ) ) {
+			return $attachments;
+		}
+
+		foreach ( $node->settings as $key => $value ) {
+
+			// Look for image attachments.
+			if ( strstr( $key, '_src' ) ) {
+
+				$base = str_replace( '_src', '', $key );
+
+				if ( isset( $node->settings->$base ) ) {
+
+					if ( is_numeric( $node->settings->$base ) ) {
+						$id   = $node->settings->$base;
 						$data = self::prep_attachment_for_js_config( $id );
 						if ( $data ) {
 							$attachments[ $id ] = $data;
 						}
-					} elseif ( is_array( $value ) ) {
-						foreach ( $value as $id ) {
+					} elseif ( is_array( $node->settings->$base ) ) {
+						foreach ( $node->settings->$base as $id ) {
 							$data = self::prep_attachment_for_js_config( $id );
 							if ( $data ) {
 								$attachments[ $id ] = $data;
 							}
+						}
+					}
+				}
+			}
+
+			// Look for video attachments.
+			if ( isset( $fields[ $key ] ) && 'video' === $fields[ $key ]['type'] ) {
+
+				if ( is_numeric( $value ) ) {
+					$id   = $value;
+					$data = self::prep_attachment_for_js_config( $id );
+					if ( $data ) {
+						$attachments[ $id ] = $data;
+					}
+				} elseif ( is_array( $value ) ) {
+					foreach ( $value as $id ) {
+						$data = self::prep_attachment_for_js_config( $id );
+						if ( $data ) {
+							$attachments[ $id ] = $data;
 						}
 					}
 				}
@@ -717,6 +746,11 @@ class FLBuilderUISettingsForms {
 			$tabs = FLBuilderModel::$settings_forms[ $form ]['tabs'];
 		} elseif ( 'module' === $group ) {
 			$tabs = FLBuilderModel::$modules[ $form ]->form;
+		} elseif ( 'dynamic' === $group && $data['node_id'] ) {
+			$dn_tabs = FLBuilderDynamicGlobal::get_dynamic_node_tabs( $data['node_id'], $group );
+			$tabs    = $dn_tabs['tabs'];
+		} else {
+			$tabs = [];
 		}
 
 		if ( empty( $tabs ) ) {
@@ -914,9 +948,10 @@ class FLBuilderUISettingsForms {
 	 * @param string $name The field name.
 	 * @param array $field An array of setup data for the field.
 	 * @param object $settings Form settings data object.
+	 * @param array  $data Dynamic Node fields data.
 	 * @return void
 	 */
-	static public function render_settings_field( $name, $field, $settings = null ) {
+	static public function render_settings_field( $name, $field, $settings = null, $data = null ) {
 
 		/**
 		 * Use this filter to modify the config array for a field before it is rendered.

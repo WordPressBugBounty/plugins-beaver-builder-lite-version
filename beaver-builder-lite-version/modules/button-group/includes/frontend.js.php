@@ -5,13 +5,18 @@ for ( $i = 0; $i < count( $settings->items ); $i++ ) :
 		continue;
 	}
 
-	if ( isset( $settings->items[ $i ]->click_action ) && 'lightbox' == $settings->items[ $i ]->click_action ) :
-		$button_group_id = "fl-node-$id";
-		$alt_node        = "fl-node-$id-$i";
+	$button_group_id = "fl-node-$id";
+	if ( isset( $settings->items[ $i ]->click_action ) && 'link' !== $settings->items[ $i ]->click_action ) :
+		$button_item_id = '#' . $button_group_id . '-' . $i;
 		?>
 		(function($){
 			$('.<?php echo $button_group_id; ?>').each(function(){
 				var $this = $(this);
+				<?php if ( 'button' == $settings->items[ $i ]->click_action ) : ?>
+				$this.find('<?php echo $button_item_id; ?> .fl-button').on('click', function(){
+					<?php echo $settings->items[ $i ]->button; ?>
+				});
+				<?php elseif ( 'lightbox' == $settings->items[ $i ]->click_action ) : ?>
 				$this.find('.fl-button-lightbox').magnificPopup({
 					<?php if ( 'video' == $settings->items[ $i ]->lightbox_content_type ) : ?>
 					type: 'iframe',
@@ -20,10 +25,10 @@ for ( $i = 0; $i < count( $settings->items ); $i++ ) :
 
 					<?php if ( 'html' == $settings->items[ $i ]->lightbox_content_type ) : ?>
 					type: 'inline',
-					items: {
-						src: $this.find('.fl-button-lightbox-content')[0]
-					},
 					callbacks: {
+						elementParse: function(item) {
+							item.src = $( item.el ).closest('.fl-button-wrap').find('.fl-button-lightbox-content');
+						},
 						open: function() {
 							var divWrap = $( $(this.content)[0] ).find('> div');
 							divWrap.css('display', 'block');
@@ -39,6 +44,7 @@ for ( $i = 0; $i < count( $settings->items ); $i++ ) :
 					fixedContentPos: true,
 					tLoading: '<i class="fas fa-spinner fa-spin fa-3x fa-fw"></i>'
 				});
+				<?php endif; ?>
 			});
 		})(jQuery);
 		<?php

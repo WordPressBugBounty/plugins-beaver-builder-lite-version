@@ -146,10 +146,10 @@ final class FLBuilderAdminSettings {
 		}
 		// Scripts
 		wp_enqueue_script( 'fl-builder-admin-settings', FLBuilder::plugin_url() . 'js/fl-builder-admin-settings.js', array( 'fl-jquery-tiptip' ), FL_BUILDER_VERSION );
-		wp_enqueue_script( 'jquery-actual', FLBuilder::plugin_url() . 'js/jquery.actual.min.js', array( 'jquery' ), FL_BUILDER_VERSION );
-		wp_enqueue_script( 'jquery-multiselect', FLBuilder::plugin_url() . 'js/jquery.multiselect.js', array( 'jquery' ), FL_BUILDER_VERSION );
-		wp_enqueue_script( 'fl-jquery-tiptip', FLBuilder::plugin_url() . 'js/jquery.tiptip.min.js', array( 'jquery' ), FL_BUILDER_VERSION, true );
-		wp_enqueue_script( 'fl-admin-notify', FLBuilder::plugin_url() . 'js/simple-notify.min.js', array(), FL_BUILDER_VERSION );
+		wp_enqueue_script( 'jquery-actual', FLBuilder::plugin_url() . 'js/libs/jquery.actual.min.js', array( 'jquery' ), FL_BUILDER_VERSION );
+		wp_enqueue_script( 'jquery-multiselect', FLBuilder::plugin_url() . 'js/libs/jquery.multiselect.js', array( 'jquery' ), FL_BUILDER_VERSION );
+		wp_enqueue_script( 'fl-jquery-tiptip', FLBuilder::plugin_url() . 'js/libs/jquery.tiptip.min.js', array( 'jquery' ), FL_BUILDER_VERSION, true );
+		wp_enqueue_script( 'fl-admin-notify', FLBuilder::plugin_url() . 'js/libs/simple-notify.min.js', array(), FL_BUILDER_VERSION );
 		// Media Uploader
 		wp_enqueue_media();
 	}

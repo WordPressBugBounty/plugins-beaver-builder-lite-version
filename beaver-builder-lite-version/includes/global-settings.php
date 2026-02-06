@@ -33,10 +33,10 @@ FLBuilder::register_settings_form('global', array(
 						),
 					),
 				),
-				'rows'         => array(
-					'title'  => __( 'Rows', 'fl-builder' ),
+				'row_spacing'  => array(
+					'title'  => __( 'Row Spacing', 'fl-builder' ),
 					'fields' => array(
-						'row_margins'               => array(
+						'row_margins'           => array(
 							'type'       => 'dimension',
 							'label'      => __( 'Margins', 'fl-builder' ),
 							'slider'     => true,
@@ -86,7 +86,7 @@ FLBuilder::register_settings_form('global', array(
 								),
 							),
 						),
-						'row_padding'               => array(
+						'row_padding'           => array(
 							'type'       => 'dimension',
 							'label'      => __( 'Padding', 'fl-builder' ),
 							'slider'     => true,
@@ -139,6 +139,21 @@ FLBuilder::register_settings_form('global', array(
 								),
 							),
 						),
+						'top_level_box_spacing' => array(
+							'type'    => 'select',
+							'label'   => __( 'Apply to Box', 'fl-builder' ),
+							'help'    => __( 'When enabled, global row spacing will also be applied to Box modules in the top-level layout.', 'fl-builder' ),
+							'default' => '1',
+							'options' => array(
+								'1' => __( 'Yes', 'fl-builder' ),
+								'0' => __( 'No', 'fl-builder' ),
+							),
+						),
+					),
+				),
+				'rows'         => array(
+					'title'  => __( 'Row Defaults', 'fl-builder' ),
+					'fields' => array(
 						'row_width'                 => array(
 							'type'       => 'unit',
 							'label'      => __( 'Max Width', 'fl-builder' ),
@@ -186,7 +201,7 @@ FLBuilder::register_settings_form('global', array(
 					),
 				),
 				'columns'      => array(
-					'title'  => __( 'Columns', 'fl-builder' ),
+					'title'  => __( 'Column Spacing', 'fl-builder' ),
 					'fields' => array(
 						'column_margins' => array(
 							'type'       => 'dimension',
@@ -291,7 +306,7 @@ FLBuilder::register_settings_form('global', array(
 					),
 				),
 				'modules'      => array(
-					'title'  => __( 'Modules', 'fl-builder' ),
+					'title'  => __( 'Module Spacing', 'fl-builder' ),
 					'fields' => array(
 						'module_margins' => array(
 							'type'       => 'dimension',

@@ -191,7 +191,7 @@ $row_settings = array(
 							'show_alpha'  => true,
 							'preview'     => array(
 								'type'     => 'css',
-								'selector' => '.fl-row-content-wrap a',
+								'selector' => '> .fl-row-content-wrap a',
 								'property' => 'color',
 							),
 						),
@@ -551,6 +551,18 @@ $row_settings = array(
 						'bg_video_audio'       => array(
 							'type'    => 'select',
 							'label'   => __( 'Enable Audio', 'fl-builder' ),
+							'default' => 'no',
+							'options' => array(
+								'no'  => __( 'No', 'fl-builder' ),
+								'yes' => __( 'Yes', 'fl-builder' ),
+							),
+							'preview' => array(
+								'type' => 'refresh',
+							),
+						),
+						'bg_video_play_pause'  => array(
+							'type'    => 'select',
+							'label'   => __( 'Enable Play/Pause Control', 'fl-builder' ),
 							'default' => 'no',
 							'options' => array(
 								'no'  => __( 'No', 'fl-builder' ),
@@ -938,9 +950,6 @@ $row_settings = array(
 								'logged_in' => array(
 									'fields' => array( 'visibility_user_capability' ),
 								),
-							),
-							'preview' => array(
-								'type' => 'none',
 							),
 						),
 						'visibility_user_capability' => array(

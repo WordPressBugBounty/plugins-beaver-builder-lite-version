@@ -8,7 +8,7 @@
 <?php endif; ?>
 
 <?php if ( ! empty( $settings->link_color ) ) : // Link Color ?>
-.fl-builder-content .fl-node-<?php echo $id; ?> a {
+.fl-builder-content .fl-node-<?php echo $id; ?> .fl-row-content-wrap a {
 	color: <?php echo FLBuilderColor::hex_or_rgb( $settings->link_color ); ?>;
 }
 <?php elseif ( ! empty( $settings->text_color ) ) : ?>
@@ -18,7 +18,7 @@
 <?php endif; ?>
 
 <?php if ( ! empty( $settings->hover_color ) ) : // Link Hover Color ?>
-.fl-builder-content .fl-node-<?php echo $id; ?> a:hover {
+.fl-builder-content .fl-node-<?php echo $id; ?> .fl-row-content-wrap a:hover {
 	color: <?php echo FLBuilderColor::hex_or_rgb( $settings->hover_color ); ?>;
 }
 <?php elseif ( ! empty( $settings->text_color ) ) : ?>
@@ -56,6 +56,20 @@
 .fl-builder-content .fl-node-<?php echo $id; ?> h5 a,
 .fl-builder-content .fl-node-<?php echo $id; ?> h6 a {
 	color: <?php echo FLBuilderColor::hex_or_rgb( $settings->text_color ); ?>;
+}
+<?php endif; ?>
+
+<?php if ( 'yes' === $row->settings->bg_video_play_pause ) : ?>
+.fl-node-<?php echo $row->node; ?> .fl-bg-video-play-pause {
+	cursor: pointer;
+	position: absolute;
+	bottom: 20px;
+	left: 20px;
+	z-index: 5;
+	width: 18px;
+}
+.fl-node-<?php echo $row->node; ?> .fl-bg-video-play-pause-control {
+	font-size: 18px;
 }
 <?php endif; ?>
 

@@ -199,6 +199,24 @@ class FLButtonGroupModule extends FLBuilderModule {
 
 		return $settings;
 	}
+
+	/**
+	 * Returns the relevant deprecated version of the button module if the button group module is deprecated.
+	 * It returns null (current version) if the button group module is not deprecated.
+	 *
+	 * @since 2.10
+	 * @method get_button_version
+	 * @return integer|null
+	 */
+	public function get_button_version() {
+		switch ( $this->version ) {
+			case 1:
+			case 2:
+				return 2;
+			default:
+				return null;
+		}
+	}
 }
 
 /**
@@ -391,7 +409,7 @@ FLBuilder::register_module('FLButtonGroupModule', array(
 						'show_alpha'  => true,
 						'preview'     => array(
 							'type'     => 'css',
-							'selector' => '.fl-button-group-buttons a.fl-button:hover',
+							'selector' => '.fl-button-group-buttons .fl-button:is(a, button):hover',
 							'property' => 'background-color',
 						),
 					),
@@ -514,11 +532,15 @@ FLBuilder::register_settings_form('buttons_form', array(
 							'default' => 'link',
 							'options' => array(
 								'link'     => __( 'Link', 'fl-builder' ),
+								'button'   => __( 'Button', 'fl-builder' ),
 								'lightbox' => __( 'Lightbox', 'fl-builder' ),
 							),
 							'toggle'  => array(
 								'link'     => array(
 									'fields' => array( 'link' ),
+								),
+								'button'   => array(
+									'fields' => array( 'button' ),
 								),
 								'lightbox' => array(
 									'sections' => array( 'lightbox' ),
@@ -540,6 +562,16 @@ FLBuilder::register_settings_form('buttons_form', array(
 								'type' => 'none',
 							),
 							'connections'   => array( 'url' ),
+						),
+						'button'         => array(
+							'type'    => 'code',
+							'label'   => __( 'Button Code', 'fl-builder' ),
+							'editor'  => 'javascript',
+							'rows'    => '18',
+							'help'    => __( 'Implement custom button functionality using JavaScript. Your logic will be available to the button\'s click event.', 'fl-builder' ),
+							'preview' => array(
+								'type' => 'none',
+							),
 						),
 					),
 				),
@@ -570,7 +602,7 @@ FLBuilder::register_settings_form('buttons_form', array(
 							'type'        => 'code',
 							'editor'      => 'html',
 							'label'       => '',
-							'rows'        => '19',
+							'rows'        => '18',
 							'preview'     => array(
 								'type' => 'none',
 							),

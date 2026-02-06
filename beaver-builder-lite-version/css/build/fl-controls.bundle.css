@@ -1,3 +1,6 @@
+/*!************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[1].use[1]!./node_modules/sass-loader/dist/cjs.js!./src/FL/controls/components/style.scss ***!
+  \************************************************************************************************************************************************************/
 .fl-controls-button {
   display: grid;
   grid-auto-flow: column;
@@ -102,6 +105,9 @@
 .fl-controls-grid-table > * > * :only-child {
   min-width: 100%;
 }
+/*!*******************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[1].use[1]!./node_modules/sass-loader/dist/cjs.js!./src/FL/controls/components/dialog/style.scss ***!
+  \*******************************************************************************************************************************************************************/
 .fl-controls-dialog {
   box-sizing: border-box;
   transform-origin: center top;
@@ -157,6 +163,9 @@
 .fl-controls-dialog.fl-appearance-panel::backdrop {
   background: transparent;
 }
+/*!*********************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[1].use[1]!./node_modules/sass-loader/dist/cjs.js!./src/FL/controls/components/color/ui/style.scss ***!
+  \*********************************************************************************************************************************************************************/
 body div.fl-color-picker-toolbar {
   color: black;
   color: var(--fg-color);
@@ -277,7 +286,7 @@ body div.fl-color-picker-toolbar .picker-input-wrap > input {
   height: var(--size);
   width: var(--size);
   box-sizing: border-box !important;
-  box-shadow: inset 0 0 0 1px hsla(0, 0%, 0.5%, 0.2);
+  box-shadow: inset 0 0 0 1px hsla(0, 0%, 50%, 0.2);
   border-radius: var(--radius);
   background: var(--checkers-bg);
   background-size: var(--bg-size);
@@ -308,7 +317,7 @@ body div.fl-color-picker-toolbar .picker-input-wrap > input {
 .fl-controls-color-swatch.mix-swatch:hover {
   scale: 1.25;
   filter: brightness(99%);
-  box-shadow: inset 0 0 0 1px hsla(0, 0%, 0.5%, 0.2), 0 8px 16px hsla(0, 0%, 0.5%, 0.2);
+  box-shadow: inset 0 0 0 1px hsla(0, 0%, 50%, 0.2), 0 8px 16px hsla(0, 0%, 50%, 0.2);
   z-index: 1;
   border-radius: 6px;
 }
@@ -479,6 +488,9 @@ body div.fl-color-picker-toolbar .picker-input-wrap > input {
   color: var(--text-color) !important;
   box-shadow: 0 0 0px 1.5px white;
 }
+/*!******************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[1].use[1]!./node_modules/sass-loader/dist/cjs.js!./src/FL/controls/components/color/style.scss ***!
+  \******************************************************************************************************************************************************************/
 .fl-controls-color-input {
   --outline-color: var(--fl-controls-outline-color);
   --radius: 6px;
@@ -513,6 +525,9 @@ body div.fl-color-picker-toolbar .picker-input-wrap > input {
   flex-grow: 1;
   display: flex;
 }
+/*!*********************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[1].use[1]!./node_modules/sass-loader/dist/cjs.js!./src/FL/controls/components/gradient/style.scss ***!
+  \*********************************************************************************************************************************************************************/
 .fl-controls-gradient-picker {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr)) var(--fl-controls-target-size);
@@ -619,6 +634,9 @@ body div.fl-color-picker-toolbar .picker-input-wrap > input {
   border-radius: var(--fl-controls-radius);
   background: var(--fl-controls-platter-bg-color);
 }
+/*!******************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[1].use[1]!./node_modules/sass-loader/dist/cjs.js!./src/FL/controls/components/media/style.scss ***!
+  \******************************************************************************************************************************************************************/
 .fl-controls-media-modal-dialog {
   position: relative;
   --inset: 30px;
@@ -641,6 +659,9 @@ body div.fl-color-picker-toolbar .picker-input-wrap > input {
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(10px) saturate(200%);
 }
+/*!*****************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[1].use[1]!./node_modules/sass-loader/dist/cjs.js!./src/FL/controls/components/series/components/title-card/style.scss ***!
+  \*****************************************************************************************************************************************************************************************/
 .fl-controls-title-card {
   display: grid;
   grid-template-columns: 36px minmax(0, 1fr);
@@ -694,6 +715,9 @@ body div.fl-color-picker-toolbar .picker-input-wrap > input {
   color: var(--color);
   background: transparent;
 }
+/*!*******************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[1].use[1]!./node_modules/sass-loader/dist/cjs.js!./src/FL/controls/components/series/style.scss ***!
+  \*******************************************************************************************************************************************************************/
 .fl-controls-series {
   display: flex;
   flex-direction: column;
@@ -945,6 +969,9 @@ body div.fl-color-picker-toolbar .picker-input-wrap > input {
   background: var(--fl-controls-platter-bg-color);
   border-radius: var(--fl-controls-radius);
 }
+/*!***************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[1].use[1]!./node_modules/sass-loader/dist/cjs.js!./src/FL/controls/components/background/series-definitions/gradient/style.scss ***!
+  \***************************************************************************************************************************************************************************************************/
 .fl-controls-gradient-picker-dialog {
   width: 320px;
 }
@@ -976,6 +1003,9 @@ body div.fl-color-picker-toolbar .picker-input-wrap > input {
   grid-row: 1/-1;
   height: 6px;
 }
+/*!*******************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[1].use[1]!./node_modules/sass-loader/dist/cjs.js!./src/FL/controls/components/background/gallery/style.scss ***!
+  \*******************************************************************************************************************************************************************************/
 .fl-controls-background-gallery-dialog {
   place-content: start stretch !important;
 }
@@ -1008,6 +1038,9 @@ body div.fl-color-picker-toolbar .picker-input-wrap > input {
 .fl-controls-background-gallery-dialog .bg-gallery-item:hover {
   scale: 1.05;
 }
+/*!********************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[1].use[1]!./node_modules/sass-loader/dist/cjs.js!./src/FL/controls/components/section/style.scss ***!
+  \********************************************************************************************************************************************************************/
 .fl-controls-section {
   --outline: var(--fl-controls-outline-color);
   background: var(--fl-controls-panel-bg-color);
@@ -1034,6 +1067,9 @@ body div.fl-color-picker-toolbar .picker-input-wrap > input {
   gap: 16px;
   padding: 24px 16px;
 }
+/*!********************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[1].use[1]!./node_modules/sass-loader/dist/cjs.js!./src/FL/controls/components/sliders/style.scss ***!
+  \********************************************************************************************************************************************************************/
 .fl-range-input:where(input[type=range]) {
   -webkit-appearance: none !important;
   appearance: none !important;
@@ -1171,6 +1207,9 @@ body div.fl-color-picker-toolbar .picker-input-wrap > input {
   background-position: var(--bg-position);
   background-color: #f3f3f3;
 }
+/*!*************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[1].use[1]!./node_modules/sass-loader/dist/cjs.js!./src/FL/controls/style.scss ***!
+  \*************************************************************************************************************************************************/
 @property --fl-controls-radius {
   inherits: true;
   initial-value: 8px;
@@ -1232,4 +1271,3 @@ body div.fl-color-picker-toolbar .picker-input-wrap > input {
   --fl-controls-checker-color-a: hsl(var(--fl-controls-hue), 0%, 35%);
   --fl-controls-checker-color-b: hsl(var(--fl-controls-hue), 0%, 25%);
 }
-

@@ -15,8 +15,8 @@ if ( '' === $settings->width ) {
 }
 ?>
 
-<?php echo $vert_selector; ?> a.fl-button,
-<?php echo $horiz_selector; ?> a.fl-button {
+<?php echo $vert_selector; ?> .fl-button:is(a, button),
+<?php echo $horiz_selector; ?> .fl-button:is(a, button) {
 	width: <?php echo $width; ?>;
 }
 <?php echo $horiz_selector; ?> {
@@ -103,17 +103,17 @@ FLBuilderCSS::dimension_field_rule( array(
 // Text (Color, Typography, etc)
 if ( ! empty( $settings->text_color ) ) :
 	?>
-	.fl-builder-content <?php echo $group_selector; ?> a.fl-button > span,
-	.fl-builder-content <?php echo $group_selector; ?> a.fl-button > i {
+	.fl-builder-content <?php echo $group_selector; ?> .fl-button:is(a, button) > span,
+	.fl-builder-content <?php echo $group_selector; ?> .fl-button:is(a, button) > i {
 		color: <?php echo FLBuilderColor::hex_or_rgb( $settings->text_color ); ?>;
 	}
 <?php endif; ?>
 
 <?php if ( ! empty( $settings->text_hover_color ) ) : ?>
-	.fl-builder-content <?php echo $group_selector; ?> a.fl-button:hover > span,
-	.fl-builder-content <?php echo $group_selector; ?> a.fl-button:focus > span,
-	.fl-builder-content <?php echo $group_selector; ?> a.fl-button:hover > i,
-	.fl-builder-content <?php echo $group_selector; ?> a.fl-button:focus > i {
+	.fl-builder-content <?php echo $group_selector; ?> .fl-button:is(a, button):hover > span,
+	.fl-builder-content <?php echo $group_selector; ?> .fl-button:is(a, button):focus > span,
+	.fl-builder-content <?php echo $group_selector; ?> .fl-button:is(a, button):hover > i,
+	.fl-builder-content <?php echo $group_selector; ?> .fl-button:is(a, button):focus > i {
 		color: <?php echo FLBuilderColor::hex_or_rgb( $settings->text_hover_color ); ?>;
 	}
 <?php endif; ?>
@@ -123,14 +123,14 @@ if ( ! empty( $settings->text_color ) ) :
 FLBuilderCSS::typography_field_rule( array(
 	'settings'     => $settings,
 	'setting_name' => 'typography',
-	'selector'     => ".fl-builder-content $group_selector a.fl-button, .fl-builder-content $group_selector a.fl-button:visited",
+	'selector'     => ".fl-builder-content $group_selector .fl-button:is(a, button), .fl-builder-content $group_selector a.fl-button:visited",
 ) );
 
 // Button Padding
 FLBuilderCSS::dimension_field_rule( array(
 	'settings'     => $settings,
 	'setting_name' => 'button_spacing',
-	'selector'     => ".fl-builder-content $buttons_selector .fl-button-group-button a.fl-button",
+	'selector'     => ".fl-builder-content $buttons_selector .fl-button-group-button .fl-button:is(a, button)",
 	'unit'         => 'px',
 	'props'        => array(
 		'padding-top'    => 'button_padding_top',
@@ -181,7 +181,7 @@ if ( ! empty( $settings->bg_color ) ) :
 
 	$bg_grad_start = FLBuilderColor::adjust_brightness( $settings->bg_color, 30, 'lighten' );
 	?>
-.fl-builder-content <?php echo $buttons_selector; ?> a.fl-button {
+.fl-builder-content <?php echo $buttons_selector; ?> .fl-button:is(a, button) {
 	background: <?php echo FLBuilderColor::hex_or_rgb( $settings->bg_color ); ?>;
 	<?php echo $bgroup_default_border; ?>
 	<?php if ( 'gradient' == $settings->style ) : ?>
@@ -195,8 +195,8 @@ endif;
 if ( ! empty( $settings->bg_hover_color ) ) :
 	$bg_hover_grad_start = FLBuilderColor::adjust_brightness( $settings->bg_hover_color, 30, 'lighten' );
 	?>
-.fl-builder-content <?php echo $buttons_selector; ?> a.fl-button:hover,
-.fl-builder-content <?php echo $buttons_selector; ?> a.fl-button:focus {
+.fl-builder-content <?php echo $buttons_selector; ?> .fl-button:is(a, button):hover,
+.fl-builder-content <?php echo $buttons_selector; ?> .fl-button:is(a, button):focus {
 
 	background: <?php echo FLBuilderColor::hex_or_rgb( $settings->bg_hover_color ); ?>;
 
@@ -216,13 +216,13 @@ if ( 'adv-gradient' === $settings->style ) :
 		$adv_grad_bg_color_end   = FLBuilderColor::hex_or_rgb( $adv_grad_bg_color );
 		$adv_grad_border_color   = FLBuilderColor::hex_or_rgb( FLBuilderColor::adjust_brightness( $adv_grad_bg_color, 12, 'darken' ) );
 
-		$adv_grad_css_rule['selector'] = "$buttons_selector .fl-button-group-button a.fl-button, $buttons_selector .fl-button-group-button a.fl-button:hover";
+		$adv_grad_css_rule['selector'] = "$buttons_selector .fl-button-group-button .fl-button:is(a, button), $buttons_selector .fl-button-group-button .fl-button:is(a, button):hover";
 		$adv_grad_css_rule['props']    = array(
 			'border'           => "1px solid $adv_grad_border_color",
 			'background-image' => "linear-gradient(to bottom, $adv_grad_bg_color_start 0%, $adv_grad_bg_color_end 100%)",
 		);
 	} else {
-		$adv_grad_css_rule['selector'] = "$buttons_selector .fl-button-group-button a.fl-button";
+		$adv_grad_css_rule['selector'] = "$buttons_selector .fl-button-group-button .fl-button:is(a, button)";
 		$adv_grad_css_rule['props']    = array(
 			'background-image' => FLBuilderColor::gradient( $settings->bg_gradient ),
 		);
@@ -234,7 +234,7 @@ endif;
 
 $group_custom_gradient_hover_enable = 'adv-gradient' === $settings->style && ! ( empty( $settings->bg_gradient_hover['colors'][0] ) && empty( $settings->bg_gradient_hover['colors'][1] ) );
 FLBuilderCSS::rule( array(
-	'selector' => "$buttons_selector .fl-button-group-button a.fl-button:hover",
+	'selector' => "$buttons_selector .fl-button-group-button .fl-button:is(a, button):hover",
 	'enabled'  => $group_custom_gradient_hover_enable,
 	'props'    => array(
 		'background-image' => FLBuilderColor::gradient( $settings->bg_gradient_hover ),
@@ -259,7 +259,7 @@ if ( 'adv-gradient' !== $settings->style ) {
 FLBuilderCSS::border_field_rule( array(
 	'settings'     => $settings,
 	'setting_name' => 'border',
-	'selector'     => ".fl-builder-content $buttons_selector a.fl-button",
+	'selector'     => ".fl-builder-content $buttons_selector .fl-button:is(a, button)",
 ) );
 
 // Border - Hover Settings
@@ -282,7 +282,7 @@ if ( 'adv-gradient' !== $settings->style ) {
 FLBuilderCSS::border_field_rule( array(
 	'settings'     => $settings,
 	'setting_name' => 'border',
-	'selector'     => ".fl-builder-content $buttons_selector a.fl-button:hover",
+	'selector'     => ".fl-builder-content $buttons_selector .fl-button:is(a, button):hover",
 ) );
 
 // Default background color for gradient styles.
@@ -292,7 +292,7 @@ if ( empty( $settings->bg_color ) && 'gradient' === $settings->style ) {
 
 // Border - Default
 FLBuilderCSS::rule( array(
-	'selector' => "$buttons_selector a.fl-button, $buttons_selector a.fl-button:visited",
+	'selector' => "$buttons_selector .fl-button:is(a, button), $buttons_selector a.fl-button:visited",
 	'enabled'  => ! empty( $settings->bg_color ) && 'gradient' === $settings->style,
 	'props'    => array(
 		'border' => '1px solid ' . FLBuilderColor::hex_or_rgb( FLBuilderColor::adjust_brightness( $settings->bg_color, 12, 'darken' ) ),
@@ -311,7 +311,7 @@ for ( $i = 0; $i < count( $settings->items ); $i++ ) :
 	FLBuilderCSS::dimension_field_rule( array(
 		'settings'     => $settings->items[ $i ],
 		'setting_name' => 'padding',
-		'selector'     => "$button_group_button_id a.fl-button",
+		'selector'     => "$button_group_button_id .fl-button:is(a, button)",
 		'unit'         => 'px',
 		'props'        => array(
 			'padding-top'    => 'padding_top',
@@ -324,8 +324,8 @@ for ( $i = 0; $i < count( $settings->items ); $i++ ) :
 	// Text Color
 	if ( ! empty( $settings->items[ $i ]->button_item_text_color ) ) :
 		?>
-		<?php echo $button_group_button_id; ?> a.fl-button > span,
-		<?php echo $button_group_button_id; ?> a.fl-button > i {
+		<?php echo $button_group_button_id; ?> .fl-button:is(a, button) > span,
+		<?php echo $button_group_button_id; ?> .fl-button:is(a, button) > i {
 			color: <?php echo FLBuilderColor::hex_or_rgb( $settings->items[ $i ]->button_item_text_color ); ?>;
 		}
 		<?php
@@ -335,16 +335,16 @@ for ( $i = 0; $i < count( $settings->items ); $i++ ) :
 	FLBuilderCSS::typography_field_rule( array(
 		'settings'     => $settings->items[ $i ],
 		'setting_name' => 'button_item_typography',
-		'selector'     => "$button_group_button_id a.fl-button, $button_group_button_id a.fl-button:visited",
+		'selector'     => "$button_group_button_id .fl-button:is(a, button), $button_group_button_id a.fl-button:visited",
 	) );
 
 
 	if ( ! empty( $settings->items[ $i ]->button_item_text_hover_color ) ) :
 		?>
-		<?php echo $button_group_button_id; ?> a.fl-button:hover > span,
-		<?php echo $button_group_button_id; ?> a.fl-button:focus > span,
-		<?php echo $button_group_button_id; ?> a.fl-button:hover > i,
-		<?php echo $button_group_button_id; ?> a.fl-button:focus > i {
+		<?php echo $button_group_button_id; ?> .fl-button:is(a, button):hover > span,
+		<?php echo $button_group_button_id; ?> .fl-button:is(a, button):focus > span,
+		<?php echo $button_group_button_id; ?> .fl-button:is(a, button):hover > i,
+		<?php echo $button_group_button_id; ?> .fl-button:is(a, button):focus > i {
 			color: <?php echo FLBuilderColor::hex_or_rgb( $settings->items[ $i ]->button_item_text_hover_color ); ?>;
 		}
 		<?php
@@ -358,7 +358,7 @@ for ( $i = 0; $i < count( $settings->items ); $i++ ) :
 	}
 	?>
 
-	<?php echo $button_group_button_id; ?> a.fl-button {
+	<?php echo $button_group_button_id; ?> .fl-button:is(a, button) {
 		<?php if ( ! empty( $settings->items[ $i ]->button_item_bg_color ) ) : ?>
 				<?php
 
@@ -388,8 +388,8 @@ for ( $i = 0; $i < count( $settings->items ); $i++ ) :
 	if ( ! empty( $settings->items[ $i ]->button_item_bg_hover_color ) ) :
 		$button_item_bg_hover_grad_start = FLBuilderColor::adjust_brightness( $settings->items[ $i ]->button_item_bg_hover_color, 30, 'lighten' );
 		?>
-		<?php echo $button_group_button_id; ?> a.fl-button:hover,
-		<?php echo $button_group_button_id; ?> a.fl-button:focus {
+		<?php echo $button_group_button_id; ?> .fl-button:is(a, button):hover,
+		<?php echo $button_group_button_id; ?> .fl-button:is(a, button):focus {
 			background: <?php echo FLBuilderColor::hex_or_rgb( $settings->items[ $i ]->button_item_bg_hover_color ); ?>;
 			<?php if ( ! empty( $settings->items[ $i ]->button_item_style ) && 'gradient' === $settings->items[ $i ]->button_item_style ) : ?>
 			background: linear-gradient(to bottom,  <?php echo FLBuilderColor::hex_or_rgb( $button_item_bg_hover_grad_start ); ?> 0%, <?php echo FLBuilderColor::hex_or_rgb( $settings->items[ $i ]->button_item_bg_hover_color ); ?> 100%);
@@ -408,13 +408,13 @@ for ( $i = 0; $i < count( $settings->items ); $i++ ) :
 			$adv_grad_bg_color_end   = FLBuilderColor::hex_or_rgb( $adv_grad_bg_color );
 			$adv_grad_border_color   = FLBuilderColor::hex_or_rgb( FLBuilderColor::adjust_brightness( $adv_grad_bg_color, 12, 'darken' ) );
 
-			$adv_grad_css_rule['selector'] = "$button_group_button_id a.fl-button, $button_group_button_id a.fl-button:hover";
+			$adv_grad_css_rule['selector'] = "$button_group_button_id .fl-button:is(a, button), $button_group_button_id .fl-button:is(a, button):hover";
 			$adv_grad_css_rule['props']    = array(
 				'border'           => "1px solid $adv_grad_border_color",
 				'background-image' => "linear-gradient(to bottom, $adv_grad_bg_color_start 0%, $adv_grad_bg_color_end 100%)",
 			);
 		} else {
-			$adv_grad_css_rule['selector'] = "$button_group_button_id a.fl-button";
+			$adv_grad_css_rule['selector'] = "$button_group_button_id .fl-button:is(a, button)";
 			$adv_grad_css_rule['props']    = array(
 				'background-image' => FLBuilderColor::gradient( $button_item_gradient ),
 			);
@@ -426,7 +426,7 @@ for ( $i = 0; $i < count( $settings->items ); $i++ ) :
 		$button_item_gradient_hover = json_decode( json_encode( $settings->items[ $i ]->button_item_bg_gradient_hover ), true );
 		if ( ! ( empty( $button_item_gradient_hover['colors'][0] ) && empty( $button_item_gradient_hover['colors'][1] ) ) ) :
 			FLBuilderCSS::rule( array(
-				'selector' => "$button_group_button_id a.fl-button:hover",
+				'selector' => "$button_group_button_id .fl-button:is(a, button):hover",
 				'props'    => array(
 					'background-image' => FLBuilderColor::gradient( $button_item_gradient_hover ),
 				),
@@ -502,28 +502,28 @@ for ( $i = 0; $i < count( $settings->items ); $i++ ) :
 	// Border
 	if ( ! empty( $settings->items[ $i ]->button_item_border->style ) ) {
 		if ( empty( $settings->items[ $i ]->button_item_border->width->top ) ) {
-			$settings->items[ $i ]->button_item_border->width->top = $settings->border['width']['top'];
+			$settings->items[ $i ]->button_item_border->width->top = $settings->border['width']['top'] ?? null;
 		}
 		if ( empty( $settings->items[ $i ]->button_item_border->width->bottom ) ) {
-			$settings->items[ $i ]->button_item_border->width->bottom = $settings->border['width']['bottom'];
+			$settings->items[ $i ]->button_item_border->width->bottom = $settings->border['width']['bottom'] ?? null;
 		}
 		if ( empty( $settings->items[ $i ]->button_item_border->width->left ) ) {
-			$settings->items[ $i ]->button_item_border->width->left = $settings->border['width']['left'];
+			$settings->items[ $i ]->button_item_border->width->left = $settings->border['width']['left'] ?? null;
 		}
 		if ( empty( $settings->items[ $i ]->button_item_border->width->right ) ) {
-			$settings->items[ $i ]->button_item_border->width->right = $settings->border['width']['right'];
+			$settings->items[ $i ]->button_item_border->width->right = $settings->border['width']['right'] ?? null;
 		}
 		FLBuilderCSS::border_field_rule( array(
 			'settings'     => $settings->items[ $i ],
 			'setting_name' => 'button_item_border',
-			'selector'     => "$button_group_button_id a.fl-button",
+			'selector'     => "$button_group_button_id .fl-button:is(a, button)",
 		) );
 	}
 
 	// Border Hover
 	if ( ! empty( $settings->items[ $i ]->button_item_border_hover_color ) ) {
 		?>
-		<?php echo $button_group_button_id; ?> a.fl-button:hover {
+		<?php echo $button_group_button_id; ?> .fl-button:is(a, button):hover {
 			border-color: <?php echo FLBuilderColor::hex_or_rgb( $settings->items[ $i ]->button_item_border_hover_color ); ?>;
 		}
 		<?php

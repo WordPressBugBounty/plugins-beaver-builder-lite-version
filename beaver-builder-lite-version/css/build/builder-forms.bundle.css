@@ -1,3 +1,6 @@
+/*!*************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[1].use[1]!./node_modules/sass-loader/dist/cjs.js!./src/FL/Builder/settings-forms/ui/field-types/field-editor.scss ***!
+  \*************************************************************************************************************************************************************************************/
 /* MCE Restyle */
 .fl-lightbox .wp-editor-tools {
   padding-left: 6px;
@@ -89,6 +92,9 @@
 .fl-editor-field {
   --button-size: 26px;
 }
+/*!*************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[1].use[1]!./node_modules/sass-loader/dist/cjs.js!./src/FL/Builder/settings-forms/ui/field-types/field-shadow.scss ***!
+  \*************************************************************************************************************************************************************************************/
 /* Slim - Shadow */
 .fl-lightbox-width-slim .fl-shadow-field .fl-dimension-field-units {
   width: auto;
@@ -98,10 +104,16 @@
   max-width: none;
   width: 100% !important;
 }
+/*!***********************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[1].use[1]!./node_modules/sass-loader/dist/cjs.js!./src/FL/Builder/settings-forms/ui/field-types/field-time.scss ***!
+  \***********************************************************************************************************************************************************************************/
 /* Slim - Time */
 .fl-lightbox-width-slim .fl-field[data-type=time] select {
   width: auto;
 }
+/*!*****************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[1].use[1]!./node_modules/sass-loader/dist/cjs.js!./src/FL/Builder/settings-forms/ui/field-types/field-typography.scss ***!
+  \*****************************************************************************************************************************************************************************************/
 /* Slim - Typography */
 .fl-lightbox-width-slim .fl-typography-field-align .fl-button-group-field-options {
   float: none;
@@ -110,6 +122,9 @@
 .fl-lightbox-width-slim .fl-typography-field-align .fl-button-group-field-option {
   width: 100%;
 }
+/*!******************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[1].use[1]!./node_modules/sass-loader/dist/cjs.js!./src/FL/Builder/settings-forms/ui/style.scss ***!
+  \******************************************************************************************************************************************************************/
 @charset "UTF-8";
 @keyframes fl-grab-attention {
   0% {
@@ -208,10 +223,12 @@ form.fl-builder-settings {
   display: none; /* Hide label icons on wide settings */
 }
 
+.fl-lightbox-width-slim .fl-field-control-wrapper .fl-field-overlay-toggle,
 .fl-lightbox-width-slim .fl-field-control-wrapper .fl-field-responsive-toggle {
   display: none; /* Hide control icons on slim settings */
 }
 
+.fl-lightbox-width-slim .fl-field-label .fl-field-overaly-toggle,
 .fl-lightbox-width-slim .fl-field-label .fl-field-responsive-toggle {
   display: flex;
   align-items: center;
@@ -1701,13 +1718,22 @@ fl-compound-field, .fl-compound-field {
 .fl-link-field-options-wrap input[type=checkbox]:after {
   content: "✓";
   font-weight: 700;
-  line-height: 12px;
+  line-height: 14px;
   text-align: center;
   color: transparent;
   display: inline-block;
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   border: 1px solid #aab1ba;
+  border-radius: 2px;
+}
+
+.fl-link-field-options-wrap input[type=checkbox]:checked::before {
+  content: none;
+}
+
+.fl-link-field-options-wrap input[type=checkbox] {
+  border: none;
   border-radius: 2px;
 }
 
@@ -1715,10 +1741,6 @@ fl-compound-field, .fl-compound-field {
   color: #fff;
   background-color: #0086b0;
   border-color: #0086b0;
-}
-
-.fl-link-field-options-wrap input[type=checkbox]:focus {
-  outline: none;
 }
 
 .fl-link-field-search {
@@ -1936,7 +1958,7 @@ fl-grid-tracklist ul > li button {
   border: none;
   background: transparent !important;
   box-shadow: none !important;
-  border-radius: var(--fluid-radius);
+  border-radius: var(--fl-builder-radius);
   padding: 0;
   cursor: pointer;
   min-width: 24px;
@@ -2490,6 +2512,7 @@ li.as-result-item em {
   box-shadow: 0 0 5px #ccc;
   display: none;
   font-weight: normal;
+  line-height: 16px !important;
   left: 23px;
   padding: 10px 13px;
   position: absolute;
@@ -2641,4 +2664,3 @@ fl-compound-field {
 .fl-deferred-mount {
   display: contents;
 }
-

@@ -14,8 +14,16 @@ if ( data.isMultiple ) {
 }
 
 var photo = null;
+let sizes   = null;
 
-if ( FLBuilderSettingsConfig.attachments[ data.value ] ) {
+if ( url && url.includes( 'demos.wpbeaverbuilder.com' ) ) {
+	photo = {
+		id: 0,
+		url: url,
+		filename: url.split( '/' ).pop(),
+		isAttachment: false
+	};
+} else if ( FLBuilderSettingsConfig.attachments[ data.value ] ) {
 	photo = FLBuilderSettingsConfig.attachments[ data.value ];
 	photo.isAttachment = true;
 } else if ( typeof data.value !== 'undefined' && '' !== data.value && false !== data.value ) {
@@ -26,6 +34,20 @@ if ( FLBuilderSettingsConfig.attachments[ data.value ] ) {
 			filename: url.split( '/' ).pop(),
 			isAttachment: false
 		};
+
+		const getPhotoSizes = function ( photoId ) {
+			const foundAttachment = FLBuilderSettingsConfig.attachments.filter( function ( attachment ) {
+				return attachment.id == photoId;
+			} );
+			return foundAttachment.length > 0 ? foundAttachment[0].sizes : null;
+		}
+
+		let photoSizes = getPhotoSizes( data.value );
+		if ( photoSizes ) {
+			photo.sizes = photoSizes;
+			photo.isAttachment = true;
+		}
+
 	} else {
 		photo = {
 			id: 0,
@@ -76,7 +98,7 @@ if ( photo && photo.url && photo.url.endsWith( '.svg' ) ) {
 		<div class="fl-photo-preview-controls">
 			<select name="{{selectName}}" {{{show}}}>
 				<# if ( photo && url ) {
-					var sizes = FLBuilder._getPhotoSizeOptions( photo, url );
+					sizes = FLBuilder._getPhotoSizeOptions( photo, url );
 				#>
 				{{{sizes}}}
 				<# } #>

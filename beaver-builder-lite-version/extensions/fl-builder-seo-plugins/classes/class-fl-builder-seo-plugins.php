@@ -9,6 +9,7 @@ class FLBuilderSeoPlugins {
 	public function __construct() {
 
 		add_action( 'admin_init', array( $this, 'init' ) );
+		add_action( 'rank_math/admin/editor_scripts', array( $this, 'init_rank_math_editor' ) );
 		add_action( 'admin_head', array( $this, 'remove_yoast_meta_box_on_edit' ), 999 );
 
 		add_filter( 'wpseo_sitemap_exclude_post_type', array( $this, 'sitemap_exclude_post_type' ), 10, 2 );
@@ -36,9 +37,16 @@ class FLBuilderSeoPlugins {
 
 		if ( defined( 'WPSEO_VERSION' ) ) {
 			$this->enqueue_script( 'yoast' );
-		} elseif ( class_exists( 'RankMath' ) ) {
-			$this->enqueue_script( 'rankmath' );
 		}
+	}
+
+	public function init_rank_math_editor() {
+		global $pagenow;
+		if ( FLBuilderAJAX::doing_ajax() || 'post.php' !== $pagenow ) {
+			return;
+		}
+
+		$this->enqueue_script( 'rankmath' );
 	}
 
 	public function rankmath_types( $post_types ) {

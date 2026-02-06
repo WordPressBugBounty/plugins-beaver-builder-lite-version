@@ -20,9 +20,7 @@
 	<hr />
 
 	<?php
-	if ( version_compare( PHP_VERSION, '5.3.0', '>' ) && class_exists( '\FLCacheClear\Plugin' ) ) {
-		include FL_BUILDER_CACHE_HELPER_DIR . 'includes/admin-settings-cache-plugins.php';
-	}
+	require FL_BUILDER_CACHE_HELPER_DIR . 'includes/admin-settings-cache-plugins.php';
 
 	$debug = get_transient( 'fl_debug_mode' );
 	if ( $debug ) {

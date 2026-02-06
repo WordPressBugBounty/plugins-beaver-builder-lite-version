@@ -279,13 +279,11 @@ class FLPhotoModule extends FLBuilderModule {
 			} else {
 
 				// A cropped photo doesn't exist, check demo sites then try to create one.
-				$post_data    = FLBuilderModel::get_post_data();
-				$editing_node = isset( $post_data['node_id'] );
-				$demo_domain  = FL_BUILDER_DEMO_DOMAIN;
+				$demo_domain = FL_BUILDER_DEMO_DOMAIN;
 
-				if ( ! $editing_node && stristr( $src, $demo_domain ) && ! stristr( $_SERVER['HTTP_HOST'], $demo_domain ) ) {
+				if ( stristr( $src, $demo_domain ) && ! stristr( $_SERVER['HTTP_HOST'], $demo_domain ) ) {
 					$src = $this->_get_cropped_demo_url();
-				} elseif ( ! $editing_node && stristr( $src, FL_BUILDER_OLD_DEMO_URL ) ) {
+				} elseif ( stristr( $src, FL_BUILDER_OLD_DEMO_URL ) ) {
 					$src = $this->_get_cropped_demo_url();
 				} else {
 					$url = $this->crop();
@@ -476,11 +474,12 @@ class FLPhotoModule extends FLBuilderModule {
 	 * @method _get_cropped_path
 	 * @protected
 	 */
-	protected function _get_cropped_path( $node = true ) {
+	protected function _get_cropped_path() {
 		$crop      = empty( $this->settings->crop ) ? 'none' : $this->settings->crop;
 		$url       = $this->_get_uncropped_url();
 		$cache_dir = FLBuilderModel::get_cache_dir();
-		$cache_id  = $node ? sprintf( '-%s-%s', md5( $url ), $this->node ) : '';
+		$is_demo   = $this->_is_demo_url( $url ) || stristr( $_SERVER['HTTP_HOST'], FL_BUILDER_DEMO_DOMAIN );
+		$cache_id  = ! $is_demo ? sprintf( '-%s-%s', md5( $url ), $this->node ) : '';
 		if ( empty( $url ) ) {
 			$filename = FLBuilderModel::uniqid(); // Return a file that doesn't exist.
 		} else {
@@ -517,6 +516,20 @@ class FLPhotoModule extends FLBuilderModule {
 	}
 
 	/**
+	 * @method _is_demo_url
+	 * @protected
+	 */
+	protected function _is_demo_url( $url ) {
+		if ( stristr( $url, FL_BUILDER_DEMO_DOMAIN ) ) {
+			return true;
+		} elseif ( stristr( $url, FL_BUILDER_OLD_DEMO_URL ) ) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
 	 * @method _get_uncropped_url
 	 * @protected
 	 */
@@ -537,7 +550,7 @@ class FLPhotoModule extends FLBuilderModule {
 	 * @protected
 	 */
 	protected function _get_cropped_demo_url() {
-		$info = $this->_get_cropped_path( false );
+		$info = $this->_get_cropped_path();
 		$src  = $this->settings->photo_src;
 
 		// Pull from a demo subsite.
@@ -602,7 +615,7 @@ FLBuilder::register_module('FLPhotoModule', array(
 								'fields' => array( 'photo' ),
 							),
 							'url'     => array(
-								'fields' => array( 'photo_url', 'caption', 'url_title' ),
+								'fields' => array( 'photo_url', 'url_title' ),
 							),
 						),
 						'preview' => array(
@@ -625,6 +638,7 @@ FLBuilder::register_module('FLPhotoModule', array(
 						'preview'     => array(
 							'type' => 'none',
 						),
+						'connections' => array( 'url' ),
 					),
 					'title_hover'  => array(
 						'type'    => 'select',
@@ -640,6 +654,7 @@ FLBuilder::register_module('FLPhotoModule', array(
 						'label'       => __( 'Image title attribute', 'fl-builder' ),
 						'default'     => '',
 						'placeholder' => __( 'Use image filename if left blank', 'fl-builder' ),
+						'connections' => array( 'string' ),
 					),
 				),
 			),
@@ -659,11 +674,11 @@ FLBuilder::register_module('FLPhotoModule', array(
 						'toggle'  => array(
 							''      => array(),
 							'hover' => array(
-								'fields' => array( 'caption_typography' ),
+								'fields' => array( 'caption', 'caption_typography' ),
 							),
 
 							'below' => array(
-								'fields' => array( 'caption_typography' ),
+								'fields' => array( 'caption', 'caption_typography' ),
 							),
 						),
 						'preview' => array(
@@ -671,18 +686,19 @@ FLBuilder::register_module('FLPhotoModule', array(
 						),
 					),
 					'caption'      => array(
-						'type'    => 'text',
-						'label'   => __( 'Caption', 'fl-builder' ),
-						'preview' => array(
+						'type'        => 'text',
+						'label'       => __( 'Caption', 'fl-builder' ),
+						'preview'     => array(
 							'type' => 'none',
 						),
+						'connections' => array( 'string' ),
 					),
 				),
 			),
 			'link'    => array(
 				'title'  => __( 'Link', 'fl-builder' ),
 				'fields' => array(
-					'link_type' => array(
+					'link_type'           => array(
 						'type'    => 'select',
 						'label'   => __( 'Link Type', 'fl-builder' ),
 						'options' => array(
@@ -693,19 +709,22 @@ FLBuilder::register_module('FLPhotoModule', array(
 							'page'     => __( 'Photo Page', 'fl-builder' ),
 						),
 						'toggle'  => array(
-							''     => array(),
-							'url'  => array(
+							''         => array(),
+							'url'      => array(
 								'fields' => array( 'link_url' ),
 							),
-							'file' => array(),
-							'page' => array(),
+							'lightbox' => array(
+								'fields' => array( 'lightbox_image_size' ),
+							),
+							'file'     => array(),
+							'page'     => array(),
 						),
 						'help'    => __( 'Link type applies to how the image should be linked on click. You can choose a specific URL, the individual photo or a separate page with the photo.', 'fl-builder' ),
 						'preview' => array(
 							'type' => 'none',
 						),
 					),
-					'link_url'  => array(
+					'link_url'            => array(
 						'type'          => 'link',
 						'label'         => __( 'Link URL', 'fl-builder' ),
 						'show_target'   => true,
@@ -715,6 +734,11 @@ FLBuilder::register_module('FLPhotoModule', array(
 							'type' => 'none',
 						),
 						'connections'   => array( 'url' ),
+					),
+					'lightbox_image_size' => array(
+						'type'    => 'photo-sizes',
+						'label'   => __( 'Lightbox Photo Size', 'fl-builder' ),
+						'default' => 'large',
 					),
 				),
 			),

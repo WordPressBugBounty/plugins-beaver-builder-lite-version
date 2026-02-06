@@ -31,6 +31,9 @@
 			}.bind( this ) );
 		} else {
 			this._init();
+			if ( config.callback ) {
+				config.callback();
+			}
 		}
 	};
 
@@ -514,7 +517,7 @@
 				value = 'auto';
 			} else if ( -1 === $.inArray( property, ignore ) && node.length ) {
 				this._disableStyles();
-				value = element.css( property );
+				value = element.eq( element.length - 1 ).css( property );
 				this._enableStyles();
 			}
 
@@ -1699,14 +1702,16 @@
 		 */
 		_rowInitContentAlignment: function(e)
 		{
-			const height           = this.elements.height.val().trim();
-			const form             = $( '.fl-builder-settings:visible' );
-			const alignFieldRow    = form.find( '#fl-field-content_alignment' );
-			const aspectValue       = form.find( '#fl-field-aspect_ratio input' ).val();
-			if ( height === 'default' && ! aspectValue ) {
-				alignFieldRow.hide();
-			} else {
-				alignFieldRow.show();
+			if ( this.elements.height.length ) {
+				const height           = this.elements.height.val().trim();
+				const form             = $( '.fl-builder-settings:visible' );
+				const alignFieldRow    = form.find( '#fl-field-content_alignment' );
+				const aspectValue      = form.find( '#fl-field-aspect_ratio input' ).val();
+				if ( height === 'default' && ! aspectValue ) {
+					alignFieldRow.hide();
+				} else {
+					alignFieldRow.show();
+				}
 			}
 		},
 
@@ -1976,6 +1981,8 @@
 				return false;
 			}
 
+			this._initDefaultComponentPreviews( fields );
+
 			for( ; i < fields.length; i++) {
 
 				field = fields.eq(i);
@@ -2012,12 +2019,39 @@
 		},
 
 		/**
+		 * Initializes the default preview logic specific to components. 
+		 * This mainly handles previews that are set to none because those 
+		 * type of previews are typically done via settings.js in a module. 
+		 * That isn't loaded for component settings since they are made up
+		 * of potentially multiple nodes, so we refresh instead.
+		 *
+		 * @since 2.10
+		 */
+		_initDefaultComponentPreviews: function( fields ) {
+			const isComponent = 'dynamic_node_form' === this.elements.settings.attr( 'data-form-id' );
+
+			if ( ! isComponent ) {
+				return;
+			}
+
+			for ( let i = 0; i < fields.length; i++ ) {
+
+				const field = fields.eq( i );
+				const preview = field.data( 'preview' );
+
+				if ( 'none' === preview.type ) {
+					this._initFieldRefreshPreview(field);
+				}
+			}
+		},
+
+		/**
 		 * Reinitializes the preview logic for deferred fields
 		 * to setup events again if they have re-rendered.
 		 *
 		 * @since 2.9
 		 */
-		_reinitDeferredFieldPrevies: function() {
+		_reinitDeferredFieldPreviews: function() {
 			const fields = this.elements.settings.find( '.fl-field' );
 
 			for ( let i = 0; i < fields.length; i++ ) {
@@ -3793,6 +3827,7 @@
 			} );
 			this.updateCSSRule( shapeSelector, 'transform', shapeTransforms.join(' ') );
 		},
+
 	}
 
 })(jQuery);

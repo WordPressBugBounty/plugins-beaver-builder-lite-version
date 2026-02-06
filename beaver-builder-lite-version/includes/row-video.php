@@ -52,6 +52,11 @@ if ( 'wordpress' == $row->settings->bg_video_source ) :
 		if ( !empty ($bg_video_data_mp4) || !empty($bg_video_data_webm) ):
 			?>
 			<div class="<?php echo $bg_video_wrapper_classes; ?>" <?php echo "$data_mobile_attr $data_width_attr $data_height_attr $data_fallback_attr $data_mp4_attr $data_mp4_type_attr $data_webm_attr $data_webm_type_attr"; ?> >
+				<?php if ( $row->settings->bg_video_play_pause ) : ?>
+					<div class="fl-bg-video-play-pause">
+						<span><i class="fas fa-play fl-bg-video-play-pause-control"></i></span>
+					</div>
+				<?php endif; ?>
 			</div>
 			<?php
 		endif;
@@ -70,7 +75,13 @@ data-mp4-type="video/mp4"
 <?php if ( isset( $row->settings->bg_video_url_webm ) ) : ?>
 data-webm="<?php echo $row->settings->bg_video_url_webm; ?>"
 data-webm-type="video/webm"
-<?php endif; ?>></div>
+<?php endif; ?>>
+<?php if ( $row->settings->bg_video_play_pause ) : ?>
+	<div class="fl-bg-video-play-pause">
+		<span><i class="fas fa-play fl-bg-video-play-pause-control"></i></span>
+	</div>
+<?php endif; ?>
+</div>
 <?php } ?>
 
 <?php if ( 'video_service' == $row->settings->bg_video_source ) {
@@ -90,6 +101,11 @@ data-video-mobile="<?php if ( isset( $row->settings->bg_video_mobile ) ) { echo 
 <?php endif; ?>
 <?php endif; ?>>
 <div class="fl-bg-video-player"></div>
+<?php if ( $row->settings->bg_video_play_pause ) : ?>
+	<div class="fl-bg-video-play-pause">
+		<span><i class="fas fa-play fl-bg-video-play-pause-control"></i></span>
+	</div>
+<?php endif; ?>
 <?php if ( $row->settings->bg_video_audio ) : ?>
 <div class="fl-bg-video-audio"><span>
 	<i class="fas fl-audio-control fa-volume-off"></i>

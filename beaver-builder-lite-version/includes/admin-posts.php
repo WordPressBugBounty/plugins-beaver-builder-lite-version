@@ -22,8 +22,8 @@
 <script type="text/javascript">
 
 FLBuilderAdminPostsStrings = {
-	<?php /* translators: 1: branded builder name */ ?>
-	switchToEditor: "<?php printf( esc_attr_x( 'Switching to Text Editor mode will disable your %1$s layout until it is enabled again. Any edits made while in Text Editor mode will not be made on your %1$s layout. Do you want to continue?', '%s stands for custom branded \"Page Builder\" name.', 'fl-builder' ), FLBuilderModel::get_branding() ); ?>"
+	<?php /* translators: %1$s: branded builder name */ ?>
+	switchToEditor: "<?php esc_attr_e( sprintf( __( 'Switching to Text Editor mode will disable your %1$s layout until it is enabled again. Any edits made while in Text Editor mode will not be made on your %1$s layout. Do you want to continue?', 'fl-builder' ), FLBuilderModel::get_branding() ) ); ?>"<?php //phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText ?>
 };
 
 </script>

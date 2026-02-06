@@ -274,6 +274,7 @@
 		 */
 		setContent: function(content)
 		{
+			this.empty();
 			this._node.find('.fl-lightbox-content').html(content);
 			this._resize();
 			if( $( '.fl-builder-content-panel-button', window.parent.document ).length == 0 ) {
@@ -290,6 +291,7 @@
 		 */
 		empty: function()
 		{
+			this._node.find('.fl-lightbox-content *').off();
 			this._node.find('.fl-lightbox-content').empty();
 		},
 
@@ -341,6 +343,8 @@
 		 */
 		destroy: function()
 		{
+			this.empty();
+			this._node.find('*').off();
 			this._node.empty();
 			this._node.remove();
 

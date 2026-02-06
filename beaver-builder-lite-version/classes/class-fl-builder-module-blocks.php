@@ -74,8 +74,6 @@ class FLBuilderModuleBlocks {
 
 		if ( empty( $enabled ) ) {
 			return false;
-		} elseif ( version_compare( $wp_version, '6.4', '<' ) ) {
-			return false;
 		}
 
 		return true;
@@ -331,13 +329,13 @@ class FLBuilderModuleBlocks {
 		$js_url  = FLBuilder::plugin_url() . 'js/';
 
 		// Register core layout assets.
-		FLBuilder::register_layout_styles_scripts();
+		FLBuilderEnqueue::register_layout_libraries();
 
 		// Enqueue builder UI assets in the block editor iframe only.
 		if ( self::is_block_editor() ) {
 			wp_enqueue_style( 'dashicons' );
-			wp_enqueue_style( 'fl-builder-min', $css_url . 'fl-builder.min.css', [], $ver );
-			wp_enqueue_style( 'fl-builder-module-blocks', $css_url . 'build/module-blocks.bundle.css', [], $ver );
+			wp_enqueue_style( 'fl-builder-css' );
+			wp_enqueue_style( 'fl-builder-module-blocks' );
 			wp_add_inline_style( 'fl-builder-module-blocks', self::render_global_css( true ) );
 		}
 
@@ -383,48 +381,27 @@ class FLBuilderModuleBlocks {
 
 		// Dependency Styles
 		wp_enqueue_style( 'foundation-icons' );
-		wp_enqueue_style( 'font-awesome-5' );
-		wp_enqueue_style( 'dashicons' );
 		wp_enqueue_style( 'jquery-autosuggest', $css_url . 'jquery.autoSuggest.min.css', [], $ver );
 		wp_enqueue_style( 'fl-jquery-tiptip', $css_url . 'jquery.tiptip.css', [], $ver );
 		wp_enqueue_style( 'select2', $css_url . 'select2.min.css', [], $ver );
+		wp_enqueue_style( 'font-awesome-5', FLBuilder::get_fa5_url(), array(), $ver );
 		FLBuilderIcons::enqueue_all_custom_icons_styles();
 
 		// Dependency Scripts
 		wp_enqueue_script( 'jquery-ui-draggable' );
 		wp_enqueue_script( 'jquery-ui-resizable' );
 		wp_enqueue_script( 'jquery-ui-slider' );
-		wp_enqueue_script( 'jquery-throttle' );
-		wp_enqueue_script( 'jquery-autosuggest', $js_url . 'jquery.autoSuggest.min.js', [], $ver );
-		wp_enqueue_script( 'jquery-validate', $js_url . 'jquery.validate.min.js', [], $ver );
-		wp_enqueue_script( 'fl-jquery-tiptip', $js_url . 'jquery.tiptip.min.js', [], $ver );
-		wp_enqueue_script( 'select2', $js_url . 'select2.min.js', [], $ver );
-
-		// Builder Styles
-		wp_enqueue_style( 'fl-builder-min', $css_url . 'fl-builder.min.css', [], $ver );
-		wp_enqueue_style( 'fl-builder-forms', $css_url . 'build/builder-forms.bundle.css', [ 'fl-builder-min', 'fl-controls' ], $ver );
-
-		// Builder Scripts
-
-		// Shared Utils
-		wp_enqueue_script( 'fl-builder-utils', $js_url . 'build/builder-utils' . $ext, [ 'jquery' ], $ver );
-
-		// Settings Forms
-		$form_deps = [
-			'jquery',
-			'fl-builder-utils',
-			'fl-controls',
-			'wp-components',
-			'wp-i18n',
-			'wp-hooks',
-		];
-		wp_enqueue_script( 'fl-builder-forms', $js_url . 'build/builder-forms' . $ext, $form_deps, $ver );
+		wp_enqueue_script( 'jquery-autosuggest', $js_url . 'libs/jquery.autoSuggest.min.js', [], $ver );
+		wp_enqueue_script( 'jquery-validate', $js_url . 'libs/jquery.validate.min.js', [], $ver );
+		wp_enqueue_script( 'fl-jquery-tiptip', $js_url . 'libs/jquery.tiptip.min.js', [], $ver );
+		wp_enqueue_script( 'select2', $js_url . 'libs/select2.min.js', [], $ver );
+		wp_enqueue_script( 'jquery-throttle', $js_url . 'libs/jquery.ba-throttle-debounce.min.js', array( 'jquery' ), $ver );
 
 		wp_enqueue_script( 'fl-color-picker', $js_url . 'fl-color-picker.js', [], $ver );
 		wp_enqueue_script( 'fl-lightbox', $js_url . 'fl-lightbox.js', [], $ver );
 		wp_enqueue_script( 'fl-icon-selector', $js_url . 'fl-icon-selector.js', [], $ver );
 		wp_enqueue_script( 'fl-stylesheet', $js_url . 'fl-stylesheet.js', [], $ver );
-		wp_enqueue_script( 'fl-builder', $js_url . 'fl-builder.js', [ 'jquery', 'fl-builder-utils' ], $ver );
+		wp_enqueue_script( 'fl-builder', $js_url . 'fl-builder.js', [ 'jquery', 'fl-builder-forms' ], $ver );
 		wp_enqueue_script( 'fl-builder-libs', $js_url . 'fl-builder-libs.js', [ 'fl-builder' ], $ver );
 		wp_enqueue_script( 'fl-builder-preview', $js_url . 'fl-builder-preview.js', [], $ver );
 		wp_enqueue_script( 'fl-builder-responsive-editing', $js_url . 'fl-builder-responsive-editing.js', [], $ver );
@@ -441,13 +418,9 @@ class FLBuilderModuleBlocks {
 			wp_enqueue_script( 'tether', FL_THEME_BUILDER_CORE_URL . 'js/tether.min.js', [ 'jquery' ], $ver );
 		}
 
-		// Module Block Styles
-		wp_enqueue_style( 'fl-builder-module-blocks', $css_url . 'build/module-blocks.bundle.css', [], $ver );
+		wp_enqueue_script( 'fl-builder-forms' );
+		wp_enqueue_script( 'fl-builder-module-blocks' );
 
-		// Module Block Scripts
-		wp_enqueue_script( 'fl-builder-module-blocks', $js_url . 'build/module-blocks.bundle.js', [ 'wp-blocks' ], $ver, true );
-
-		// Module Block Config
 		$config = [
 			'blocks'  => self::$blocks,
 			'enabled' => self::get_enabled_block_editor_modules(),
@@ -456,7 +429,6 @@ class FLBuilderModuleBlocks {
 				'nonce' => wp_create_nonce( 'wp_rest' ),
 			],
 		];
-
 		wp_localize_script( 'fl-builder-module-blocks', 'FLBuilderModuleBlocksConfig', $config );
 
 		// Module block.js

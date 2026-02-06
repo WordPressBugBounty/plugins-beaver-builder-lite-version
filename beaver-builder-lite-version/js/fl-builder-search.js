@@ -51,6 +51,7 @@
                 group: null,
                 enabled: true, /* pertains only to modules */
                 global: null, /* pertains only to user row and module templates */
+                dynamic: null,
                 searchTerm: null,
 				categorized: false,
 			};
@@ -166,6 +167,22 @@
                     if ( ! _.isUndefined( query.searchTerm ) && ! _.isNull( query.searchTerm ) ) {
                         if ( ! this.matchesSearchTerm( object, query.searchTerm ) ) {
 	                        continue;
+                        }
+                    }
+
+                    if ( ! _.isNull( query.dynamic ) ) {
+                        if ( true === query.dynamic && ! object.isDynamicEditing ) {
+                            continue;
+                        } else if ( false === query.dynamic && object.isDynamicEditing ) {
+                            continue;
+                        }   
+                    }
+
+                    if ( ! _.isNull( query.global ) ) {
+                        if ( query.global === true && ! object.isGlobal ) {
+                            continue;
+                        } else if ( query.global === false && object.isGlobal ) {
+                            continue;
                         }
                     }
 

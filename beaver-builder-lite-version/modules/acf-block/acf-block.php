@@ -166,6 +166,25 @@ class FLACFBlockModule extends FLBuilderModule {
 
 		return acf_prepare_block( $block );
 	}
+
+	/**
+	 * Enqueue block scripts and styles manually (since WordPress 6.9).
+	 *
+	 * @param array $block_data The node ID to use for this block.
+	 * @return null
+	 */
+	static public function enqueue( $block_data ) {
+		if ( isset( $block_data['style_handles'] ) && is_array( $block_data['style_handles'] ) ) {
+			foreach ( $block_data['style_handles'] as $handle ) {
+				wp_enqueue_style( $handle );
+			}
+		}
+		if ( isset( $block_data['script_handles'] ) && is_array( $block_data['script_handles'] ) ) {
+			foreach ( $block_data['script_handles'] as $handle ) {
+				wp_enqueue_script( $handle );
+			}
+		}
+	}
 }
 
 /**

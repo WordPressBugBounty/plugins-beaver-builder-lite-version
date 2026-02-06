@@ -46,7 +46,13 @@
 .fl-menu .fl-has-submenu-container:focus {
 	outline: 0;
 }
-.fl-menu .fl-has-submenu-container{ position: relative; }
+.fl-menu .fl-has-submenu-container:has(span.fl-menu-toggle) {
+	position: relative;
+}
+.fl-menu .fl-has-submenu-container:has(button.fl-menu-toggle) {
+	display: grid;
+	grid-template-columns: 1fr 40px;
+}
 
 /* Submenu - accordion, expanded */
 .fl-menu .fl-menu-accordion .fl-has-submenu > .sub-menu{
@@ -58,7 +64,7 @@
 }
 
 /* Toggle - General */
-.fl-menu .fl-menu-toggle{
+.fl-menu span.fl-menu-toggle{
 	position: absolute;
 	top: 0;
 	right: 0;
@@ -66,8 +72,12 @@
 	height: 100%;
 	cursor: pointer;
 }
-.fl-menu .fl-toggle-arrows .fl-menu-toggle:before,
-.fl-menu .fl-toggle-none .fl-menu-toggle:before{
+.fl-menu button.fl-menu-toggle{
+	all: unset;
+	position: relative;
+	cursor: pointer;
+}
+.fl-menu .fl-toggle-arrows .fl-menu-toggle:before{
 	border-color: #333;
 }
 .fl-menu .fl-menu-expanded .fl-menu-toggle{
@@ -82,8 +92,11 @@
 	border: none;
 	color: #333;
 	border-radius: 0;
+	cursor: pointer;
 }
-.fl-menu .fl-menu-mobile-toggle:focus-visible {
+.fl-menu .fl-menu-mobile-toggle:focus-visible,
+.fl-menu-mobile-close:focus-visible,
+.fl-menu .fl-menu-toggle:focus-visible {
 	outline: 2px auto Highlight;
 	outline: 2px auto -webkit-focus-ring-color;
 }
@@ -169,7 +182,7 @@ ul.fl-menu-horizontal li.mega-menu > ul.sub-menu ul.sub-menu {
 }
 
 /* Mobile menu - below row clone */
-:where(.fl-col-group-medium-reversed, .fl-col-group-responsive-reversed) > .fl-menu-mobile-clone {
+:where(.fl-col-group-medium-reversed, .fl-col-group-responsive-reversed, .fl-col-group-equal-height.fl-col-group-custom-width) > .fl-menu-mobile-clone {
 	flex: 1 1 100%;
 }
 .fl-menu-mobile-clone {
@@ -180,19 +193,14 @@ ul.fl-menu-horizontal li.mega-menu > ul.sub-menu ul.sub-menu {
 }
 
 /* Mobile menu - Flyout */
-.fl-menu-mobile-close {
-	display: none;
-}
-.fl-menu-mobile-close,
-.fl-menu-mobile-close:hover,
-.fl-menu-mobile-close:focus {
+.fl-menu-mobile-flyout .fl-menu-mobile-close,
+.fl-menu-mobile-flyout .fl-menu-mobile-close:hover,
+.fl-menu-mobile-flyout .fl-menu-mobile-close:focus {
 	background: none;
 	border: 0 none;
 	color: inherit;
 	font-size: 18px;
-	padding: 10px 6px;
-}
-.fl-menu-mobile-close:focus-visible {
-	outline: 2px auto Highlight;
-	outline: 2px auto -webkit-focus-ring-color;
+	padding: 10px 15px;
+	margin: 5px 0;
+	cursor: pointer;
 }

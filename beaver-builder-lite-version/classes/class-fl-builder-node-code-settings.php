@@ -91,6 +91,10 @@ final class FLBuilderNodeCodeSettings {
 
 		foreach ( $all_nodes as $node_id => $node ) {
 			if ( isset( $node->settings ) ) {
+				if ( ! FLBuilderModel::is_builder_active() && '0' === $node->settings->visibility_display ) {
+					continue;
+				}
+
 				if ( isset( $node->settings->bb_css_code ) && ! empty( $node->settings->bb_css_code ) ) {
 
 					// Load scssphp libs
@@ -115,6 +119,9 @@ final class FLBuilderNodeCodeSettings {
 	public static function filter_layout_js( $js, $nodes ) {
 		$all_nodes = array_merge( $nodes['rows'], $nodes['columns'], $nodes['modules'] );
 		foreach ( $all_nodes as $node ) {
+			if ( ! FLBuilderModel::is_builder_active() && '0' === $node->settings->visibility_display ) {
+				continue;
+			}
 			$js .= self::get_node_js( $node ) ? "\n;" . ltrim( FLBuilder::maybe_do_shortcode( self::get_node_js( $node ) ), ';' ) : '';
 		}
 		return $js;

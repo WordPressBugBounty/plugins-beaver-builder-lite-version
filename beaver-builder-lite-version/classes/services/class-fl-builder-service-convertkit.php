@@ -115,10 +115,11 @@ final class FLBuilderServiceConvertKit extends FLBuilderService {
 	 * }
 	 */
 	public function render_fields( $account, $settings ) {
-		$account_data = $this->get_account_data( $account );
-		$api          = $this->get_api( $account_data['api_key'] );
-		$forms        = $api->get_resources( 'forms' );
-		$response     = array(
+		$account_data  = $this->get_account_data( $account );
+		$api           = $this->get_api( $account_data['api_key'] );
+		$forms         = $api->get_resources( 'forms' );
+		$custom_fields = $api->get_resources( 'custom_fields' );
+		$response      = array(
 			'error' => false,
 			'html'  => '',
 		);
@@ -126,7 +127,7 @@ final class FLBuilderServiceConvertKit extends FLBuilderService {
 		if ( ! $forms ) {
 			$response['error'] = __( 'Error: Please check your API key.', 'fl-builder' );
 		} else {
-			$response['html'] = $this->render_list_field( $forms, $settings );
+			$response['html'] = $this->render_list_field( $forms, $settings, $custom_fields );
 		}
 
 		return $response;
@@ -141,16 +142,23 @@ final class FLBuilderServiceConvertKit extends FLBuilderService {
 	 * @return string The markup for the list field.
 	 * @access private
 	 */
-	private function render_list_field( $forms, $settings ) {
+	private function render_list_field( $forms, $settings, $custom_fields ) {
 		ob_start();
 
 		$options = array(
 			'' => __( 'Choose...', 'fl-builder' ),
 		);
+		$cfields = array();
 
 		if ( isset( $forms['forms'] ) ) {
 			foreach ( $forms['forms'] as $form ) {
 				$options[ $form['id'] ] = esc_attr( $form['name'] );
+			}
+		}
+
+		if ( isset( $custom_fields['custom_fields'] ) ) {
+			foreach ( $custom_fields['custom_fields'] as $cf ) {
+				$cfields[ $cf['key'] ] = esc_attr( $cf['label'] );
 			}
 		}
 
@@ -164,6 +172,20 @@ final class FLBuilderServiceConvertKit extends FLBuilderService {
 				'type' => 'none',
 			),
 		), $settings);
+
+		if ( ! empty( $cfields ) ) {
+			FLBuilder::render_settings_field( 'custom_field', array(
+				'row_class'    => 'fl-builder-service-field-row',
+				'class'        => 'fl-builder-service-list-select',
+				'type'         => 'select',
+				'label'        => _x( 'Custom Fields', 'Custom fields created on a third party provider.', 'fl-builder' ),
+				'options'      => $cfields,
+				'multi-select' => true,
+				'preview'      => array(
+					'type' => 'none',
+				),
+			), $settings);
+		}
 
 		return ob_get_clean();
 	}
@@ -179,7 +201,7 @@ final class FLBuilderServiceConvertKit extends FLBuilderService {
 	 *      @type bool|string $error The error message or false if no error.
 	 * }
 	 */
-	public function subscribe( $settings, $email, $name = '' ) {
+	public function subscribe( $settings, $email, $name, $custom_fields ) {
 		$account_data = $this->get_account_data( $settings->service_account );
 		$response     = array(
 			'error' => false,
@@ -198,7 +220,7 @@ final class FLBuilderServiceConvertKit extends FLBuilderService {
 				$data['fname'] = $name;
 			}
 
-			$result = $api->form_subscribe( $settings->list_id, $data );
+			$result = $api->form_subscribe( $settings->list_id, $data, $custom_fields );
 
 			if ( isset( $result->error ) ) {
 				$message           = isset( $result->message ) ? $result->message : '';

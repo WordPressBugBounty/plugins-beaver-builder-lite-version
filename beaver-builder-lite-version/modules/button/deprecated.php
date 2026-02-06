@@ -10,4 +10,5 @@ FLBuilder::register_module_deprecations( 'button', [
 			'includes/frontend.php',
 		],
 	],
+	'v2' => [],
 ] );

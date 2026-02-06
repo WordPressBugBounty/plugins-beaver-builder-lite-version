@@ -126,10 +126,22 @@ class FLCtaModule extends FLBuilderModule {
 	}
 
 	/**
+	 * Returns the relevant deprecated version of the button module if the cta module is deprecated.
+	 * It returns null (current version) if the cta module is not deprecated.
+	 *
+	 * @since 2.10
+	 * @method get_button_version
+	 * @return integer|null
+	 */
+	public function get_button_version() {
+		return null;  // Temporary lock on current version only until further changes are ready for the next version
+	}
+
+	/**
 	 * @method render_button
 	 */
 	public function render_button() {
-		FLBuilder::render_module_html( 'button', $this->get_button_settings() );
+		FLBuilder::render_module_html( 'button', $this->get_button_settings(), $this->get_button_version() );
 	}
 }
 
@@ -419,7 +431,7 @@ FLBuilder::register_module('FLCtaModule', array(
 						'units'      => array( 'px' ),
 						'preview'    => array(
 							'type'     => 'css',
-							'selector' => 'a.fl-button',
+							'selector' => '.fl-button:is(a, button)',
 							'property' => 'padding',
 						),
 					),
@@ -437,7 +449,7 @@ FLBuilder::register_module('FLCtaModule', array(
 						'show_alpha'  => true,
 						'preview'     => array(
 							'type'      => 'css',
-							'selector'  => 'a.fl-button, a.fl-button *',
+							'selector'  => '.fl-button:is(a, button), .fl-button:is(a, button) *',
 							'property'  => 'color',
 							'important' => true,
 						),
@@ -451,7 +463,7 @@ FLBuilder::register_module('FLCtaModule', array(
 						'show_alpha'  => true,
 						'preview'     => array(
 							'type'      => 'css',
-							'selector'  => 'a.fl-button:hover, a.fl-button:hover *, a.fl-button:focus, a.fl-button:focus *',
+							'selector'  => '.fl-button:is(a, button):hover, .fl-button:is(a, button):hover *, .fl-button:is(a, button):focus, .fl-button:is(a, button):focus *',
 							'property'  => 'color',
 							'important' => true,
 						),
@@ -462,7 +474,7 @@ FLBuilder::register_module('FLCtaModule', array(
 						'responsive' => true,
 						'preview'    => array(
 							'type'     => 'css',
-							'selector' => 'a.fl-button',
+							'selector' => '.fl-button:is(a, button)',
 						),
 					),
 				),
@@ -520,7 +532,7 @@ FLBuilder::register_module('FLCtaModule', array(
 						'label'   => __( 'Background Gradient', 'fl-builder' ),
 						'preview' => array(
 							'type'     => 'css',
-							'selector' => 'a.fl-button',
+							'selector' => '.fl-button:is(a, button)',
 							'property' => 'background-image',
 						),
 					),
@@ -529,7 +541,7 @@ FLBuilder::register_module('FLCtaModule', array(
 						'label'   => __( 'Background Hover Gradient', 'fl-builder' ),
 						'preview' => array(
 							'type'     => 'css',
-							'selector' => 'a.fl-button:hover',
+							'selector' => '.fl-button:is(a, button):hover',
 							'property' => 'background-image',
 						),
 					),
@@ -556,7 +568,7 @@ FLBuilder::register_module('FLCtaModule', array(
 						'responsive' => true,
 						'preview'    => array(
 							'type'      => 'css',
-							'selector'  => 'a.fl-button',
+							'selector'  => '.fl-button:is(a, button)',
 							'important' => true,
 						),
 					),

@@ -54,25 +54,7 @@ final class FLBuilderRevisions {
 			'numberposts' => apply_filters( 'fl_builder_revisions_number', 25 ),
 		) );
 
-		if ( version_compare( $wp_version, '5.3.0', '<' ) ) {
-			$tz = get_option( 'timezone_string' );
-
-			if ( empty( $tz ) ) {
-				$offset  = (float) get_option( 'gmt_offset' );
-				$hours   = (int) $offset;
-				$minutes = ( $offset - $hours );
-
-				$sign     = ( $offset < 0 ) ? '-' : '+';
-				$abs_hour = abs( $hours );
-				$abs_mins = abs( $minutes * 60 );
-				$tz       = sprintf( '%s%02d:%02d', $sign, $abs_hour, $abs_mins );
-			}
-
-			$local_time = new DateTimeImmutable( 'now', new DateTimeZone( $tz ) );
-		} else {
-			$local_time = current_datetime();
-		}
-
+		$local_time   = current_datetime();
 		$current_time = $local_time->getTimestamp() + $local_time->getOffset();
 
 		$config = array(

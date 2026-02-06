@@ -76,7 +76,13 @@ final class FLBuilderHistoryManager {
 			'row_template_applied'    => esc_attr__( 'Row Template Added', 'fl-builder' ),
 			'column_template_applied' => esc_attr__( 'Column Template Added', 'fl-builder' ),
 			'module_template_applied' => esc_attr__( 'Module Template Added', 'fl-builder' ),
-			'history_disabled'        => __( 'Undo/Redo history is currently disabled.', 'fl-builder' ),
+			'history_disabled'        => esc_attr__( 'Undo/Redo history is currently disabled.', 'fl-builder' ),
+
+			// Global nodes
+			'global_row_unlinked'     => esc_attr__( 'Row Unlinked', 'fl-builder' ),
+			'global_column_unlinked'  => esc_attr__( 'Column Unlinked', 'fl-builder' ),
+			/* translators: %s: Module name */
+			'global_module_unlinked'  => esc_attr__( '%s Unlinked', 'fl-builder' ),
 		);
 
 		$hooks = array(

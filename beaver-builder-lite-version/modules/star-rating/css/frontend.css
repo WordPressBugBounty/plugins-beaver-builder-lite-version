@@ -1,0 +1,29 @@
+.fl-module-star-rating {
+  width: auto;
+  height: auto;
+  line-height: 1;
+
+  &:dir(rtl) {
+    transform: rotateY(180deg);
+  }
+
+  &::before {
+    display: var(--display, 'none') !important;
+    font-size: inherit;
+    width: auto;
+    height: auto;
+  }
+
+  &::after {
+    content: attr(data-content) !important;
+    position: relative;
+    right: var(--offset, 'auto');
+    font-family: var(--font);
+    letter-spacing: var(--space);
+    background: linear-gradient(90deg, var(--fill) var(--step), var(--background) var(--step));
+    -webkit-text-stroke: var(--stroke) var(--border);
+    -webkit-text-fill-color: transparent;
+    -webkit-background-clip: text;
+    background-clip: text;
+    }
+}

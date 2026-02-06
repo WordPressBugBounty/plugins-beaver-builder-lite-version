@@ -1,3 +1,6 @@
+/*!***************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[1].use[1]!./node_modules/sass-loader/dist/cjs.js!./src/wp/wp-editor/layout-block/index.scss ***!
+  \***************************************************************************************************************************************************************/
 .wp-block[data-type="fl-builder/layout"] .components-placeholder__fieldset,
 .wp-block[data-type="fl-builder/layout"] .components-placeholder__instructions,
 .wp-block[data-type="fl-builder/layout"] .components-placeholder.components-placeholder {
@@ -51,6 +54,9 @@ body.fl-builder-layout-enabled .block-editor-block-contextual-toolbar {
 .fl-builder-layout-loading-view .spinner {
   float: left;
 }
+/*!************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[1].use[1]!./node_modules/sass-loader/dist/cjs.js!./src/wp/wp-editor/more-menu/menu-item-pre-5-3.scss ***!
+  \************************************************************************************************************************************************************************/
 /**
  * This should be removed when the API supports proper click
  * events on more menu items.
@@ -63,4 +69,3 @@ body.fl-builder-layout-enabled .block-editor-block-contextual-toolbar {
   left: 0;
   z-index: 1;
 }
-

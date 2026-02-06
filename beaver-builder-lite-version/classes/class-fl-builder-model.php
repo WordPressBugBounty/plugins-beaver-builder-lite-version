@@ -183,6 +183,7 @@ final class FLBuilderModel {
 		/* Actions */
 		add_action( 'init', __CLASS__ . '::load_settings', 1 );
 		add_action( 'init', __CLASS__ . '::load_modules', 2 );
+		add_action( 'wp', __CLASS__ . '::filter_settings_forms', 1 );
 		add_action( 'before_delete_post', __CLASS__ . '::delete_post' );
 		add_action( 'save_post', __CLASS__ . '::save_revision', 10, 3 );
 		add_action( 'save_post', __CLASS__ . '::set_node_template_default_type', 10, 3 );
@@ -195,9 +196,18 @@ final class FLBuilderModel {
 		add_filter( 'heartbeat_received', __CLASS__ . '::lock_post', 10, 2 );
 		add_filter( 'fl_builder_register_settings_form', __CLASS__ . '::filter_row_settings_for_resize', 10, 2 );
 		add_filter( 'wp_revisions_to_keep', __CLASS__ . '::limit_revisions', 10, 2 );
+		add_action( 'fl_builder_after_render_row', array( __CLASS__, 'animation_opacity' ), 10, 2 );
+		add_action( 'fl_builder_after_render_module', array( __CLASS__, 'animation_opacity' ), 10, 2 );
+		add_action( 'fl_builder_after_render_col', array( __CLASS__, 'animation_opacity' ), 10, 2 );
 
 		/* Core Templates */
 		self::register_core_templates();
+	}
+
+	public static function animation_opacity( $node, $extra = false ) {
+		if ( ! self::is_builder_active() && isset( $node->settings->animation ) && is_array( $node->settings->animation ) && ! empty( $node->settings->animation['style'] ) ) {
+			printf( '<style>.fl-node-%s.fl-animation:not(.fl-animated){opacity:0}</style>', $node->node );
+		}
 	}
 
 	/**
@@ -814,7 +824,12 @@ final class FLBuilderModel {
 	 */
 	static public function disable() {
 		if ( isset( $_POST['_wpnonce'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'fl-enable-editor' ) ) {
-			update_post_meta( self::get_post_id(), '_fl_builder_enabled', false );
+			$post_id = self::get_post_id();
+			$user_id = get_current_user_id();
+			$post    = get_post( $post_id );
+			if ( current_user_can( 'edit_others_posts' ) || ( $post->post_author === $user_id ) ) {
+				update_post_meta( $post_id, '_fl_builder_enabled', false );
+			}
 		}
 		exit;
 	}
@@ -1197,9 +1212,11 @@ final class FLBuilderModel {
 	static public function get_node( $node_id = null, $status = null ) {
 		if ( is_object( $node_id ) ) {
 			$node = $node_id;
-		} else {
+		} elseif ( null !== $node_id ) {
 			$data = self::get_layout_data( $status );
 			$node = isset( $data[ $node_id ] ) ? $data[ $node_id ] : null;
+		} else {
+			$node = false;
 		}
 
 		if ( $node && ! empty( $node->settings ) ) {
@@ -1411,8 +1428,13 @@ final class FLBuilderModel {
 
 		if ( is_object( $parent ) ) {
 			foreach ( $data as $node_id => $node ) {
-				if ( ( isset( $node->parent ) && $node->parent == $parent->node )
-					|| ( $template_node_id && $template_node_id == $node->parent ) ) {
+				$is_child        = isset( $node->parent ) && $node->parent == $parent->node;
+				$is_global_child = $template_node_id && $template_node_id == $node->parent;
+
+				if ( $is_global_child ) {
+					$global_node                 = FLBuilderDynamicGlobal::merge_child_settings( $parent, $node );
+					$nodes[ $global_node->node ] = $global_node;
+				} elseif ( $is_child ) {
 					$nodes[ $node_id ] = $node;
 				}
 			}
@@ -1462,11 +1484,7 @@ final class FLBuilderModel {
 	 * @return array
 	 */
 	static public function get_categorized_nodes() {
-		if ( self::is_post_user_template( 'module' ) ) {
-			$root_module                            = self::get_node_template_root( 'module' );
-			$nodes                                  = self::get_categorized_child_nodes( $root_module );
-			$nodes['modules'][ $root_module->node ] = self::get_module( $root_module );
-		} elseif ( self::is_post_user_template( 'column' ) ) {
+		if ( self::is_post_user_template( 'column' ) ) {
 			$root_col                            = self::get_node_template_root( 'column' );
 			$nodes                               = self::get_categorized_child_nodes( $root_col );
 			$nodes['columns'][ $root_col->node ] = $root_col;
@@ -1534,11 +1552,12 @@ final class FLBuilderModel {
 	 * @return object
 	 */
 	static public function get_node_settings( $node, $filter = true ) {
-		$node      = is_object( $node ) ? $node : self::get_node( $node );
-		$post_data = self::get_post_data();
+		$node              = is_object( $node ) ? $node : self::get_node( $node );
+		$post_data         = self::get_post_data();
+		$is_dynamic_global = isset( $node->settings->dynamic_node_settings );
 
 		// Get the node settings for a node template's root node?
-		if ( self::is_node_template_root( $node ) && ! self::is_post_node_template( false, $node->type ) ) {
+		if ( ! $is_dynamic_global && self::is_node_template_root( $node ) && ! self::is_post_node_template( false, $node->type ) ) {
 			$template_post_id = self::get_node_template_post_id( $node->template_id );
 			$template_data    = self::get_layout_data( 'published', $template_post_id );
 
@@ -1557,6 +1576,10 @@ final class FLBuilderModel {
 				}
 
 				$node->settings = $template_settings;
+
+				if ( isset( $node->settings->dynamic_fields ) ) {
+					unset( $node->settings->dynamic_fields );
+				}
 			}
 		}
 
@@ -1579,6 +1602,11 @@ final class FLBuilderModel {
 
 			if ( ! isset( $post_data['node_preview_processed_settings'] ) ) {
 				$settings = $post_data['node_preview'];
+
+				if ( isset( $settings['dynamic_node_settings'] ) ) {
+					$settings = FLBuilderDynamicGlobal::merge_settings_for_save( $node, (object) $settings );
+				}
+
 				$settings = (object) array_merge( (array) $node->settings, (array) $settings );
 				$settings = self::process_node_settings( $node, $settings );
 				self::update_post_data( 'node_preview_processed_settings', $settings );
@@ -1588,6 +1616,8 @@ final class FLBuilderModel {
 		} else {
 			$settings = self::get_node_settings_with_defaults_merged( $node );
 		}
+
+		$settings = FLBuilderDynamicGlobal::merge_settings_with_template( $node, $settings );
 
 		return ! $filter ? $settings : apply_filters( 'fl_builder_node_settings', $settings, $node );
 	}
@@ -2058,9 +2088,18 @@ final class FLBuilderModel {
 	 * @param string $node_id Node ID of the row to copy.
 	 * @param object $settings These settings will be used for the copy if present.
 	 * @param string $settings_id The ID of the node who's settings were passed.
+	 * @param bool $preserve_globals Whether to preserve global nodes.
 	 * @return void
 	 */
-	static public function copy_row( $node_id = null, $settings = null, $settings_id = null ) {
+	static public function copy_row( $node_id = null, $settings = null, $settings_id = null, $preserve_globals = true ) {
+
+		// Duplicate as a global row?
+		$node = self::get_node( $node_id );
+		if ( $preserve_globals && self::is_node_template_root( $node ) ) {
+			return self::duplicate_global_node( $node->node );
+		}
+
+		// Duplicate as a regular row...
 		$layout_data   = self::get_layout_data();
 		$row           = self::get_node( $node_id );
 		$new_row_id    = self::generate_node_id();
@@ -2078,6 +2117,8 @@ final class FLBuilderModel {
 			unset( $layout_data[ $new_row_id ]->template_id );
 			unset( $layout_data[ $new_row_id ]->template_node_id );
 			unset( $layout_data[ $new_row_id ]->template_root_node );
+			unset( $layout_data[ $new_row_id ]->settings->dynamic_fields );
+			unset( $layout_data[ $new_row_id ]->settings->dynamic_node_settings );
 		}
 
 		// Preliminary layout data update so the new row is available.
@@ -2088,10 +2129,14 @@ final class FLBuilderModel {
 
 			// Handle modules as direct row children.
 			if ( 'module' === $child->type ) {
-				$child_copy                     = self::copy_module( $child, $child->settings, $new_row_id );
-				$child_copy_children            = self::get_nested_nodes( $child_copy->node );
-				$new_nodes[ $child_copy->node ] = $child_copy;
-				$new_nodes                      = array_merge( $new_nodes, $child_copy_children );
+				$child_copy = self::copy_module( $child, $child->settings, $new_row_id, null, $preserve_globals );
+				if ( $child_copy ) {
+					$new_nodes[ $child_copy->node ] = $child_copy;
+					if ( ! $preserve_globals || ! self::is_node_global( $child_copy ) ) {
+						$child_copy_children = self::get_nested_nodes( $child_copy->node );
+						$new_nodes           = array_merge( $new_nodes, $child_copy_children );
+					}
+				}
 				continue;
 			}
 
@@ -2108,10 +2153,14 @@ final class FLBuilderModel {
 				foreach ( $nodes as $node ) {
 
 					if ( 'module' == $node->type ) {
-						$module_copy                     = self::copy_module( $node, $node->settings, $node->parent, $node->position );
-						$module_copy_children            = self::get_nested_nodes( $module_copy->node );
-						$new_nodes[ $module_copy->node ] = $module_copy;
-						$new_nodes                       = array_merge( $new_nodes, $module_copy_children );
+						$module_copy = self::copy_module( $node, $node->settings, $node->parent, $node->position, $preserve_globals );
+						if ( $module_copy ) {
+							$new_nodes[ $module_copy->node ] = $module_copy;
+							if ( ! $preserve_globals || ! self::is_node_global( $module_copy ) ) {
+								$module_copy_children = self::get_nested_nodes( $module_copy->node );
+								$new_nodes            = array_merge( $new_nodes, $module_copy_children );
+							}
+						}
 					} elseif ( 'column-group' == $node->type ) {
 
 						$new_nodes[ $node->node ] = clone $node;
@@ -2124,10 +2173,14 @@ final class FLBuilderModel {
 							$modules                                  = self::get_nodes( 'module', $nested_col );
 
 							foreach ( $modules as $module ) {
-								$module_copy                     = self::copy_module( $module, $module->settings, $module->parent, $module->position );
-								$module_copy_children            = self::get_nested_nodes( $module_copy->node );
-								$new_nodes[ $module_copy->node ] = $module_copy;
-								$new_nodes                       = array_merge( $new_nodes, $module_copy_children );
+								$module_copy = self::copy_module( $module, $module->settings, $module->parent, $module->position, $preserve_globals );
+								if ( $module_copy ) {
+									$new_nodes[ $module_copy->node ] = $module_copy;
+									if ( ! $preserve_globals || ! self::is_node_global( $module_copy ) ) {
+										$module_copy_children = self::get_nested_nodes( $module_copy->node );
+										$new_nodes            = array_merge( $new_nodes, $module_copy_children );
+									}
+								}
 							}
 						}
 					}
@@ -2149,6 +2202,7 @@ final class FLBuilderModel {
 
 		// Set col group parent ids to the new row id and unset template data.
 		foreach ( $new_nodes as $child_node_id => $child ) {
+
 			// Check for column template's new node id.
 			if ( isset( $child->template_node_id ) ) {
 				$template_cols[ $child->template_node_id ] = $child_node_id;
@@ -2164,9 +2218,13 @@ final class FLBuilderModel {
 				}
 			}
 
-			if ( isset( $new_nodes[ $child_node_id ]->template_id ) ) {
+			// Unset template data.
+			if ( ! $preserve_globals && isset( $new_nodes[ $child_node_id ]->template_id ) ) {
 				unset( $new_nodes[ $child_node_id ]->template_id );
 				unset( $new_nodes[ $child_node_id ]->template_node_id );
+				unset( $new_nodes[ $child_node_id ]->template_root_node );
+				unset( $new_nodes[ $child_node_id ]->settings->dynamic_fields );
+				unset( $new_nodes[ $child_node_id ]->settings->dynamic_node_settings );
 			}
 		}
 
@@ -2953,9 +3011,18 @@ final class FLBuilderModel {
 	 * @param string $node_id Node ID of the column to copy.
 	 * @param object $settings These settings will be used for the copy if present.
 	 * @param string $settings_id The ID of the node who's settings were passed.
+	 * @param boolean $preserve_globals Whether to preserve global nodes.
 	 * @return void
 	 */
-	static public function copy_col( $node_id = null, $settings = null, $settings_id = null ) {
+	static public function copy_col( $node_id = null, $settings = null, $settings_id = null, $preserve_globals = true ) {
+
+		// Duplicate as a global column?
+		$node = self::get_node( $node_id );
+		if ( $preserve_globals && self::is_node_template_root( $node ) ) {
+			return self::duplicate_global_node( $node->node );
+		}
+
+		// Duplicate as a regular column...
 		$layout_data = self::get_layout_data();
 		$col         = self::get_node( $node_id );
 		$new_col_id  = self::generate_node_id();
@@ -2983,6 +3050,8 @@ final class FLBuilderModel {
 			} else {
 				unset( $layout_data[ $new_col_id ]->template_id );
 				unset( $layout_data[ $new_col_id ]->template_node_id );
+				unset( $layout_data[ $new_col_id ]->settings->dynamic_fields );
+				unset( $layout_data[ $new_col_id ]->settings->dynamic_node_settings );
 
 			}
 			unset( $layout_data[ $new_col_id ]->template_root_node );
@@ -2992,10 +3061,14 @@ final class FLBuilderModel {
 		foreach ( $nodes as $node ) {
 
 			if ( 'module' == $node->type ) {
-				$module_copy                     = self::copy_module( $node, $node->settings, $node->parent, $node->position );
-				$module_copy_children            = self::get_nested_nodes( $module_copy->node );
-				$new_nodes[ $module_copy->node ] = $module_copy;
-				$new_nodes                       = array_merge( $new_nodes, $module_copy_children );
+				$module_copy = self::copy_module( $node, $node->settings, $node->parent, $node->position, $preserve_globals );
+				if ( $module_copy ) {
+					$new_nodes[ $module_copy->node ] = $module_copy;
+					if ( ! $preserve_globals || ! self::is_node_global( $module_copy ) ) {
+						$module_copy_children = self::get_nested_nodes( $module_copy->node );
+						$new_nodes            = array_merge( $new_nodes, $module_copy_children );
+					}
+				}
 			} elseif ( 'column-group' == $node->type ) {
 
 				$new_nodes[ $node->node ] = clone $node;
@@ -3032,7 +3105,7 @@ final class FLBuilderModel {
 			if ( $child->parent == $col->node || ( isset( $col->template_node_id ) && $child->parent == $col->template_node_id ) ) {
 				$new_nodes[ $child_node_id ]->parent = $new_col_id;
 			}
-			if ( isset( $new_nodes[ $child_node_id ]->template_id ) ) {
+			if ( ! $preserve_globals && isset( $new_nodes[ $child_node_id ]->template_id ) ) {
 				// Check if the column is global.
 				if ( isset( $layout_data[ $new_col_id ]->template_node_id ) ) {
 					$new_nodes[ $child_node_id ]->template_id      = $parent->template_id;
@@ -3361,6 +3434,7 @@ final class FLBuilderModel {
 		// These modules are deprecated and disabled by default.
 		$deprecated = array(
 			'social-buttons',
+			'widget',
 		);
 		return $deprecated;
 	}
@@ -3663,6 +3737,10 @@ final class FLBuilderModel {
 			if ( isset( $module->template_id ) ) {
 				$instance->template_id      = $module->template_id;
 				$instance->template_node_id = $module->template_node_id;
+				$instance->template_title   = $module->template_title ?? '';
+				$instance->template_url     = $module->template_url ?? '';
+				$instance->global           = $module->global ?? false;
+				$instance->dynamic          = $module->dynamic ?? false;
 			}
 			if ( isset( $module->template_root_node ) ) {
 				$instance->template_root_node = true;
@@ -3767,7 +3845,14 @@ final class FLBuilderModel {
 		if ( self::is_node_global( $parent ) ) {
 			$data[ $module_node_id ]->template_id      = $parent->template_id;
 			$data[ $module_node_id ]->template_node_id = $module_node_id;
+		} else {
+			unset( $data[ $module_node_id ]->template_id );
+			unset( $data[ $module_node_id ]->template_node_id );
+			unset( $data[ $module_node_id ]->settings->dynamic_fields );
+			unset( $data[ $module_node_id ]->settings->dynamic_node_settings );
+
 		}
+		unset( $data[ $module_node_id ]->template_root_node );
 
 		// Add a version number?
 		if ( null !== $version ) {
@@ -3985,23 +4070,36 @@ final class FLBuilderModel {
 	 * @param object $settings These settings will be used for the copy if present.
 	 * @param string $parent_id Node ID of a new parent if necessary.
 	 * @param int $position Position of the new module if necessary.
-	 * @return object The new module object.
+	 * @param bool $preserve_globals Whether to preserve global nodes.
+	 * @return object|bool The new module object.
 	 */
-	static public function copy_module( $node_id = null, $settings = null, $parent_id = null, $position = null ) {
-		$module   = self::get_module( $node_id );
-		$children = self::get_nodes( null, $module );
+	static public function copy_module( $node_id = null, $settings = null, $parent_id = null, $position = null, $preserve_globals = true ) {
 
-		if ( $settings ) {
+		// Duplicate as a global module?
+		$node = self::get_node( $node_id );
+		if ( $preserve_globals && self::is_node_template_root( $node ) ) {
+			$new_node = self::duplicate_global_node( $node->node, $parent_id );
+			return self::get_node( $new_node->node );
+		}
+
+		// Duplicate as a regular module...
+		$module = self::get_module( $node_id );
+
+		if ( ! $module ) {
+			return false;
+		} elseif ( $settings ) {
 			$module->settings = (object) array_merge( (array) $module->settings, (array) $settings );
 		}
 
 		$parent_id   = null !== $parent_id ? $parent_id : $module->parent;
 		$position    = null !== $position ? $position : $module->position + 1;
 		$version     = isset( $module->version ) && $module->version ? (int) $module->version : null;
-		$module_copy = self::add_module( $module->settings->type, $module->settings, $parent_id, $position, $version );
+		$settings    = clone $module->settings;
+		$module_copy = self::add_module( $settings->type, $settings, $parent_id, $position, $version );
+		$children    = self::get_nodes( null, $module );
 
 		foreach ( $children as $child ) {
-			$child_copy = self::copy_module( $child, $child->settings, $module_copy->node, $child->position );
+			self::copy_module( $child, $child->settings, $module_copy->node, $child->position, $preserve_globals );
 		}
 
 		return $module_copy;
@@ -4256,6 +4354,34 @@ final class FLBuilderModel {
 	}
 
 	/**
+	 * Allows settings forms to be filtered once the query
+	 * is parsed (on the wp action).
+	 *
+	 * @since 2.10
+	 */
+	static public function filter_settings_forms() {
+		foreach ( self::$settings_forms as $id => $form ) {
+			self::$settings_forms[ $id ] = apply_filters( 'fl_builder_filter_settings_form', $form, $id );
+
+			if ( isset( self::$modules[ $id ] ) ) {
+				self::$modules[ $id ]->form = self::$settings_forms[ $id ];
+
+				if ( isset( self::$modules[ $id ]->form['advanced'] ) ) {
+					self::$modules[ $id ]->form['advanced'] = self::$settings_forms['module_advanced'];
+				}
+
+				if ( isset( self::$modules[ $id ]->form['auto_style'] ) ) {
+					self::$modules[ $id ]->form['auto_style'] = self::$settings_forms['auto_style'];
+				}
+			} elseif ( 'module_advanced' === $id ) {
+				foreach ( self::$modules as $slug => $module ) {
+					self::$modules[ $slug ]->form['advanced'] = self::$settings_forms['module_advanced'];
+				}
+			}
+		}
+	}
+
+	/**
 	 * Returns the data for a settings form.
 	 *
 	 * @since 1.0
@@ -4491,6 +4617,18 @@ final class FLBuilderModel {
 	 */
 	static public function save_settings( $node_id = null, $settings = null ) {
 		$node = self::get_node( $node_id );
+
+		if ( empty( $node ) ) {
+			return null;
+		}
+
+		$settings          = (object) $settings;
+		$template_post_id  = self::is_node_global( $node );
+		$is_dynamic_global = isset( $settings->dynamic_node_settings );
+		$is_node_template  = self::is_post_node_template( false, $node->type );
+		$post_id           = self::get_post_id();
+
+		// Verify settings for security before proceeding.
 		if ( ! FLBuilderModel::user_has_unfiltered_html() && true !== self::verify_settings( $settings ) ) {
 			return array(
 				'node_id'  => $node->node,
@@ -4499,12 +4637,18 @@ final class FLBuilderModel {
 			);
 		}
 
-		$new_settings     = (object) array_merge( (array) $node->settings, (array) $settings );
-		$template_post_id = self::is_node_global( $node );
-		$post_id          = self::get_post_id();
+		// Merge the new settings.
+		if ( $is_dynamic_global ) {
+			$new_settings = FLBuilderDynamicGlobal::merge_settings_for_save( $node, $settings );
+		} else {
+			$new_settings = (object) array_merge( (array) $node->settings, (array) $settings );
+			$new_settings = self::process_node_settings( $node, $new_settings );
+		}
 
-		// Process the settings.
-		$new_settings = self::process_node_settings( $node, $new_settings );
+		// Ensure dynamic fields is an object.
+		if ( isset( $new_settings->dynamic_fields ) ) {
+			$new_settings->dynamic_fields = (object) $new_settings->dynamic_fields;
+		}
 
 		/**
 		 * Remove any js setting for users with no unfiltered role
@@ -4521,7 +4665,7 @@ final class FLBuilderModel {
 		self::update_layout_data( $data );
 
 		// Save settings for a global node template?
-		if ( $template_post_id && $template_post_id !== $post_id && ! self::is_post_node_template( false, $node->type ) ) {
+		if ( $template_post_id && $template_post_id !== $post_id && ! $is_node_template && ! $is_dynamic_global ) {
 
 			// Get the template data.
 			$template_data = self::get_layout_data( 'published', $template_post_id );
@@ -4748,9 +4892,20 @@ final class FLBuilderModel {
 	 * @return object
 	 */
 	static public function save_global_settings( $settings = array() ) {
+
+		if ( ! current_user_can( 'delete_others_posts' ) ) {
+			wp_die( '', 403 );
+		}
+
 		$old_settings = self::get_global_settings();
 		$settings     = self::sanitize_global( $settings );
+
+		if ( ! current_user_can( 'unfiltered_html' ) ) {
+			unset( $settings['js'] );
+		}
+
 		$new_settings = (object) array_merge( (array) $old_settings, (array) $settings );
+
 		/**
 		* Special handling for color scheme
 		* Color scheme is actually a user setting, not a global setting. It just appears in the global settings form.
@@ -5051,6 +5206,15 @@ final class FLBuilderModel {
 		foreach ( $data as $node_id => $node ) {
 			if ( is_object( $node ) ) {
 				$data[ $node_id ] = clone $node;
+
+				if ( ! empty( $data[ $node_id ]->global ) ) {
+					$data[ $node_id ]->template_title = get_the_title( $data[ $node_id ]->global );
+					$data[ $node_id ]->template_url   = get_permalink( $data[ $node_id ]->global );
+
+					if ( isset( $data[ $node_id ]->type ) && 'module' === $data[ $node_id ]->type ) {
+						$data[ $node_id ]->moduleType = $data[ $node_id ]->settings->type;
+					}
+				}
 			}
 		}
 
@@ -5167,6 +5331,7 @@ final class FLBuilderModel {
 						$cleaned[ $node->node ]->parent   = $node->parent;
 						$cleaned[ $node->node ]->position = $node->position;
 						$cleaned[ $node->node ]->settings = $node->settings;
+
 						if ( isset( $node->version ) ) {
 							$cleaned[ $node->node ]->version = $node->version;
 						}
@@ -5174,7 +5339,9 @@ final class FLBuilderModel {
 						$cleaned[ $node->node ] = $node;
 					}
 
-					$cleaned[ $node->node ]->global = self::is_node_global( $node );
+					$cleaned[ $node->node ]->global  = self::is_node_global( $node );
+					$cleaned[ $node->node ]->dynamic = self::is_node_dynamic( $node );
+
 				}
 			}
 		}
@@ -5486,6 +5653,15 @@ final class FLBuilderModel {
 		$published        = self::get_layout_data( 'published', $original_post_id );
 		$draft            = self::get_layout_data( 'draft', $original_post_id );
 
+		$orig_post = get_post( $original_post_id );
+		$new_post  = get_post( $new_post_id );
+
+		if ( $orig_post->post_author !== $new_post->post_author ) {
+			wp_die( false, false, array( 'response' => 403 ) );
+		}
+
+		check_admin_referer( 'fl_wpml_duplicate_clicked' );
+
 		$response = array(
 			'enabled'    => false,
 			'has_layout' => false,
@@ -5693,6 +5869,7 @@ final class FLBuilderModel {
 			'posts_per_page'   => '-1',
 			'suppress_filters' => false,
 			'fields'           => 'ids',
+			'post__not_in'     => [ self::get_post_id() ],
 			'tax_query'        => array(
 				array(
 					'taxonomy' => 'fl-builder-template-type',
@@ -5721,16 +5898,17 @@ final class FLBuilderModel {
 			}
 
 			$templates[] = array(
-				'id'       => get_post_meta( $post, '_fl_builder_template_id', true ),
-				'postId'   => $post,
-				'name'     => get_the_title( $post ),
-				'image'    => $image,
-				'kind'     => 'template',
-				'type'     => 'user',
-				'content'  => FLBuilderModel::get_user_template_type( $post ),
-				'isGlobal' => FLBuilderModel::is_post_global_node_template( $post ),
-				'link'     => add_query_arg( 'fl_builder', '', get_permalink( $post ) ),
-				'category' => array(),
+				'id'               => get_post_meta( $post, '_fl_builder_template_id', true ),
+				'postId'           => $post,
+				'name'             => get_the_title( $post ),
+				'image'            => $image,
+				'kind'             => 'template',
+				'type'             => 'user',
+				'content'          => FLBuilderModel::get_user_template_type( $post ),
+				'isGlobal'         => FLBuilderModel::is_post_global_node_template( $post ),
+				'isDynamicEditing' => FLBuilderModel::is_post_dynamic_editing_node_template( $post ),
+				'link'             => add_query_arg( 'fl_builder', '', get_permalink( $post ) ),
+				'category'         => array(),
 			);
 		}
 
@@ -5811,7 +5989,9 @@ final class FLBuilderModel {
 
 			$type = ( is_wp_error( $terms ) || 0 === count( $terms ) ) ? 'layout' : $terms[0]->slug;
 
-			self::$node_template_types[ $template_id ] = $type;
+			if ( null !== $template_id ) {
+				self::$node_template_types[ $template_id ] = $type;
+			}
 
 			return $type;
 		}
@@ -5977,6 +6157,36 @@ final class FLBuilderModel {
 	}
 
 	/**
+	 * Checks to see if the current post is a global node template.
+	 *
+	 * @since 2.10
+	 * @param int $post_id If supplied, this post will be checked instead.
+	 * @return int
+	 */
+	static public function is_post_dynamic_editing_node_template( $post_id = false ) {
+		if ( self::is_post_global_node_template( $post_id ) ) {
+			return (int) get_post_meta( $post_id, '_fl_builder_template_dynamic_editing', true );
+		}
+		return 0;
+	}
+
+	/**
+	 * Checks to see if the given node is dynamic global.
+	 *
+	 * @since 2.10
+	 * @param object $node The node object to check.
+	 * @return bool
+	 */
+	static public function is_node_dynamic( $node ) {
+		if ( ! isset( $node->template_id ) ) {
+			return false;
+		}
+
+		$template_post_id = self::get_node_template_post_id( $node->template_id );
+		return (bool) self::is_post_dynamic_editing_node_template( $template_post_id );
+	}
+
+	/**
 	 * Checks to see if a node is a global node.
 	 *
 	 * @since 1.6.3
@@ -5987,7 +6197,9 @@ final class FLBuilderModel {
 		if ( ! isset( $node->template_id ) ) {
 			return false;
 		}
-
+		if ( empty( $node->template_id ) ) {
+			return false;
+		}
 		return self::get_node_template_post_id( $node->template_id );
 	}
 
@@ -6214,6 +6426,7 @@ final class FLBuilderModel {
 
 		if ( self::is_post_global_node_template( $post_id ) ) {
 
+			$post_types  = array_keys( get_post_types( [], 'names' ) );
 			$template_id = get_post_meta( $post_id, '_fl_builder_template_id', true );
 
 			$query = new WP_Query( array(
@@ -6230,8 +6443,8 @@ final class FLBuilderModel {
 						'compare' => 'LIKE',
 					),
 				),
-				'post_type'    => 'any',
 				'post_status'  => 'any',
+				'post_type'    => $post_types,
 				'post__not_in' => array( $post_id ),
 			) );
 
@@ -6256,6 +6469,8 @@ final class FLBuilderModel {
 		$original_parent   = $root_node->parent;
 		$original_position = $root_node->position;
 		$post_excerpt      = isset( $settings['notes'] ) ? wp_kses_post( $settings['notes'] ) : '';
+		$dynamic_editing   = false;
+		$global            = false;
 
 		// Save the node template post.
 		$post_id = wp_insert_post( array(
@@ -6322,14 +6537,25 @@ final class FLBuilderModel {
 		}
 		$nodes = $template_nodes;
 
+		// Setup dynamic editing for components.
+		if ( 'dynamic' === $settings['type'] ) {
+			$dynamic_editing = true;
+			$global          = true;
+			update_post_meta( $post_id, '_fl_builder_template_dynamic_editing', $dynamic_editing );
+		} elseif ( 'global' === $settings['type'] ) {
+			$global = true;
+		}
+
 		// Add the template ID and template node ID for global templates.
-		if ( $settings['global'] ) {
+		if ( $global ) {
 
 			foreach ( $nodes as $node_id => $node ) {
 
 				if ( false == $nodes[ $node_id ]->global ) {
 					$nodes[ $node_id ]->template_id      = $template_id;
 					$nodes[ $node_id ]->template_node_id = $node_id;
+					$nodes[ $node_id ]->global           = $global;
+					$nodes[ $node_id ]->dynamic          = $dynamic_editing;
 					if ( $node_id == $root_node->node ) {
 						$nodes[ $node_id ]->template_root_node = true;
 					} elseif ( isset( $nodes[ $node_id ]->template_root_node ) ) {
@@ -6352,10 +6578,10 @@ final class FLBuilderModel {
 		update_post_meta( $post_id, '_fl_builder_template_id', $template_id );
 
 		// Add the template global flag post meta.
-		update_post_meta( $post_id, '_fl_builder_template_global', $settings['global'] );
+		update_post_meta( $post_id, '_fl_builder_template_global', $global );
 
 		// Delete the existing node and apply the template for global templates.
-		if ( $settings['global'] ) {
+		if ( $global ) {
 
 			// Delete the existing node.
 			self::delete_node( $template_node_id );
@@ -6367,16 +6593,17 @@ final class FLBuilderModel {
 		// Return an array of template settings.
 		return array(
 			'id'                 => $template_id,
-			'global'             => $settings['global'] ? true : false,
+			'global'             => $global,
 			'link'               => add_query_arg( 'fl_builder', '', get_permalink( $post_id ) ),
 			'name'               => $settings['name'],
 			'type'               => $root_node->type,
-			'layout'             => $settings['global'] ? FLBuilderAJAXLayout::render( $root_node->node, $template_node_id ) : null,
-			'config'             => $settings['global'] ? FLBuilderUISettingsForms::get_node_js_config() : null,
+			'layout'             => $global ? FLBuilderAJAXLayout::render( $root_node->node, $template_node_id ) : null,
+			'config'             => $global ? FLBuilderUISettingsForms::get_node_js_config() : null,
 			'postID'             => $post_id,
 			'template_id'        => $template_id,
 			'template_node_id'   => $root_node->node,
 			'template_root_node' => true,
+			'dynamic_editing'    => $dynamic_editing,
 			'parent'             => $original_parent,
 			'position'           => $original_position,
 			'settings'           => $root_node->settings,
@@ -6448,6 +6675,60 @@ final class FLBuilderModel {
 	}
 
 	/**
+	 * Duplicate a root global node in a layout, preserving all
+	 * of the global references. This will only duplicate a root
+	 * global node in a layout. It is not intended to duplicate
+	 * children of global nodes.
+	 *
+	 * @since 2.10
+	 * @param string $node_id
+	 * @param string $parent_id
+	 * @return object
+	 */
+	static public function duplicate_global_node( $node_id, $parent_id = null ) {
+		$data = self::get_layout_data();
+
+		$new_node_id  = self::generate_node_id();
+		$new_position = $data[ $node_id ]->position + 1;
+
+		$data[ $new_node_id ]       = unserialize( serialize( $data[ $node_id ] ) ); // Deep clone
+		$data[ $new_node_id ]->node = $new_node_id;
+
+		if ( null !== $parent_id ) {
+			$data[ $new_node_id ]->parent = $parent_id;
+		}
+
+		self::update_layout_data( $data );
+		self::reorder_node( $new_node_id, $new_position );
+
+		return self::get_node( $new_node_id );
+	}
+
+	/**
+	 * Unlink a single global node instance in a layout. This will remove
+	 * the global reference from the node, turning it into a static node.
+	 *
+	 * @since 2.10
+	 * @param string $node_id
+	 * @return object
+	 */
+	static public function unlink_global_node( $node_id ) {
+		$node = self::get_node( $node_id );
+
+		if ( 'row' === $node->type ) {
+			$new_node = self::copy_row( $node->node, null, null, false );
+		} elseif ( 'column' === $node->type ) {
+			$new_node = self::copy_col( $node->node, null, null, false );
+		} elseif ( 'module' === $node->type ) {
+			$new_node = self::copy_module( $node->node, null, null, null, false );
+		}
+
+		self::delete_node( $node->node );
+
+		return self::get_node( $new_node->node );
+	}
+
+	/**
 	 * Unlinks all instances of a global node template in all posts.
 	 *
 	 * @since 1.6.3
@@ -6492,22 +6773,52 @@ final class FLBuilderModel {
 			// Check to see if this is the global template node to unlink.
 			if ( isset( $node->template_id ) && $node->template_id == $template_id ) {
 
-				// Generate new node ids for the template data.
-				$new_data = self::generate_new_node_ids( $template_data );
+				// Clone the template data to avoid modifying the original.
+				$new_data = [];
+				foreach ( $template_data as $i => $n ) {
+					$new_data[ $i ] = clone $n;
+				}
 
 				// Get the root node from the template data.
 				$root_node = self::get_node_template_root( $node->type, $new_data );
 
-				// Remove the root node from the template data since it's already in the layout.
-				unset( $new_data[ $root_node->node ] );
+				if ( is_object( $root_node ) ) {
+					// Remove the root node from the template data since it's already in the layout.
+					unset( $new_data[ $root_node->node ] );
+				}
+
+				// Merge children with dynamic settings if necessary.
+				if ( $node->dynamic ) {
+					foreach ( $new_data as $i => $n ) {
+						$new_data[ $i ] = FLBuilderDynamicGlobal::merge_child_settings(
+							$layout_data[ $node_id ],
+							$new_data[ $i ],
+							false
+						);
+					}
+				}
+
+				// Generate new node ids for the child template data.
+				$new_data = self::generate_new_node_ids( $new_data );
 
 				// Update the settings for the root node in this layout.
-				$layout_data[ $node_id ]->settings = $root_node->settings;
+				if ( $node->dynamic ) {
+					$layout_data[ $node_id ]->settings = FLBuilderDynamicGlobal::merge_settings_with_template(
+						$layout_data[ $node_id ],
+						$layout_data[ $node_id ]->settings
+					);
+				} else {
+					if ( is_object( $root_node ) ) {
+						$layout_data[ $node_id ]->settings = $root_node->settings;
+					}
+				}
 
-				// Update children with the new parent node ID.
-				foreach ( $new_data as $i => $n ) {
-					if ( $n->parent == $root_node->node ) {
-						$new_data[ $i ]->parent = $node->node;
+				if ( is_object( $root_node ) ) {
+					// Update children with the new parent node ID.
+					foreach ( $new_data as $i => $n ) {
+						if ( $n->parent == $root_node->node ) {
+							$new_data[ $i ]->parent = $node_id;
+						}
 					}
 				}
 
@@ -6522,11 +6833,28 @@ final class FLBuilderModel {
 		// Only update if we need to.
 		if ( $update ) {
 
-			// Remove template info from the layout data.
+			// Get the template ID for the current post if it has one.
+			$post_template_id = get_post_meta( $post_id, '_fl_builder_template_id', true );
+
+			// Loop through the layout data and update the template ID.
 			foreach ( $layout_data as $node_id => $node ) {
+
+				// Check to see if this node is part of the global template to unlink.
 				if ( isset( $node->template_id ) && $node->template_id == $template_id ) {
-					unset( $layout_data[ $node_id ]->template_id );
-					unset( $layout_data[ $node_id ]->template_node_id );
+
+					// If this post has a template ID, set it to the new template ID for these nodes.
+					// Otherwise, unset the template ID and remove dynamic settings.
+					if ( $post_template_id ) {
+						$layout_data[ $node_id ]->template_id      = $post_template_id;
+						$layout_data[ $node_id ]->template_node_id = $node_id;
+					} else {
+						unset( $layout_data[ $node_id ]->template_id );
+						unset( $layout_data[ $node_id ]->template_node_id );
+						unset( $layout_data[ $node_id ]->settings->dynamic_fields );
+						unset( $layout_data[ $node_id ]->settings->dynamic_node_settings );
+					}
+
+					// We're unlinking, so this is no longer a root node.
 					unset( $layout_data[ $node_id ]->template_root_node );
 				}
 			}
@@ -6674,22 +7002,26 @@ final class FLBuilderModel {
 			if ( ! $parent || 'row' == $parent->type || 'column-group' == $parent->type ) {
 
 				if ( 'module' == $root_node->type ) {
-					$parent_id = self::add_module_parent( $root_node, $parent_id, $position );
-					$position  = $parent_id ? null : $position;
+					$module = self::get_module( $root_node );
+					if ( ! $module->accepts_children() ) {
+						$parent_id = self::add_module_parent( $root_node, $parent_id, $position );
+						$position  = $parent_id ? null : $position;
+					}
 				} elseif ( 'column' == $root_node->type ) {
-					$parent_id       = self::add_col_parent( $parent_id, $position );
-					$is_col_template = self::is_node_global( $root_node );
+					$parent_id = self::add_col_parent( $parent_id, $position );
 				}
 
 				$parent = self::get_node( $parent_id );
 			}
 
-			// Set the  node's template data if the parent is a global node.
-			if ( self::is_node_global( $parent ) && ! $is_col_template ) {
-				$template_data[ $root_node->node ]->template_id      = $parent->template_id;
-				$template_data[ $root_node->node ]->template_node_id = $root_node->node;
-				unset( $template_data[ $root_node->node ]->template_root_node );
-				$global = true;
+			// Set the global template references for all template nodes if the
+			// parent is a global node and the template being applied is global.
+			// This check allows globals to be applied to other globals.
+			if ( self::is_node_global( $parent ) && ! self::is_node_global( $root_node ) ) {
+				foreach ( $template_data as $node_id => $node ) {
+					$template_data[ $node_id ]->template_id      = $parent->template_id;
+					$template_data[ $node_id ]->template_node_id = $node_id;
+				}
 			}
 		}
 
@@ -6710,6 +7042,10 @@ final class FLBuilderModel {
 
 			// Merge template settings.
 			$layout_settings = self::merge_layout_settings( $layout_settings, $template_settings );
+		}
+
+		if ( isset( $layout_data[ $root_node->node ]->settings->dynamic_fields ) ) {
+			unset( $layout_data[ $root_node->node ]->settings->dynamic_fields );
 		}
 
 		// Update the layout data and settings.

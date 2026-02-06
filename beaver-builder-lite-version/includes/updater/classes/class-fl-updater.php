@@ -56,6 +56,7 @@ final class FLUpdater {
 
 		if ( 'plugin' == $settings['type'] ) {
 			add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'update_check' ) );
+			add_filter( 'site_transient_update_plugins', array( $this, 'site_transient_update_plugins' ) );
 			add_filter( 'plugins_api', array( $this, 'plugin_info' ), 99, 3 );
 			add_action( 'in_plugin_update_message-' . self::get_plugin_file( $settings['slug'] ), array( $this, 'update_message' ), 1, 2 );
 			add_action( 'admin_init', array( $this, 'wp_update_notice' ) );
@@ -99,6 +100,27 @@ final class FLUpdater {
 		);
 
 		return FLUpdater::$_responses[ $slug ];
+	}
+
+	/**
+	 * @since 2.10
+	 */
+	public function site_transient_update_plugins( $response ) {
+
+		if ( ! is_object( $response ) ) {
+			return $response;
+		}
+
+		$slug         = $this->settings['slug'];
+		$version      = $this->settings['version'];
+		$response_obj = isset( $response->response ) ? (array) $response->response : new StdClass();
+
+		foreach ( $response_obj as $k => $obj ) {
+			if ( $slug === $obj->slug && $version === $obj->new_version ) {
+				unset( $response->response[ $k ] );
+			}
+		}
+		return $response;
 	}
 
 	/**

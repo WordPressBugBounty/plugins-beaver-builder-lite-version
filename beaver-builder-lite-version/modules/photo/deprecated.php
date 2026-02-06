@@ -10,4 +10,5 @@ FLBuilder::register_module_deprecations( 'photo', [
 			'includes/frontend.php',
 		],
 	],
+	'v2' => [], // Deprecates the old markup in the frontend.php file
 ] );

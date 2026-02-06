@@ -73,9 +73,6 @@ FLBuilder::register_settings_form('module_advanced', array(
 							'fields' => array( 'visibility_user_capability' ),
 						),
 					),
-					'preview' => array(
-						'type' => 'none',
-					),
 				),
 				'visibility_user_capability' => array(
 					'type'        => 'text',

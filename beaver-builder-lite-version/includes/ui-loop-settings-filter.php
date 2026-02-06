@@ -8,10 +8,25 @@ $defaults = array(
 	'order'       => 'DESC',
 	'offset'      => 0,
 	'users'       => '',
+	'type'        => '',
 );
 
-$tab_defaults = isset( $tab['defaults'] ) ? $tab['defaults'] : array();
-$settings     = (object) array_merge( $defaults, $tab_defaults, (array) $settings );
+$tab_group     = isset( $tab['group'] ) ? $tab['group'] : '';
+$tab_defaults  = [];
+$query_node_id = '';
+$prefix        = '';
+
+if ( 'dynamic' === $tab_group ) {
+	$orig_tab_defaults = isset( $tab['defaults'] ) ? (array) $tab['defaults'] : array();
+	$query_node_id     = isset( $tab['query_node_id'] ) ? $tab['query_node_id'] : '';
+	$prefix            = empty( $query_node_id ) ? '' : '__' . $query_node_id . '__';
+
+	foreach ( $orig_tab_defaults as $k => $v ) {
+		$tab_defaults[ $prefix . $k ] = $v;
+	}
+}
+
+$settings = (object) array_merge( $defaults, $tab_defaults, (array) $settings );
 /**
  * Allow extension of default Values
  * @see fl_builder_loop_settings
@@ -37,7 +52,7 @@ do_action( 'fl_builder_loop_settings_before_form', $settings );
 	if ( 'loop' === $settings->type ) {
 		$options['taxonomy_query'] = __( 'Taxonomy Query', 'fl-builder' );
 	}
-	FLBuilder::render_settings_field('data_source', array(
+	FLBuilder::render_settings_field( $prefix . 'data_source', array(
 		'type'    => 'select',
 		'label'   => __( 'Source', 'fl-builder' ),
 		'default' => 'custom_query',
@@ -47,7 +62,7 @@ do_action( 'fl_builder_loop_settings_before_form', $settings );
 				'fields' => array( 'posts_per_page' ),
 			),
 		),
-	), $settings);
+	), $settings, $data );
 
 	?>
 	</table>
@@ -68,10 +83,10 @@ do_action( 'fl_builder_loop_settings_before_form', $settings );
 			<table class="fl-form-table">
 			<?php
 				// ACF Repeater Key
-				FLBuilder::render_settings_field('acf_repeater_key', array(
+				FLBuilder::render_settings_field( $prefix . 'acf_repeater_key', array(
 					'type'  => 'text',
 					'label' => __( 'Key', 'fl-builder' ),
-				), $settings);
+				), $settings, $data );
 				?>
 			</table>
 		</div>
@@ -94,14 +109,14 @@ do_action( 'fl_builder_loop_settings_before_form', $settings );
 			<?php
 				$terms_taxonomy = isset( $settings->terms_taxonomy ) ? $settings->terms_taxonomy : 'category';
 				// Taxonomy
-				FLBuilder::render_settings_field('terms_taxonomy', array(
+				FLBuilder::render_settings_field( $prefix . 'terms_taxonomy', array(
 					'type'    => 'select',
 					'label'   => __( 'Taxonomy', 'fl-builder' ),
 					'default' => 'category',
 					'options' => FLBuilderLoop::get_taxonomy_options(),
-				), $settings);
+				), $settings, $data );
 
-				FLBuilder::render_settings_field('select_terms', array(
+				FLBuilder::render_settings_field( $prefix . 'select_terms', array(
 					'label'       => __( 'Select Terms to Display', 'fl-builder' ),
 					'type'        => 'button-group',
 					'fill_space'  => true,
@@ -121,16 +136,16 @@ do_action( 'fl_builder_loop_settings_before_form', $settings );
 				), $settings);
 
 				// Parent term
-				FLBuilder::render_settings_field('term_parent', array(
+				FLBuilder::render_settings_field( $prefix . 'term_parent', array(
 					'type'    => 'select',
 					'label'   => __( 'Parent Term', 'fl-builder' ),
 					'help'    => __( 'Selecting None will show all terms.', 'fl-builder' ),
 					'default' => 0,
 					'options' => FLBuilderLoop::get_term_options( $terms_taxonomy ),
-				), $settings);
+				), $settings, $data );
 
 				// Order
-				FLBuilder::render_settings_field('term_order', array(
+				FLBuilder::render_settings_field( $prefix . 'term_order', array(
 					'type'    => 'select',
 					'label'   => __( 'Order', 'fl-builder' ),
 					'default' => 'ASC',
@@ -138,9 +153,9 @@ do_action( 'fl_builder_loop_settings_before_form', $settings );
 						'ASC'  => __( 'Ascending', 'fl-builder' ),
 						'DESC' => __( 'Descending', 'fl-builder' ),
 					),
-				), $settings);
+				), $settings, $data );
 
-				FLBuilder::render_settings_field('term_hide_empty', array(
+				FLBuilder::render_settings_field( $prefix . 'term_hide_empty', array(
 					'type'    => 'select',
 					'label'   => __( 'Hide Empty', 'fl-builder' ),
 					'default' => '1',
@@ -149,9 +164,9 @@ do_action( 'fl_builder_loop_settings_before_form', $settings );
 						'1' => __( 'Yes', 'fl-builder' ),
 						'0' => __( 'No', 'fl-builder' ),
 					),
-				), $settings);
+				), $settings, $data );
 
-				FLBuilder::render_settings_field('term_order_by', array(
+				FLBuilder::render_settings_field( $prefix . 'term_order_by', array(
 					'type'    => 'select',
 					'label'   => __( 'Order By', 'fl-builder' ),
 					'default' => 'name',
@@ -171,12 +186,12 @@ do_action( 'fl_builder_loop_settings_before_form', $settings );
 							'fields' => array( 'term_order_by_meta_key' ),
 						),
 					),
-				), $settings);
+				), $settings, $data );
 
-				FLBuilder::render_settings_field('term_order_by_meta_key', array(
+				FLBuilder::render_settings_field( $prefix . 'term_order_by_meta_key', array(
 					'type'  => 'text',
 					'label' => __( 'Meta Key', 'fl-builder' ),
-				), $settings);
+				), $settings, $data );
 				?>
 			</table>
 		</div>
@@ -199,24 +214,24 @@ do_action( 'fl_builder_loop_settings_before_form', $settings );
 			<?php
 
 			// Post type
-			FLBuilder::render_settings_field('post_type', array(
+			FLBuilder::render_settings_field( $prefix . 'post_type', array(
 				'type'         => 'post-type',
 				'label'        => __( 'Post Type', 'fl-builder' ),
 				'multi-select' => true,
-			), $settings);
+			), $settings, $data );
 
 			// Order
-			FLBuilder::render_settings_field('order', array(
+			FLBuilder::render_settings_field( $prefix . 'order', array(
 				'type'    => 'select',
 				'label'   => __( 'Order', 'fl-builder' ),
 				'options' => array(
 					'DESC' => __( 'Descending', 'fl-builder' ),
 					'ASC'  => __( 'Ascending', 'fl-builder' ),
 				),
-			), $settings);
+			), $settings, $data );
 
 			// Order by
-			FLBuilder::render_settings_field('order_by', array(
+			FLBuilder::render_settings_field( $prefix . 'order_by', array(
 				'type'    => 'select',
 				'label'   => __( 'Order By', 'fl-builder' ),
 				'options' => array(
@@ -240,16 +255,16 @@ do_action( 'fl_builder_loop_settings_before_form', $settings );
 						'fields' => array( 'order_by_meta_key' ),
 					),
 				),
-			), $settings);
+			), $settings, $data );
 
 			// Meta Key
-			FLBuilder::render_settings_field('order_by_meta_key', array(
+			FLBuilder::render_settings_field( $prefix . 'order_by_meta_key', array(
 				'type'  => 'text',
 				'label' => __( 'Meta Key', 'fl-builder' ),
-			), $settings);
+			), $settings, $data );
 
 			// Offset
-			FLBuilder::render_settings_field('offset', array(
+			FLBuilder::render_settings_field( $prefix . 'offset', array(
 				'type'        => 'unit',
 				'label'       => _x( 'Offset', 'How many posts to skip.', 'fl-builder' ),
 				'default'     => '0',
@@ -261,9 +276,9 @@ do_action( 'fl_builder_loop_settings_before_form', $settings );
 					'step' => 2,
 				),
 				'help'        => __( 'Skip this many posts that match the specified criteria.', 'fl-builder' ),
-			), $settings);
+			), $settings, $data );
 
-			FLBuilder::render_settings_field('exclude_self', array(
+			FLBuilder::render_settings_field( $prefix . 'exclude_self', array(
 				'type'    => 'select',
 				'label'   => __( 'Exclude Current Post', 'fl-builder' ),
 				'default' => 'no',
@@ -272,7 +287,7 @@ do_action( 'fl_builder_loop_settings_before_form', $settings );
 					'yes' => __( 'Yes', 'fl-builder' ),
 					'no'  => __( 'No', 'fl-builder' ),
 				),
-			), $settings);
+			), $settings, $data );
 			?>
 			</table>
 		</div>
@@ -292,7 +307,7 @@ do_action( 'fl_builder_loop_settings_before_form', $settings );
 			<?php
 
 			// Posts
-			FLBuilder::render_settings_field( 'posts_' . $slug, array(
+			FLBuilder::render_settings_field(  $prefix . 'posts_' . $slug, array(
 				'type'     => 'suggest',
 				'action'   => 'fl_as_posts',
 				'data'     => $slug,
@@ -300,7 +315,7 @@ do_action( 'fl_builder_loop_settings_before_form', $settings );
 				/* translators: %s: type label */
 				'help'     => sprintf( __( 'Enter a list of %1$s.', 'fl-builder' ), $type->label ),
 				'matching' => true,
-			), $settings );
+			), $settings, $data );
 
 			// Taxonomies
 			$taxonomies = FLBuilderLoop::taxonomies( $slug );
@@ -319,7 +334,7 @@ do_action( 'fl_builder_loop_settings_before_form', $settings );
 					$field_settings->$field_key = $settings->$field_key;
 				}
 
-				FLBuilder::render_settings_field( $field_key, array(
+				FLBuilder::render_settings_field( $prefix . $field_key, array(
 					'type'     => 'suggest',
 					'action'   => 'fl_as_terms',
 					'data'     => $tax_slug,
@@ -327,7 +342,7 @@ do_action( 'fl_builder_loop_settings_before_form', $settings );
 					/* translators: %s: tax label */
 					'help'     => sprintf( __( 'Enter a list of %1$s.', 'fl-builder' ), $tax->label ),
 					'matching' => true,
-				), $field_settings );
+				), $field_settings, $data );
 			}
 			?>
 			</table>
@@ -335,13 +350,13 @@ do_action( 'fl_builder_loop_settings_before_form', $settings );
 			<table class="fl-form-table">
 			<?php
 			// Author
-			FLBuilder::render_settings_field('users', array(
+			FLBuilder::render_settings_field( $prefix . 'users', array(
 				'type'     => 'suggest',
 				'action'   => 'fl_as_users',
 				'label'    => __( 'Authors', 'fl-builder' ),
 				'help'     => __( 'Enter a list of authors usernames.', 'fl-builder' ),
 				'matching' => true,
-			), $settings);
+			), $settings, $data );
 			?>
 			</table>
 		</div>
@@ -360,7 +375,7 @@ do_action( 'fl_builder_loop_settings_before_form', $settings );
 		<div class="fl-builder-settings-section-content">
 			<table class="fl-form-table">
 			<?php
-				FLBuilder::render_settings_field( 'custom_field_relation', array(
+				FLBuilder::render_settings_field( $prefix . 'custom_field_relation', array(
 					'type'    => 'select',
 					'label'   => __( 'Relation', 'fl-builder' ),
 					'default' => 'AND',
@@ -368,12 +383,12 @@ do_action( 'fl_builder_loop_settings_before_form', $settings );
 						'AND' => __( 'AND', 'fl-builder' ),
 						'OR'  => __( 'OR', 'fl-builder' ),
 					),
-				), $settings);
+				), $settings, $data );
 				?>
 			</table>
 			<table class="fl-form-table">
 			<?php
-				FLBuilder::render_settings_field( 'custom_field', array(
+				FLBuilder::render_settings_field( $prefix . 'custom_field', array(
 					'type'         => 'form',
 					'help'         => __( 'Custom field key.', 'fl-builder' ),
 					'label'        => __( 'Custom Field', 'fl-builder' ),
@@ -381,7 +396,7 @@ do_action( 'fl_builder_loop_settings_before_form', $settings );
 					'default'      => array( 0 => '' ),
 					'preview_text' => 'filter_meta_label',
 					'multiple'     => true,
-				), $settings);
+				), $settings, $data );
 				?>
 			</table>
 		</div>

@@ -278,7 +278,7 @@ final class FLBuilderUserAccess {
 	 */
 	public static function register_default_settings() {
 		self::register_setting( 'builder_access', array(
-			'default'     => 'all',
+			'default'     => [ 'administrator', 'editor' ],
 			'group'       => __( 'Frontend', 'fl-builder' ),
 			'label'       => __( 'Builder Access', 'fl-builder' ),
 			'description' => __( 'The selected roles will have access to the builder for editing posts, pages, and CPTs.', 'fl-builder' ),
@@ -286,7 +286,7 @@ final class FLBuilderUserAccess {
 		) );
 
 		self::register_setting( 'unrestricted_editing', array(
-			'default'     => 'all',
+			'default'     => [ 'administrator', 'editor' ],
 			'group'       => __( 'Frontend', 'fl-builder' ),
 			'label'       => __( 'Unrestricted Editing', 'fl-builder' ),
 			'description' => __( 'The selected roles will have unrestricted access to all editing features within the builder.', 'fl-builder' ),

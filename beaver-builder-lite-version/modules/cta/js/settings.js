@@ -50,7 +50,7 @@
 
 		_previewButtonBackground: function( e ) {
 			var preview	= FLBuilder.preview,
-				selector = preview.classes.node + ' a.fl-button, ' + preview.classes.node + ' a.fl-button:visited',
+				selector = preview.classes.node + ' .fl-button:is(a, button), ' + preview.classes.node + ' a.fl-button:visited',
 				form = $( '.fl-builder-settings:visible' ),
 				style = form.find( 'select[name=btn_style]' ).val(),
 				bgColor = form.find( 'input[name=btn_bg_color]' ).val();

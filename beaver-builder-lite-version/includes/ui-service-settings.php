@@ -41,7 +41,13 @@
 			}
 		};
 
-		html = FLBuilderSettingsForms.renderFields( fields, data.settings );
+		const dynamicOptions = {
+			global          : FLBuilderSettingsForms.config.global, 
+			dynamicEditing  : FLBuilderSettingsForms.config.dynamicEditing, 
+			rootNodeEditing : FLBuilderSettingsForms.config.rootNodeEditing,
+		};
+		
+		html = FLBuilderSettingsForms.renderFields( fields, data.settings, null, null, null, dynamicOptions );
 
 		#>
 		{{{html}}}

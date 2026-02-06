@@ -140,6 +140,7 @@ final class FLBuilderServiceMailChimp extends FLBuilderService {
 			if ( ! isset( $post_data['list_id'] ) ) {
 				$lists             = $api->getLists();
 				$response['html'] .= $this->render_list_field( $lists, $settings );
+				$response['html'] .= $this->render_tags_field( $settings );
 			}
 		} catch ( Exception $e ) {
 			$response['error'] = $e->getMessage();
@@ -193,6 +194,31 @@ final class FLBuilderServiceMailChimp extends FLBuilderService {
 			'type'      => 'select',
 			'label'     => _x( 'List', 'An email list from a third party provider.', 'fl-builder' ),
 			'options'   => $options,
+			'preview'   => array(
+				'type' => 'none',
+			),
+		), $settings);
+
+		return ob_get_clean();
+	}
+
+	/**
+	 * Render markup for the tags field.
+	 *
+	 * @since 2.10
+	 * @param object $settings Saved module settings.
+	 * @return string The markup for the tags field.
+	 * @access private
+	 */
+	private function render_tags_field( $settings ) {
+		ob_start();
+
+		FLBuilder::render_settings_field( 'tags', array(
+			'row_class' => 'fl-builder-service-connect-row',
+			'class'     => 'fl-builder-service-connect-input',
+			'type'      => 'text',
+			'label'     => _x( 'Tags', 'A comma separated list of tags.', 'fl-builder' ),
+			'help'      => __( 'A comma separated list of tags.', 'fl-builder' ),
 			'preview'   => array(
 				'type' => 'none',
 			),
@@ -278,6 +304,10 @@ final class FLBuilderServiceMailChimp extends FLBuilderService {
 					'email'        => $email,
 					'double_optin' => (bool) $double,
 				);
+
+				if ( isset( $settings->tags ) && ! empty( trim( $settings->tags ) ) ) {
+					$data['tags'] = array_map( 'trim', explode( ',', $settings->tags ) );
+				}
 
 				// Name
 				if ( $name ) {

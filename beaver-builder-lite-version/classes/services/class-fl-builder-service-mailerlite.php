@@ -125,7 +125,7 @@ final class FLBuilderServiceMailerLite extends FLBuilderService {
 	public function render_fields( $account, $settings ) {
 		$account_data = $this->get_account_data( $account );
 		$api          = $this->get_api( $account_data['api_key'] )->groups();
-		$get_lists    = $api->get();
+		$get_lists    = $api->getgroups();
 		$lists        = array();
 
 		if ( $get_lists && ! isset( $get_lists->error ) && count( $get_lists ) > 0 ) {

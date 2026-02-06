@@ -20,6 +20,12 @@ final class FLBuilderWPML {
 		add_filter( 'fl_builder_node_template_post_id', __CLASS__ . '::filter_node_template_post_id' );
 		add_filter( 'fl_builder_parent_template_node_id', __CLASS__ . '::filter_parent_template_node_id', 10, 3 );
 		add_filter( 'option_fl_site_url', __CLASS__ . '::fix_url_check' );
+
+		add_action( 'admin_enqueue_scripts', function () {
+			wp_localize_script( 'fl-builder-admin-posts', 'fl_wpml_vars', array(
+				'nonce' => wp_create_nonce( 'fl_wpml_duplicate_clicked' ),
+			) );
+		}, 11 );
 	}
 
 	/**

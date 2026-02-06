@@ -9,7 +9,7 @@
 	<# if ( data.isMultiple && data.supportsMultiple && data.template.length ) {
 		var origValues = data.value,
 			values = origValues,
-			button = FLBuilderStrings.addField.replace( '%s', data.field.label ),
+			button = FLBuilderStrings.addField.replace( '%s', typeof( data.field.button_label ) !== 'undefined' ? data.field.button_label : data.field.label ),
 			i	   = 0;
 
 		data.name += '[]';
@@ -28,23 +28,42 @@
 		}
 	#>
 	<tbody id="fl-field-{{data.rootName}}" class="fl-field fl-builder-field-multiples" data-limit="{{limit}}" data-type="form" data-preview='{{{data.preview}}}' data-connections="{{{connections}}}">
+    <# if ( ! shouldDeferRendering ) { #>
+		<# if ( data.global && data.dynamicOptions?.source !== 'legacy' && data.field.type === 'form' && 'fl-builder-template' === FLBuilderConfig.postType && ( data.dynamicEditing || data.rootNodeEditing ) ) { #>
+		<tr class="fl-builder-field-multiple-label">
+			<th class="fl-field-label">
+			<#
+				let dynamicFieldIcons = 'dashicons-admin-plugins';
+				let dynamicEditingTitle = FLBuilderStrings.enableComponentEditing;
 
-		<# if ( ! shouldDeferRendering ) { #>
-
-			<# for( ; i < values.length; i++ ) {
-				data.index = i;
-				data.value = values[ i ];
-			#>
-			<tr class="fl-builder-field-multiple" data-field="{{data.rootName}}">
-				<# var field = FLBuilderSettingsForms.renderField( data ); #>
-				{{{field}}}
-				<td class="fl-builder-field-actions">
+				if ( 'object' === typeof data.settings.dynamic_fields && data.settings.dynamic_fields?.fields ) {
+					let dynamicFields = data.settings.dynamic_fields.fields;
+					
+					if ( dynamicFields.includes( data.rootName ) ) {
+						dynamicFieldIcons += ' fl-dynamic-node-field-enabled';
+						dynamicEditingTitle = FLBuilderStrings.disableComponentEditing;
+					}
+				}
+				#>
+				<label>{{{ FLBuilderStrings.makeFieldDynamic }}} <i class="fl-dynamic-node-field dashicons {{dynamicFieldIcons}}" data-target-field="{{data.rootName}}" data-target-field-type="{{data.field.type}}"></i></label>
+			</th>
+		</tr>
+		<# } #>
+    
+		<# for( ; i < values.length; i++ ) {
+			data.index = i;
+			data.value = values[ i ];
+		#>
+		<tr class="fl-builder-field-multiple" data-field="{{data.rootName}}">
+			<# var field = FLBuilderSettingsForms.renderField( data ); #>
+			{{{field}}}
+			<td class="fl-builder-field-actions">
 					<i class="fl-builder-field-move fas fa-arrows-alt" title="{{FLBuilderStrings.move}}"></i>
 					<i class="fl-builder-field-copy far fa-copy" title="{{FLBuilderStrings.duplicate}}"></i>
 					<i class="fl-builder-field-delete fas fa-times" title="{{FLBuilderStrings.delete}}"></i>
-				</td>
-			</tr>
-			<# } #>
+			</td>
+		</tr>
+		<# } #>
 			<tr>
 				<# if ( ! data.field.label ) { #>
 				<td colspan="2">
@@ -54,14 +73,15 @@
 					<a href="javascript:void(0);" onclick="return false;" class="fl-builder-field-add fl-builder-button" data-field="{{data.rootName}}">{{button}}</a>
 				</td>
 			</tr>
-		<# } #>
+	<# } #>
 	</tbody>
 	<# } else { #>
+  
 	<tr id="fl-field-{{data.name}}" class="fl-field{{data.rowClass}}" data-type="{{data.field.type}}" data-is-style="{{data.field.is_style}}" data-preview='{{{data.preview}}}' data-connections="{{{connections}}}">
 		<#
 		if ( ! shouldDeferRendering ) {
 			var field = FLBuilderSettingsForms.renderField( data );
-		#>
+			#>
 			{{{field}}}
 		<# } #>
 	</tr>

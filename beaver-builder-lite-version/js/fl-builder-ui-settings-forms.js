@@ -73,6 +73,8 @@
 					type      : 'general',
 					id        : null,
 					nodeId    : null,
+					tabId     : null,
+					sectionId : null,
 					className : '',
 					attrs     : '',
 					title     : '',
@@ -85,11 +87,14 @@
 					rules	    : null,
 					preview   : null,
 					helper 	  : null,
-					messages  : null
+					messages  : null,
+					dynamicEditing  : null,
+					global          : null,
+					rootNodeEditing : null,
 				};
 
 			// Load settings from the server if we have a node but no settings.
-			if ( config.nodeId && ! config.settings ) {
+			if ( config.nodeId && ! config.settings && 'node_template' !== config.id ) {
 				this.loadNodeSettings( config, callback );
 				return;
 			}
@@ -117,12 +122,14 @@
 			if ( this.renderLightbox( config ) ) {
 
 				// Finish rendering.
-				if ( config.legacy || ! this.renderLegacySettings( config, callback ) ) {
+				requestAnimationFrame(() => {
+					if ( config.legacy || ! this.renderLegacySettings( config, callback ) ) {
 
-					this.renderComplete( config, callback );
-				} else {
-					this.showLightboxLoader();
-				}
+						this.renderComplete( config, callback );
+					} else {
+						this.showLightboxLoader();
+					}
+				})
 			}
 
 			// Clear any visible registered panels
@@ -318,6 +325,7 @@
 				// Cancel any preview refreshes.
 				if ( FLBuilder.preview ) {
 					FLBuilder.preview.cancel();
+					FLBuilder.preview = null;
 				}
 
 				FLBuilder._closePanel();
@@ -340,6 +348,9 @@
 				FL.Builder.data.getOutlinePanelActions().setActiveNode( config.nodeId );
 			}
 
+			// Show the fields
+			$( '.fl-builder-settings-fields', window.parent.document ).css( 'visibility', 'visible' );
+
 			return true;
 		},
 
@@ -352,34 +363,43 @@
 		 * @param {Function} callback
 		 */
 		renderComplete: function( config, callback ) {
-			// This is done on a timeout to keep it from delaying painting
-			// of the settings form in the DOM by a fraction of a second.
-			setTimeout( function() {
-				if ( config.legacy ) {
-					this.renderLegacySettingsComplete( config.legacy );
-				}
+
+			// Ensure any legacy settings sent from the server are rendered
+			// before the form is initialized. 
+			if ( config.legacy ) {
+				this.renderLegacySettingsComplete( config.legacy );
+			}
+
+			// Handles requestAnimationFrame itself
+			FLBuilder._initSettingsForms();
+
+			// Finish setting up the form on the next animation frame
+			// to allow the form to fully paint on the screen first.
+			requestAnimationFrame(() => {
 
 				callback();
-
-				FLBuilder._initSettingsForms();
 
 				if ( config.rules ) {
 					FLBuilder._initSettingsValidation( config.rules, config.messages );
 				}
+
 				if ( config.preview ) {
+					const previewCallback = config.preview.callback || function() {};
+					config.preview.callback = function() {
+						previewCallback();
+						config.helper ? config.helper.init() : null;
+					}
 					FLBuilder.preview = new FLBuilderPreview( config.preview );
+				} else {
+					config.helper ? config.helper.init() : null;
 				}
+
 				// hook for initializing custom preview.
 				FLBuilder.triggerHook( 'initCustomPreview', config );
 
-				if ( config.helper ) {
-					config.helper.init();
-				}
-
 				// Cache current settings.
 				this.cacheCurrentSettings();
-
-			}.bind( this ), 1 );
+			})
 		},
 
 		/**
@@ -389,9 +409,13 @@
 		 * @method renderFields
 		 * @param {Object} fields
 		 * @param {Object} settings
+		 * @param {Object} node
+		 * @param {int} tabId
+		 * @param {int} sectionId
+		 * @param {Object} dynamicOptions
 		 * @return {String}
 		 */
-		renderFields: function( fields, settings, node, tabId, sectionId ) {
+		renderFields: function( fields, settings, node = null, tabId = null, sectionId = null, dynamicOptions = null ) {
 			var template         = wp.template( 'fl-builder-settings-row' ),
 				groupRowTemplate = wp.template( 'fl-builder-settings-field-group-row' ),
 				html             = '',
@@ -404,6 +428,9 @@
 				settings		 = ! settings ? this.config.settings : settings,
 				globalSettings   = FLBuilderConfig.global;
 
+			const global          = dynamicOptions && dynamicOptions.global !== undefined ? dynamicOptions.global : this.config.global;
+			const dynamicEditing  = dynamicOptions && dynamicOptions.dynamicEditing !== undefined ? dynamicOptions.dynamicEditing : this.config.dynamicEditing;
+			const rootNodeEditing = dynamicOptions && dynamicOptions.rootNodeEditing !== undefined ? dynamicOptions.rootNodeEditing : this.config.rootNodeEditing;
 
 			for ( name in fields ) {
 				field = fields[ name ];
@@ -448,14 +475,18 @@
 					template		 : $( '#tmpl-fl-builder-field-' + field.type ),
 					node             : node,
 					tabId,
-					sectionId
+					sectionId,
+					global,
+					dynamicEditing,
+					rootNodeEditing,
+					dynamicOptions,
 				} );
 			}
 
 			return html;
 		},
 
-		renderFieldRow: function( name, field, settings, node ) {
+		renderFieldRow: function( name, field, settings, node, global, dynamicEditing = false, rootNodeEditing = false ) {
 			const template           = wp.template( 'fl-builder-settings-row' ),
 				  supportsResponsive = $.inArray( field['type'], FLBuilderConfig.responsiveFields ) > -1,
 				  value              = undefined !== settings[ name ] ? settings[ name ] : '',
@@ -483,6 +514,10 @@
 				globalSettings   : FLBuilderConfig.global,
 				template		 : $( '#tmpl-fl-builder-field-' + field.type ),
 				node             : node,
+				global           : global,
+				dynamicEditing   : dynamicEditing,
+				rootNodeEditing  : rootNodeEditing,
+				dynamicOptions   : dynamicOptions,
 			} );
 		},
 
@@ -555,7 +590,10 @@
 					'sections' 	: [],
 					'fields' 	: [],
 					'settings'	: null,
-					'node_id'	: null
+					'node_id'	: null,
+					'dynamicEditing' : config.dynamicEditing,
+					'global'         : config.global,
+					'rootNodeEditing': config.rootNodeEditing,
 				};
 
 			// Fields
@@ -883,6 +921,29 @@
 				"'": '&#039;'
 			};
 			return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+		},
+		/**
+		 * Traverse compound fields for the set modifier.
+		 * @since 2.10
+		 * @method traverseCompoundFields
+		 * @param {Object} value
+		 * @param {String} keys
+		 * @param {Object} field
+		 */
+		traverseCompoundFields: function( value, keys, field ) {
+			if ( 'object' === typeof value ) {
+				if ( Array.isArray( value ) ) {
+					value.forEach( ( item ) => {
+						this.traverseCompoundFields( item, keys + '[]', field )
+					})
+				} else {
+					for ( let key in value ) {
+						this.traverseCompoundFields( value[key], keys + `[${key}]`, field )
+					}
+				}
+			} else {
+				field.setSubValue( keys, value, FLBuilderResponsiveEditing._mode )
+			}
 		}
 	};
 
@@ -933,6 +994,11 @@
 			// Reset node widths
 			FLBuilder.addHook( 'didResetRowWidth', this.updateOnResetRowWidth.bind( this ) );
 			FLBuilder.addHook( 'didResetColumnWidths', this.updateOnResetColumnWidths.bind( this ) );
+
+			// Global nodes
+			FLBuilder.addHook( 'didUnlinkGlobalRow', this.unlinkGlobalNode.bind( this ) );
+			FLBuilder.addHook( 'didUnlinkGlobalColumn', this.unlinkGlobalNode.bind( this ) );
+			FLBuilder.addHook( 'didUnlinkGlobalModule', this.unlinkGlobalNode.bind( this ) );
 
 			// Apply templates
 			FLBuilder.addHook( 'didApplyTemplateComplete', this.updateOnApplyTemplate.bind( this ) );
@@ -1238,6 +1304,24 @@
 					self.nodes[ newNodeId ] = self.nodes[ oldNodeId ];
 				}
 			} );
+		},
+
+		/**
+		 * Adds new nodes from an unlinked global node and
+		 * deletes any old node reference no longer in the DOM.
+		 *
+		 * @since 2.10
+		 * @method unlinkGlobalNode
+		 * @param {String} oldNodeId
+		 * @param {String} newNodeId
+		 */
+		unlinkGlobalNode: function( e, { newNodes, deletedNodes } ) {
+			for ( nodeId in newNodes ) {
+				this.nodes[ nodeId ] = newNodes[ nodeId ].settings;
+			}
+			for ( nodeId of deletedNodes ) {
+				delete this.nodes[ nodeId ];
+			}
 		},
 
 		/**

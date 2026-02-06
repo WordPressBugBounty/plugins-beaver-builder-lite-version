@@ -68,7 +68,7 @@ final class FLBuilderAutoSuggest {
 				break;
 
 			default:
-				if ( function_exists( $action . '_value' ) ) {
+				if ( str_starts_with( $action, 'fl_as_' ) && function_exists( $action . '_value' ) ) {
 					$data = call_user_func_array( $action . '_value', array( $value, $data ) );
 				}
 

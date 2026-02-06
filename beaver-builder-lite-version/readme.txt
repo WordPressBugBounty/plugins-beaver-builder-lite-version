@@ -1,16 +1,20 @@
-=== Beaver Builder - WordPress Page Builder ===
+=== Beaver Builder Page Builder - Drag and Drop Website Builder ===
 Contributors: justinbusa, RobbyMcCullough, billyyoung, hinampaksh, diegoliv, webmandesign, eugenealegiojo, helgatheviking, ozancanakli, brentjettgmailcom, jproffitt71, brainstormforce, ideaboxcreations, laubsterboy, nikolayyordanov, codente, pross, pedromendonca
 Tags: page builder, beaver builder, landing page, front-end builder, drag and drop editor
-Requires at least: 5.2
-Tested up to: 6.8
-Requires PHP: 7.0
-Stable tag: 2.9.3.2
+Requires at least: 6.6
+Tested up to: 6.9
+Requires PHP: 7.2
+Stable tag: 2.10.0.6
 License: GPL2+
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-The best drag and drop WordPress Page Builder. Easily build beautiful home pages, professional landing pages, and more with Beaver Builder.
+The Professional's Choice for Drag & Drop WordPress Page Building. Fast, Reliable, and Trusted since 2014.
 
 == Description ==
+
+= The Professional's Choice for Drag & Drop WordPress Page Building. Fast, Reliable, and Trusted since 2014 =
+
+Beaver Builder is the page builder and website builder that agencies and developers rely on. Create pixel-perfect websites with our visual editor - no coding required. Front-end editing, flexible templates, and enterprise-grade performance.  Try [Beaver Builder Pro](https://www.wpbeaverbuilder.com/pricing/ "Get Beaver Builder Pro") for unlimited sites and premium features.
 
 = What Is The Beaver Builder Page Builder? =
 

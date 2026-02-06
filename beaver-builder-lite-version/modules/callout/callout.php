@@ -230,6 +230,18 @@ class FLCalloutModule extends FLBuilderModule {
 	}
 
 	/**
+	 * Returns the relevant deprecated version of the button module if the callout module is deprecated.
+	 * It returns null (current version) if the callout module is not deprecated.
+	 *
+	 * @since 2.10
+	 * @method get_button_version
+	 * @return integer|null
+	 */
+	public function get_button_version() {
+		return null;  // Temporary lock on current version only until further changes are ready for the next version
+	}
+
+	/**
 	 * @method get_button
 	 */
 	public function get_button() {
@@ -238,7 +250,7 @@ class FLCalloutModule extends FLBuilderModule {
 		if ( 'button' == $this->settings->cta_type ) {
 			ob_start();
 			echo '<div class="fl-callout-button">';
-			FLBuilder::render_module_html( 'button', $this->get_button_settings() );
+			FLBuilder::render_module_html( 'button', $this->get_button_settings(), $this->get_button_version() );
 			echo '</div>';
 			$html = ob_get_clean();
 		}
@@ -341,6 +353,23 @@ class FLCalloutModule extends FLBuilderModule {
 	}
 
 	/**
+	 *  Returns the relevant deprecated version of the photo module if the callout module is deprecated.
+	 *  It returns null (current version) if the callout module is not deprecated.
+	 *
+	 * @since 2.10
+	 * @method get_photo_version
+	 * @return int|null
+	 */
+	public function get_photo_version() {
+		switch ( $this->version ) {
+			case 1:
+				return 2;
+			default:
+				return null;
+		}
+	}
+
+	/**
 	 * @method render_image
 	 */
 	public function render_image( $position ) {
@@ -349,7 +378,7 @@ class FLCalloutModule extends FLBuilderModule {
 				return;
 			}
 			echo '<div class="fl-callout-photo">';
-			FLBuilder::render_module_html( 'photo', $this->get_photo_settings() );
+			FLBuilder::render_module_html( 'photo', $this->get_photo_settings(), $this->get_photo_version() );
 			echo '</div>';
 		} elseif ( 'icon' == $this->settings->image_type && $this->settings->icon_position == $position ) {
 			FLBuilder::render_module_html( 'icon', $this->get_icon_settings() );
@@ -953,7 +982,7 @@ FLBuilder::register_module('FLCalloutModule', array(
 						'units'      => array( 'px' ),
 						'preview'    => array(
 							'type'     => 'css',
-							'selector' => 'a.fl-button',
+							'selector' => '.fl-button:is(a, button)',
 							'property' => 'padding',
 						),
 					),
@@ -971,7 +1000,7 @@ FLBuilder::register_module('FLCalloutModule', array(
 						'show_alpha'  => true,
 						'preview'     => array(
 							'type'      => 'css',
-							'selector'  => 'a.fl-button, a.fl-button *',
+							'selector'  => '.fl-button:is(a, button), .fl-button:is(a, button) *',
 							'property'  => 'color',
 							'important' => true,
 						),
@@ -985,7 +1014,7 @@ FLBuilder::register_module('FLCalloutModule', array(
 						'show_alpha'  => true,
 						'preview'     => array(
 							'type'      => 'css',
-							'selector'  => 'a.fl-button:hover, a.fl-button:hover *, a.fl-button:focus, a.fl-button:focus *',
+							'selector'  => '.fl-button:is(a, button):hover, .fl-button:is(a, button):hover *, .fl-button:is(a, button):focus, .fl-button:is(a, button):focus *',
 							'property'  => 'color',
 							'important' => true,
 						),
@@ -996,7 +1025,7 @@ FLBuilder::register_module('FLCalloutModule', array(
 						'responsive' => true,
 						'preview'    => array(
 							'type'     => 'css',
-							'selector' => 'a.fl-button',
+							'selector' => '.fl-button:is(a, button)',
 						),
 					),
 				),
@@ -1054,7 +1083,7 @@ FLBuilder::register_module('FLCalloutModule', array(
 						'label'   => __( 'Background Gradient', 'fl-builder' ),
 						'preview' => array(
 							'type'     => 'css',
-							'selector' => 'a.fl-button',
+							'selector' => '.fl-button:is(a, button)',
 							'property' => 'background-image',
 						),
 					),
@@ -1063,7 +1092,7 @@ FLBuilder::register_module('FLCalloutModule', array(
 						'label'   => __( 'Background Hover Gradient', 'fl-builder' ),
 						'preview' => array(
 							'type'     => 'css',
-							'selector' => 'a.fl-button:hover',
+							'selector' => '.fl-button:is(a, button):hover',
 							'property' => 'background-image',
 						),
 					),
@@ -1090,7 +1119,7 @@ FLBuilder::register_module('FLCalloutModule', array(
 						'responsive' => true,
 						'preview'    => array(
 							'type'      => 'css',
-							'selector'  => 'a.fl-button',
+							'selector'  => '.fl-button:is(a, button)',
 							'important' => true,
 						),
 					),
@@ -1110,3 +1139,8 @@ FLBuilder::register_module('FLCalloutModule', array(
 		),
 	),
 ));
+
+FLBuilder::register_module_deprecations( 'callout', [
+	// Register module version (v1) to deprecate the old rendered photo module HTML markup.
+	'v1' => [],
+] );

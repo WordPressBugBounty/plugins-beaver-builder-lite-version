@@ -18,8 +18,22 @@ if ( false === strpos( $attrs, 'loading=' ) && false === strpos( $attrs, 'no-laz
 	$attrs = rtrim( $attrs ) . ' ' . FLBuilderUtils::img_lazyload( 'lazy' );
 }
 
+if ( 2 < $module->version ) {
+	$wrapper_attributes = array( 'figure' );
+	$caption_attributes = array( 'figcaption' );
+} else {
+	$wrapper_attributes = array( 'div', 'role="figure"' );
+	$caption_attributes = array( 'div' );
+	$attrs             .= ' itemprop="image"';
+	if ( '0' !== $settings->show_caption ) {
+		$wrapper_attributes[] = 'aria-labelledby="caption-' . $id . '"';
+		$caption_attributes[] = 'id="caption-' . $id . '"';
+		$caption_attributes[] = 'itemprop="caption"';
+	}
+}
+
 ?>
-<div
+<<?php echo join( ' ', $wrapper_attributes ); ?>
 <?php
 $module->render_attributes( $wrapper_attrs );
 FLBuilder::print_schema( ' itemscope itemtype="https://schema.org/ImageObject"' );
@@ -29,15 +43,15 @@ FLBuilder::print_schema( ' itemscope itemtype="https://schema.org/ImageObject"' 
 		<?php if ( ! empty( $link ) ) : ?>
 		<a href="<?php echo $link; ?>" <?php echo ( isset( $settings->link_url_download ) && 'yes' === $settings->link_url_download ) ? ' download' : ''; ?> target="<?php echo esc_attr( $settings->link_url_target ); ?>"<?php echo $rel; ?> itemprop="url">
 		<?php endif; ?>
-		<img class="<?php echo $classes; ?>" src="<?php echo $src; ?>" alt="<?php echo $alt; ?>" itemprop="image" <?php echo $attrs; ?> />
+		<img class="<?php echo $classes; ?>" src="<?php echo $src; ?>" alt="<?php echo $alt; ?>" <?php echo $attrs; ?> />
 		<?php if ( ! empty( $link ) ) : ?>
 		</a>
 		<?php endif; ?>
 		<?php if ( 'hover' === $settings->show_caption ) : ?>
-		<div class="fl-photo-caption fl-photo-caption-hover" itemprop="caption"><?php echo $caption; ?></div>
+		<<?php echo join( ' ', $caption_attributes ); ?> class="fl-photo-caption fl-photo-caption-hover" ><?php echo $caption; ?></<?php echo $caption_attributes[0]; ?>>
 		<?php endif; ?>
 	</div>
 	<?php if ( 'below' === $settings->show_caption ) : ?>
-	<div class="fl-photo-caption fl-photo-caption-below" itemprop="caption"><?php echo $caption; ?></div>
+	<<?php echo join( ' ', $caption_attributes ); ?> class="fl-photo-caption fl-photo-caption-below"><?php echo $caption; ?></<?php echo $caption_attributes[0]; ?>>
 	<?php endif; ?>
-</div>
+</<?php echo $wrapper_attributes[0]; ?>>

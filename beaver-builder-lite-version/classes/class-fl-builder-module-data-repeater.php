@@ -256,4 +256,14 @@ final class FLBuilderModuleDataRepeater {
 	public function get_settings() {
 		return $this->settings;
 	}
+
+	/**
+	 * Get the underlying query object for this repeater.
+	 *
+	 * @since 2.10
+	 * @return object The query instance used by the repeater.
+	 */
+	public function get_query() {
+		return $this->query;
+	}
 }

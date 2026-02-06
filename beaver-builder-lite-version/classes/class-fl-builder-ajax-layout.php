@@ -199,6 +199,7 @@ final class FLBuilderAJAXLayout {
 	 * @return array
 	 */
 	static public function copy_row( $node_id, $settings = null, $settings_id = null ) {
+
 		$row      = FLBuilderModel::copy_row( $node_id, $settings, $settings_id );
 		$response = self::render( $row->node );
 
@@ -214,7 +215,8 @@ final class FLBuilderAJAXLayout {
 		 * Get Siblings who's positions have changed.
 		 * Only need node fragments for this.
 		 */
-		$siblings      = FLBuilderModel::get_nodes( 'row' );
+		$siblings = FLBuilderModel::get_nodes( 'row' );
+
 		$updated_nodes = array();
 		foreach ( $siblings as $sibling ) {
 			if ( is_object( $sibling ) && isset( $sibling->node ) && $sibling->node !== $row->node ) {
@@ -535,16 +537,22 @@ final class FLBuilderAJAXLayout {
 		}
 
 		return array(
-			'type'         => $module->settings->type,
-			'nodeId'       => $module->node,
-			'parentId'     => $module->parent,
-			'global'       => FLBuilderModel::is_node_global( $module ),
-			'layout'       => self::render( $render_id ),
-			'settings'     => $module->settings,
-			'legacy'       => FLBuilderUISettingsForms::pre_render_legacy_module_settings( $module->settings->type, $module->settings ),
-			'newNodes'     => $new_nodes,
-			'updatedNodes' => $updated_nodes,
-			'config'       => null === $template_id ? null : FLBuilderUISettingsForms::get_node_js_config(),
+			'type'               => $module->settings->type,
+			'nodeId'             => $module->node,
+			'parentId'           => $module->parent,
+			'dynamic'            => FLBuilderModel::is_node_dynamic( $module ),
+			'global'             => FLBuilderModel::is_node_global( $module ),
+			'template_root_node' => $module->template_root_node ?? false,
+			'template_node_id'   => $module->template_node_id ?? '',
+			'template_id'        => $module->template_id ?? '',
+			'template_title'     => $module->template_title ?? '',
+			'template_url'       => $module->template_url ?? '',
+			'layout'             => self::render( $render_id ),
+			'settings'           => $module->settings,
+			'legacy'             => FLBuilderUISettingsForms::pre_render_legacy_module_settings( $module->settings->type, $module->settings ),
+			'newNodes'           => $new_nodes,
+			'updatedNodes'       => $updated_nodes,
+			'config'             => null === $template_id ? null : FLBuilderUISettingsForms::get_node_js_config(),
 		);
 	}
 
@@ -572,6 +580,14 @@ final class FLBuilderAJAXLayout {
 			$children
 		) );
 
+		if ( isset( $new_nodes[ $module->node ] ) ) {
+			$new_nodes[ $module->node ]->template_root_node = $module->template_root_node ?? false;
+			$new_nodes[ $module->node ]->template_node_id   = $module->template_node_id ?? '';
+			$new_nodes[ $module->node ]->template_id        = $module->template_id ?? '';
+			$new_nodes[ $module->node ]->template_title     = $module->template_title ?? '';
+			$new_nodes[ $module->node ]->template_url       = $module->template_url ?? '';
+		}
+
 		/**
 		 * Get Siblings who's positions have changed.
 		 * Only need node fragments for this.
@@ -591,6 +607,32 @@ final class FLBuilderAJAXLayout {
 		$affected_nodes = array(
 			'newNodes'     => $new_nodes,
 			'updatedNodes' => $updated_nodes,
+		);
+
+		return array_merge( $response, $affected_nodes );
+	}
+
+	/**
+	 * Unlinks a global node and renders the static node layout.
+	 *
+	 * @param string $node_id The ID of the node to unlink.
+	 * @since 2.10
+	 */
+	static public function unlink_global_node( $node_id ) {
+		$new_node = FLBuilderModel::unlink_global_node( $node_id );
+		$response = self::render( $new_node->node, $node_id );
+
+		/**
+		 * New Nodes
+		 *
+		 * We need whole objects for any newly-created nodes.
+		*/
+		$new_nodes                    = FLBuilderModel::get_nested_nodes( $new_node->node );
+		$new_nodes[ $new_node->node ] = $new_node;
+
+		$affected_nodes = array(
+			'newNodes'     => $new_nodes,
+			'deletedNodes' => [ $node_id ],
 		);
 
 		return array_merge( $response, $affected_nodes );
@@ -867,7 +909,7 @@ final class FLBuilderAJAXLayout {
 	 */
 	static private function register_scripts() {
 		// Running these isn't necessary and can cause performance issues.
-		remove_action( 'wp_enqueue_scripts', 'FLBuilder::register_layout_styles_scripts' );
+		remove_action( 'wp_enqueue_scripts', 'FLBuilderEnqueue::on_enqueue' );
 		remove_action( 'wp_enqueue_scripts', 'FLBuilder::enqueue_ui_styles_scripts' );
 		remove_action( 'wp_enqueue_scripts', 'FLBuilder::enqueue_all_layouts_styles_scripts' );
 

@@ -160,7 +160,57 @@ class FLButtonModule extends FLBuilderModule {
 	}
 
 	/**
-	 * Returns button link rel based on settings
+	 * Returns the tag to use for the button based on the click action
+	 * @since 2.10
+	 * @return string
+	 */
+	public function get_tag() {
+		if ( isset( $this->settings->click_action ) && 'link' !== $this->settings->click_action ) {
+			if ( $this->version > 2 ) {
+				return 'button type="' . ( isset( $this->settings->button_type ) ? $this->settings->button_type : 'button' ) . '"';
+			} else {
+				return 'a role="button" tabindex="0"';
+			}
+		}
+		return 'a';
+	}
+
+	/**
+	 * Returns a link attribute or data attribute based on the click action
+	 * @since 2.10
+	 * @return string
+	 */
+	public function get_link() {
+		if ( 'a' === $this->get_tag() ) {
+			return 'href="' . esc_url( do_shortcode( $this->settings->link ) ) . '"';
+		} elseif ( 'video' === $this->settings->lightbox_content_type ) {
+			return 'data-mfp-src="' . esc_url( do_shortcode( $this->settings->lightbox_video_link ) ) . '"';
+		}
+	}
+
+	public function get_label() {
+		if ( ! empty( $this->settings->text ) ) {
+			return;
+		}
+		if ( isset( $this->settings->label_text ) && ! empty( $this->settings->label_text ) ) {
+			return 'aria-label="' . $this->settings->label_text . '"';
+		}
+	}
+
+	/**
+	 * Returns the link target based on settings
+	 * @since 2.10
+	 * @return string
+	 */
+	public function get_target() {
+		if ( 'a' === $this->get_tag() ) {
+			return 'target="' . esc_attr( $this->settings->link_target ) . '"' . $this->get_rel();
+		}
+		return '';
+	}
+
+	/**
+	 * Returns the link rel based on settings
 	 * @since 1.10.9
 	 */
 	public function get_rel() {
@@ -176,12 +226,6 @@ class FLButtonModule extends FLBuilderModule {
 			$rel = ' rel="' . $rel . '" ';
 		}
 		return $rel;
-	}
-
-	public function get_role() {
-		if ( isset( $this->settings->click_action ) && 'lightbox' === $this->settings->click_action ) {
-			return ' role="button"';
-		}
 	}
 
 	public function use_default_border() {
@@ -260,11 +304,15 @@ FLBuilder::register_module('FLButtonModule', array(
 						'default' => 'link',
 						'options' => array(
 							'link'     => __( 'Link', 'fl-builder' ),
+							'button'   => __( 'Button', 'fl-builder' ),
 							'lightbox' => __( 'Lightbox', 'fl-builder' ),
 						),
 						'toggle'  => array(
 							'link'     => array(
 								'fields' => array( 'link' ),
+							),
+							'button'   => array(
+								'fields' => array( 'button' ),
 							),
 							'lightbox' => array(
 								'sections' => array( 'lightbox' ),
@@ -285,6 +333,16 @@ FLBuilder::register_module('FLButtonModule', array(
 							'type' => 'none',
 						),
 						'connections'   => array( 'url' ),
+					),
+					'button'         => array(
+						'type'    => 'code',
+						'editor'  => 'javascript',
+						'label'   => __( 'Button Code', 'fl-builder' ),
+						'rows'    => '18',
+						'help'    => __( 'Implement custom button functionality using JavaScript. Your logic will be available to the button\'s click event.', 'fl-builder' ),
+						'preview' => array(
+							'type' => 'none',
+						),
 					),
 				),
 			),
@@ -360,24 +418,25 @@ FLBuilder::register_module('FLButtonModule', array(
 						),
 					),
 					'custom_width' => array(
-						'type'    => 'unit',
-						'label'   => __( 'Custom Width', 'fl-builder' ),
-						'default' => '200',
-						'slider'  => array(
+						'type'       => 'unit',
+						'label'      => __( 'Custom Width', 'fl-builder' ),
+						'default'    => '200',
+						'responsive' => true,
+						'slider'     => array(
 							'px' => array(
 								'min'  => 0,
 								'max'  => 1000,
 								'step' => 10,
 							),
 						),
-						'units'   => array(
+						'units'      => array(
 							'px',
 							'vw',
 							'%',
 						),
-						'preview' => array(
+						'preview'    => array(
 							'type'     => 'css',
-							'selector' => 'a.fl-button',
+							'selector' => '.fl-button:is(a, button)',
 							'property' => 'width',
 						),
 					),
@@ -400,7 +459,7 @@ FLBuilder::register_module('FLButtonModule', array(
 						'units'      => array( 'px' ),
 						'preview'    => array(
 							'type'     => 'css',
-							'selector' => 'a.fl-button',
+							'selector' => '.fl-button:is(a, button)',
 							'property' => 'padding',
 						),
 					),
@@ -416,9 +475,10 @@ FLBuilder::register_module('FLButtonModule', array(
 						'default'     => '',
 						'show_reset'  => true,
 						'show_alpha'  => true,
+						'responsive'  => true,
 						'preview'     => array(
 							'type'      => 'css',
-							'selector'  => 'a.fl-button, a.fl-button *',
+							'selector'  => '.fl-button:is(a, button), .fl-button:is(a, button) *',
 							'property'  => 'color',
 							'important' => true,
 						),
@@ -430,9 +490,10 @@ FLBuilder::register_module('FLButtonModule', array(
 						'default'     => '',
 						'show_reset'  => true,
 						'show_alpha'  => true,
+						'responsive'  => true,
 						'preview'     => array(
 							'type'      => 'css',
-							'selector'  => 'a.fl-button:hover, a.fl-button:hover *',
+							'selector'  => '.fl-button:is(a, button):hover, .fl-button:is(a, button):hover *',
 							'property'  => 'color',
 							'important' => true,
 						),
@@ -443,7 +504,7 @@ FLBuilder::register_module('FLButtonModule', array(
 						'responsive' => true,
 						'preview'    => array(
 							'type'     => 'css',
-							'selector' => 'a.fl-button',
+							'selector' => '.fl-button:is(a, button)',
 						),
 					),
 				),
@@ -514,6 +575,7 @@ FLBuilder::register_module('FLButtonModule', array(
 						'default'     => '',
 						'show_reset'  => true,
 						'show_alpha'  => true,
+						'responsive'  => true,
 						'preview'     => array(
 							'type' => 'refresh',
 						),
@@ -525,19 +587,21 @@ FLBuilder::register_module('FLButtonModule', array(
 						'default'     => '',
 						'show_reset'  => true,
 						'show_alpha'  => true,
+						'responsive'  => true,
 						'preview'     => array(
 							'type' => 'none',
 						),
 					),
 					'button_transition' => array(
-						'type'    => 'select',
-						'label'   => __( 'Background Animation', 'fl-builder' ),
-						'default' => 'disable',
-						'options' => array(
+						'type'       => 'select',
+						'label'      => __( 'Background Animation', 'fl-builder' ),
+						'default'    => 'disable',
+						'options'    => array(
 							'disable' => __( 'Disabled', 'fl-builder' ),
 							'enable'  => __( 'Enabled', 'fl-builder' ),
 						),
-						'preview' => array(
+						'responsive' => true,
+						'preview'    => array(
 							'type' => 'none',
 						),
 					),
@@ -566,7 +630,7 @@ FLBuilder::register_module('FLButtonModule', array(
 						'responsive' => true,
 						'preview'    => array(
 							'type'      => 'css',
-							'selector'  => 'a.fl-button',
+							'selector'  => '.fl-button:is(a, button)',
 							'important' => true,
 						),
 					),
@@ -577,6 +641,7 @@ FLBuilder::register_module('FLButtonModule', array(
 						'default'     => '',
 						'show_reset'  => true,
 						'show_alpha'  => true,
+						'responsive'  => true,
 						'preview'     => array(
 							'type' => 'none',
 						),

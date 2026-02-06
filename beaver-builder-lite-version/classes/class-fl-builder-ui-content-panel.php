@@ -90,6 +90,7 @@ class FLBuilderUIContentPanel {
 				'group'       => 'standard',
 			),
 			'orderedSectionNames' => array_keys( FLBuilderModel::get_module_categories() ),
+			'templateName'        => 'fl-content-panel-modules-view',
 		);
 
 		$templates          = FLBuilderModel::get_module_templates_data();
@@ -104,16 +105,17 @@ class FLBuilderUIContentPanel {
 			foreach ( $templates['groups'] as $slug => $group ) {
 
 				$data['views'][] = array(
-					'handle'      => $slug,
-					'name'        => $group['name'],
-					'hasChildren' => count( $group['categories'] ) > 1,
-					'query'       => array(
+					'handle'       => $slug,
+					'name'         => $group['name'],
+					'hasChildren'  => 0,
+					'query'        => array(
 						'kind'        => 'template',
 						'type'        => 'core',
 						'group'       => $slug,
 						'content'     => 'module',
 						'categorized' => true,
 					),
+					'templateName' => 'fl-content-panel-node-templates-view',
 				);
 
 				if ( count( $group['categories'] ) < 2 ) {
@@ -122,11 +124,12 @@ class FLBuilderUIContentPanel {
 
 				foreach ( $group['categories'] as $cat_slug => $category ) {
 					$data['views'][] = array(
-						'handle'    => $cat_slug,
-						'name'      => $category['name'],
-						'isSubItem' => true,
-						'parent'    => $slug,
-						'query'     => array(
+						'handle'       => $slug . '-' . $cat_slug,
+						'name'         => $category['name'],
+						'isSubItem'    => true,
+						'parent'       => $slug,
+						'parentName'   => $group['name'],
+						'query'        => array(
 							'kind'        => 'template',
 							'type'        => 'core',
 							'content'     => 'module',
@@ -134,6 +137,7 @@ class FLBuilderUIContentPanel {
 							'category'    => $cat_slug,
 							'categorized' => true,
 						),
+						'templateName' => 'fl-content-panel-node-templates-view',
 					);
 				}
 			}
@@ -204,16 +208,17 @@ class FLBuilderUIContentPanel {
 			foreach ( $templates['groups'] as $slug => $group ) {
 
 				$data['views'][] = array(
-					'handle'      => $slug,
-					'name'        => $group['name'],
-					'hasChildren' => count( $group['categories'] ) > 1,
-					'query'       => array(
+					'handle'       => $slug,
+					'name'         => $group['name'],
+					'hasChildren'  => 0,
+					'query'        => array(
 						'kind'        => 'template',
 						'type'        => 'core',
 						'group'       => $slug,
 						'content'     => 'row',
 						'categorized' => true,
 					),
+					'templateName' => 'fl-content-panel-node-templates-view',
 				);
 
 				if ( count( $group['categories'] ) < 2 ) {
@@ -222,11 +227,12 @@ class FLBuilderUIContentPanel {
 
 				foreach ( $group['categories'] as $cat_slug => $category ) {
 					$data['views'][] = array(
-						'handle'    => $cat_slug,
-						'name'      => $category['name'],
-						'isSubItem' => true,
-						'parent'    => $slug,
-						'query'     => array(
+						'handle'       => $slug . '-' . $cat_slug,
+						'name'         => $category['name'],
+						'isSubItem'    => true,
+						'parent'       => $slug,
+						'parentName'   => $group['name'],
+						'query'        => array(
 							'kind'        => 'template',
 							'type'        => 'core',
 							'content'     => 'row',
@@ -234,6 +240,7 @@ class FLBuilderUIContentPanel {
 							'category'    => $cat_slug,
 							'categorized' => true,
 						),
+						'templateName' => 'fl-content-panel-node-templates-view',
 					);
 				}
 			}
@@ -307,6 +314,94 @@ class FLBuilderUIContentPanel {
 						'category'    => $cat_slug,
 						'categorized' => true,
 					),
+				);
+			}
+		}
+
+		// Prebuilt node templates views
+		$data['views'][30] = array(
+			'type' => 'separator',
+		);
+
+		$row_templates    = FLBuilderModel::get_row_templates_data();
+		$module_templates = FLBuilderModel::get_module_templates_data();
+
+		foreach ( $module_templates['groups'] as $slug => $group ) {
+
+			$data['views'][] = array(
+				'handle'       => $slug,
+				'name'         => $group['name'],
+				'hasChildren'  => 0,
+				'query'        => array(
+					'kind'        => 'template',
+					'type'        => 'core',
+					'group'       => $slug,
+					'content'     => 'module',
+					'categorized' => true,
+				),
+				'templateName' => 'fl-content-panel-node-templates-view',
+			);
+
+			if ( count( $group['categories'] ) < 2 ) {
+				continue;
+			}
+
+			foreach ( $group['categories'] as $cat_slug => $category ) {
+				$data['views'][] = array(
+					'handle'       => $slug . '-' . $cat_slug,
+					'name'         => $category['name'],
+					'isSubItem'    => true,
+					'parent'       => $slug,
+					'parentName'   => $group['name'],
+					'query'        => array(
+						'kind'        => 'template',
+						'type'        => 'core',
+						'content'     => 'module',
+						'group'       => $slug,
+						'category'    => $cat_slug,
+						'categorized' => true,
+					),
+					'templateName' => 'fl-content-panel-node-templates-view',
+				);
+			}
+		}
+
+		foreach ( $row_templates['groups'] as $slug => $group ) {
+
+			$data['views'][] = array(
+				'handle'       => $slug,
+				'name'         => $group['name'],
+				'hasChildren'  => 0,
+				'query'        => array(
+					'kind'        => 'template',
+					'type'        => 'core',
+					'group'       => $slug,
+					'content'     => 'row',
+					'categorized' => true,
+				),
+				'templateName' => 'fl-content-panel-node-templates-view',
+			);
+
+			if ( count( $group['categories'] ) < 2 ) {
+				continue;
+			}
+
+			foreach ( $group['categories'] as $cat_slug => $category ) {
+				$data['views'][] = array(
+					'handle'       => $slug . '-' . $cat_slug,
+					'name'         => $category['name'],
+					'isSubItem'    => true,
+					'parent'       => $slug,
+					'parentName'   => $group['name'],
+					'query'        => array(
+						'kind'        => 'template',
+						'type'        => 'core',
+						'content'     => 'row',
+						'group'       => $slug,
+						'category'    => $cat_slug,
+						'categorized' => true,
+					),
+					'templateName' => 'fl-content-panel-node-templates-view',
 				);
 			}
 		}

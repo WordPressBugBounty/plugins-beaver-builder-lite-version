@@ -82,15 +82,12 @@ final class FLBuilder {
 		add_action( 'send_headers', __CLASS__ . '::no_cache_headers' );
 		add_action( 'wp', __CLASS__ . '::init_ui', 11 );
 		add_action( 'wp', __CLASS__ . '::rich_edit' );
-		add_action( 'wp_enqueue_scripts', __CLASS__ . '::register_layout_styles_scripts' );
 		add_action( 'fl_builder_ui_enqueue_scripts', __CLASS__ . '::enqueue_ui_styles_scripts', 11 );
 		add_action( 'wp_enqueue_scripts', __CLASS__ . '::enqueue_ui_layout_styles_scripts', 11 );
 		add_action( 'wp_enqueue_scripts', __CLASS__ . '::enqueue_all_layouts_styles_scripts' );
 		add_action( 'wp_head', __CLASS__ . '::render_custom_css_for_editing', 999 );
 		add_action( 'admin_bar_menu', __CLASS__ . '::admin_bar_menu', 999 );
 		add_action( 'wp_footer', __CLASS__ . '::render_ui' );
-		add_action( 'admin_enqueue_scripts', __CLASS__ . '::register_libs_everywhere' );
-		add_action( 'wp_enqueue_scripts', __CLASS__ . '::register_libs_everywhere' );
 
 		// TODO this needs fixing.
 		//add_action( 'wp_footer', __CLASS__ . '::check_content_filters', 1000 );
@@ -264,13 +261,8 @@ final class FLBuilder {
 	}
 
 	static public function rich_edit() {
-		global $wp_version;
 		if ( FLBuilderModel::is_builder_active() ) {
-			if ( version_compare( $wp_version, '5.4.99', '<' ) ) {
-				add_filter( 'get_user_option_rich_editing', '__return_true' );
-			} else {
-				add_filter( 'user_can_richedit', '__return_true' ); // WP 5.5
-			}
+			add_filter( 'user_can_richedit', '__return_true' ); // WP 5.5
 		}
 	}
 
@@ -433,10 +425,6 @@ final class FLBuilder {
 			array_shift( $buttons );
 			array_unshift( $buttons, 'fontsizeselect' );
 
-			if ( version_compare( $wp_version, '4.6.9', '<=' ) ) {
-				array_unshift( $buttons, 'formatselect' );
-			}
-
 			if ( ( $key = array_search( 'wp_help', $buttons ) ) !== false ) { // @codingStandardsIgnoreLine
 				unset( $buttons[ $key ] );
 			}
@@ -518,46 +506,13 @@ final class FLBuilder {
 	}
 
 	/**
-	 * Register the styles and scripts for builder layouts.
+	 * Alias method for backwards compatibility with previous versions
+	 * of the builder that used this method to register.
 	 *
-	 * @since 1.7.4
-	 * @return void
+	 * @since 2.10
 	 */
 	static public function register_layout_styles_scripts() {
-		$ver     = FL_BUILDER_VERSION;
-		$css_url = FLBuilder::plugin_url() . 'css/';
-		$js_url  = FLBuilder::plugin_url() . 'js/';
-		$min     = ( self::is_debug() ) ? '' : '.min';
-
-		// Register additional CSS
-		wp_register_style( 'fl-slideshow', $css_url . 'fl-slideshow' . $min . '.css', array( 'yui3' ), $ver );
-		wp_register_style( 'jquery-bxslider', $css_url . 'jquery.bxslider.css', array(), $ver );
-		wp_register_style( 'jquery-magnificpopup', $css_url . 'jquery.magnificpopup' . $min . '.css', array(), $ver );
-		wp_register_style( 'yui3', $css_url . 'yui3.css', array(), $ver );
-
-		// Register icon CDN CSS
-		wp_register_style( 'font-awesome-5', self::get_fa5_url(), array(), $ver );
-		wp_register_style( 'font-awesome', FLBuilder::plugin_url() . 'fonts/fontawesome/' . self::get_fa5_version() . '/css/v4-shims.min.css', array( 'font-awesome-5' ), $ver );
-
-		wp_register_style( 'foundation-icons', 'https://cdnjs.cloudflare.com/ajax/libs/foundicons/3.0.0/foundation-icons.css', array(), $ver );
-
-		// Register additional JS
-		wp_register_script( 'fl-slideshow', $js_url . 'fl-slideshow' . $min . '.js', array( 'yui3' ), $ver, true );
-		wp_register_script( 'fl-gallery-grid', $js_url . 'fl-gallery-grid.js', array( 'jquery' ), $ver, true );
-		wp_register_script( 'jquery-bxslider', $js_url . 'jquery.bxslider' . $min . '.js', array( 'jquery-easing', 'jquery-fitvids' ), $ver, true );
-		wp_register_script( 'jquery-easing', $js_url . 'jquery.easing.min.js', array( 'jquery' ), '1.4', true );
-		wp_register_script( 'jquery-fitvids', $js_url . 'jquery.fitvids.min.js', array( 'jquery' ), '1.2', true );
-		wp_register_script( 'jquery-infinitescroll', $js_url . 'jquery.infinitescroll.min.js', array( 'jquery' ), $ver, true );
-		wp_register_script( 'jquery-magnificpopup', $js_url . 'jquery.magnificpopup' . $min . '.js', array( 'jquery' ), $ver, true );
-		wp_register_script( 'jquery-mosaicflow', $js_url . 'jquery.mosaicflow' . $min . '.js', array( 'jquery' ), $ver, true );
-		wp_register_script( 'jquery-waypoints', $js_url . 'jquery.waypoints.min.js', array( 'jquery' ), $ver, true );
-		wp_register_script( 'jquery-wookmark', $js_url . 'jquery.wookmark.min.js', array( 'jquery' ), $ver, true );
-		wp_register_script( 'jquery-throttle', $js_url . 'jquery.ba-throttle-debounce.min.js', array( 'jquery' ), $ver, true );
-		wp_register_script( 'yui3', $js_url . 'yui3.min.js', array(), $ver, true );
-		wp_register_script( 'youtube-player', 'https://www.youtube.com/iframe_api', array(), $ver, true );
-		wp_register_script( 'vimeo-player', 'https://player.vimeo.com/api/player.js', array(), $ver, true );
-		wp_deregister_script( 'imagesloaded' );
-		wp_register_script( 'imagesloaded', $js_url . 'jquery.imagesloaded.min.js', array( 'jquery' ), $ver, true );
+		FLBuilderEnqueue::register_layout_libraries();
 	}
 
 	/**
@@ -610,6 +565,12 @@ final class FLBuilder {
 	 */
 	static public function enqueue_layout_styles_scripts( $rerender = false ) {
 		if ( FLBuilderModel::is_builder_enabled() ) {
+
+			// Block themes render content before wp_enqueue_scripts, so we need to register the layout libraries here
+			// to ensure they are available when the layout CSS and JS are enqueued.
+			if ( function_exists( 'wp_is_block_theme' ) && wp_is_block_theme() ) {
+				FLBuilderEnqueue::register_layout_libraries();
+			}
 
 			$nodes = FLBuilderModel::get_categorized_nodes();
 
@@ -781,40 +742,13 @@ final class FLBuilder {
 			if ( 'css' == $type ) {
 				wp_enqueue_style( $handle, $url, $css_deps, $asset_ver, $css_media );
 			} elseif ( 'js' == $type ) {
-				$deps = self::get_layout_script_enqueue_deps( array( 'jquery' ), $path );
-				$deps = apply_filters( 'fl_builder_layout_script_enqueue_deps', $deps, $path );
+				$deps = apply_filters( 'fl_builder_layout_script_enqueue_deps', [ 'jquery' ], $path );
 				wp_enqueue_script( $handle, $url, $deps, $asset_ver, true );
 			}
 		}
 	}
 
 	/**
-	 * Sort dependencies for layout.js
-	 *
-	 * @since 2.8.3
-	 * @param array $deps Dependencies for layout js, default is jquery.
-	 * @param string $path Path to layout js file.
-	 * @return array
-	 */
-	static private function get_layout_script_enqueue_deps( $deps, $path ) {
-
-		if ( ! ( function_exists( 'wp_is_block_theme' ) && wp_is_block_theme() ) ) {
-			return $deps;
-		}
-
-		$js = file_get_contents( $path );
-		if ( false !== strpos( $js, 'YUI' ) ) {
-			$deps[] = 'yui3';
-		}
-		if ( false !== strpos( $js, 'fl-slideshow' ) ) {
-			$deps[] = 'fl-slideshow';
-		}
-		return $deps;
-	}
-
-	/**
-	 *
-	 *
 	 * @since 2.1
 	 * @return void
 	 */
@@ -831,114 +765,6 @@ final class FLBuilder {
 	 */
 	static public function clear_enqueued_global_assets() {
 		self::$enqueued_global_assets = array();
-	}
-
-	/**
-	 * Register libraries for use on both frontend and admin
-	 */
-	static public function register_libs_everywhere() {
-
-		if ( ! is_user_logged_in() ) {
-			return;
-		}
-
-		$ver      = FL_BUILDER_VERSION;
-		$js_build = FLBuilder::plugin_url() . 'js/build/';
-		$ext      = self::is_debug() ? '.bundle.js' : '.bundle.min.js';
-
-		// Shared FL.Builder.utils API
-		wp_register_script( 'fl-builder-utils', $js_build . 'builder-utils' . $ext, [ 'jquery' ], $ver );
-
-		self::register_shared_vendors();
-
-		FLControls::register();
-
-		if ( FLBuilderModel::is_builder_active() ) {
-			FLControls::enqueue();
-		}
-	}
-
-	/**
-	 * Register common JS vendors
-	 * This is primarily for consistent sharing with Assistant.
-	 *
-	 * @return void
-	 */
-	static public function register_shared_vendors() {
-		global $wp_version;
-
-		$ver        = FL_BUILDER_VERSION;
-		$css_build  = FLBuilder::plugin_url() . 'css/build/';
-		$js_vendors = FLBuilder::plugin_url() . 'js/vendors/';
-		$js_build   = FLBuilder::plugin_url() . 'js/build/';
-		$tag        = '.bundle.min';
-		$vendor_tag = '.min';
-		// @beaverbuilder/app-core
-		$app_core_deps = array( 'react', 'redux', 'react-router-dom', 'wp-i18n' );
-		// @beaverbuilder/fluid
-		$fluid_deps = array(
-			'react',
-			'react-dom',
-			'redux',
-			'react-router-dom',
-			'react-laag',
-			'wp-i18n',
-			'bb-icons',
-		);
-
-		if ( self::is_debug() ) {
-			$tag        = '.bundle';
-			$vendor_tag = '';
-		}
-
-		// React polyfill for older versions of WordPress.
-		if ( version_compare( $wp_version, '6.2', '<=' ) || function_exists( 'classicpress_version' ) ) {
-
-			// React
-			wp_deregister_script( 'react' );
-			wp_enqueue_script( 'react', "{$js_vendors}react{$vendor_tag}.js", array(), $ver, true );
-
-			// React-DOM
-			wp_deregister_script( 'react-dom' );
-			wp_enqueue_script( 'react-dom', "{$js_vendors}react-dom{$vendor_tag}.js", array(), $ver, true );
-
-			// @beaverbuilder/app-core
-			$app_core_deps = array( 'react', 'redux', 'react-router-dom' );
-			// @beaverbuilder/fluid
-			$fluid_deps = array(
-				'react',
-				'react-dom',
-				'redux',
-				'react-router-dom',
-				'react-laag',
-				'bb-icons',
-			);
-			if ( ! wp_script_is( 'wp-i18n', 'registered' ) ) {
-				wp_enqueue_script( 'fl-wp-i18n', "{$js_vendors}i18n-polyfill.js" );
-			}
-		}
-
-		/**
-		 * Shared Vendors
-		 * These vendor bundles are special in that they attach a global reference to themselves on the FL.vendors object.
-		 */
-
-		// redux
-		wp_register_script( 'redux', "{$js_vendors}redux.min.js", array(), $ver, false );
-
-		// react-router-dom
-		wp_register_script( 'react-router-dom', "{$js_vendors}react-router-dom.min.js", array( 'react' ), $ver, false );
-
-		// react-laag
-		wp_register_script( 'react-laag', "{$js_build}vendor-react-laag{$tag}.js", array( 'react' ), $ver, false );
-
-		wp_register_script( 'bb-app-core', "{$js_build}vendor-bb-app-core{$tag}.js", $app_core_deps, $ver, false );
-
-		// @beaverbuilder/icons
-		wp_register_script( 'bb-icons', "{$js_build}vendor-bb-icons{$tag}.js", array( 'react' ), $ver, false );
-
-		wp_register_script( 'bb-fluid', "{$js_build}vendor-bb-fluid{$tag}.js", $fluid_deps, $ver, false );
-		wp_register_style( 'bb-fluid', "{$css_build}vendor-bb-fluid{$tag}.css", array(), $ver, null );
 	}
 
 	/**
@@ -966,49 +792,30 @@ final class FLBuilder {
 
 		if ( FLBuilderModel::is_builder_active() ) {
 
-			$ver     = FL_BUILDER_VERSION;
-			$css_url = FLBuilder::plugin_url() . 'css/';
-			$js_url  = FLBuilder::plugin_url() . 'js/';
-			$ext     = self::is_debug() ? '.bundle.js' : '.bundle.min.js';
+			$ver      = FL_BUILDER_VERSION;
+			$is_debug = self::is_debug();
+			$css_url  = FLBuilder::plugin_url() . 'css/';
+			$js_url   = FLBuilder::plugin_url() . 'js/';
+			$ext      = self::is_debug() ? '.bundle.js' : '.bundle.min.js';
 
 			// Remove wp admin bar top margin
 			remove_action( 'wp_head', '_admin_bar_bump_cb' );
-
-			// Register React and other vendor bundles
-			self::register_shared_vendors();
 
 			/* Frontend builder styles */
 			wp_enqueue_style( 'dashicons' );
 			wp_enqueue_style( 'font-awesome-5' );
 			wp_enqueue_style( 'foundation-icons' );
+
 			wp_enqueue_style( 'jquery-nanoscroller', $css_url . 'jquery.nanoscroller.css', array(), $ver );
 			wp_enqueue_style( 'jquery-autosuggest', $css_url . 'jquery.autoSuggest.min.css', array(), $ver );
 			wp_enqueue_style( 'fl-jquery-tiptip', $css_url . 'jquery.tiptip.css', array(), $ver );
+
 			if ( FLBuilder::is_tour_enabled() ) {
 				wp_enqueue_style( 'bootstrap-tour', $css_url . 'bootstrap-tour-standalone.min.css', array(), $ver );
 			}
+
 			if ( true === apply_filters( 'fl_select2_enabled', true ) ) {
 				wp_enqueue_style( 'select2', $css_url . 'select2.min.css', array(), $ver );
-			}
-
-			// Enqueue individual builder styles if WP_DEBUG is on.
-			if ( self::is_debug() ) {
-				wp_enqueue_style( 'fl-builder-vars', $css_url . 'fl-builder-vars.css', array(), $ver );
-				wp_enqueue_style( 'fl-color-picker', $css_url . 'fl-color-picker.css', array(), $ver );
-				wp_enqueue_style( 'fl-lightbox', $css_url . 'fl-lightbox.css', array(), $ver );
-				wp_enqueue_style( 'fl-icon-selector', $css_url . 'fl-icon-selector.css', array(), $ver );
-				wp_enqueue_style( 'fl-builder', $css_url . 'fl-builder.css', array( 'fl-builder-vars' ), $ver );
-				wp_enqueue_style( 'fl-builder-forms', $css_url . 'build/builder-forms.bundle.css', [ 'fl-builder-vars', 'fl-controls' ], $ver );
-
-				// skins need to come after default ui styles
-				wp_enqueue_style( 'fl-builder-ui-skin-dark', $css_url . 'fl-builder-ui-skin-dark.css', array(), $ver );
-				wp_enqueue_style( 'fl-builder-system', $css_url . 'build/builder.bundle.css', array( 'bb-fluid' ), $ver );
-			} else {
-
-				wp_enqueue_style( 'fl-builder-min', $css_url . 'fl-builder.min.css', array(), $ver );
-				wp_enqueue_style( 'fl-builder-ui-skin-dark', $css_url . 'fl-builder-ui-skin-dark.css', array(), $ver );
-				wp_enqueue_style( 'fl-builder-forms', $css_url . 'build/builder-forms.bundle.min.css', [ 'fl-builder-min', 'fl-controls' ], $ver );
-				wp_enqueue_style( 'fl-builder-system', $css_url . 'build/builder.bundle.min.css', array( 'bb-fluid' ), $ver );
 			}
 
 			/* Custom Icons */
@@ -1023,7 +830,7 @@ final class FLBuilder {
 			wp_deregister_script( 'jquery-ui-sortable' );
 			wp_dequeue_script( 'jquery-touch-punch' );
 			wp_deregister_script( 'jquery-touch-punch' );
-			wp_register_script( 'jquery-touch-punch', $js_url . 'jquery.touch-punch.min.js', array(), $ver );
+			wp_register_script( 'jquery-touch-punch', $js_url . 'libs/jquery.touch-punch.min.js', array(), $ver );
 
 			/* Frontend builder scripts */
 			wp_enqueue_media();
@@ -1048,13 +855,13 @@ final class FLBuilder {
 			 */
 			do_action( 'fl_before_sortable_enqueue' );
 
-			wp_enqueue_script( 'jquery-ui-sortable', $js_url . 'jquery.ui.sortable.js', array( 'jquery-ui-core', 'jquery-ui-widget', 'jquery-ui-mouse' ), $ver );
-			wp_enqueue_script( 'jquery-nanoscroller', $js_url . 'jquery.nanoscroller.min.js', array(), $ver );
-			wp_enqueue_script( 'jquery-autosuggest', $js_url . 'jquery.autoSuggest.min.js', array(), $ver );
-			wp_enqueue_script( 'fl-jquery-tiptip', $js_url . 'jquery.tiptip.min.js', array(), $ver );
-			wp_enqueue_script( 'jquery-showhideevents', $js_url . 'jquery.showhideevents.js', array(), $ver );
-			wp_enqueue_script( 'jquery-simulate', $js_url . 'jquery.simulate.js', array(), $ver );
-			wp_enqueue_script( 'jquery-validate', $js_url . 'jquery.validate.min.js', array(), $ver );
+			wp_enqueue_script( 'jquery-ui-sortable', $js_url . 'libs/jquery.ui.sortable.js', array( 'jquery-ui-core', 'jquery-ui-widget', 'jquery-ui-mouse' ), $ver );
+			wp_enqueue_script( 'jquery-nanoscroller', $js_url . 'libs/jquery.nanoscroller.min.js', array(), $ver );
+			wp_enqueue_script( 'jquery-autosuggest', $js_url . 'libs/jquery.autoSuggest.min.js', array(), $ver );
+			wp_enqueue_script( 'fl-jquery-tiptip', $js_url . 'libs/jquery.tiptip.min.js', array(), $ver );
+			wp_enqueue_script( 'jquery-showhideevents', $js_url . 'libs/jquery.showhideevents.js', array(), $ver );
+			wp_enqueue_script( 'jquery-simulate', $js_url . 'libs/jquery.simulate.js', array(), $ver );
+			wp_enqueue_script( 'jquery-validate', $js_url . 'libs/jquery.validate.min.js', array(), $ver );
 			wp_enqueue_script( 'clipboard', $js_url . 'clipboard.min.js', array(), $ver );
 			if ( FLBuilder::is_tour_enabled() ) {
 				wp_enqueue_script( 'bootstrap-tour', $js_url . 'bootstrap-tour-standalone.min.js', array(), $ver );
@@ -1063,23 +870,10 @@ final class FLBuilder {
 
 			wp_enqueue_script( 'ace', $js_url . 'ace/ace.js', array(), $ver );
 			wp_enqueue_script( 'ace-language-tools', $js_url . 'ace/ext-language_tools.js', array(), $ver );
-			wp_enqueue_script( 'mousetrap', $js_url . 'mousetrap-custom.js', array(), $ver );
+			wp_enqueue_script( 'mousetrap', $js_url . 'libs/mousetrap-custom.js', array(), $ver );
 			if ( true === apply_filters( 'fl_select2_enabled', true ) ) {
-				wp_enqueue_script( 'select2', $js_url . 'select2.min.js', array(), $ver );
+				wp_enqueue_script( 'select2', $js_url . 'libs/select2.min.js', array(), $ver );
 			}
-
-			// Settings Forms
-			$form_deps = [
-				'jquery',
-				'fl-controls',
-				'fl-builder-utils',
-				'wp-components',
-				'wp-i18n',
-				'wp-hooks',
-			];
-			wp_enqueue_script( 'fl-builder-forms', $js_url . 'build/builder-forms' . $ext, $form_deps, $ver );
-
-			$sys_bundle_deps = array( 'react', 'react-dom', 'bb-app-core', 'bb-fluid' );
 
 			// Enqueue individual builder scripts if WP_DEBUG is on.
 			if ( self::is_debug() ) {
@@ -1088,7 +882,7 @@ final class FLBuilder {
 				wp_enqueue_script( 'fl-lightbox', $js_url . 'fl-lightbox.js', array(), $ver );
 				wp_enqueue_script( 'fl-icon-selector', $js_url . 'fl-icon-selector.js', array(), $ver );
 				wp_enqueue_script( 'fl-stylesheet', $js_url . 'fl-stylesheet.js', array(), $ver );
-				wp_enqueue_script( 'fl-builder', $js_url . 'fl-builder.js', array( 'jquery' ), $ver );
+				wp_enqueue_script( 'fl-builder', $js_url . 'fl-builder.js', array( 'jquery', 'fl-builder-forms' ), $ver );
 				wp_enqueue_script( 'fl-builder-libs', $js_url . 'fl-builder-libs.js', array( 'fl-builder' ), $ver );
 				wp_enqueue_script( 'fl-builder-ajax-layout', $js_url . 'fl-builder-ajax-layout.js', array(), $ver );
 				wp_enqueue_script( 'fl-builder-preview', $js_url . 'fl-builder-preview.js', array(), $ver );
@@ -1109,11 +903,12 @@ final class FLBuilder {
 				wp_enqueue_script( 'fl-builder-save-manager', $js_url . 'fl-builder-save-manager.js', array( 'jquery' ), $ver );
 				wp_enqueue_script( 'fl-builder-history-manager', $js_url . 'fl-builder-history-manager.js', array(), $ver );
 				wp_enqueue_script( 'fl-builder-loop-containers', $js_url . 'fl-builder-loop-containers.js', array(), $ver );
-				wp_enqueue_script( 'fl-builder-system', $js_url . 'build/builder.bundle.js', $sys_bundle_deps, $ver, true );
 			} else {
-				wp_enqueue_script( 'fl-builder-min', $js_url . 'fl-builder.min.js', array( 'jquery', 'mousetrap' ), $ver );
-				wp_enqueue_script( 'fl-builder-system', $js_url . 'build/builder.bundle.min.js', $sys_bundle_deps, $ver, true );
+				wp_enqueue_script( 'fl-builder-min', $js_url . 'fl-builder.min.js', array( 'jquery', 'mousetrap', 'fl-builder-forms' ), $ver );
 			}
+
+			wp_enqueue_script( 'fl-builder-forms' );
+			wp_enqueue_script( 'fl-builder-system' );
 
 			/* Additional module styles and scripts */
 			foreach ( FLBuilderModel::$modules as $module ) {
@@ -2021,6 +1816,10 @@ final class FLBuilder {
 			$buttons['fl-assistant']['show'] = version_compare( FL_ASSISTANT_VERSION, '0.6', '>=' );
 		}
 
+		if ( isset( $buttons['fl-assistant'] ) && ( defined( 'FL_ASSISTANT_BB_EXTENSION' ) && true === FL_ASSISTANT_BB_EXTENSION ) ) {
+			$buttons['fl-assistant']['show'] = FLBuilderUserAccess::current_user_can( 'cloud_ui_access' ) && ! $simple_ui;
+		}
+
 		echo '<div class="fl-builder-bar-actions">';
 		$i = 0;
 
@@ -2491,7 +2290,7 @@ final class FLBuilder {
 				$module->settings->crop = false;
 			}
 
-			self::render_module_html( $module->settings->type, $module->settings, $module );
+			self::render_module_html( $module->settings->type, $module->settings );
 
 			// Render container module children.
 			if ( $module->accepts_children() ) {
@@ -2546,10 +2345,11 @@ final class FLBuilder {
 	 * @param string $name The field name.
 	 * @param array $field An array of setup data for the field.
 	 * @param object $settings Form settings data object.
+	 * @param array $data Fields for Dynamic Node data.
 	 * @return void
 	 */
-	static public function render_settings_field( $name, $field, $settings = null ) {
-		return FLBuilderUISettingsForms::render_settings_field( $name, $field, $settings );
+	static public function render_settings_field( $name, $field, $settings = null, $data = null ) {
+		return FLBuilderUISettingsForms::render_settings_field( $name, $field, $settings, $data );
 	}
 
 	/**
@@ -2658,6 +2458,7 @@ final class FLBuilder {
 		$visible      = FLBuilderModel::is_node_visible( $row );
 		$has_rules    = FLBuilderModel::node_has_visibility_rules( $row );
 		$rules        = FLBuilderModel::node_visibility_rules( $row );
+		$hide_node    = FLBuilderDynamicGlobal::hide_dynamic_node( $row );
 		$attrs        = array(
 			'id'        => self::sanitize_class_id( $row->settings->id ),
 			'class'     => array(
@@ -2732,7 +2533,7 @@ final class FLBuilder {
 		if ( ! empty( $custom_class ) ) {
 			$attrs['class'][] = self::sanitize_class_id( $custom_class );
 		}
-		if ( $active && ! $visible ) {
+		if ( $active && ( ! $visible || $hide_node ) ) {
 			$attrs['class'][] = 'fl-node-hidden';
 		}
 		if ( $active && $has_rules ) {
@@ -2988,6 +2789,7 @@ final class FLBuilder {
 			'style'     => array(),
 		);
 		$global_settings = FLBuilderModel::get_global_settings();
+		$hide_node       = FLBuilderDynamicGlobal::hide_dynamic_node( $col );
 
 		// Classes
 		if ( $col->settings->size <= 50 ) {
@@ -3031,7 +2833,7 @@ final class FLBuilder {
 		if ( ! empty( $custom_class ) ) {
 			$attrs['class'][] = self::sanitize_class_id( $custom_class );
 		}
-		if ( $active && ! $visible ) {
+		if ( $active && ( ! $visible || $hide_node ) ) {
 			$attrs['class'][] = 'fl-node-hidden';
 		}
 		if ( $active && $has_rules ) {
@@ -3164,16 +2966,15 @@ final class FLBuilder {
 
 	/**
 	 * Renders the markup for a single module. This can be used to render
-	 * the markup of a module within another module by passing the type
-	 * and settings params and leaving the module param null.
+	 * the markup of a module within another module by passing the type and settings params.
 	 *
 	 * @since 1.0
 	 * @param string $type The type of module.
 	 * @param object $settings A module settings object.
-	 * @param object $module Optional. An existing module object to use.
+	 * @param integer $version A specific deprecated version for rendered modules to use.
 	 * @return void
 	 */
-	static public function render_module_html( $type, $settings, $module = null ) {
+	static public function render_module_html( $type, $settings, $version = null ) {
 		// Settings
 		$defaults = FLBuilderModel::get_module_defaults( $type );
 		$settings = (object) array_merge( (array) $defaults, (array) $settings );
@@ -3183,7 +2984,7 @@ final class FLBuilder {
 		$module           = new $class();
 		$module->settings = $settings;
 		$module->settings = FLBuilderSettingsCompat::filter_node_settings( $module );
-		$module->version  = FLBuilderModuleDeprecations::get_module_version( $module->slug );
+		$module->version  = isset( $version ) ? $version : FLBuilderModuleDeprecations::get_module_version( $module->slug );
 
 		// Shorthand reference to the module's id.
 		$id = $module->node;
@@ -3235,6 +3036,7 @@ final class FLBuilder {
 		$has_rules    = FLBuilderModel::node_has_visibility_rules( $module );
 		$rules        = FLBuilderModel::node_visibility_rules( $module );
 		$base_classes = array();
+		$hide_node    = FLBuilderDynamicGlobal::hide_dynamic_node( $module );
 
 		// Escape attrs coming into the function
 		foreach ( $attrs as $key => $value ) {
@@ -3313,7 +3115,7 @@ final class FLBuilder {
 		}
 
 		// Hidden
-		if ( $active && ! $visible ) {
+		if ( $active && ( ! $visible || $hide_node ) ) {
 			$attrs['class'][] = 'fl-node-hidden';
 		}
 
@@ -3519,6 +3321,11 @@ final class FLBuilder {
 			// Instance row css
 			$settings = $row->settings;
 			$id       = $row->node;
+
+			if ( ! FLBuilderModel::is_builder_active() && '0' === $settings->visibility_display ) {
+				continue;
+			}
+
 			ob_start();
 			FLBuilderCSS::auto_css( $row );
 			include FL_BUILDER_DIR . 'includes/row-css.php';
@@ -3556,6 +3363,11 @@ final class FLBuilder {
 			// Instance column css
 			$settings = $col->settings;
 			$id       = $col->node;
+
+			if ( ! FLBuilderModel::is_builder_active() && '0' === $settings->visibility_display ) {
+				continue;
+			}
+
 			ob_start();
 			FLBuilderCSS::auto_css( $col );
 			include FL_BUILDER_DIR . 'includes/column-css.php';
@@ -3584,6 +3396,10 @@ final class FLBuilder {
 		foreach ( $nodes['modules'] as $module ) {
 
 			if ( ! $module ) {
+				continue;
+			}
+
+			if ( ! FLBuilderModel::is_builder_active() && '0' === $module->settings->visibility_display ) {
 				continue;
 			}
 
@@ -3767,22 +3583,40 @@ final class FLBuilder {
 			) );
 		}
 
-		// Global node css.
+		// Global row width
+		FLBuilderCSS::responsive_rule( array(
+			'settings'     => $global_settings,
+			'setting_name' => 'row_width',
+			'selector'     => '.fl-row-fixed-width',
+			'prop'         => 'max-width',
+		) );
+
+		// Global row spacing selectors. Can also apply to container modules if enabled.
+		$row_default_selector    = '.fl-row-content-wrap';
+		$row_breakpoint_selector = '.fl-row[data-node] > .fl-row-content-wrap';
+
+		if ( isset( $global_settings->top_level_box_spacing ) && $global_settings->top_level_box_spacing ) {
+			$row_default_selector    .= ', .fl-builder-content > .fl-module-box';
+			$row_breakpoint_selector .= ', .fl-builder-content > .fl-module-box';
+		}
+
+		// Zero out top-level container module margins in case the global defaults are empty.
 		FLBuilderCSS::rule( array(
-			'selector' => '.fl-row-fixed-width',
+			'selector' => '.fl-builder-content > .fl-module-box',
 			'props'    => array(
-				'max-width' => $global_settings->row_width . $global_settings->row_width_unit,
+				'margin' => '0',
 			),
 		) );
 
+		// Global row margins
 		FLBuilderCSS::dimension_field_rule( array(
 			'settings'     => $global_settings,
 			'setting_name' => 'row_margins',
 			'selector'     => array(
-				'default'    => '.fl-row-content-wrap',
-				'large'      => '.fl-row[data-node] > .fl-row-content-wrap',
-				'medium'     => '.fl-row[data-node] > .fl-row-content-wrap',
-				'responsive' => '.fl-row[data-node] > .fl-row-content-wrap',
+				'default'    => $row_default_selector,
+				'large'      => $row_breakpoint_selector,
+				'medium'     => $row_breakpoint_selector,
+				'responsive' => $row_breakpoint_selector,
 			),
 			'props'        => array(
 				'margin-top'    => 'row_margins_top',
@@ -3792,14 +3626,15 @@ final class FLBuilder {
 			),
 		) );
 
+		// Global row padding
 		FLBuilderCSS::dimension_field_rule( array(
 			'settings'     => $global_settings,
 			'setting_name' => 'row_padding',
 			'selector'     => array(
-				'default'    => '.fl-row-content-wrap',
-				'large'      => '.fl-row[data-node] > .fl-row-content-wrap',
-				'medium'     => '.fl-row[data-node] > .fl-row-content-wrap',
-				'responsive' => '.fl-row[data-node] > .fl-row-content-wrap',
+				'default'    => $row_default_selector,
+				'large'      => $row_breakpoint_selector,
+				'medium'     => $row_breakpoint_selector,
+				'responsive' => $row_breakpoint_selector,
 			),
 			'props'        => array(
 				'padding-top'    => 'row_padding_top',
@@ -3809,6 +3644,7 @@ final class FLBuilder {
 			),
 		) );
 
+		// Global column margins
 		FLBuilderCSS::dimension_field_rule( array(
 			'settings'     => $global_settings,
 			'setting_name' => 'column_margins',
@@ -3826,6 +3662,7 @@ final class FLBuilder {
 			),
 		) );
 
+		// Global column padding
 		FLBuilderCSS::dimension_field_rule( array(
 			'settings'     => $global_settings,
 			'setting_name' => 'column_padding',
@@ -3843,6 +3680,7 @@ final class FLBuilder {
 			),
 		) );
 
+		// Global module margins
 		FLBuilderCSS::dimension_field_rule( array(
 			'settings'     => $global_settings,
 			'setting_name' => 'module_margins',
@@ -4510,6 +4348,10 @@ final class FLBuilder {
 		if ( ! $module ) {
 			return $js;
 		}
+		if ( ! FLBuilderModel::is_builder_active() && '0' === $module->settings->visibility_display ) {
+			return $js;
+		}
+
 		// Global module JS
 		$file = $module->path( 'js/frontend.js' );
 
@@ -4540,12 +4382,30 @@ final class FLBuilder {
 		$id              = $module->node;
 		$js              = '';
 
+		if ( ! FLBuilderModel::is_builder_active() && '0' === $module->settings->visibility_display ) {
+			return $js;
+		}
+
 		if ( ! in_array( $id, self::$enqueued_module_js_assets ) && fl_builder_filesystem()->file_exists( $file ) ) {
 			self::$enqueued_module_js_assets[] = $id;
 			ob_start();
 			include $file;
 			$js .= ltrim( ob_get_clean(), ';' );
 		}
+
+		/**
+		 * Filter each modules JS in render_js
+		 * @since 2.9
+		 * @see fl_builder_render_js_module
+		 */
+		$js = apply_filters( 'fl_builder_render_js_module', $js, $module, $settings );
+
+		/**
+		 * Dynamic Filter to target modules with slug in render_js
+		 * @since 2.9
+		 * @see fl_builder_render_js_module_
+		 */
+		$js = apply_filters( "fl_builder_render_js_module_{$module->slug}", $js, $module, $settings );
 
 		return $js;
 	}

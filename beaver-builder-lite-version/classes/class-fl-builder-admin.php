@@ -41,8 +41,8 @@ final class FLBuilderAdmin {
 		global $wp_version;
 
 		// Check for WordPress 3.5 and above.
-		if ( ! version_compare( $wp_version, '5.2', '>=' ) ) {
-			self::show_activate_error( __( 'The <strong>Beaver Builder</strong> plugin requires WordPress version 5.2 or greater. Please update WordPress before activating the plugin.', 'fl-builder' ) );
+		if ( ! version_compare( $wp_version, '6.6', '>=' ) ) {
+			self::show_activate_error( __( 'The <strong>Beaver Builder</strong> plugin requires WordPress version 6.6 or greater. Please update WordPress before activating the plugin.', 'fl-builder' ) );
 		}
 
 		/**

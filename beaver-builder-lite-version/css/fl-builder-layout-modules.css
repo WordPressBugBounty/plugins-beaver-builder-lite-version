@@ -29,11 +29,9 @@
 /* Buttons
 ------------------------------------------------------ */
 
-.fl-builder-content a.fl-button,
+.fl-builder-content .fl-button:is(a, button),
 .fl-builder-content a.fl-button:visited {
 	border-radius: 4px;
-	-moz-border-radius: 4px;
-	-webkit-border-radius: 4px;
 	display: inline-block;
 	font-size: 16px;
 	font-weight: normal;
@@ -50,6 +48,7 @@
 	top: 1px;
 }
 .fl-builder-content .fl-button-width-full .fl-button {
+	width: 100%;
 	display: block;
 	text-align: center;
 }
@@ -254,8 +253,6 @@
 	background: transparent;
 	border: none;
 	box-shadow: none;
-	-moz-box-shadow: none;
-	-webkit-box-shadow: none;
 	left: 0;
 }
 
@@ -272,8 +269,6 @@
 	position: absolute;
 	top: 50%;
 	box-shadow: none !important;
-	-moz-box-shadow: none !important;
-	-webkit-box-shadow: none !important;
 }
 .mfp-wrap .mfp-close,
 .mfp-wrap .mfp-close:active,
@@ -285,8 +280,6 @@
 	position: absolute;
 	top: 0;
 	box-shadow: none !important;
-	-moz-box-shadow: none !important;
-	-webkit-box-shadow: none !important;
 }
 .admin-bar .mfp-wrap .mfp-close,
 .admin-bar .mfp-wrap .mfp-close:active,
@@ -342,20 +335,16 @@ body.fl-no-js .fl-animation {
 }
 .fl-animated {
 	animation-fill-mode: both;
-	-webkit-animation-fill-mode: both;
 }
 
 /* Button Icon Animation */
 .fl-button.fl-button-icon-animation i {
 	width: 0 !important;
 	opacity: 0;
-	-ms-filter: "alpha(opacity=0)";
 	transition: all 0.2s ease-out;
-	-webkit-transition: all 0.2s ease-out;
 }
 .fl-button.fl-button-icon-animation:hover i {
-	opacity: 1! important;
-    -ms-filter: "alpha(opacity=100)";
+	opacity: 1 !important;
 }
 .fl-button.fl-button-icon-animation i.fl-button-icon-after {
 	margin-left: 0px !important;
@@ -368,5 +357,5 @@ body.fl-no-js .fl-animation {
 }
 .fl-button.fl-button-icon-animation:hover i.fl-button-icon-before {
 	margin-right: 20px !important;
-    margin-left: -10px;
+  margin-left: -10px;
 }

@@ -124,6 +124,10 @@ final class FLBuilderUpdate {
 			self::v_282();
 		}
 
+		if ( version_compare( $saved_version, '2.10', '<' ) ) {
+			self::v_210();
+		}
+
 		// Clear all asset cache.
 		FLBuilderModel::delete_asset_cache_for_all_posts();
 
@@ -662,6 +666,16 @@ final class FLBuilderUpdate {
 			}
 		}
 		update_option( '_fl_builder_styles', $settings );
+	}
+
+	/**
+	 * Update to version 2.10.
+	 */
+	static public function v_210() {
+		$global_settings                        = FLBuilderModel::get_global_settings( false );
+		$global_settings->top_level_box_spacing = '0';
+
+		FLBuilderModel::save_global_settings( (array) $global_settings );
 	}
 }
 

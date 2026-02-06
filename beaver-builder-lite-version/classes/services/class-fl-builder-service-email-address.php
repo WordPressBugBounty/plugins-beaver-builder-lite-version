@@ -51,7 +51,7 @@ final class FLBuilderServiceEmailAddress extends FLBuilderService {
 	 * @since 1.6.0
 	 * @return string The connection settings markup.
 	 */
-	public function render_connect_settings() {
+	public function render_connect_settings( $data = null ) {
 		ob_start();
 
 		FLBuilder::render_settings_field( 'email', array(
@@ -63,7 +63,7 @@ final class FLBuilderServiceEmailAddress extends FLBuilderService {
 			'preview'     => array(
 				'type' => 'none',
 			),
-		));
+		), null, $data );
 
 		return ob_get_clean();
 	}

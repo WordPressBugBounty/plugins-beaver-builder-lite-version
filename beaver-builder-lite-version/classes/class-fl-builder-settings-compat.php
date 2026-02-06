@@ -80,7 +80,7 @@ final class FLBuilderSettingsCompat {
 		if ( 'module' === $type && isset( FLBuilderModel::$modules[ $settings->type ] ) ) {
 			$module   = FLBuilderModel::$modules[ $settings->type ];
 			$defaults = FLBuilderModel::get_node_defaults( $node );
-			$settings = $module->filter_raw_settings( $settings, $defaults );
+			$settings = $module->filter_raw_settings_defaults( $settings, $defaults );
 		}
 
 		// Make sure the defaults are merged.

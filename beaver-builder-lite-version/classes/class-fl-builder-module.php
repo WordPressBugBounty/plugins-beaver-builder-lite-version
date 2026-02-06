@@ -211,6 +211,11 @@ class FLBuilderModule {
 
 	public $template_id;
 
+	public $template_title = '';
+	public $template_url   = '';
+	public $global         = false;
+	public $dynamic        = false;
+
 	/**
 	 * Whether this module is acting as a block or not.
 	 *
@@ -443,10 +448,25 @@ class FLBuilderModule {
 	 *
 	 * @since 2.6.0.1
 	 * @param object $settings A raw settings object.
+	 * @deprecated 2.9
+	 * @return object
+	 */
+	public function filter_raw_settings( $settings ) {
+		_deprecated_function( __METHOD__, '2.9', 'filter_raw_settings_defaults( $settings, $defaults )' );
+		return $settings;
+	}
+
+	/**
+	 * Should be overridden by subclasses to work with raw settings data
+	 * _before defaults are merged in_. This is mainly used to ensure
+	 * backwards compatibility with old module settings.
+	 *
+	 * @since 2.9
+	 * @param object $settings A raw settings object.
 	 * @param object $defaults The default settings for this module.
 	 * @return object
 	 */
-	public function filter_raw_settings( $settings, $defaults ) {
+	public function filter_raw_settings_defaults( $settings, $defaults ) {
 		return $settings;
 	}
 
@@ -575,6 +595,35 @@ class FLBuilderModule {
 	 * @return array
 	 */
 	public function filter_attributes( $attrs = [] ) {
+		return $this->accessibility_attributes( $attrs );
+	}
+
+	/**
+	 * Add accessibility attributes if not set & applicable.
+	 *
+	 * @since 2.10
+	 * @access private
+	 * @param array $attrs
+	 * @return array
+	 */
+	private function accessibility_attributes( $attrs = [] ) {
+		$applicable = array(
+			'content-slider',
+			'post-carousel',
+			'testimonials',
+			'post-slider',
+			'slideshow',
+		);
+		if ( in_array( $this->slug, $applicable ) ) {
+			if ( 'section' !== $this->settings->container_element ) {
+				$attrs['role'] = 'region';
+			}
+			if ( isset( $attrs['aria-label'] ) ) {
+				$attrs['aria-roledescription'] = $this->name;
+			} else {
+				$attrs['aria-label'] = $this->name;
+			}
+		}
 		return $attrs;
 	}
 

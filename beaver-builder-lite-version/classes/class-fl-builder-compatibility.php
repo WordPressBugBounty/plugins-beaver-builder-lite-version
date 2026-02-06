@@ -109,6 +109,7 @@ final class FLBuilderCompatibility {
 		add_filter( 'option_iubenda_cookie_law_solution', array( __CLASS__, 'fix_iubenda' ) );
 		add_filter( 'fl_builder_is_post_editable', array( __CLASS__, 'fix_theme_my_login' ) );
 		add_filter( 'fl_is_tour_enabled', array( __CLASS__, 'fix_classicpress_v2_ad_js' ) );
+		add_filter( 'attachment_fields_to_edit', array( __CLASS__, 'attachment_fields_to_edit' ), 10, 2 );
 	}
 
 	/**
@@ -1446,6 +1447,17 @@ final class FLBuilderCompatibility {
 			wp_dequeue_script( 'wpd-module-animation-speed' );
 			wp_dequeue_script( 'wpd-google-places-autocomplete' );
 		}
+	}
+
+	/**
+	 * @since 2.9.1
+	 */
+	public static function attachment_fields_to_edit( $form_fields, $post = null ) {
+		if ( ! function_exists( 'get_current_screen' && class_exists( 'Media_Library_Organizer' ) ) ) {
+			include_once ABSPATH . 'wp-admin/includes/template.php';
+			include_once ABSPATH . 'wp-admin/includes/screen.php';
+		}
+		return $form_fields;
 	}
 }
 FLBuilderCompatibility::init();

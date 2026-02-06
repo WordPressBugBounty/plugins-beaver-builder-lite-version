@@ -1,9 +1,13 @@
 <?php
 $button_node_id = "fl-node-$id";
 
-if ( isset( $settings->click_action ) && 'lightbox' == $settings->click_action ) : ?>
-
+if ( isset( $settings->click_action ) ) : ?>
 (function($){
+	<?php if ( 'button' == $settings->click_action ) : ?>
+	$('.<?php echo $button_node_id; ?> .fl-button').on('click', function(){
+		<?php echo $settings->button; ?>
+	});
+	<?php elseif ( 'lightbox' == $settings->click_action ) : ?>
 	$('.<?php echo $button_node_id; ?>').each(function(){
 		var $this = $(this);
 		$this.find('.fl-button-lightbox').magnificPopup({
@@ -40,5 +44,6 @@ if ( isset( $settings->click_action ) && 'lightbox' == $settings->click_action )
 			tLoading: '<i class="fas fa-spinner fa-spin fa-3x fa-fw"></i>',
 		});
 	});
+	<?php endif; ?>
 })(jQuery);
 <?php endif; ?>

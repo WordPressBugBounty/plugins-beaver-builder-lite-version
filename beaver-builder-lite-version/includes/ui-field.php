@@ -1,20 +1,60 @@
 <script type="text/html" id="tmpl-fl-builder-field">
+	<#
+		var dynamicFields = [];
+		let dynamicFieldIcons = '';
+		let dynamicEditingTitle = FLBuilderStrings.enableComponentEditing;
+		const { source, isDataSource } = data.dynamicOptions;
+
+		if ( data.dynamicEditing ) {
+			dynamicFieldIcons = 'dashicons-admin-plugins';
+
+			if ( 'object' === typeof data.settings.dynamic_fields && data.settings.dynamic_fields?.fields ) {
+				dynamicFields = data.settings.dynamic_fields.fields;
+
+				if ( dynamicFields.includes( data.rootName ) ) {
+					dynamicFieldIcons += ' fl-dynamic-node-field-enabled';
+					dynamicEditingTitle = FLBuilderStrings.disableComponentEditing;
+				}
+			}
+
+			if ( data.field.type === 'form' ) {
+				dynamicFieldIcons = '';
+			} else if ( data.field.type === 'button' && data.name === 'service_connect_button' ) {
+				dynamicFieldIcons = '';
+			} else if ( data.field.type === 'select' && data.name === 'service' ) {
+				dynamicFieldIcons = '';
+			} else if ( source === 'legacy' && ! isDataSource ) {
+				dynamicFieldIcons = '';
+			}
+
+		}
+	#>
 	<# if ( ! data.field.label ) { #>
 	<td class="fl-field-control" colspan="2">
+		<# if ( dynamicFieldIcons && 'fl-builder-template' === FLBuilderConfig.postType && 'form' !== data.field.type ) { #>
+			<i class="fl-dynamic-node-field dashicons fl-tip {{dynamicFieldIcons}}" title="{{dynamicEditingTitle}}" data-target-field="{{data.name}}" data-target-field-type="{{data.field.type}}"></i>
+		<# } #>
 	<# } else { #>
 	<th class="fl-field-label">
 		<label for="{{data.name}}">
+			<#
+			var targetFieldName = data.rootName;
 
+			if ( data.rootName !== data.name ) {
+				targetFieldName = data.name;
+			}
+			#>
 			<# if ( 'button' === data.field.type ) { #>
 			&nbsp;
 			<# } else { #>
-			{{{data.field.label}}}
+				{{{data.field.label}}}
 				<# if ( undefined !== data.index ) { #>
-				<# var index = data.index + 1; #>
-				<span class="fl-builder-field-index">{{index}}</span>
+					<span class="fl-builder-field-index">{{ data.index + 1 }}</span>
 				<# } #>
 			<# } #>
-
+				<# if ( dynamicFieldIcons && 'fl-builder-template' === FLBuilderConfig.postType && 'form' !== data.field.type ) { #>
+				<i class="fl-dynamic-node-field dashicons fl-tip {{dynamicFieldIcons}}" title="{{dynamicEditingTitle}}" data-target-field="{{targetFieldName}}" data-target-field-type="{{data.field.type}}" data-target-field-index="{{ ( undefined !== data.index ) ? data.index : '' }}"></i>
+				<# } #>
 			<# if ( data.responsive ) { #>
 			<i class="fl-field-responsive-toggle dashicons dashicons-desktop" data-mode="default"></i>
 			<# } #>

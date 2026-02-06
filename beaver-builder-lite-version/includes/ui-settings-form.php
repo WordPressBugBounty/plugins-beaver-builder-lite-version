@@ -8,10 +8,12 @@
 			</div>
 			<div class="fl-lightbox-header">
 				<h1>
-					{{{data.title}}}
-					<# if ( data.settings.node_label && ! FLBuilderConfig.node_labels_disabled ) { #>
-					{{{FLBuilderConfig.node_labels_separator}}}{{{data.settings.node_label}}}
-					<# } #>
+					<span class="fl-lightbox-title">
+						{{{data.title}}}
+						<# if ( data.settings.node_label && ! FLBuilderConfig.node_labels_disabled ) { #>
+						{{{FLBuilderConfig.node_labels_separator}}}{{{data.settings.node_label}}}
+						<# } #>
+					</span>
 					<# for ( var i = 0; i < data.badges.length; i++ ) { #>
 					<span class="fl-builder-badge fl-builder-badge-{{data.badges[ i ]}}">{{data.badges[ i ]}}</span>
 					<# } #>
@@ -20,7 +22,7 @@
 					<i class="fl-lightbox-resize-toggle <# var className = FLLightbox.getResizableControlClass(); #>{{className}}"></i>
 				</div>
 			</div>
-			<# if ( data.tabs && Object.keys( data.tabs ).length > 1 ) { #>
+			<# if ( ! data.notice && data.tabs && Object.keys( data.tabs ).length > 1 ) { #>
 			<div class="fl-builder-settings-tabs">
 				<# var i = 0; for ( var tabId in data.tabs ) { #>
 				<# var tab = data.tabs[ tabId ]; #>
@@ -38,13 +40,17 @@
 			</div>
 			<div class="fl-builder-settings-tabs-overflow-click-mask"></div>
 			<div class="fl-builder-settings-tabs-overflow-menu"></div>
+			<# } else if ( data.notice ) { #>
+				<div class="fl-builder-settings-notice">
+					{{{data.notice}}}	
+				</div>
 			<# } #>
 		</div>
 
 		<div class="fl-lightbox-content-wrap">
 			<div class="fl-builder-settings-fields fl-nanoscroller">
 				<div class="fl-nanoscroller-content">
-					<# if ( data.tabs && Object.keys( data.tabs ).length > 0 ) { #>
+					<# if ( ! data.notice && data.tabs && Object.keys( data.tabs ).length > 0 ) { #>
 						<# var i = 0; for ( var tabId in data.tabs ) { #>
 						<# var tab = data.tabs[ tabId ]; #>
 						<div id="fl-builder-settings-tab-{{tabId}}" class="fl-builder-settings-tab<# if ( tabId === data.activeTab ) { #> fl-active<# } #>">
@@ -66,15 +72,14 @@
 										var isCollapsed = false;
 										if ( typeof section.collapsed !== 'undefined' ) {
 											isCollapsed = section.collapsed
-										}
-										if ( typeof section.title !== 'undefined' && true === FLBuilderConfig.collapseSectionsDefault && section.title && '' !== section.title ) {
+										} else if ( typeof section.title !== 'undefined' && true === FLBuilderConfig.collapseSectionsDefault && section.title && '' !== section.title ) {
 											isCollapsed = true;
 										}
 										var collapsedClass = isCollapsed ? 'fl-builder-settings-section-collapsed' : '';
 
 									#>
 									<div id="fl-builder-settings-section-{{sectionId}}" class="fl-builder-settings-section {{collapsedClass}}">
-
+								
 										<# if ( section.file ) { #>
 											<div class="fl-legacy-settings-section" data-section="{{sectionId}}" data-tab="{{tabId}}"></div>
 										<# } else if ( section.template ) { #>
@@ -101,12 +106,17 @@
 												<table class="fl-form-table">
 												<#
 													var node = { type: data.id };
-													var fields = FLBuilderSettingsForms.renderFields( section.fields, data.settings, node, tabId, sectionId );
-												#>
+													const dynamicOptions = {
+														global:          data.global, 
+														dynamicEditing:  data.dynamicEditing, 
+														rootNodeEditing: data.rootNodeEditing
+													};
+
+													var fields = FLBuilderSettingsForms.renderFields( section.fields, data.settings, node, null, null, dynamicOptions );
+													#>
 												{{{fields}}}
 												</table>
 											</div>
-
 										<# } #>
 
 									</div>
@@ -120,7 +130,17 @@
 				</div>
 			</div>
 			<div class="fl-lightbox-footer">
+				<#
+				let hideSaveButton = false;
+
+				if ( ( data.type === 'dynamic' || data.type === 'module' ) && data.notice ) {
+					hideSaveButton = ! data.isNewNode
+				}
+				
+				#>
+				<# if ( ! hideSaveButton ) { #>
 				<button class="fl-builder-settings-save fl-builder-button fl-builder-button-large" href="javascript:void(0);" onclick="return false;">{{FLBuilderStrings.save}}</button>
+				<# } #>
 				<# if ( jQuery.inArray( 'save-as', data.buttons ) > -1 ) { #>
 				<button class="fl-builder-settings-save-as fl-builder-button fl-builder-button-large" href="javascript:void(0);" onclick="return false;">{{FLBuilderStrings.saveAs}}</button>
 				<# } #>
@@ -132,5 +152,21 @@
 		</div>
 		<# var settings = FLBuilder._getSettingsJSONForHTML( data.settings ); #>
 		<input class="fl-builder-settings-json" type="hidden" value='{{settings}}' />
+		<#
+		var isEditingGlobalNode = data.global && ( data.dynamicEditing || data.rootNodeEditing );
+
+		if ( isEditingGlobalNode ) {
+			let dynamicFieldsValue = data.settings.dynamic_fields ? data.settings.dynamic_fields : '';
+			let dynamicFields = '';
+
+			if ( 'object' === typeof dynamicFieldsValue ) {
+				dynamicFields = JSON.stringify( dynamicFieldsValue );
+			}
+		    #>
+			<input class="active-dynamic-fields" type="hidden" name="dynamic_fields" value='{{dynamicFields}}' />
+		<# } #>
+		<# if ( data.id === 'dynamic_node_form' ) { #>
+			<input class="fl-builder-dynamic-settings-json" type="hidden" name="dynamic_node_settings" value='{{data.dynamicNodeSettings}}' />
+		<# } #>
 	</form>
 </script>

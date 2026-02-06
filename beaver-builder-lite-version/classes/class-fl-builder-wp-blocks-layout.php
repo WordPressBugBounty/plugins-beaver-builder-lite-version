@@ -17,9 +17,8 @@ final class FLBuilderWPBlocksLayout {
 		add_action( 'current_screen', __CLASS__ . '::init_template' );
 		add_action( 'pre_post_update', __CLASS__ . '::disable_builder_on_post_update', 10, 2 );
 
-		$hook = version_compare( $wp_version, '5.8-alpha', '<' ) ? 'block_editor_preload_paths' : 'block_editor_rest_api_preload_paths';
 		// Filters
-		add_action( $hook, __CLASS__ . '::update_legacy_post', 10, 2 );
+		add_action( 'block_editor_rest_api_preload_paths', __CLASS__ . '::update_legacy_post', 10, 2 );
 		add_filter( 'fl_builder_editor_content', __CLASS__ . '::filter_editor_content' );
 		add_filter( 'fl_builder_migrated_post_content', __CLASS__ . '::filter_migrated_post_content' );
 	}

@@ -1,6 +1,7 @@
-<div class="fl-builder-layer fl-builder-shape-layer fl-builder-<?php echo $position; ?>-edge-layer fl-builder-shape-<?php echo esc_attr( $shape_name ); ?>">
-	<svg class="<?php echo $svg_class; ?>" viewBox="<?php echo $view_box; ?>" preserveAspectRatio="<?php echo $preserve_aspect_ratio; ?>">
-
+<div class="fl-builder-layer fl-builder-shape-layer fl-builder-<?php echo esc_attr( $position ); ?>-edge-layer fl-builder-shape-<?php echo esc_attr( $shape_name ); ?>">
+	<svg alt role="img" class="<?php echo $svg_class; ?>" viewBox="<?php echo $view_box; ?>" preserveAspectRatio="<?php echo $preserve_aspect_ratio; ?>">
+		<title>Row <?php echo esc_attr( $shape_name ); ?> Shape</title>
+		<desc>Decorative svg added to <?php echo esc_attr( $position ); ?></desc>
 		<defs>
 		<?php
 		$is_in_builder = FLBuilderModel::is_builder_active();

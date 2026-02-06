@@ -35,135 +35,138 @@ final class FLBuilderAdminAdvanced {
 	static public function get_settings() {
 		$settings = array(
 			'iframe_ui'              => array(
-				'label'       => __( 'Responsive iFrame UI', 'fl-builder' ),
+				'label'       => self::__( 'Responsive iFrame UI', 'fl-builder' ),
 				'default'     => 1,
+				'enabled'     => get_transient( 'fl_debug_mode' ),
 				'callback'    => array( __CLASS__, 'disable_iframe_ui' ),
 				'group'       => 'ui',
-				'description' => __( 'The iFrame UI provides accurate responsive editing. Disable it if you are having issues with third-party or legacy add-ons.', 'fl-builder' ),
+				'description' => self::__( 'The iFrame UI provides accurate responsive editing. Disable it if you are having issues with third-party or legacy add-ons.', 'fl-builder' ),
 			),
 			'outline_enabled'        => array(
-				'label'    => __( 'Outline Panel', 'fl-builder' ),
+				'label'    => self::__( 'Outline Panel', 'fl-builder' ),
 				'default'  => 1,
 				'callback' => array( __CLASS__, 'disable_outline' ),
 				'group'    => 'ui',
 				'link'     => 'https://docs.wpbeaverbuilder.com/beaver-builder/user-interface/outline-panel/',
 			),
 			'inline_editing_enabled' => array(
-				'label'    => __( 'Inline Editing', 'fl-builder' ),
+				'label'    => self::__( 'Inline Editing', 'fl-builder' ),
 				'default'  => 1,
 				'callback' => array( __CLASS__, 'disable_inline_edit' ),
 				'group'    => 'ui',
 				'link'     => 'https://docs.wpbeaverbuilder.com/beaver-builder/basics/inline-editing/',
 			),
 			'notifications_enabled'  => array(
-				'label'       => __( "What's New", 'fl-builder' ),
+				'label'       => self::__( "What's New", 'fl-builder' ),
 				'default'     => 1,
 				'callback'    => array( __CLASS__, 'disable_notifications' ),
 				'group'       => 'ui',
-				'description' => __( 'When disabled, alerts will not be received for new posts on the blog in the UI', 'fl-builder' ),
+				'description' => self::__( 'When disabled, alerts will not be received for new posts on the blog in the UI', 'fl-builder' ),
 			),
 			'lasttab_enabled'        => array(
-				'label'       => __( 'Remember last used tab', 'fl-builder' ),
+				'label'       => self::__( 'Remember last used tab', 'fl-builder' ),
 				'default'     => 1,
 				'callback'    => array( __CLASS__, 'disable_lastused' ),
 				'group'       => 'ui',
-				'description' => __( 'When disabled, the Builder will not remember the last tab used in the row/column/module settings.', 'fl-builder' ),
+				'description' => self::__( 'When disabled, the Builder will not remember the last tab used in the row/column/module settings.', 'fl-builder' ),
 			),
 			'rowshapes_enabled'      => array(
-				'label'       => __( 'Custom Row Shapes', 'fl-builder' ),
+				'label'       => self::__( 'Custom Row Shapes', 'fl-builder' ),
 				'default'     => 1,
 				'callback'    => array( __CLASS__, 'disable_rowshapes' ),
 				'group'       => 'ui',
-				'description' => __( 'When enabled, a custom row shapes tab will be added to the Global Settings.', 'fl-builder' ),
+				'description' => self::__( 'When enabled, a custom row shapes tab will be added to the Global Settings.', 'fl-builder' ),
 			),
 			'node_code'              => array(
-				'label'       => __( 'Enable Code Settings', 'fl-builder' ),
+				'label'       => self::__( 'Enable Code Settings', 'fl-builder' ),
 				'default'     => 1,
 				'callback'    => array( __CLASS__, 'disable_node_code' ),
 				'group'       => 'ui',
-				'description' => __( 'When enabled, CSS and JS settings will be available for rows, columns, and modules.', 'fl-builder' ),
+				'action'      => 'plugins_loaded',
+				'priority'    => 9,
+				'description' => self::__( 'When enabled, CSS and JS settings will be available for rows, columns, and modules.', 'fl-builder' ),
 			),
 			'limitrevisions_enabled' => array(
-				'label'       => __( 'Limit WP revisions for layouts', 'fl-builder' ),
-				'default'     => 0,
+				'label'       => self::__( 'Limit WP revisions for layouts', 'fl-builder' ),
+				'default'     => 1,
 				'callback'    => array( __CLASS__, 'limit_revisions' ),
 				'group'       => 'ui',
 				'hasdepend'   => true,
-				'description' => __( 'WP by default does not limit the amount of revisions.', 'fl-builder' ),
+				'description' => self::__( 'WP by default does not limit the amount of revisions.', 'fl-builder' ),
 			),
 			'limitrevisions_num'     => array(
-				'label'       => __( 'Revisions Limit', 'fl-builder' ),
+				'label'       => self::__( 'Revisions Limit', 'fl-builder' ),
 				'default'     => 10,
 				'type'        => 'text',
 				'depends'     => 'limitrevisions_enabled',
 				'group'       => 'ui',
-				'description' => __( 'Set to 0 to completely disable revisions for layouts/pages controlled by the Builder', 'fl-builder' ),
+				'description' => self::__( 'Set to 0 to completely disable revisions for layouts/pages controlled by the Builder', 'fl-builder' ),
 			),
 			'limithistory_enabled'   => array(
-				'label'       => __( 'Limit the amount of undo/redo history in Builder UI', 'fl-builder' ),
+				'label'       => self::__( 'Limit the amount of undo/redo history in Builder UI', 'fl-builder' ),
 				'default'     => 0,
 				'callback'    => array( __CLASS__, 'limithistory_enabled' ),
 				'group'       => 'ui',
 				'hasdepend'   => true,
-				'description' => __( 'History is limited to 20 by default in the Builder undo/redo UI', 'fl-builder' ),
+				'description' => self::__( 'History is limited to 20 by default in the Builder undo/redo UI', 'fl-builder' ),
 			),
 			'limithistory_num'       => array(
-				'label'       => __( 'History Limit', 'fl-builder' ),
+				'label'       => self::__( 'History Limit', 'fl-builder' ),
 				'default'     => 5,
 				'type'        => 'text',
 				'depends'     => 'limithistory_enabled',
 				'group'       => 'ui',
-				'description' => __( 'Set to 0 to completely disable undo/redo history', 'fl-builder' ),
+				'description' => self::__( 'Set to 0 to completely disable undo/redo history', 'fl-builder' ),
 			),
 			'modsec_enabled'         => array(
-				'label'    => __( 'Mod Security fix', 'fl-builder' ),
+				'label'    => self::__( 'Mod Security fix', 'fl-builder' ),
 				'default'  => 0,
 				'callback' => array( __CLASS__, 'enable_modsec' ),
 				'group'    => 'ui',
 				'link'     => 'https://docs.wpbeaverbuilder.com/beaver-builder/troubleshooting/common-issues/403-forbidden-or-blocked-error/',
 			),
 			'sort_enabled'           => array(
-				'label'       => __( 'Add Filtering Option ', 'fl-builder' ),
+				'label'       => self::__( 'Add Filtering Option ', 'fl-builder' ),
 				'default'     => 1,
 				'callback'    => array( __CLASS__, 'disable_sorting' ),
 				'group'       => 'admin',
-				'description' => __( 'When enabled, a filter option is added for Builder enabled posts/pages in the post/page list', 'fl-builder' ),
+				'description' => self::__( 'When enabled, a filter option is added for Builder enabled posts/pages in the post/page list', 'fl-builder' ),
 			),
 			'duplicate_enabled'      => array(
-				'label'    => __( 'Show duplicate action links in post/page list view', 'fl-builder' ),
+				'label'    => self::__( 'Show duplicate action links in post/page list view', 'fl-builder' ),
 				'default'  => 1,
 				'callback' => array( __CLASS__, 'disable_duplicate' ),
 				'group'    => 'admin',
 			),
 			'duplicatemenu_enabled'  => array(
-				'label'    => __( 'Show duplicate action link in WP Admin Bar', 'fl-builder' ),
+				'label'    => self::__( 'Show duplicate action link in WP Admin Bar', 'fl-builder' ),
 				'default'  => 0,
 				'callback' => array( __CLASS__, 'disable_duplicate_menu' ),
 				'group'    => 'admin',
 			),
 			'google_enabled'         => array(
 				'label'       => 'Google Fonts',
-				'description' => __( 'When disabled, no Google Fonts will be enqueued or available in style options.', 'fl-builder' ),
+				'description' => self::__( 'When disabled, no Google Fonts will be enqueued or available in style options.', 'fl-builder' ),
 				'default'     => 1,
 				'callback'    => array( __CLASS__, 'disable_google' ),
 				'group'       => 'assets',
 			),
 			'google_auto'            => array(
 				'label'       => 'Google Fonts Auto Update',
-				'description' => __( 'System will automatically update the available fonts', 'fl-builder' ),
+				'description' => self::__( 'System will automatically update the available fonts', 'fl-builder' ),
 				'default'     => 1,
 				'callback'    => array( __CLASS__, 'google_auto' ),
 				'group'       => 'assets',
 			),
 			'awesome_enabled'        => array(
-				'label'       => __( 'Font Awesome', 'fl-builder' ),
-				'description' => __( 'When disabled, Font Awesome will not be enqueued, even if modules require it.', 'fl-builder' ),
+				'label'       => self::__( 'Font Awesome', 'fl-builder' ),
+				'description' => self::__( 'When disabled, Font Awesome will not be enqueued, even if modules require it.', 'fl-builder' ),
 				'default'     => 1,
 				'callback'    => array( __CLASS__, 'disable_awesome' ),
 				'group'       => 'assets',
 			),
 			'gd_crop_enabled'        => array(
-				'label'    => __( 'Prefer GD for image cropping', 'fl-builder' ),
+				'label'    => self::__( 'Prefer GD for image cropping', 'fl-builder' ),
 				'default'  => 0,
 				'callback' => array( __CLASS__, 'enable_gd_crop' ),
 				'group'    => 'assets',
@@ -173,77 +176,89 @@ final class FLBuilderAdminAdvanced {
 				'default'     => 0,
 				'callback'    => array( __CLASS__, 'render_inline' ),
 				'group'       => 'frontend',
-				'description' => __( 'Instead of loading Builder CSS and JavaScript as an asset file, assets will render inline', 'fl-builder' ),
+				'description' => self::__( 'Instead of loading Builder CSS and JavaScript as an asset file, assets will render inline', 'fl-builder' ),
 				'link'        => 'https://docs.wpbeaverbuilder.com/beaver-builder/developer/how-to-tips/load-css-and-javascript-inline/',
 			),
 			'modules_enabled'        => array(
-				'label'       => __( 'Show advanced module usage', 'fl-builder' ),
+				'label'       => self::__( 'Show advanced module usage', 'fl-builder' ),
 				'default'     => 0,
+				'action'      => 'plugins_loaded',
 				'callback'    => array( __CLASS__, 'modules_enabled' ),
 				'group'       => 'admin',
-				'description' => __( 'Show detailed module usage on modules tab. Any disabled modules will be fully disabled and no longer render unless it is a dependency for another module.', 'fl-builder' ),
+				'description' => self::__( 'Show detailed module usage on modules tab. Any disabled modules will be fully disabled and no longer render unless it is a dependency for another module.', 'fl-builder' ),
 				'link'        => 'https://docs.wpbeaverbuilder.com/beaver-builder/developer/tutorials-guides/common-beaver-builder-plugin-filter-examples/#show-which-modules-are-in-use-in-a-website',
 			),
 
 			'small_data_enabled'     => array(
-				'label'       => __( 'Small Data Mode', 'fl-builder' ),
+				'label'       => self::__( 'Small Data Mode', 'fl-builder' ),
 				'default'     => 0,
 				'callback'    => array( __CLASS__, 'small_data_enabled' ),
 				'group'       => 'ui',
-				'description' => __( 'When enabled, fields that are empty/blank will not be saved to the database.', 'fl-builder' ),
+				'description' => self::__( 'When enabled, fields that are empty/blank will not be saved to the database.', 'fl-builder' ),
 			),
 			'node_labels_enabled'    => array(
-				'label'       => __( 'Node Labels', 'fl-builder' ),
+				'label'       => self::__( 'Node Labels', 'fl-builder' ),
 				'default'     => 1,
 				'callback'    => array( __CLASS__, 'node_labels_enabled' ),
 				'group'       => 'ui',
-				'description' => __( 'Show custom labels for Nodes.', 'fl-builder' ),
+				'description' => self::__( 'Show custom labels for Nodes.', 'fl-builder' ),
 			),
 			'shortcodes_enabled'     => array(
-				'label'    => __( 'Render shortcodes in CSS/JS', 'fl-builder' ),
+				'label'    => self::__( 'Render shortcodes in CSS/JS', 'fl-builder' ),
 				'default'  => 0,
 				'callback' => array( __CLASS__, 'shortcodes_enabled' ),
 				'group'    => 'ui',
 				'link'     => 'https://docs.wpbeaverbuilder.com/beaver-builder/advanced-builder-techniques/shortcodes/use-shortcodes-in-tools-menu-css-or-js/',
 			),
 			'acf_blocks_enabled'     => array(
-				'label'       => __( 'ACF Blocks', 'fl-builder' ),
+				'label'       => self::__( 'ACF Blocks', 'fl-builder' ),
 				'default'     => 1,
 				'callback'    => array( __CLASS__, 'disable_acf_blocks' ),
 				'group'       => 'ui',
-				'description' => __( 'When enabled, this allows blocks built with ACF to be used in the builder.', 'fl-builder' ),
+				'description' => self::__( 'When enabled, this allows blocks built with ACF to be used in the builder.', 'fl-builder' ),
 			),
 			'collapse_default'       => array(
-				'label'       => __( 'Collapse All Settings', 'fl-builder' ),
+				'label'       => self::__( 'Collapse All Settings', 'fl-builder' ),
 				'default'     => 0,
 				'callback'    => array( __CLASS__, 'collapse_default' ),
 				'group'       => 'ui',
-				'description' => __( 'When enabled, settings window sections will be collapsed.', 'fl-builder' ),
+				'description' => self::__( 'When enabled, settings window sections will be collapsed.', 'fl-builder' ),
 			),
 			'theme_colors'           => array(
-				'label'       => __( 'Load Theme Colors', 'fl-builder' ),
+				'label'       => self::__( 'Load Theme Colors', 'fl-builder' ),
 				'default'     => 0,
 				'group'       => 'ui',
-				'description' => __( 'When enabled, Theme colors will be shown in color pickers.', 'fl-builder' ),
+				'description' => self::__( 'When enabled, Theme colors will be shown in color pickers.', 'fl-builder' ),
 			),
 			'core_colors'            => array(
-				'label'       => __( 'Load WordPress Colors', 'fl-builder' ),
+				'label'       => self::__( 'Load WordPress Colors', 'fl-builder' ),
 				'default'     => 0,
 				'group'       => 'ui',
-				'description' => __( 'When enabled, WordPress Core colors will be shown in color pickers.', 'fl-builder' ),
+				'description' => self::__( 'When enabled, WordPress Core colors will be shown in color pickers.', 'fl-builder' ),
 			),
 			'module_wrappers'        => array(
-				'label'       => __( 'Force Module Wrapper Divs', 'fl-builder' ),
+				'label'       => self::__( 'Force Module Wrapper Divs', 'fl-builder' ),
 				'default'     => 0,
 				'callback'    => array( __CLASS__, 'module_wrappers' ),
 				'group'       => 'frontend',
-				'description' => __( 'Forces modules to render their wrapper divs, even if they have been removed in a recent update.', 'fl-builder' ),
+				'description' => self::__( 'Forces modules to render their wrapper divs, even if they have been removed in a recent update.', 'fl-builder' ),
 			),
 		);
-		if ( FLBuilderModel::is_white_labeled() ) {
+		if ( ! self::is_plugins_loaded_action() && FLBuilderModel::is_white_labeled() ) {
 			unset( $settings['notifications_enabled'] );
 		}
 		return $settings;
+	}
+
+	static private function __( $text, $domain ) {
+		if ( self::is_plugins_loaded_action() ) {
+			return $text;
+		}
+		return __( $text, $domain ); //phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText, WordPress.WP.I18n.NonSingularStringLiteralDomain
+	}
+
+	static private function is_plugins_loaded_action() {
+		return 'plugins_loaded' === current_action();
 	}
 
 	static private function disable_sorting() {
@@ -367,9 +382,11 @@ final class FLBuilderAdminAdvanced {
 		add_action( 'init', array( __CLASS__, 'register_settings' ) );
 		add_action( 'after_setup_theme', __CLASS__ . '::register_user_access_settings' );
 		add_action( 'wp_ajax_fl_advanced_submit', array( __CLASS__, 'advanced_submit' ) );
-		add_action( 'init', array( __CLASS__, 'init_hooks' ), 11 );
+		add_action( 'plugins_loaded', array( __CLASS__, 'init_hooks' ), 5 );
 		self::global_styles();
+		self::update();
 	}
+
 
 	/**
 	 * @since 2.8.1
@@ -427,7 +444,11 @@ final class FLBuilderAdminAdvanced {
 				$option = $setting['default'];
 			}
 			if ( $option != $setting['default'] && isset( $setting['callback'] ) ) {
-				call_user_func( $setting['callback'] );
+				$action   = isset( $setting['action'] ) ? $setting['action'] : 'init';
+				$priority = isset( $setting['priority'] ) ? $setting['priority'] : 11;
+				add_action( $action, function () use ( $setting ) {
+					call_user_func( $setting['callback'] );
+				}, $priority );
 			}
 		}
 	}
@@ -439,6 +460,11 @@ final class FLBuilderAdminAdvanced {
 	static public function register_settings() {
 		foreach ( self::get_settings() as $key => $setting ) {
 			FLBuilderAdminSettings::register_setting( '_fl_builder_' . $key );
+		}
+	}
+	static public function update() {
+		if ( false === get_option( '_fl_builder_limitrevisions_enabled' ) ) {
+			update_option( '_fl_builder_limitrevisions_enabled', true );
 		}
 	}
 }

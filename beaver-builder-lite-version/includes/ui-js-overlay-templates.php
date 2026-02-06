@@ -1,9 +1,17 @@
 <script type="text/html" id="tmpl-fl-row-overlay">
-	<div class="fl-row-overlay fl-block-overlay<# if ( data.global ) { #> fl-block-overlay-global<# } #>">
+	<div class="fl-row-overlay fl-block-overlay<# if ( data.dynamic ) { #> fl-block-overlay-dynamic<# } else if ( data.global ) { #> fl-block-overlay-global<# } #>">
 		<div class="fl-block-overlay-header">
 			<div class="fl-block-overlay-actions">
 				<# if ( data.global && ! FLBuilderConfig.userCanEditGlobalTemplates ) { #>
-					<i class="fas fa-lock fl-tip" title="<?php _e( 'Locked', 'fl-builder' ); ?>"></i>
+					<# if ( data.dynamic ) { #>
+						<span class="fl-block-settings fl-tip" title="<?php _e( 'Row Settings', 'fl-builder' ); ?><# if ( data.nodeLabel && ! FLBuilderConfig.node_labels_disabled ) { #>{{FLBuilderConfig.node_labels_separator}}{{data.nodeLabel}}<# } #>">
+							<svg width="16" height="16" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+								<path fill="currentColor" d="M352 320c88.4 0 160-71.6 160-160c0-15.3-2.2-30.1-6.2-44.2c-3.1-10.8-16.4-13.2-24.3-5.3l-76.8 76.8c-3 3-7.1 4.7-11.3 4.7H336c-8.8 0-16-7.2-16-16V118.6c0-4.2 1.7-8.3 4.7-11.3l76.8-76.8c7.9-7.9 5.4-21.2-5.3-24.3C382.1 2.2 367.3 0 352 0C263.6 0 192 71.6 192 160c0 19.1 3.4 37.5 9.5 54.5L19.9 396.1C7.2 408.8 0 426.1 0 444.1C0 481.6 30.4 512 67.9 512c18 0 35.3-7.2 48-19.9L297.5 310.5c17 6.2 35.4 9.5 54.5 9.5zM80 408a24 24 0 1 1 0 48 24 24 0 1 1 0-48z"/>
+							</svg>
+						</span>
+					<# } else { #>
+						<i class="fas fa-lock fl-tip" title="<?php _e( 'Locked', 'fl-builder' ); ?>"></i>
+					<# } #>
 				<# } else { #>
 
 					<# if ( 'row' !== FLBuilderConfig.userTemplateType && ! FLBuilderConfig.simpleUi ) { #>
@@ -35,13 +43,45 @@
 							</svg>
 						</span>
 						<?php if ( ! $simple_ui ) : ?>
-							<# if ( ! data.global || ( data.global && 'row' == FLBuilderConfig.userTemplateType ) ) { #>
+							<# if ( data.global && 'row' !== FLBuilderConfig.userTemplateType ) { #>
+								<ul class="fl-builder-submenu">
+									<# if ( data.dynamic ) { #>
+										<li><a class="fl-builder-submenu-link fl-block-settings" href="javascript:void(0);"><?php _e( 'Edit Settings', 'fl-builder' ); ?></a></li>
+									<# } #>
+									<li>
+										<a class="fl-builder-submenu-link fl-block-edit-template" href="javascript:void(0);">
+											<# if ( data.dynamic ) { #>
+												<?php _e( 'Edit Component', 'fl-builder' ); ?>
+											<# } else { #>
+												<?php _e( 'Edit Template', 'fl-builder' ); ?>
+											<# } #>
+										</a>
+									</li>
+									<li>
+										<a class="fl-builder-submenu-link fl-block-unlink-global" href="javascript:void(0);">
+											<# if ( data.dynamic ) { #>
+												<?php _e( 'Unlink Component', 'fl-builder' ); ?>
+											<# } else { #>
+												<?php _e( 'Unlink Template', 'fl-builder' ); ?>
+											<# } #>
+										</a>
+									</li>
+								</ul>
+							<# } else if ( ! data.global || ( data.global && 'row' == FLBuilderConfig.userTemplateType ) ) { #>
 								<ul class="fl-builder-submenu">
 									<li><a class="fl-builder-submenu-link fl-block-settings" href="javascript:void(0);"><?php _e( 'Row Settings', 'fl-builder' ); ?></a></li>
 									<li><a class="fl-builder-submenu-link fl-block-col-reset" href="javascript:void(0);"><?php _e( 'Reset Column Widths', 'fl-builder' ); ?></a></li>
 									<li><a class="fl-builder-submenu-link fl-block-row-reset" href="javascript:void(0);"><?php _e( 'Reset Row Width', 'fl-builder' ); ?></a></li>
 									<li><a class="fl-builder-submenu-link fl-row-quick-copy" href="javascript:void(0);"><?php _e( 'Copy Row Settings', 'fl-builder' ); ?></a></li>
-									<li><a class="fl-builder-submenu-link fl-row-quick-paste <# if ( 'row' === FLBuilderSettingsCopyPaste._getClipboardType() ) { #>fl-quick-paste-active<# } #>" href="javascript:void(0);"><?php _e( 'Paste Row Settings', 'fl-builder' ); ?></a></li>
+									<# if ( 'row' === FLBuilderSettingsCopyPaste._getClipboardType() ) { #>
+									<li><a class="fl-builder-submenu-link fl-row-quick-paste fl-quick-paste-active" href="javascript:void(0);"><?php _e( 'Paste Row Settings', 'fl-builder' ); ?></a></li>
+									<# } #>
+									<# if ( ! data.global ) { #>
+									<li class="fl-builder-submenu-sep">
+										<div></div>
+									</li>
+									<li><a class="fl-builder-submenu-link fl-block-save-as" href="javascript:void(0);"><?php _e( 'Save As...', 'fl-builder' ); ?></a></li>
+									<# } #>
 								</ul>
 							<# } #>
 						<?php endif; ?>
@@ -77,11 +117,19 @@
 <!-- #tmpl-fl-row-overlay -->
 
 <script type="text/html" id="tmpl-fl-col-overlay">
-	<div class="fl-col-overlay fl-block-overlay<# if ( data.global ) { #> fl-block-overlay-global<# } #>">
+	<div class="fl-col-overlay fl-block-overlay<# if ( data.dynamic || data.parentDynamic ) { #> fl-block-overlay-dynamic<# } else if ( data.global ) { #> fl-block-overlay-global<# } #>">
 		<div class="fl-block-overlay-header">
 			<div class="fl-block-overlay-actions">
 				<# if ( data.global && ! FLBuilderConfig.userCanEditGlobalTemplates ) { #>
-					<i class="fas fa-lock fl-tip" title="<?php _e( 'Locked', 'fl-builder' ); ?>"></i>
+					<# if ( data.dynamic ) { #>
+						<span class="fl-block-settings fl-tip" title="<?php _e( 'Column Settings', 'fl-builder' ); ?><# if ( data.nodeLabel && ! FLBuilderConfig.node_labels_disabled ) { #>{{FLBuilderConfig.node_labels_separator}}{{data.nodeLabel}}<# } #>">
+							<svg width="16" height="16" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+								<path fill="currentColor" d="M352 320c88.4 0 160-71.6 160-160c0-15.3-2.2-30.1-6.2-44.2c-3.1-10.8-16.4-13.2-24.3-5.3l-76.8 76.8c-3 3-7.1 4.7-11.3 4.7H336c-8.8 0-16-7.2-16-16V118.6c0-4.2 1.7-8.3 4.7-11.3l76.8-76.8c7.9-7.9 5.4-21.2-5.3-24.3C382.1 2.2 367.3 0 352 0C263.6 0 192 71.6 192 160c0 19.1 3.4 37.5 9.5 54.5L19.9 396.1C7.2 408.8 0 426.1 0 444.1C0 481.6 30.4 512 67.9 512c18 0 35.3-7.2 48-19.9L297.5 310.5c17 6.2 35.4 9.5 54.5 9.5zM80 408a24 24 0 1 1 0 48 24 24 0 1 1 0-48z"/>
+							</svg>
+						</span>
+					<# } else { #>
+						<i class="fas fa-lock fl-tip" title="<?php _e( 'Locked', 'fl-builder' ); ?>"></i>
+					<# } #>
 				<# } else { #>
 
 					<# if ( 'column' !== FLBuilderConfig.userTemplateType && ! FLBuilderConfig.simpleUi ) { #>
@@ -113,7 +161,31 @@
 							</svg>
 						</span>
 						<?php if ( ! $simple_ui ) : ?>
-							<# if ( ! data.global || ( data.global && FLBuilderConfig.userTemplateType ) ) { #>
+							<# if ( data.isTemplate && ! data.isRootCol ) { #>
+								<ul class="fl-builder-submenu">
+									<# if ( data.dynamic ) { #>
+										<li><a class="fl-builder-submenu-link fl-block-settings" href="javascript:void(0);"><?php _e( 'Edit Settings', 'fl-builder' ); ?></a></li>
+									<# } #>
+									<li>
+										<a class="fl-builder-submenu-link fl-block-edit-template" href="javascript:void(0);">
+											<# if ( data.dynamic ) { #>
+												<?php _e( 'Edit Component', 'fl-builder' ); ?>
+											<# } else { #>
+												<?php _e( 'Edit Template', 'fl-builder' ); ?>
+											<# } #>
+										</a>
+									</li>
+									<li>
+										<a class="fl-builder-submenu-link fl-block-unlink-global" href="javascript:void(0);">
+											<# if ( data.dynamic ) { #>
+												<?php _e( 'Unlink Component', 'fl-builder' ); ?>
+											<# } else { #>
+												<?php _e( 'Unlink Template', 'fl-builder' ); ?>
+											<# } #>
+										</a>
+									</li>
+								</ul>
+							<# } else if ( ! data.global || ( data.global && 'column' != FLBuilderConfig.userTemplateType ) ) { #>
 								<ul class="fl-builder-submenu fl-block-col-submenu">
 									<li><a class="fl-builder-submenu-link fl-block-settings" href="javascript:void(0);"><?php _e( 'Column Settings', 'fl-builder' ); ?></a></li>
 									<# if ( data.numCols > 1 || ( data.hasParentCol && data.numParentCols > 1 ) ) { #>
@@ -123,7 +195,15 @@
 										<li><a class="fl-builder-submenu-link fl-block-row-reset" href="javascript:void(0);"><?php _e( 'Reset Row Width', 'fl-builder' ); ?></a></li>
 									<# } #>
 									<li><a class="fl-builder-submenu-link fl-col-quick-copy" href="javascript:void(0);"><?php _e( 'Copy Column Settings', 'fl-builder' ); ?></a></li>
-									<li><a class="fl-builder-submenu-link fl-col-quick-paste <# if ( 'column' === FLBuilderSettingsCopyPaste._getClipboardType() ) { #>fl-quick-paste-active<# } #>" href="javascript:void(0);"><?php _e( 'Paste Column Settings', 'fl-builder' ); ?></a></li>
+									<# if ( 'column' === FLBuilderSettingsCopyPaste._getClipboardType() ) { #>
+									<li><a class="fl-builder-submenu-link fl-col-quick-paste fl-quick-paste-active" href="javascript:void(0);"><?php _e( 'Paste Column Settings', 'fl-builder' ); ?></a></li>
+									<# } #>
+									<# if ( ! data.global ) { #>
+									<li class="fl-builder-submenu-sep">
+										<div></div>
+									</li>
+									<li><a class="fl-builder-submenu-link fl-block-save-as" href="javascript:void(0);"><?php _e( 'Save As...', 'fl-builder' ); ?></a></li>
+									<# } #>
 								</ul>
 							<# } #>
 						<?php endif; ?>
@@ -210,12 +290,14 @@
 													}
 
 													#>
+													<# if ( pasteActive ) { #>
 													<li>
-														<a class="fl-builder-submenu-link fl-{{data.parentMenu[i].type}}-quick-paste <# if ( pasteActive ) { #>fl-quick-paste-active<# } #>" data-target-node="{{data.parentMenu[i].node}}" href="javascript:void(0);">
+														<a class="fl-builder-submenu-link fl-{{data.parentMenu[i].type}}-quick-paste fl-quick-paste-active" data-target-node="{{data.parentMenu[i].node}}" href="javascript:void(0);">
 															<?php /* translators: %s: Node type */ ?>
 															<?php printf( __( 'Paste %s Settings', 'fl-builder' ), '{{data.parentMenu[i].name}}' ); ?>
 														</a>
 													</li>
+													<# } #>
 												</ul>
 											</li>
 										<# } #>
@@ -290,11 +372,20 @@
 <!-- #tmpl-fl-col-overlay -->
 
 <script type="text/html" id="tmpl-fl-module-overlay">
-	<div class="fl-module-overlay fl-block-overlay<# if ( data.global ) { #> fl-block-overlay-global<# } #>">
+	<div class="fl-module-overlay fl-block-overlay<# if ( data.dynamic || data.parentDynamic ) { #> fl-block-overlay-dynamic<# } else if ( data.global ) { #> fl-block-overlay-global<# } #>">
 		<div class="fl-block-overlay-header">
 			<div class="fl-block-overlay-actions">
 				<# if ( data.global && ! FLBuilderConfig.userCanEditGlobalTemplates ) { #>
-					<i class="fas fa-lock fl-tip" title="<?php _e( 'Locked', 'fl-builder' ); ?>"></i>
+					<# if ( data.dynamic ) { #>
+						<?php /* translators: %s: module name */ ?>
+						<span class="fl-block-settings fl-tip" title="<?php printf( __( '%s Settings', 'fl-builder' ), '{{data.moduleName}}' ); ?><# if ( data.nodeLabel && ! FLBuilderConfig.node_labels_disabled ) { #>{{FLBuilderConfig.node_labels_separator}}{{data.nodeLabel}}<# } #>">
+							<svg width="16" height="16" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+								<path fill="currentColor" d="M352 320c88.4 0 160-71.6 160-160c0-15.3-2.2-30.1-6.2-44.2c-3.1-10.8-16.4-13.2-24.3-5.3l-76.8 76.8c-3 3-7.1 4.7-11.3 4.7H336c-8.8 0-16-7.2-16-16V118.6c0-4.2 1.7-8.3 4.7-11.3l76.8-76.8c7.9-7.9 5.4-21.2-5.3-24.3C382.1 2.2 367.3 0 352 0C263.6 0 192 71.6 192 160c0 19.1 3.4 37.5 9.5 54.5L19.9 396.1C7.2 408.8 0 426.1 0 444.1C0 481.6 30.4 512 67.9 512c18 0 35.3-7.2 48-19.9L297.5 310.5c17 6.2 35.4 9.5 54.5 9.5zM80 408a24 24 0 1 1 0 48 24 24 0 1 1 0-48z"/>
+							</svg>
+						</span>
+					<# } else { #>
+						<i class="fas fa-lock fl-tip" title="<?php _e( 'Locked', 'fl-builder' ); ?>"></i>
+					<# } #>
 				<# } else { #>
 
 					<# if ( ! data.isRootModule && ! FLBuilderConfig.simpleUi ) { #>
@@ -338,14 +429,48 @@
 								<path fill="currentColor" d="M352 320c88.4 0 160-71.6 160-160c0-15.3-2.2-30.1-6.2-44.2c-3.1-10.8-16.4-13.2-24.3-5.3l-76.8 76.8c-3 3-7.1 4.7-11.3 4.7H336c-8.8 0-16-7.2-16-16V118.6c0-4.2 1.7-8.3 4.7-11.3l76.8-76.8c7.9-7.9 5.4-21.2-5.3-24.3C382.1 2.2 367.3 0 352 0C263.6 0 192 71.6 192 160c0 19.1 3.4 37.5 9.5 54.5L19.9 396.1C7.2 408.8 0 426.1 0 444.1C0 481.6 30.4 512 67.9 512c18 0 35.3-7.2 48-19.9L297.5 310.5c17 6.2 35.4 9.5 54.5 9.5zM80 408a24 24 0 1 1 0 48 24 24 0 1 1 0-48z"/>
 							</svg>
 						</span>
-						<ul class="fl-builder-submenu">
-							<?php /* translators: %s: module name */ ?>
-							<li><a class="fl-builder-submenu-link fl-block-settings" href="javascript:void(0);"><?php printf( __( '%s Settings', 'fl-builder' ), '{{data.moduleName}}' ); ?></a></li>
-							<?php /* translators: %s: module name */ ?>
-							<li><a class="fl-builder-submenu-link fl-module-quick-copy" href="javascript:void(0);"><?php printf( __( 'Copy %s Settings', 'fl-builder' ), '{{data.moduleName}}' ); ?></a></li>
-							<?php /* translators: %s: module name */ ?>
-							<li><a class="fl-builder-submenu-link fl-module-quick-paste <# if ( data.moduleType === FLBuilderSettingsCopyPaste._getClipboardType() ) { #>fl-quick-paste-active<# } #>" href="javascript:void(0);"><?php printf( __( 'Paste %s Settings', 'fl-builder' ), '{{data.moduleName}}' ); ?></a></li>
-						</ul>
+						<# if ( data.isTemplate && ! data.isRootModule ) { #>
+							<ul class="fl-builder-submenu">
+								<# if ( data.dynamic ) { #>
+									<li><a class="fl-builder-submenu-link fl-block-settings" href="javascript:void(0);"><?php _e( 'Edit Settings', 'fl-builder' ); ?></a></li>
+								<# } #>
+								<li>
+									<a class="fl-builder-submenu-link fl-block-edit-template" href="javascript:void(0);">
+										<# if ( data.dynamic ) { #>
+											<?php _e( 'Edit Component', 'fl-builder' ); ?>
+										<# } else { #>
+											<?php _e( 'Edit Template', 'fl-builder' ); ?>
+										<# } #>
+									</a>
+								</li>
+								<li>
+									<a class="fl-builder-submenu-link fl-block-unlink-global" href="javascript:void(0);">
+										<# if ( data.dynamic ) { #>
+											<?php _e( 'Unlink Component', 'fl-builder' ); ?>
+										<# } else { #>
+											<?php _e( 'Unlink Template', 'fl-builder' ); ?>
+										<# } #>
+									</a>
+								</li>
+							</ul>
+						<# } else { #>
+							<ul class="fl-builder-submenu">
+								<?php /* translators: %s: module name */ ?>
+								<li><a class="fl-builder-submenu-link fl-block-settings" href="javascript:void(0);"><?php printf( __( '%s Settings', 'fl-builder' ), '{{data.moduleName}}' ); ?></a></li>
+								<?php /* translators: %s: module name */ ?>
+								<li><a class="fl-builder-submenu-link fl-module-quick-copy" href="javascript:void(0);"><?php printf( __( 'Copy %s Settings', 'fl-builder' ), '{{data.moduleName}}' ); ?></a></li>
+								<# if ( data.moduleType === FLBuilderSettingsCopyPaste._getClipboardType() ) { #>
+									<?php /* translators: %s: module name */ ?>
+									<li><a class="fl-builder-submenu-link fl-module-quick-paste fl-quick-paste-active" href="javascript:void(0);"><?php printf( __( 'Paste %s Settings', 'fl-builder' ), '{{data.moduleName}}' ); ?></a></li>
+								<# } #>
+								<# if ( ! data.global ) { #>
+								<li class="fl-builder-submenu-sep">
+									<div></div>
+								</li>
+								<li><a class="fl-builder-submenu-link fl-block-save-as" href="javascript:void(0);"><?php _e( 'Save As...', 'fl-builder' ); ?></a></li>
+								<# } #>
+							</ul>
+						<# } #>
 					</span>
 
 					<# if ( ! data.isRootModule && ! FLBuilderConfig.simpleUi ) { #>
@@ -426,12 +551,14 @@
 												}
 
 												#>
+												<# if ( pasteActive ) { #>
 												<li>
-													<a class="fl-builder-submenu-link fl-{{data.parentMenu[i].type}}-quick-paste <# if ( pasteActive ) { #>fl-quick-paste-active<# } #>" data-target-node="{{data.parentMenu[i].node}}" href="javascript:void(0);">
+													<a class="fl-builder-submenu-link fl-{{data.parentMenu[i].type}}-quick-paste fl-quick-paste-active" data-target-node="{{data.parentMenu[i].node}}" href="javascript:void(0);">
 														<?php /* translators: %s: Node type */ ?>
 														<?php printf( __( 'Paste %s Settings', 'fl-builder' ), '{{data.parentMenu[i].name}}' ); ?>
 													</a>
 												</li>
+												<# } #>
 											</ul>
 										</li>
 									<# } #>

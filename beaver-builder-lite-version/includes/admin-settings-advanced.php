@@ -11,10 +11,9 @@ $groups   = FLBuilderAdminAdvanced::get_groups();
 		foreach ( $groups as $group_key => $group ) {
 			printf( '<div class="advanced-group"><h3>%s</h3>', $group['label'] );
 			foreach ( $settings as $key => $setting ) {
-				if ( $setting['group'] != $group_key ) {
+				if ( $setting['group'] !== $group_key || isset( $setting['enabled'] ) && ! $setting['enabled'] ) {
 					continue;
 				}
-				$disabled = '';
 
 				if ( isset( $setting['type'] ) && 'text' == $setting['type'] ) {
 					if ( isset( $setting['depends'] ) && ! get_option( "_fl_builder_{$setting['depends']}" ) ) {

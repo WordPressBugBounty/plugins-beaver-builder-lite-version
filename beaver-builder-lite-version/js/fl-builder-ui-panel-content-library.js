@@ -94,17 +94,29 @@
         * @return void
         */
         addView: function(args) {
-
             var viewType = PanelView;
+
             switch(this.handle) {
                 case 'modules':
-                    viewType = ModulesPanelView;
+					if ( 'fl-content-panel-node-templates-view' === args.templateName ) {
+						viewType = NodeTemplatesPanelView;
+					} else {
+						viewType = ModulesPanelView;
+					}
                     break;
                 case 'rows':
-                    viewType = RowsPanelView;
+					if ( 'fl-content-panel-node-templates-view' === args.templateName ) {
+						viewType = NodeTemplatesPanelView;
+					} else {
+						viewType = RowsPanelView;
+					}
                     break;
                 case 'templates':
-                    viewType = TemplatesPanelView;
+                    if ( 'fl-content-panel-node-templates-view' === args.templateName ) {
+						viewType = NodeTemplatesPanelView;
+					} else {
+						viewType = TemplatesPanelView;
+					}
                     break;
                 case 'saved':
                     viewType = SavedPanelView;
@@ -365,31 +377,84 @@
         * @return void
         */
         bindEvents: function() {
-
             this.$sections = this.$el; // should really change this in the template.
-
             this.$items = this.$el.find('.fl-builder-block, .fl-builder-blocks-section-title');
+			this.$more_layouts = this.$el.find('.fl-builder-blocks-more-layouts-link');
+
+			this.$more_layouts.on( 'click', this.moreLayoutsClicked.bind( this ) );
         },
+
+		moreLayoutsClicked: function( e ) {
+			e.preventDefault();
+			FLBuilder.ContentPanel.tabs.modules.renderView( 'prebuiltmodules' )
+		}
     });
 
     /**
     * Panel view controller for row views.
     */
-    var RowsPanelView = PanelView.create({
+    var RowsPanelView = PanelView.create({});
 
-        /**
-        * The wp.template reference.
-        */
-        templateName: 'fl-content-panel-row-templates-view',
+    /**
+    * Panel view controller for pre-built node template views.
+    */
+    var NodeTemplatesPanelView = PanelView.create({
 
-        /**
-        * Bind events
-        *
-        * @return void
-        */
-        bindEvents: function() {
-            this.$items = this.$el.find('.fl-builder-block, .fl-builder-blocks-section-title');
-        },
+		templateName: 'fl-content-panel-node-templates-view',
+
+		bindEvents: function() {
+			this.$items = this.$el.find( '.fl-builder-blocks-section' );
+			this.$back = this.$el.find( '.fl-builder-node-templates-back' );
+
+			if ( this.isSubItem ) {
+				this.$back.on( 'click', this.onBackClick.bind( this ) );
+			} else {
+				this.$items.on( 'click', this.onCategoryClick.bind( this ) );
+			}
+		},
+
+		onCategoryClick: function( e ) {
+			var target = $( e.target ).closest( '.fl-builder-blocks-section' );
+			var categoryName = target.attr( 'data-category' );
+			var categorySlug = this.getCategorySlug( categoryName );
+
+			this.renderView( categorySlug );
+		},
+
+		getCategorySlug: function( name ) {
+			var views = this.getViews();
+
+			for ( slug in views ) {
+				if ( this.handle === views[ slug ].parent && name === views[ slug ].name ) {
+					return slug;
+				}
+			}
+
+			return null;
+		},
+
+		onBackClick: function() {
+			this.renderView( this.parent )
+		},
+
+		renderView: function( slug ) {
+			if ( this.$el.closest( '[data-tab="templates"]' ).length ) {
+				FLBuilder.ContentPanel.tabs.templates.renderView( slug )
+			} else if ( 'row' === this.query.content ) {
+				FLBuilder.ContentPanel.tabs.rows.renderView( slug )
+			} else {
+                FLBuilder.ContentPanel.tabs.modules.renderView( slug )
+            }
+		},
+
+		getViews: function() {
+			if ( this.$el.closest( '[data-tab="templates"]' ).length ) {
+				return FLBuilder.ContentPanel.tabs.templates.views;
+			} else if ( 'row' === this.query.content ) {
+				return FLBuilder.ContentPanel.tabs.rows.views;
+			}
+			return FLBuilder.ContentPanel.tabs.modules.views;
+		}
     });
 
     /**
@@ -519,9 +584,22 @@
         templateName: 'fl-content-panel-saved-view',
 
         bindEvents: function() {
-            this.$savedSearchInput = $(this.$el[0]).find('input[name="saved-search-term"]');
+            this.$savedSearchInput = this.$el.find('input[name="saved-search-term"]');
             this.$savedSearchInput.on('keyup', this.onSavedSearchTermChanged.bind(this) );
+
+            this.$savedSearchType = this.$el.find('select[name="saved-search-type"]');
+            this.$savedSearchType.on('change', this.onSavedSearchTermChanged.bind(this) );
+
+			this.$sectionHeaders = this.$el.find( '.fl-builder-blocks-section-header' );
+			this.$sectionHeaders.on( 'click', this.onSectionHeaderClicked );
         },
+
+		onSectionHeaderClicked: function( e ) {
+			const section = $( e.target ).closest( '.fl-builder-blocks-section' );
+			const collapsed = parseInt( section.attr( 'data-collapsed' ) );
+
+			section.attr( 'data-collapsed', ! collapsed ? 1 : 0 );
+		},
 
         /**
         * Filter the data before it's given to the template function
@@ -542,11 +620,12 @@
 
         onSavedSearchTermChanged: function(e) {
             var value = this.$savedSearchInput.val();
+            var type = this.$savedSearchType.val();
 
-            this.showSearchResults( value );
+            this.showSearchResults( value, type ); 
         },
 
-        showSearchResults: function( term ){
+        showSearchResults: function( term, type ){
             var html = '',
                 tempContent = '',
                 buttonContent = '',
@@ -556,12 +635,25 @@
                     type: "user",
                     content: ["module", "column", "row"],
                     searchTerm: '',
+                    dynamic: null,
+                    global: null,
                 };
 
             if ( term && term.length >= 2 ) {
                 qry.searchTerm = term;
             } else {
                 qry.searchTerm = '';
+            }
+
+            if ( 'template' === type ) {
+                qry.dynamic = false;
+                qry.global = false;
+            } else if ( 'dynamic' === type ) {
+                qry.dynamic = true;
+                qry.global = true;
+            } else if ( 'global' === type ) {
+                qry.dynamic = false;
+                qry.global = true;
             }
 
             this.queryResults = FLBuilder.Search.byQuery( qry );

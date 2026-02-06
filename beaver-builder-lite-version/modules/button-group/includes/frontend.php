@@ -49,7 +49,7 @@ $attrs = [
 		);
 
 		echo '<div id="fl-button-group-button-' . "$id-$i" . '" class="fl-button-group-button fl-button-group-button-' . "$id-$i" . '">';
-		FLBuilder::render_module_html( 'button', $button_settings );
+		FLBuilder::render_module_html( 'button', $button_settings, $module->get_button_version() );
 		echo '</div>';
 
 	endfor;

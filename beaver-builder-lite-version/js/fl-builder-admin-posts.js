@@ -146,7 +146,8 @@
 
 				FLBuilderAdminPosts.ajax({
 					action: 'fl_builder_duplicate_wpml_layout',
-					original_post_id: originalPostId
+					original_post_id: originalPostId,
+					_wpnonce: window.fl_wpml_vars.nonce,
 				}, FLBuilderAdminPosts._wpmlCopyComplete);
 			}
 		},

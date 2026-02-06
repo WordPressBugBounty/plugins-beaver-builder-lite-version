@@ -179,13 +179,6 @@ final class FLBuilderServices {
 			}
 		}
 
-		// Remove services that use namespaces if we're not on a supported PHP version.
-		foreach ( $services as $key => $service ) {
-			if ( isset( $service['namespace'] ) && ! version_compare( phpversion(), '5.3', '>=' ) ) {
-				unset( $services[ $key ] );
-			}
-		}
-
 		// Remove services that don't meet the requirements.
 		if ( isset( $services['mailpoet'] )
 			&& ! class_exists( 'WYSIJA' )
@@ -234,9 +227,10 @@ final class FLBuilderServices {
 	 * @return array The response array.
 	 */
 	static public function connect_service() {
-		$saved_services = FLBuilderModel::get_services();
-		$post_data      = FLBuilderModel::get_post_data();
-		$response       = array(
+		$saved_services  = FLBuilderModel::get_services();
+		$post_data       = FLBuilderModel::get_post_data();
+		$dynamic_options = isset( $post_data['dynamic_options'] ) ? $post_data['dynamic_options'] : null;
+		$response        = array(
 			'error' => false,
 			'html'  => '',
 		);
@@ -275,7 +269,7 @@ final class FLBuilderServices {
 					$connection['data']
 				);
 
-				$response['html'] = self::render_account_settings( $service, $service_account );
+				$response['html'] = self::render_account_settings( $service, $service_account, $dynamic_options );
 			}
 		}
 
@@ -302,12 +296,14 @@ final class FLBuilderServices {
 			'html'  => '',
 		);
 
+		$dynamic_options = isset( $post_data['dynamic_options'] ) ? $post_data['dynamic_options'] : null;
+
 		// Render the settings to connect a new account.
 		if ( isset( $post_data['add_new'] ) || ! isset( $saved_services[ $service ] ) ) {
-			$response['html'] = self::render_connect_settings( $service );
+			$response['html'] = self::render_connect_settings( $service, $dynamic_options );
 		} else {
 			$account          = isset( $settings->service_account ) ? $settings->service_account : '';
-			$response['html'] = self::render_account_settings( $service, $account );
+			$response['html'] = self::render_account_settings( $service, $account, $dynamic_options );
 		}
 
 		// Return the response.
@@ -320,7 +316,7 @@ final class FLBuilderServices {
 	 * @since 1.5.4
 	 * @return string The settings markup.
 	 */
-	static public function render_connect_settings( $service ) {
+	static public function render_connect_settings( $service, $dynamic_options = null ) {
 		ob_start();
 
 		FLBuilder::render_settings_field( 'service_account', array(
@@ -332,10 +328,10 @@ final class FLBuilderServices {
 			'preview'   => array(
 				'type' => 'none',
 			),
-		));
+		), null, $dynamic_options );
 
 		$instance = self::get_service_instance( $service );
-		echo $instance->render_connect_settings();
+		echo $instance->render_connect_settings( $dynamic_options );
 
 		FLBuilder::render_settings_field( 'service_connect_button', array(
 			'row_class' => 'fl-builder-service-connect-row',
@@ -353,9 +349,10 @@ final class FLBuilderServices {
 	 * @since 1.5.4
 	 * @param string $service The service id such as "mailchimp".
 	 * @param string $active The name of the active account, if any.
+	 * @param array $dynamic_options Selected fields for Dynamic Node, if any.
 	 * @return string The account settings markup.
 	 */
-	static public function render_account_settings( $service, $active = '' ) {
+	static public function render_account_settings( $service, $active = '', $dynamic_options = null ) {
 		ob_start();
 
 		$saved_services            = FLBuilderModel::get_services();
@@ -382,7 +379,7 @@ final class FLBuilderServices {
 			'preview'   => array(
 				'type' => 'none',
 			),
-		), $settings);
+		), $settings, $dynamic_options );
 
 		// Render additional service fields if we have a saved account.
 		if ( ! empty( $active ) && isset( $saved_services[ $service ][ $active ] ) ) {

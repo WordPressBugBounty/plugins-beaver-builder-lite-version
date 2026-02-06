@@ -102,4 +102,13 @@ class Groups extends ApiAbstract {
 
         return $response['body'];
     }
+
+    /**
+     * Added by Simon in the year 2025
+     */
+    public function getgroups()
+    {
+        $response = $this->restClient->get($this->endpoint, ['limit' => 1000]);
+        return $response['body'];
+    }
 }

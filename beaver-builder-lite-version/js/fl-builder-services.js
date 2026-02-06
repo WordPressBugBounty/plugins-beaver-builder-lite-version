@@ -79,6 +79,12 @@
 				selectRow   = select.closest( 'tr' ),
 				service     = select.val();
 
+			const dynamicOptions = {
+				global          : FLBuilderSettingsForms.config.global, 
+				dynamicEditing  : FLBuilderSettingsForms.config.dynamicEditing, 
+				rootNodeEditing : FLBuilderSettingsForms.config.rootNodeEditing,
+			};
+			
 			selectRow.siblings( 'tr.fl-builder-service-account-row' ).remove();
 			selectRow.siblings( 'tr.fl-builder-service-connect-row' ).remove();
 			selectRow.siblings( 'tr.fl-builder-service-field-row' ).remove();
@@ -93,7 +99,8 @@
 			FLBuilder.ajax( {
 				action  : 'render_service_settings',
 				node_id : nodeId,
-				service : service
+				service : service,
+				dynamic_options : dynamicOptions,
 			}, FLBuilderServices._serviceChangeComplete );
 		},
 
@@ -135,7 +142,12 @@
 					action          : 'connect_service',
 					node_id         : nodeId,
 					service         : select.val(),
-					fields          : {}
+					fields          : {},
+					dynamic_options : {
+						global          : FLBuilderSettingsForms.config.global, 
+						dynamicEditing  : FLBuilderSettingsForms.config.dynamicEditing, 
+						rootNodeEditing : FLBuilderSettingsForms.config.rootNodeEditing,
+					},
 				};
 
 			for ( ; i < connectInputs.length; i++ ) {
@@ -205,6 +217,12 @@
 				value       = account.val(),
 				data        = null;
 
+			const dynamicOptions = {
+				global          : FLBuilderSettingsForms.config.global, 
+				dynamicEditing  : FLBuilderSettingsForms.config.dynamicEditing, 
+				rootNodeEditing : FLBuilderSettingsForms.config.rootNodeEditing,
+			};
+			
 			connectRows.remove();
 			fieldRows.remove();
 			error.remove();
@@ -214,7 +232,8 @@
 					action  : 'render_service_settings',
 					node_id : nodeId,
 					service : select.val(),
-					add_new : true
+					add_new : true,
+					dynamic_options : dynamicOptions,
 				};
 			}
 			else if ( '' !== value ) {
@@ -222,7 +241,8 @@
 					action  : 'render_service_fields',
 					node_id : nodeId,
 					service : select.val(),
-					account : value
+					account : value,
+					dynamic_options : dynamicOptions,
 				};
 			}
 

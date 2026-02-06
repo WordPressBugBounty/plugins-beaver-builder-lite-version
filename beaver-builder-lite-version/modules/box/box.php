@@ -3,7 +3,6 @@
 class FLBuilderBoxModule extends FLBuilderModule {
 
 	public function __construct() {
-		global $wp_version;
 		parent::__construct( [
 			'name'            => __( 'Box', 'fl-builder' ),
 			'description'     => __( 'A simple layout container', 'fl-builder' ),
@@ -12,7 +11,6 @@ class FLBuilderBoxModule extends FLBuilderModule {
 			'partial_refresh' => true,
 			'include_wrapper' => false,
 			'accepts'         => 'all',
-			'enabled'         => version_compare( $wp_version, '5.2', '>=' ) && ! function_exists( 'classicpress_version' ),
 			'block_editor'    => true,
 		] );
 
@@ -38,7 +36,7 @@ class FLBuilderBoxModule extends FLBuilderModule {
 	 * @param Object $settings
 	 * @return Object
 	 */
-	public function filter_raw_settings( $settings, $defaults ) {
+	public function filter_raw_settings_defaults( $settings, $defaults ) {
 
 		foreach ( [ '', 'child_' ] as $prefix ) {
 			if ( ! isset( $settings->{ $prefix . 'bg_type' } ) ) {
@@ -48,6 +46,23 @@ class FLBuilderBoxModule extends FLBuilderModule {
 					}
 				} else {
 					$settings->{ $prefix . 'bg_type' } = 'basic';
+				}
+			}
+		}
+
+		foreach ( [ '', '_large', '_medium', '_responsive' ] as $suffix ) {
+			$grid_auto_flow = 'grid_auto_flow' . $suffix;
+			if ( isset( $settings->$grid_auto_flow ) && 'normal' === $settings->$grid_auto_flow ) {
+				$settings->$grid_auto_flow = '';
+			}
+			if ( isset( $settings->layout ) && in_array( $settings->layout, [ 'grid', 'z_stack' ] ) ) {
+				$place_content  = 'place_content' . $suffix;
+				$invalid_values = [ 'space-around', 'space-between', 'space-evenly' ];
+				if ( isset( $settings->$place_content ) && isset( $settings->$place_content['vertical'] ) && in_array( $settings->$place_content['vertical'], $invalid_values ) ) {
+					$settings->$place_content['vertical'] = '';
+				}
+				if ( isset( $settings->$place_content ) && isset( $settings->$place_content['horizontal'] ) && in_array( $settings->$place_content['horizontal'], $invalid_values ) ) {
+					$settings->$place_content['horizontal'] = '';
 				}
 			}
 		}
@@ -65,14 +80,20 @@ class FLBuilderBoxModule extends FLBuilderModule {
 
 		// Support link field attributes
 		if ( '' !== $this->settings->link ) {
-			$attrs['href'] = esc_url( do_shortcode( $this->settings->link ) );
+			if ( 1 === $this->version ) {
+				$attrs['href'] = esc_url( do_shortcode( $this->settings->link ) );
 
-			if ( isset( $this->settings->link_target ) ) {
-				$attrs['target'] = esc_attr( $this->settings->link_target );
-			}
-			$rel = $this->get_rel_attr( 'link' );
-			if ( '' !== $rel ) {
-				$attrs['rel'] = esc_attr( $rel );
+				if ( isset( $this->settings->link_target ) ) {
+					$attrs['target'] = esc_attr( $this->settings->link_target );
+				}
+				$rel = $this->get_rel_attr( 'link' );
+				if ( '' !== $rel ) {
+					$attrs['rel'] = esc_attr( $rel );
+				}
+			} else {
+				$attrs['tabindex'] = [ 0 ];
+				$attrs['role']     = [ 'link' ];
+				$attrs['data-url'] = [ esc_url( do_shortcode( $this->settings->link ) ) ];
 			}
 		}
 		return $attrs;
@@ -103,7 +124,7 @@ class FLBuilderBoxModule extends FLBuilderModule {
 		}
 
 		// Link support
-		if ( '' !== $this->settings->link ) {
+		if ( '' !== $this->settings->link && 1 === $this->version ) {
 			$tag = 'a';
 		}
 
@@ -112,9 +133,9 @@ class FLBuilderBoxModule extends FLBuilderModule {
 
 	static public function child_selector( $specificity = 0 ) {
 		if ( 1 === $specificity ) {
-			return '.fl-node-{node_id} > :not( .fl-block-overlay, .fl-drop-target )';
+			return '{node} > :not( .fl-block-overlay, .fl-drop-target )';
 		}
-		return ':where( .fl-node-{node_id} > :not( .fl-block-overlay, .fl-drop-target ) )';
+		return ':where( {node} > :not( .fl-block-overlay, .fl-drop-target ) )';
 	}
 
 	/**
@@ -212,7 +233,7 @@ FLBuilder::register_module( 'FLBuilderBoxModule', [
 						'set'         => [
 							'grid'    => [
 								'x_overflow'     => '',
-								'grid_auto_flow' => 'normal',
+								'grid_auto_flow' => '',
 								'child_grid_col' => [
 									'start' => '',
 									'span'  => '',
@@ -642,7 +663,7 @@ FLBuilder::register_module( 'FLBuilderBoxModule', [
 				'collapsed'   => true,
 				'fields'      => [
 
-					'aspect_ratio' => [
+					'aspect_ratio'  => [
 						'label'      => __( 'Aspect Ratio', 'fl-builder' ),
 						'type'       => 'select',
 						'options'    => FLBuilderBoxModule::get_aspect_ratio_options(),
@@ -654,7 +675,7 @@ FLBuilder::register_module( 'FLBuilderBoxModule', [
 							'auto'     => true,
 						],
 					],
-					'flex'         => [
+					'flex'          => [
 						'label'      => __( 'Flex', 'fl-builder' ),
 						'type'       => 'flex',
 						'responsive' => true,
@@ -695,7 +716,7 @@ FLBuilder::register_module( 'FLBuilderBoxModule', [
 							],
 						],
 					],
-					'grid_col'     => [
+					'grid_col'      => [
 						'label'      => __( 'Grid Column', 'fl-builder' ),
 						'type'       => 'grid-area',
 						'responsive' => true,
@@ -707,7 +728,7 @@ FLBuilder::register_module( 'FLBuilderBoxModule', [
 							'important' => true,
 						],
 					],
-					'grid_row'     => [
+					'grid_row'      => [
 						'label'      => __( 'Grid Row', 'fl-builder' ),
 						'type'       => 'grid-area',
 						'responsive' => true,
@@ -719,7 +740,7 @@ FLBuilder::register_module( 'FLBuilderBoxModule', [
 							'important' => true,
 						],
 					],
-					'size'         => [
+					'size'          => [
 						'label'      => __( 'Width & Height', 'fl-builder' ),
 						'type'       => 'size',
 						'responsive' => true,
@@ -772,7 +793,7 @@ FLBuilder::register_module( 'FLBuilderBoxModule', [
 							],
 						],
 					],
-					'margin_inline'        => [
+					'margin_inline' => [
 						'label'      => __( 'Alignment', 'fl-builder' ),
 						'type'       => 'button-group',
 						'default'    => '',
@@ -780,17 +801,17 @@ FLBuilder::register_module( 'FLBuilderBoxModule', [
 						'fill_space' => true,
 						'options'    => [
 							'0 auto' => __( 'Left', 'fl-builder' ),
-							'auto' => __( 'Center', 'fl-builder' ),
+							'auto'   => __( 'Center', 'fl-builder' ),
 							'auto 0' => __( 'Right', 'fl-builder' ),
 						],
 						'preview'    => [
-							'type'  => 'css',
-							'auto'  => true,
-							'property' => 'margin-inline',
+							'type'         => 'css',
+							'auto'         => true,
+							'property'     => 'margin-inline',
 							'format_value' => '%s !important', // Prevent regular margins from overriding
 						],
 					],
-					'order' => [
+					'order'         => [
 						'label'      => __( 'Order', 'fl-builder' ),
 						'help'       => __( 'Affects the order of this box when placed in a flex or grid parent.', 'fl-builder' ),
 						'type'       => 'unit',
@@ -1108,3 +1129,8 @@ FLBuilder::register_module( 'FLBuilderBoxModule', [
 ] );
 
 require_once __DIR__ . '/box-aliases.php';
+
+FLBuilder::register_module_deprecations( 'box', [
+	// Register module version (v1) to deprecate old HTML markup & prevent using anchor tags.
+	'v1' => [],
+] );

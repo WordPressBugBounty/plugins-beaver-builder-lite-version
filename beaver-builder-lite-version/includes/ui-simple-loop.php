@@ -12,7 +12,7 @@ $settings     = (object) array_merge( $defaults, $tab_defaults, (array) $setting
 
 ?>
 
-<div id="fl-builder-settings-section-post" class="fl-builder-settings-section">
+<div id="fl-builder-settings-section-post__ui-simple-loop" class="fl-builder-settings-section__ui-simple-loop">
 	<div class="fl-builder-settings-section-header">
 		<button class="fl-builder-settings-title">
 			<svg width="20" height="20">

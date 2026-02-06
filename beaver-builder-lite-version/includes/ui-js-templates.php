@@ -390,10 +390,17 @@
 					slug = title.replace(/\s+/g, '-').toLowerCase();
 
 					if ( _.isUndefined(modules) ) { continue; }
+
+					var isBoxSection = modules.some(module => module.slug === 'box')
 				#>
 				<div id="fl-builder-blocks-{{slug}}" class="fl-builder-blocks-section">
 					<div class="fl-builder-blocks-section-header">
 						<span class="fl-builder-blocks-section-title">{{title}}</span>
+						<# if ( isBoxSection && 'module' !== FLBuilderConfig.userTemplateType && ( 'disabled' !== FLBuilderConfig.enabledTemplates && 'user' !== FLBuilderConfig.enabledTemplates ) && ! FLBuilderConfig.isOverrideModuleCategories ) { #>
+						<a href="#" class="fl-builder-blocks-more-layouts-link">
+							<?php _e( 'More Layouts', 'fl-builder' ); ?>
+						</a>
+						<# } #>
 					</div>
 					<div class="fl-builder-blocks-section-content fl-builder-modules">
 						<# for( var k in modules) {
@@ -669,18 +676,17 @@
 </script>
 <!-- #tmpl-fl-content-panel-templates-view -->
 
-<script type="text/html" id="tmpl-fl-content-panel-row-templates-view">
+<script type="text/html" id="tmpl-fl-content-panel-node-templates-view">
 	<#
-	var categories;
+	var categories = {};
 	if (!_.isUndefined(data.queryResults)) {
 		categories = data.queryResults.library.template.categorized;
 	}
+	if ( ! data.isSubItem && Object.keys( categories ).length > 1 ) {
 	#>
-	<div>
-		<#
-		if (!_.isUndefined(categories)) {
+		<div class="fl-builder-node-template-categories">
+			<#
 			for( var catHandle in categories) {
-				var templates = categories[catHandle];
 				var categoryName;
 				if (!_.isUndefined(FLBuilderStrings.categoryMeta[catHandle])) {
 					categoryName = FLBuilderStrings.categoryMeta[catHandle].name;
@@ -688,13 +694,36 @@
 					categoryName = catHandle;
 				}
 				#>
-				<div class="fl-builder-blocks-section">
-					<# if (catHandle !== 'uncategorized' && catHandle !== FLBuilderStrings.undefined && Object.keys(categories).length > 1) { #>
+				<div class="fl-builder-blocks-section" data-category="{{catHandle}}">
+					<# if (catHandle !== 'uncategorized' && catHandle !== FLBuilderStrings.undefined) { #>
 					<div class="fl-builder-blocks-section-header">
 						<span class="fl-builder-blocks-section-title">{{categoryName}}</span>
+						<svg width="20" height="20">
+							<use href="#fl-builder-forms-down-caret"></use>
+						</svg>
 					</div>
 					<# } #>
-					<div class="fl-builder-blocks-section-content fl-builder-row-templates">
+				</div>
+				<#
+			}
+			#>
+		</div>
+	<# } else { #>
+		<div class="fl-builder-node-template-items">
+			<# if ( data.isSubItem ) { #>
+			<button class="fl-builder-node-templates-back fl-builder-button">
+				<svg width="20" height="20">
+					<use href="#fl-builder-forms-down-caret"></use>
+				</svg>
+				<?php // translators: %s: parent name ?>
+				<span><?php echo sprintf( __( 'Back to %s', 'fl-builder' ), '{{ data.parentName }}' ); ?></span>
+			</button>
+			<# } #>
+			<# for( var catHandle in categories) {
+				var templates = categories[catHandle];
+				#>
+				<div class="fl-builder-blocks-section">
+					<div class="fl-builder-blocks-section-content fl-builder-{{data.query.content}}-templates">
 						<#
 						for( var i in templates) {
 							var template = templates[i],
@@ -705,7 +734,7 @@
 								isPremium = FLBuilderConfig.lite && template.premium,
 								disabledClass = isPremium ? 'fl-builder-block-disabled' : '';
 						#>
-						<span onclick="FLBuilder._showProMessage('{{template.name}}')" class="fl-builder-block fl-builder-block-template fl-builder-block-row-template {{hasImageClass}} {{disabledClass}}" data-id="{{id}}" data-type="{{template.type}}">
+						<span onclick="FLBuilder._showProMessage('{{template.name}}')" class="fl-builder-block fl-builder-block-template fl-builder-block-{{data.query.content}}-template {{hasImageClass}} {{disabledClass}}" data-id="{{id}}" data-type="{{template.type}}">
 							<span class="fl-builder-block-content">
 								<# if (hasImage) { #>
 								<div class="fl-builder-block-thumbnail" style="background-image:url({{image}})"></div>
@@ -720,64 +749,11 @@
 					</div>
 				</div>
 				<#
-			}
-		}
-		#>
-	</div>
+			} #>
+		</div>
+	<# } #>
 </script>
-<!-- #tmpl-fl-content-panel-row-templates-view -->
-
-<script type="text/html" id="tmpl-fl-content-panel-module-templates-view">
-	<#
-	var categories;
-	if (!_.isUndefined(data.queryResults)) {
-		categories = data.queryResults.library.template.categorized;
-	}
-	#>
-	<div class="fl-builder-module-templates-view">
-		<#
-		if (!_.isUndefined(categories)) {
-			for( var catHandle in categories) {
-				var templates = categories[catHandle],
-					categoryName;
-				if (!_.isUndefined(FLBuilderStrings.categoryMeta[catHandle])) {
-					categoryName = FLBuilderStrings.categoryMeta[catHandle].name;
-				} else {
-					categoryName = catHandle;
-				}
-				#>
-				<div class="fl-builder-blocks-section">
-					<# if (catHandle !== 'uncategorized' && catHandle !== FLBuilderStrings.undefined && Object.keys(categories).length > 1) { #>
-					<div class="fl-builder-blocks-section-header">
-						<span class="fl-builder-blocks-section-title">{{categoryName}}</span>
-					</div>
-					<# } #>
-					<div class="fl-builder-blocks-section-content fl-builder-module-templates">
-						<#
-						for( var i in templates) {
-							var template = templates[i],
-								image = template.image,
-								id = _.isNumber( template.postId ) ? template.postId : template.id,
-								hasImage = image && !image.endsWith('blank.jpg'),
-								hasImageClass = hasImage ? 'fl-builder-block-has-thumbnail' : '';
-						#>
-						<span class="fl-builder-block fl-builder-block-template fl-builder-block-module-template {{hasImageClass}}" data-id="{{id}}" data-type="{{template.type}}">
-							<span class="fl-builder-block-content">
-								<# if ( hasImage ) { #>
-								<img class="fl-builder-block-template-image" src="{{image}}" />
-								<# } #>
-								<span class="fl-builder-block-title">{{template.name}}</span>
-							</span>
-						</span>
-						<# } #>
-					</div>
-				</div><#
-			}
-		}
-		#>
-	</div>
-</script>
-<!-- #tmpl-fl-content-panel-module-templates-view -->
+<!-- #tmpl-fl-content-panel-node-templates-view -->
 
 <script type="text/html" id="tmpl-fl-content-panel-no-view">
 	<div class="fl-builder--panel-message">

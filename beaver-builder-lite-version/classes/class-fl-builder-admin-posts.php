@@ -275,11 +275,6 @@ final class FLBuilderAdminPosts {
 		// Styles
 		wp_enqueue_style( 'fl-builder-admin-posts', FLBuilder::plugin_url() . 'css/fl-builder-admin-posts.css', array(), FL_BUILDER_VERSION );
 
-		// Legacy WP Styles (3.7 and below)
-		if ( version_compare( $wp_version, '3.7', '<=' ) ) {
-			wp_enqueue_style( 'fl-builder-admin-posts-legacy', FLBuilder::plugin_url() . 'css/fl-builder-admin-posts-legacy.css', array(), FL_BUILDER_VERSION );
-		}
-
 		// Scripts
 		wp_enqueue_script( 'json2' );
 		wp_enqueue_script( 'fl-builder-admin-posts', FLBuilder::plugin_url() . 'js/fl-builder-admin-posts.js', array(), FL_BUILDER_VERSION );
@@ -298,11 +293,6 @@ final class FLBuilderAdminPosts {
 		// Builder body class
 		if ( FLBuilderModel::is_builder_enabled() ) {
 			$classes .= ' fl-builder-enabled';
-		}
-
-		// Pre WP 3.8 body class
-		if ( version_compare( $wp_version, '3.8', '<' ) ) {
-			$classes .= ' fl-pre-wp-3-8';
 		}
 
 		return $classes;

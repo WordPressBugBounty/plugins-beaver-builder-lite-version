@@ -48,7 +48,7 @@ if ( ! class_exists( 'FLBuilderLoader' ) ) {
 		 * @return void
 		 */
 		static private function define_constants() {
-			define( 'FL_BUILDER_VERSION', '2.9.3.2' );
+			define( 'FL_BUILDER_VERSION', '2.10.0.6' );
 			define( 'FL_BUILDER_FILE', trailingslashit( dirname( __DIR__, 1 ) ) . 'fl-builder.php' );
 			define( 'FL_BUILDER_DIR', plugin_dir_path( FL_BUILDER_FILE ) );
 			define( 'FL_BUILDER_URL', esc_url( plugins_url( '/', FL_BUILDER_FILE ) ) );
@@ -123,6 +123,8 @@ if ( ! class_exists( 'FLBuilderLoader' ) ) {
 			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-global-import-export.php';
 			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-node-code-settings.php';
 			require_once FL_BUILDER_DIR . 'classes/class-fl-controls.php';
+			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-enqueue.php';
+			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-config.php';
 
 			/* WP CLI Commands */
 			if ( defined( 'WP_CLI' ) ) {

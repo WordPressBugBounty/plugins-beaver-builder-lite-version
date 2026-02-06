@@ -15,6 +15,11 @@ jQuery(function($) {
 						<?php endif; ?>
 					}
 			},
+			<?php if ( isset( $settings->lightbox_image_size ) && isset( $settings->data->sizes->{$settings->lightbox_image_size} ) ) : ?>
+			items: {
+				src: '<?php echo $settings->data->sizes->{$settings->lightbox_image_size}->url; ?>'
+			},
+			<?php endif; ?>
 			callbacks: {
 				open: function() {
 					$('.mfp-preloader').html('<i class="fas fa-spinner fa-spin fa-3x fa-fw"></i>');

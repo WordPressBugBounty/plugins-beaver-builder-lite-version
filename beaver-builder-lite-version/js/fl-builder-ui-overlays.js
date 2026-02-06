@@ -68,6 +68,9 @@
 			body.on( 'click touchend', '.fl-block-overlay .fl-block-settings', FLBuilder._nodeSettingsClicked);
 			body.on( 'click touchend', '.fl-block-overlay .fl-block-copy', FLBuilder._nodeDuplicateClicked);
 			body.on( 'click touchend', '.fl-block-overlay .fl-block-remove', FLBuilder._nodeRemoveClicked);
+			body.on( 'click touchend', '.fl-block-overlay .fl-block-unlink-global', FLBuilder._nodeUnlinkGlobalClicked);
+			body.on( 'click touchend', '.fl-block-overlay .fl-block-edit-template', FLBuilder._nodeEditTemplateClicked);
+			body.on( 'click touchend', '.fl-block-overlay .fl-block-save-as', FLBuilder._nodeOverlaySaveAsClicked);
 
 			/* Rows */
 			body.on( 'mousedown', '.fl-row-overlay .fl-block-move, .fl-row-move', FLBuilder._rowDragInit);
@@ -75,6 +78,7 @@
 			body.on( 'click touchend', '.fl-row-quick-copy', FLBuilder._rowCopySettingsClicked);
 			body.on( 'click touchend', '.fl-row-quick-paste', FLBuilder._rowPasteSettingsClicked);
 			parentBody.on( 'click', '.fl-builder-row-settings .fl-builder-settings-save', FLBuilder._saveSettings);
+			parentBody.on( 'click', '.fl-builder-dynamic-row-settings .fl-builder-settings-save', FLBuilder._saveSettings);
 
 			// Row touch or mouse specific events.
 			if ( isTouch ) {
@@ -93,6 +97,7 @@
 			body.on( 'click touchend', '.fl-col-quick-paste', FLBuilder._colPasteSettingsClicked);
 			body.on( 'click touchend', '.fl-builder-submenu .fl-block-col-reset', FLBuilder._resetColumnWidthsClicked);
 			parentBody.on( 'click', '.fl-builder-col-settings .fl-builder-settings-save', FLBuilder._saveSettings);
+			parentBody.on( 'click', '.fl-builder-dynamic-col-settings .fl-builder-settings-save', FLBuilder._saveSettings);
 
 			// Column touch or mouse specific events.
 			if ( isTouch ) {
@@ -108,6 +113,7 @@
 			body.on( 'click touchend', '.fl-module-quick-paste', FLBuilder._modulePasteSettingsClicked);
 			body.on( 'click touchend', '.fl-module-overlay .fl-block-col-settings', FLBuilder._colSettingsClicked);
 			parentBody.on( 'click', '.fl-builder-module-settings .fl-builder-settings-save', FLBuilder._saveModuleClicked);
+			parentBody.on( 'click', '.fl-builder-dynamic-module-settings .fl-builder-settings-save', FLBuilder._saveSettings);
 
 			// Module touch or mouse specific events.
 			if ( isTouch ) {
@@ -324,6 +330,7 @@
 			selected.removeClass( 'fl-node-selected' );
 			selected.removeClass( 'fl-block-overlay-active' );
 			selected.find( '> .fl-block-overlay' ).remove();
+			$('body').removeClass('fl-block-overlay-muted');
 
 			FLBuilder._selectedNode = null;
 		},
@@ -403,7 +410,8 @@
 			var rows = $('.fl-row:not(.fl-node-selected)');
 
 			rows.removeClass('fl-block-overlay-active');
-			rows.find('.fl-row-overlay').remove();
+			rows.find('.fl-row-overlay *').off();
+			rows.find('.fl-row-overlay').off().empty().remove();
 			rows.find('.fl-module').removeClass('fl-module-adjust-height');
 			$('body').removeClass( 'fl-builder-row-resizing' );
 			FLBuilder._closeAllSubmenus();
@@ -452,6 +460,7 @@
                 overlay = FLBuilder._appendOverlay( row, template( {
                     node : id,
 	                global : row.hasClass( 'fl-node-global' ),
+					dynamic: !! row.attr( 'data-dynamic-editing' ),
 					hasRules : row.hasClass( 'fl-node-has-rules' ),
 					rulesTextRow : row.attr('data-rules-text'),
 					rulesTypeRow : row.attr('data-rules-type'),
@@ -530,7 +539,8 @@
 			var cols = $( '.fl-col:not(.fl-node-selected)' );
 
 			cols.removeClass('fl-block-overlay-active');
-			cols.find('> .fl-col-overlay').remove();
+			cols.find('> .fl-col-overlay *').off();
+			cols.find('> .fl-col-overlay').off().empty().remove();
 			FLBuilder._closeAllSubmenus();
 			FL.Builder.data.getOutlinePanelActions().setFocusNode( false );
 		},
@@ -551,6 +561,8 @@
 				groupLoading    = group.hasClass( 'fl-col-group-has-child-loading' ),
 				global		  	= col.hasClass( 'fl-node-global' ),
 				parentGlobal  	= col.parents( '.fl-node-global' ).length > 0,
+				dynamic			= !! col.attr( 'data-dynamic-editing' ),
+				parentDynamic	= !! col.closest( '[data-dynamic-editing]' ).length,
 				numCols		  	= col.closest( '.fl-col-group' ).find( '> .fl-col' ).length,
 				index           = group.find( '> .fl-col' ).index( col ),
 				isFirst   		= 0 === index,
@@ -616,11 +628,14 @@
 				// Append the template.
 				overlay = FLBuilder._appendOverlay( col, template( {
 					global	      		: global,
+					dynamic	      		: dynamic,
+					parentDynamic		: parentDynamic,
 					groupLoading  		: groupLoading,
 					numCols	      		: numCols,
 					isFirst         	: isFirst,
 					isLast   	      	: isLast,
 					isRootCol     		: isRootCol,
+					node				: colNode,
 					hasChildCols  		: hasChildCols,
 					hasParentCol  		: hasParentCol,
 					parentFirst   		: parentFirst,
@@ -630,7 +645,8 @@
 					userCanResizeRows 	: userCanResizeRows,
 					hasRules			: hasRules,
 					nodeLabel 			: settings?.node_label,
-					parentMenu			: parentMenu
+					parentMenu			: parentMenu,
+					isTemplate			: isColTemplate,
 				} ) );
 
 				// Build the overlay overflow menu if needed.
@@ -690,7 +706,8 @@
 			var modules = $('.fl-module:not(.fl-node-selected)');
 
 			modules.removeClass('fl-block-overlay-active');
-			modules.find('> .fl-module-overlay').remove();
+			modules.find('> .fl-module-overlay * ').off();
+			modules.find('> .fl-module-overlay').off().empty().remove();
 			FLBuilder._closeAllSubmenus();
 			FL.Builder.data.getOutlinePanelActions().setFocusNode( false );
 		},
@@ -713,12 +730,13 @@
 				global		  = module.hasClass( 'fl-node-global' ),
 				parent		  = module.parent(),
 				parentGlobal  = module.parents( '.fl-node-global' ).length > 0,
+				dynamic		  = !! module.attr( 'data-dynamic-editing' ),
+				parentDynamic = !! module.closest( '[data-dynamic-editing]' ).length,
 				group         = module.parents( '.fl-col-group' ).last(),
 				groupLoading  = group.hasClass( 'fl-col-group-has-child-loading' ),
 				numCols		  = module.closest( '.fl-col-group' ).find( '> .fl-col' ).length,
 				col           = module.closest( '.fl-col' ),
 				colFirst      = col.index() <= 0,
-				colNode 	  = col.attr( 'data-node' ),
 				colLast       = numCols === col.index() + 1,
 				parentCol     = col.parents( '.fl-col' ),
 				hasParentCol  = parentCol.length > 0,
@@ -726,7 +744,6 @@
 				parentFirst   = hasParentCol ? 0 === parentCol.index() : false,
 				parentLast    = hasParentCol ? numParentCols === parentCol.index() + 1 : false,
 				row			  = module.closest('.fl-row'),
-				isGlobalRow   = row.hasClass( 'fl-node-global' ),
 				rowIsFixedWidth = !! row.find('.fl-row-fixed-width').addBack('.fl-row-fixed-width').length,
 				userCanResizeRows = FLBuilderConfig.rowResize.userCanResizeRows,
 				hasRules	  = module.hasClass( 'fl-node-has-rules' ),
@@ -744,6 +761,7 @@
 				isFirst		  = 0 === parentChildren.index( module ),
 				isLast		  = parentChildren.index( module ) === parentChildren.length - 1,
 				layoutDirection = FLBuilder._getNodeLayoutDirection( module ),
+				isModuleTemplate   = 'undefined' !== typeof module.data('template-url'),
 				template	  = wp.template( 'fl-module-overlay' ),
 				overlay       = null;
 
@@ -774,7 +792,10 @@
 				// Append the template.
 				overlay = FLBuilder._appendOverlay( module, template( {
 					global 		  		: global,
+					dynamic 		  	: dynamic,
+					parentDynamic 		: parentDynamic,
 					moduleType	  		: moduleType,
+					node				: id,
 					moduleName	  		: moduleName,
 					nodeLabel			: settings?.node_label,
 					groupLoading  		: groupLoading,
@@ -798,6 +819,8 @@
 					isFirst			  : isFirst,
 					isLast			  : isLast,
 					layoutDirection	  : layoutDirection,
+					isTemplate		  : isModuleTemplate,
+					dynamicEditing    : !! module.attr( 'data-dynamic-editing' ),
 				} ) );
 
 				// Adjust overlay position to match margins of

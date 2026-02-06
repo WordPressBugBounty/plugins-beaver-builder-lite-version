@@ -55,7 +55,7 @@ class FLWidgetModule extends FLBuilderModule {
 	/**
 	 * @method filter_raw_settings for checking widget settings compatibility for old pages
 	 */
-	public function filter_raw_settings( $settings, $defaults ) {
+	public function filter_raw_settings_defaults( $settings, $defaults ) {
 		if ( FLWidgetModule::check_class( $settings ) === 'widget' ) {
 			$widget_class           = FLWidgetModule::extract_class( $settings );
 			$instance               = new $widget_class();

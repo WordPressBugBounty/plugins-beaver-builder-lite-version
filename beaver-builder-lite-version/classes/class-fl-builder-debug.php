@@ -206,6 +206,25 @@ final class FL_Debug {
 				'data' => ( $count->inherit > 0 ) ? $count->inherit : $count->publish,
 			);
 			self::register( 'wp_type_count_' . $type, $args );
+
+			if ( 'fl-builder-history' === $type ) {
+				$result = $wpdb->get_results( $wpdb->prepare( "select count(post_id) as total,post_id as ID from $wpdb->postmeta where meta_key LIKE %s group by post_id", '_fl_builder_history_state_%' ) );
+				if ( ! empty( $result ) ) {
+					$total = count( $result );
+					$all   = 0;
+					foreach ( $result as $post ) {
+						$all += $post->total;
+					}
+					$avg     = $all / $total;
+					$history = sprintf( "\n%s History states across %s Layouts, Average %s", $all, $total, number_format( $avg ) );
+				}
+				$args = array(
+					'name' => 'History States',
+					'data' => $history,
+				);
+				self::register( 'wp_type_count_history_' . $type, $args );
+
+			}
 		}
 
 		$args = array(
@@ -462,6 +481,15 @@ final class FL_Debug {
 		self::register( 'theme_version', $args );
 
 		$args = array(
+			'name' => 'Assistant',
+			'data' => ( defined( 'FL_ASSISTANT_VERSION' ) ) ? FL_ASSISTANT_VERSION : 'Not active/installed.',
+		);
+		if ( defined( 'FL_ASSISTANT_BB_EXTENSION' ) && FL_ASSISTANT_BB_EXTENSION ) {
+			$args['data'] .= ' (bundled)';
+		}
+		self::register( 'assistant_version', $args );
+
+		$args = array(
 			'name' => 'Modules',
 			'data' => self::divider(),
 		);
@@ -589,18 +617,6 @@ final class FL_Debug {
 		$opts     = array();
 		foreach ( $adv_opts as $key => $opt ) {
 			$option = get_option( "_fl_builder_{$key}", $opt['default'] ) ? 'Enabled' : 'Disabled';
-			if ( 'limithistory_enabled' === $key ) {
-				$result = $wpdb->get_results( $wpdb->prepare( "select count(post_id) as total,post_id as ID from $wpdb->postmeta where meta_key LIKE %s group by post_id", '_fl_builder_history_state_%' ) );
-				if ( ! empty( $result ) ) {
-					$total = count( $result );
-					$all   = 0;
-					foreach ( $result as $post ) {
-						$all += $post->total;
-					}
-					$avg     = $all / $total;
-					$option .= sprintf( "\n%s History states across %s Layouts, Average %s", $all, $total, number_format( $avg ) );
-				}
-			}
 			$opts[] = sprintf( '%s: %s', $opt['label'], $option );
 		}
 		$args = array(

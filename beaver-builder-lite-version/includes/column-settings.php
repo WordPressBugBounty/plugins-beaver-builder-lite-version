@@ -110,7 +110,9 @@ FLBuilder::register_settings_form('col', array(
 							'show_reset'  => true,
 							'show_alpha'  => true,
 							'preview'     => array(
-								'type' => 'none',
+								'type'     => 'css',
+								'selector' => '> .fl-col-content a',
+								'property' => 'color',
 							),
 						),
 						'hover_color'   => array(
@@ -550,9 +552,6 @@ FLBuilder::register_settings_form('col', array(
 								'logged_in' => array(
 									'fields' => array( 'visibility_user_capability' ),
 								),
-							),
-							'preview' => array(
-								'type' => 'none',
 							),
 						),
 						'visibility_user_capability' => array(

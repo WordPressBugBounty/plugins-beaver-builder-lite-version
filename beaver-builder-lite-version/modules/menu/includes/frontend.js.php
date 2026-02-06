@@ -9,6 +9,7 @@
 	$post_id           = FLBuilderModel::get_post_id();
 	$mobile_stacked    = isset( $settings->mobile_stacked ) && 'no' === $settings->mobile_stacked ? 'false' : 'true';
 	$submenu_icon      = isset( $settings->submenu_hover_toggle ) ? esc_js( $settings->submenu_hover_toggle ) : 'none';
+	$flyout_width      = isset( $settings->flyout_width ) ? esc_js( $settings->flyout_width ) : '250';
 ?>
 
 (function($) {
@@ -30,6 +31,7 @@
 			postId : '<?php echo $post_id; ?>',
 			mobileStacked: <?php echo $mobile_stacked; ?>,
 			submenuIcon: '<?php echo $submenu_icon; ?>',
+			flyoutWidth: '<?php echo $flyout_width; ?>',
 		});
 
 	});

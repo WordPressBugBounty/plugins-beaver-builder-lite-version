@@ -25,12 +25,19 @@ $field['html_after'] = ob_get_clean();
 <tr id="fl-field-<?php echo $name; ?>"></tr>
 <script>
 
-var html   = null,
-	fields = {
+var fieldName = '<?php echo $name; ?>';
+var html   = null;
+var fields = {
 		'<?php echo $name; ?>' : <?php echo json_encode( $field ); ?>
 	};
 
-html = FLBuilderSettingsForms.renderFields( fields, <?php echo json_encode( $settings ); ?> );
+var dynamicOptions = {
+	source       : 'legacy',
+	isDataSource : <?php echo ( 'data_source' === $name ? '1' : 0 ); ?>,
+};
+
+html = FLBuilderSettingsForms.renderFields( fields, <?php echo json_encode( $settings ); ?>, null, null, null, dynamicOptions );
+
 
 jQuery( '#fl-field-<?php echo $name; ?>' ).after( html ).remove();
 

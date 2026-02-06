@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 (function($) {
 
 	/**
@@ -11,22 +12,23 @@
 		this.nodeId              = settings.id;
 		this.nodeClass           = '.fl-node-' + settings.id;
 		this.wrapperClass        = this.nodeClass + ' .fl-menu';
-		this.type				 = settings.type;
-		this.mobileToggle		 = settings.mobile;
-		this.mobileBelowRow		 = settings.mobileBelowRow;
-		this.mobileFlyout		 = settings.mobileFlyout;
+		this.type				 				 = settings.type;
+		this.mobileToggle		     = settings.mobile;
+		this.mobileBelowRow		   = settings.mobileBelowRow;
+		this.mobileFlyout		     = settings.mobileFlyout;
 		this.breakPoints         = settings.breakPoints;
-		this.mobileBreakpoint	 = settings.mobileBreakpoint;
+		this.mobileBreakpoint	 	 = settings.mobileBreakpoint;
 		this.currentBrowserWidth = $( window ).width();
 		this.postId              = settings.postId;
 		this.mobileStacked       = settings.mobileStacked;
 		this.submenuIcon         = settings.submenuIcon;
+		this.flyoutWidth         = settings.flyoutWidth;
 
 		// initialize the menu
 		this._initMenu();
 
 		// check if viewport is resizing
-		$( window ).on( 'resize', $.proxy( function( e ) {
+		$( window ).on( 'resize', $.proxy( function() {
 
 			var width = $( window ).width();
 
@@ -34,37 +36,47 @@
 		    if( width != this.currentBrowserWidth ){
 
 				this.currentBrowserWidth = width;
-				this._initMenu();
- 				this._clickOrHover();
+				this._initMenu( true );
+ 				this._clickOrHover( true );
 			}
 
 			this._resizeFlyoutMenuPanel();
 		}, this ) );
 
-		$( window ).on( 'scroll', $.proxy( function( e ) {
+		$( window ).on( 'scroll', $.proxy( function() {
 			this._resizeFlyoutMenuPanel();
 		}, this ) );
 
-		$( 'body' ).on( 'click', $.proxy( function( e ) {
-			if ( 'undefined' !== typeof FLBuilderConfig ){
+		// Move focus to the first menu item if the layout is set to BelowRow
+		$( this.wrapperClass ).on( 'keydown', '.fl-menu-mobile-toggle, .menu-item:first a:first', $.proxy( function ( event ) {
+			// Make sure it is a tab key with both the menu toggle enabled & below row layout set
+			if ( event.key !== 'Tab' || ! this._isMenuToggle() || ! this._isMobileBelowRowEnabled() ) {
 				return;
 			}
-
-			var activeMobileMenu = $(this.wrapperClass + ' .fl-menu-mobile-toggle.fl-active' );
-			if ( activeMobileMenu.length && ( 'expanded' !== this.mobileToggle ) ){
-				$( activeMobileMenu ).trigger('click');
+			// Trigger focus on the mobile toggle button if the user is shift tabbing from the first menu item
+			if ( event.shiftKey && $( event.target ).is( 'a' ) ) {
+				event.preventDefault();
+				$( this.wrapperClass ).find( '.fl-menu-mobile-toggle' ).trigger( 'focus' );
 			}
-
-			$( this.wrapperClass ).find( '.fl-has-submenu' ).removeClass( 'focus' );
-			$( this.wrapperClass ).find( '.fl-has-submenu .sub-menu' ).removeClass( 'focus' );
-
+			// Trigger focus on the first menu item if the user is tabbing from the mobile toggle button
+			else if ( ! event.shiftKey && $( event.target ).hasClass( 'fl-menu-mobile-toggle' ) && $( event.target ).hasClass( 'fl-active' )  ) {
+				event.preventDefault();
+				$( this.wrapperClass ).find( '.menu-item:first a:first' ).trigger( 'focus' );
+			}
 		}, this ) );
 
-		// Close Mobile menu when tabbing out from the last menu item.
-		$( this.wrapperClass + ' ul.menu > li:last-child' ).on( 'focusout', $.proxy(function (e) {
-			if ( $( this.wrapperClass ).find( '.fl-menu-mobile-toggle' ).hasClass( 'fl-active' ) && ( 'expanded' !== this.mobileToggle ) ) {
-				if ( ! $( e.relatedTarget ).parent().hasClass( 'menu-item' ) ) {
-					$( this.wrapperClass ).find( '.fl-menu-mobile-toggle' ).trigger( 'click' );
+		// Close mobile menu or accordion when tabbing out from the first or last menu item
+		$( this.wrapperClass ).on( 'focusout', $.proxy( function ( event ) {
+			if ( $( this.wrapperClass + ' nav' ).has( $( event.relatedTarget ) ).length === 0 ) {
+				if ( this.type === 'accordion' ) {
+					this._toggleSubmenu( $( event.target ).parents( '.fl-has-submenu:last' ), false );
+				}
+				else {
+					this._clickOrHover( true );
+				}
+				const mobileToggle = $( this.wrapperClass ).find( '.fl-menu-mobile-toggle' );
+				if ( this._isMenuToggle() && mobileToggle.hasClass( 'fl-active' ) && ! $( event.relatedTarget ).is( mobileToggle ) && 'expanded' !== this.mobileToggle ) {
+					mobileToggle.trigger( 'click' );
 				}
 			}
 		}, this ) );
@@ -72,11 +84,11 @@
 	};
 
 	FLBuilderMenu.prototype = {
-		nodeClass               : '',
-		wrapperClass            : '',
-		type 	                : '',
-		breakPoints 			: {},
-		$submenus				: null,
+		nodeClass		: '',
+		wrapperClass: '',
+		type				: '',
+		breakPoints	: {},
+		$submenus		: null,
 
 		/**
 		 * Check if the screen size fits a mobile viewport.
@@ -86,6 +98,16 @@
 		 */
 		_isMobile: function(){
 			return this.currentBrowserWidth <= this.breakPoints.small ? true : false;
+		},
+
+		/**
+		 * Check if the device is connected to a mouse.
+		 * 
+		 * @since  2.9.0
+		 * @return bool
+		 */
+		_isMouseAvailable: function(){
+			return window.matchMedia("(pointer: fine) and (hover: hover)").matches;
 		},
 
 		/**
@@ -109,11 +131,11 @@
 		},
 
 		/**
-		 * Check if the menu should toggle for the current viewport base on the selected breakpoint
+		 * Check if the menu should toggle for the current viewport base on the selected breakpoint.
 		 *
-		 * @see 	this._isMobile()
-		 * @see 	this._isMedium()
-		 * @since  	1.10.5
+		 * @see 	 this._isMobile()
+		 * @see 	 this._isMedium()
+		 * @since  1.10.5
 		 * @return bool
 		 */
 		_isMenuToggle: function(){
@@ -140,11 +162,13 @@
 		 * @since  1.6.1
 		 * @return void
 		 */
-		_initMenu: function(){
+		_initMenu: function( resized = false ){
 			this._setupSubmenu();
-			this._menuOnFocus();
-			this._menuOnEscape();
-			this._submenuOnClick();
+			if ( ! resized ) {
+				this._menuOnFocus();
+				this._menuOnClick();
+				this._menuOnEscape();
+			}
 			if ( $( this.nodeClass ).length && this.type == 'horizontal' ) {
 				this._initMegaMenus();
 			}
@@ -152,11 +176,9 @@
 			if( this._isMenuToggle() || this.type == 'accordion' ){
 
 				$( this.wrapperClass ).off( 'mouseenter mouseleave' );
-				this._menuOnClick();
 				this._clickOrHover();
 
 			} else {
-				$( this.wrapperClass ).off( 'click' );
 				this._submenuOnRight();
 				this._submenuRowZindexFix();
 			}
@@ -175,192 +197,152 @@
 		},
 
 		/**
-		 * Initializes submenu dropdowns.
+		 * Whether the toggle behavior for submenus is through hovering or not.
 		 *
-		 * @since 3.0
+		 * @since  2.5
 		 * @return void
 		 */
 		_setupSubmenu: function() {
-			$( this.wrapperClass + ' ul.sub-menu' ).each( function(){
-				$( this ).closest( 'li' ).find('a').first().attr( 'aria-haspopup', 'true' );
-			});
+			if ( ! this._isMouseAvailable() || this._isMenuToggle() || this.type === 'accordion' ) {
+				$( this.wrapperClass ).addClass( 'no-hover' );
+			}
+			else {
+				$( this.wrapperClass ).removeClass( 'no-hover' );
+			}
 		},
 
 		/**
-		 * Adds a focus class to menu elements similar to be used similar to CSS :hover psuedo event
+		 * Logic for menu items when focused.
 		 *
 		 * @since  1.9.0
 		 * @return void
 		 */
 		_menuOnFocus: function(){
-			var cKey      = 0,
-			    isShifted = false;
-
-			$( this.nodeClass ).off('keydown').on( 'keydown', 'a', function( e ){
-				cKey      = e.which;
-				isShifted = e.shiftKey;
-			});
-
-			$( this.nodeClass ).off('focus').on( 'focus', 'a', $.proxy( function( e ){
-				var $menuItem	= $( e.target ).parents( '.menu-item' ).first(),
-					$parents	= $( e.target ).parentsUntil( this.wrapperClass );
-
-				$('.fl-menu .focus').removeClass('focus');
-
-				$parents.addClass('focus')
-
-				if ( ! $menuItem.closest('.fl-has-submenu').hasClass('escaped') ) {
-					$menuItem.addClass('focus')
+			$( this.wrapperClass ).on( 'focus', 'a, .fl-menu-toggle', $.proxy( function( event ) {
+				const focusedMenuItem = $( event.target ).closest( '.menu-item' );
+				const blurredMenuItem = $( event.relatedTarget ).closest( '.menu-item' );
+				// In case the blurred & focused items are siblings
+				if ( focusedMenuItem.closest( 'ul' ).is( blurredMenuItem.closest( 'ul' ) ) )	{
+					// Check if the focus event is not between the link & submenu icon of the same menu item
+					if ( ! focusedMenuItem.is( blurredMenuItem ) ) {
+						this._toggleSubmenu( blurredMenuItem, false );
+					}
 				}
-				else {
-					$menuItem.closest('.fl-has-submenu').removeClass('focus escaped')
+				// In case neither items are child & parent nor vice versa
+				else if ( focusedMenuItem.has( blurredMenuItem ).length === blurredMenuItem.has( focusedMenuItem ).length ) {
+					// Get the blurred item parent & is the sibling of the focused item
+					blurredMenuItem.parents( '.fl-has-submenu' ).each( ( _, parent ) => {
+						if ( focusedMenuItem.closest( 'ul' ).is( $( parent ).closest( 'ul' ) ) ) {
+							this._toggleSubmenu( $( parent ), false );
+							return false;
+						}
+					} );
 				}
-			}, this ) ).on( 'focusout', 'a', $.proxy( function( e ){
-				var el            = $(e.target).parent(),
-		            $megaMenu     = el.closest( '.mega-menu' ),
-		            $megaLastItem = $megaMenu.find('> .sub-menu > .menu-item:last-child'),
-					$lastItem     = el.parents('.fl-has-submenu:last').find('.menu-item:last'),
-					isLastChild   = ! $megaMenu.length && el.is( $lastItem );
-
-		        if( $megaMenu.length ) {
-					isLastChild = el.is( $megaLastItem ) || el.is( $megaLastItem.find( '.menu-item:last-child' ) );
+				// In case the blurred item is a child of the focused item
+				else if ( focusedMenuItem.has( blurredMenuItem ).length ) {
+					if ( this.type !== 'accordion' && this.submenuIcon === 'none' ) {
+						this._toggleSubmenu( blurredMenuItem, false );
+					}
 				}
-
-				if ( isLastChild && cKey === 9 && isShifted ) {
-					isLastChild = false;
-					cKey       = 0;
-					isShifted  = false;
-				}
-				else if ( cKey === 27 ) {
-					isLastChild = false;
-				}
-
-				if ( isLastChild ) {
-					$( e.target ).parentsUntil( this.wrapperClass ).removeClass( 'focus' );
-				}
-
 			}, this ) );
 		},
 
 		/**
-		 * Logic for submenu items when Escape key is pressed.
+		 * Logic for menu items when Escape key is pressed.
 		 *
 		 * @since  2.7.1
 		 * @return void
 		 */
 		_menuOnEscape: function(){
-			$( 'body' ).off('keydown').on( 'keydown', $.proxy( function( e ){
-				if ( e.which !== 27 ) {
-					return;
-				}
-
-				if ( $( e.target ).closest('.menu-item').length ) {
-					var activeSubmenu = null,
-						menuItem      = $( e.target ).closest('.menu-item'),
-						type          = menuItem.closest('.fl-menu-accordion').length ? 'accordion' : 'horizontal';
-
-					if ( 'horizontal' === type ) {
-						if ( menuItem.hasClass( 'fl-has-submenu' ) && menuItem.hasClass( 'focus' ) ) {
-							activeSubmenu = menuItem.find('> ul.sub-menu');
-						}
-						else {
-							activeSubmenu = menuItem.closest('ul.sub-menu');
-						}
-						activeSubmenu.parent().addClass('escaped');
-						activeSubmenu.parent().find('a:first').focus();
+			$( this.wrapperClass ).on( 'keydown', $.proxy( function( event ){
+				if ( event.key !== 'Escape' ) return;
+				const menuItem = $( event.target ).closest( '.menu-item' );
+				const mobileToggle = $( this.wrapperClass ).find( '.fl-menu-mobile-toggle' );
+				// In case there is a focused menu item
+				if ( menuItem.length || $( event.target ).hasClass( 'fl-menu-mobile-close' ) ) {
+					// Close all the submenus of the focused menu item
+					if ( menuItem.hasClass( 'fl-has-submenu' ) && menuItem.find( '.sub-menu:first' ).is( ':visible' ) ) {
+						this._toggleSubmenu( menuItem, false );
 					}
 					else {
-						if ( menuItem.hasClass( 'fl-has-submenu' ) && 'accordion' === type && menuItem.hasClass( 'fl-active' ) ) {
-							activeSubmenu = menuItem.find('> ul.sub-menu');
+						// Shift focus to the parent while closing all its submenus
+						const parentMenuItem = menuItem.parents( '.fl-has-submenu' ).not( '.mega-menu.hide-heading, .mega-menu-disabled.hide-heading' ).first();
+						// Close the mobile menu if there is no parent menu item and the mobile toggle is active
+						if ( parentMenuItem.length === 0 && this._isMenuToggle() && mobileToggle.hasClass( 'fl-active' ) ) {
+							// Blur to trigger the focus-out event for closing the menu
+							mobileToggle.trigger( 'blur' ).trigger( 'focus' );
 						}
-						else {
-							activeSubmenu = menuItem.closest('ul.sub-menu');
+						// Close the parent submenu and shift focus to its link
+						else if ( parentMenuItem.length !== 0 ) {
+							this._toggleSubmenu( parentMenuItem, false );
+							parentMenuItem.find( 'a:first' ).trigger( 'focus' );
 						}
-
-						activeSubmenu.slideUp(400, function(){
-							if ( menuItem.hasClass( 'fl-has-submenu' ) && menuItem.hasClass( 'fl-active' ) ) {
-								activeSubmenu.parent().last().find('a:first').focus();
-							}
-							else {
-								menuItem.removeClass('focus');
-								menuItem.parents('.menu-item').first().find('a:first').focus();
-							}
-							activeSubmenu.parent().last().removeClass( 'fl-active' );
-						});
-
 					}
 				}
-				else {
-					$('.fl-menu').find( 'li.menu-item.focus' ).last().removeClass('focus');
+				// Close the mobile menu if the mobile toggle is active
+				else if ( $( event.target ).hasClass( 'fl-menu-mobile-toggle' ) && mobileToggle.hasClass( 'fl-active' ) ) {
+					// Blur to trigger the focus-out event for closing the menu
+					mobileToggle.trigger( 'blur' ).trigger( 'focus' );
 				}
 			}, this ) );
 		},
 
 		/**
-		 * Logic for submenu toggling on accordions or mobile menus (vertical, horizontal)
+		 * Logic for menu items when clicked.
 		 *
 		 * @since  1.6.1
 		 * @return void
 		 */
 		_menuOnClick: function(){
-			$( this.wrapperClass ).off().on( 'click', '.fl-has-submenu-container', $.proxy( function( e ){
-
-				var $link			= $( e.target ).parents( '.fl-has-submenu' ).first(),
-					$subMenu 		= $link.children( '.sub-menu' ).first(),
-					$href	 		= $link.children('.fl-has-submenu-container').first().find('> a').attr('href') || false,
-					$subMenuParents = $( e.target ).parents( '.sub-menu' ),
-					$activeParents 	= $( e.target ).parents( '.fl-has-submenu.fl-active' );
-				if(
-					( ! $subMenu.is(':visible') && 'none' === this.submenuIcon )
-					|| $(e.target).hasClass('fl-menu-toggle')
-					|| ($subMenu.is(':visible') && (typeof $href === 'undefined'|| $href == '#'))
-					|| ( ! $href || '#' === $href )
-				){
-					e.preventDefault();
-				} else {
-						e.stopPropagation();
-						window.location.href = $href;
-						return false;
+			// Fallback for span elements with role="button" to be clickable
+			$( this.wrapperClass ).on( 'keydown', 'span.fl-menu-toggle', $.proxy( function( event ) {
+				if ( event.key === 'Enter' || event.key === ' ' ) {
+					event.preventDefault();
+					$( event.target ).trigger( 'click' );
 				}
-
-				if ($(this.wrapperClass).hasClass('fl-menu-accordion-collapse')) {
-
-					if ( !$link.parents('.menu-item').hasClass('fl-active') ) {
-						$('.menu .fl-active', this.wrapperClass).not($link).removeClass('fl-active');
-					}
-					else if ($link.parents('.menu-item').hasClass('fl-active') && $link.parent('.sub-menu').length) {
-						$('.menu .fl-active', this.wrapperClass).not($link).not($activeParents).removeClass('fl-active');
-					}
-
-					$('.sub-menu', this.wrapperClass).not($subMenu).not($subMenuParents).slideUp('normal');
-				}
-
-				if ( ! this.mobileStacked && 'horizontal' == this.type && 'expanded' == this.mobileToggle ) {
-					$( this.wrapperClass ).find( '.fl-active' ).not($link).not($activeParents).removeClass( 'fl-active' );
-				}
-				else {
-					$subMenu.slideToggle();
-				}
-
-				$link.toggleClass( 'fl-active' );
-				e.stopPropagation();
-
 			}, this ) );
-
+			$( this.wrapperClass ).on( 'click', 'a, .fl-menu-toggle', $.proxy( function( event ) {
+				event.stopPropagation();
+				// Only allow mouse clicks with accordion & mobile menus
+				if ( this._isMouseAvailable() && ! this._isMenuToggle() && event.detail && this.type !== 'accordion' ) return;
+				// Links only open & do not toggle submenus if there is either a submenu icon or an accordion layout
+				if ( $( event.target ).is( 'a' ) && ( this.submenuIcon !== 'none' || this.type === 'accordion' ) ) return;
+				const menuItem = $( event.target ).closest( '.menu-item' );
+				const menuLink = menuItem.find( 'a:first' ).attr( 'href' );
+				const submenuHidden = menuItem.find( '.sub-menu:first' ).is( ':hidden' );
+				if ( typeof menuLink === 'undefined' || menuLink === '#' || submenuHidden ) {
+					event.preventDefault();
+				}
+				if ( $( event.target ).hasClass( 'fl-menu-toggle' ) || submenuHidden ) {
+					this._toggleSubmenu( menuItem, submenuHidden );
+				}
+			}, this ) );
 		},
 
 		/**
-		 * Logic for submenu items click event
+		 * Controls toggling the visibility of all submenu items for desktop & mobile.
 		 *
-		 * @since  1.10.6
+		 * @since  2.10
 		 * @return void
 		 */
-		_submenuOnClick: function(){
-			$( this.wrapperClass + ' .sub-menu' ).off().on( 'click', 'a', $.proxy( function( e ){
-				if ( $( e.target ).parent().hasClass('focus') ) {
-					$( e.target ).parentsUntil( this.wrapperClass ).removeClass('focus');
+		_toggleSubmenu: function ( menuItem, opened ) {
+			const togglingClass = this._isMenuToggle() || this.type === 'accordion' ? 'fl-active' : 'focus';
+			const toggleElement = this.submenuIcon === 'none' ? 'a' : '.fl-menu-toggle';
+			const hiddenMenu = '.mega-menu.hide-heading, .mega-menu-disabled.hide-heading';
+			if ( opened && menuItem.hasClass( 'fl-has-submenu' ) && ! menuItem.is( hiddenMenu ) ) {
+				menuItem.addClass( togglingClass );
+				menuItem.find( toggleElement ).first().attr( 'aria-expanded', true );
+				if ( this._isMenuToggle() || this.type === 'accordion' ) {
+					menuItem.find( '.sub-menu:first:hidden' ).slideDown();
 				}
-			}, this ) );
+			}
+			else {
+				menuItem.parent().find( '.menu-item' ).removeClass( togglingClass );
+				menuItem.parent().find( '.fl-has-submenu' ).not( hiddenMenu ).find( toggleElement ).attr( 'aria-expanded', false );
+				if ( this._isMenuToggle() || this.type === 'accordion' ) {
+					menuItem.find( '.sub-menu:visible' ).slideUp();
+				}
+			}
 		},
 
 		/**
@@ -370,28 +352,27 @@
 		 * @since  1.6.1
 		 * @return void
 		 */
-		_clickOrHover: function(){
-			this.$submenus = this.$submenus || $( this.wrapperClass ).find( '.sub-menu' );
-			var $wrapper   = $( this.wrapperClass ),
-				$menu      = $wrapper.find( '.menu' );
-				$li        = $wrapper.find( '.fl-has-submenu' );
+		_clickOrHover: function( clear = false ){
+			const selector = this._isMobileBelowRowEnabled() ? this.nodeClass + '-clone' : this.nodeClass;
+			this.$submenus = this.$submenus || $( selector ).find( '.sub-menu' );
 
-			if( this._isMenuToggle() ){
-				$li.each( function( el ){
-					if( !$(this).hasClass('fl-active') ){
-						$(this).find( '.sub-menu' ).fadeOut();
-					}
-				} );
-			} else {
-				$li.each( function( el ){
-					if( !$(this).hasClass('fl-active') ){
-						$(this).find( '.sub-menu' ).css( {
+			const className = this._isMenuToggle() || this.type === 'accordion' ? 'fl-active' : 'focus';
+			const toggleElement = this.submenuIcon === 'none' ? 'a' : '.fl-menu-toggle';
+			const hiddenMenu = '.mega-menu.hide-heading, .mega-menu-disabled.hide-heading';
+			$( selector ).find( '.fl-has-submenu' ).not( hiddenMenu ).each( function() {
+				if( clear || ! $ ( this ).hasClass( className ) ){
+					if ( clear ) $( this ).removeClass( className );
+					$( this ).find( toggleElement + ':first' ).attr( 'aria-expanded', false );
+					if ( className === 'fl-active' ) {
+						$( this ).find( '.sub-menu' ).fadeOut();
+					} else if ( className === 'focus' ) {
+						$( this ).find( '.sub-menu' ).css( {
 							'display' : '',
 							'opacity' : ''
 						} );
 					}
-				} );
-			}
+				}
+			} );
 		},
 
 		/**
@@ -453,7 +434,7 @@
 		 * @since  1.10.9
 		 * @return void
 		 */
-		_submenuRowZindexFix: function( e ){
+		_submenuRowZindexFix: function(){
 
 			$( this.wrapperClass )
 				.on( 'mouseenter', 'ul.menu > .fl-has-submenu', $.proxy( function( e ){
@@ -468,7 +449,7 @@
 						.css( 'z-index', '10' );
 
 				}, this ) )
-				.on( 'mouseleave', 'ul.menu > .fl-has-submenu', $.proxy( function( e ){
+				.on( 'mouseleave', 'ul.menu > .fl-has-submenu', $.proxy( function(){
 
 					$( this.nodeClass )
 						.closest( '.fl-row' )
@@ -489,6 +470,9 @@
 			var $wrapper = null,
 				$menu    = null,
 				self     = this;
+
+			$( this.wrapperClass ).find( 'ul.menu' ).attr( 'role', 'menu');
+			$( this.wrapperClass ).find( '.fl-menu-mobile-toggle' ).attr('aria-controls', $( this.wrapperClass ).find( 'ul.menu' ).attr('id'));
 
 			if( this._isMenuToggle() ){
 
@@ -513,18 +497,28 @@
 				}
 
 				$wrapper.on( 'click', '.fl-menu-mobile-toggle', function( e ){
+					e.stopImmediatePropagation();
 
 					$( this ).toggleClass( 'fl-active' );
 
 					if ( self.mobileFlyout ) {
 						self._toggleFlyoutMenu();
+						const flyoutWrapper = $( '.fl-menu-mobile-flyout' );
+						if ( $( this ).hasClass( 'fl-active' ) ) {
+							flyoutWrapper.attr( 'aria-hidden', false );
+							flyoutWrapper.find( 'a[href], button, input, select, textarea, span.fl-menu-toggle, [tabindex="-1"]' ).attr( 'tabindex', 0 );
+						}
+						else {
+							flyoutWrapper.attr( 'aria-hidden', true );
+							flyoutWrapper.find( 'a[href], button, input, select, textarea, span.fl-menu-toggle, [tabindex]:not([tabindex="-1"])' ).attr( 'tabindex', -1 );
+						}
 					}
 					else {
 						var targetMenu = null;
 
 						if ( self.mobileBelowRow ) {
 							var $closestCol = $( this ).parents( '.fl-col, .fl-module-box' ),
-								$closestColGroup = $closestCol.length ? $closestCol.parent( '.fl-col-group' ) : null,
+								$closestColGroup = $closestCol.length ? $closestCol.parent( '.fl-col-group' ) : null;
 								targetMenu  = $closestCol.length ? $closestCol.last().next( '.fl-menu-mobile-clone' ) : null;
 
 							if ( $closestColGroup.length ) {
@@ -537,7 +531,7 @@
 						} else {
 							targetMenu = $( this ).closest( '.fl-menu' ).find( 'ul.menu' );
 						}
-
+						
 						if ( targetMenu.length ) {
 							$menu = $( targetMenu );
 						}
@@ -548,8 +542,8 @@
 					e.stopPropagation();
 				} );
 
-				// Hide active menu when click on anchor link ID that exists on a page.
-				$menu.off().on( 'click', '.menu-item > a[href*="#"]:not([href="#"])', function(e){
+				// Hide active menu when click on anchor link ID that exists on a page
+				$menu.off().on( 'click', '.menu-item > a[href*="#"]:not([href="#"])', function(){
 					var $href = $(this).attr('href'),
 						$targetID = $href.split('#')[1],
 						element = $('#' + $targetID);
@@ -590,8 +584,8 @@
 		/**
 		 * Init any mega menus that exist.
 		 *
-		 * @see 	this._isMenuToggle()
-		 * @since  	1.10.4
+		 * @see 	 this._isMenuToggle()
+		 * @since  1.10.4
 		 * @return void
 		 */
 		_initMegaMenus: function(){
@@ -617,7 +611,7 @@
 		/**
 		 * Check to see if Below Row should be enabled.
 		 *
-		 * @since  	1.11
+		 * @since  1.11
 		 * @return boolean
 		 */
 		_isMobileBelowRowEnabled: function() {
@@ -652,12 +646,14 @@
 			clone.find( '.fl-menu-mobile-toggle' ).remove();
 			col.after( clone );
 
-			// Removes animation when enabled.
+			// Removes animation when enabled
 			if ( module.hasClass( 'fl-animation' ) ) {
 				clone.removeClass( 'fl-animation' );
 			}
 
+			this._menuOnFocus();
 			this._menuOnClick();
+			this._menuOnEscape();
 		},
 
 		/**
@@ -685,23 +681,21 @@
 		/**
 		 * Logic for Flyout responsive menu.
 		 *
-		 * @since 2.2
+		 * @since  2.2
 		 * @return void
 		 */
 		_initFlyoutMenu: function(){
-			var win     = $( window ),
-				wrapper = $( this.wrapperClass ),
+			var wrapper = $( this.wrapperClass ),
 				menu  	= wrapper.find( 'ul.menu' ),
 				button	= wrapper.find( '.fl-menu-mobile-toggle' );
 
 			if ( 0 === wrapper.find( '.fl-menu-mobile-flyout' ).length ) {
-				menu.wrap( '<div class="fl-menu-mobile-flyout"></div>' );
+				menu.wrap( '<div class="fl-menu-mobile-flyout" aria-hidden="true"></div>' );
 			}
 
 			if ( 0 === wrapper.find( '.fl-menu-mobile-close' ).length ) {
-				close = window.fl_responsive_close || 'Close'
-				wrapper.find( '.fl-menu-mobile-flyout' )
-					.prepend( '<button class="fl-menu-mobile-close" aria-label="' + close + '"><i class="fas fa-times" aria-hidden="true"></i></button>' );
+				var close = window.fl_responsive_close || 'Close'
+				wrapper.find( '.fl-menu-mobile-flyout' ).prepend( '<button class="fl-menu-mobile-close fl-content-ui-button" aria-label="' + close + '"><i class="fas fa-times"></i></button>' );
 			}
 
 			// Push with opacity
@@ -709,8 +703,8 @@
 				wrapper.append( '<div class="fl-menu-mobile-opacity"></div>' );
 			}
 
-			wrapper.on( 'click', '.fl-menu-mobile-opacity, .fl-menu-mobile-close', function(e){
-				button.trigger( 'click' );
+			wrapper.off( 'click', '.fl-menu-mobile-opacity, .fl-menu-mobile-close' ).on( 'click', '.fl-menu-mobile-opacity, .fl-menu-mobile-close', function(e){
+				button.trigger('focus').trigger( 'click' );
 				e.stopPropagation();
 			});
 
@@ -718,54 +712,48 @@
 				FLBuilder.addHook('restartEditingSession', function(){
 					$( '.fl-builder-ui-pinned-content-transform' ).css( 'transform', '' );
 
-					// Toggle active menu.
+					// Toggle active menu
 					if ( button.hasClass( 'fl-active' ) ) {
 						button.trigger( 'click' );
 					}
 				});
 			}
+			$( '.fl-menu-mobile-flyout' ).find( 'a[href], button, input, select, textarea, span.fl-menu-toggle, [tabindex]:not([tabindex="-1"])' ).attr( 'tabindex', -1 );
 		},
 
 		/**
 		 * Logic to enable/disable the Flyout menu on button click.
 		 *
-		 * @since 2.2
+		 * @since  2.2
 		 * @return void
 		 */
 		_toggleFlyoutMenu: function(){
 			var wrapper		= $( this.wrapperClass ),
 				button		= wrapper.find( '.fl-menu-mobile-toggle' ),
-				wrapFlyout	= wrapper.find( '.fl-menu-mobile-flyout' ),
 				position 	= wrapper.hasClass( 'fl-flyout-right' ) ? 'right' : 'left',
 				pushMenu 	= wrapper.hasClass( 'fl-menu-responsive-flyout-push' ) || wrapper.hasClass( 'fl-menu-responsive-flyout-push-opacity' ),
 				opacity		= wrapper.find( '.fl-menu-mobile-opacity' ),
 				marginPos	= {},
-				posAttr		= {},
 				fixedPos 	= {},
-				winHeight	= $(window).height(),
 				fixedHeader	= $('header, header > div');
 
 			this._resizeFlyoutMenuPanel();
 
-			// Fix the push menu when builder ui panel is pinned.
+			// Fix the push menu when builder ui panel is pinned
 			if ( $( '.fl-builder-ui-pinned-content-transform' ).length > 0 && ! $( 'body' ).hasClass( 'fl-builder-edit' ) ) {
 				$( '.fl-builder-ui-pinned-content-transform' ).css( 'transform', 'none' );
 			}
 
 			if ( pushMenu ) {
-				marginPos[ 'margin-' + position ] = button.hasClass( 'fl-active' ) ? '250px' : '0px';
+				marginPos[ 'margin-' + position ] = button.hasClass( 'fl-active' ) ? this.flyoutWidth + 'px' : '0px';
 				$( 'body' ).animate( marginPos, 200);
 
 				// Fixed header
 				if ( fixedHeader.length > 0 ) {
-					fixedPos[ position] = button.hasClass( 'fl-active' ) ? '250px' : '0px';
+					fixedPos[ position] = button.hasClass( 'fl-active' ) ? this.flyoutWidth + 'px' : '0px';
 					fixedHeader.each(function(){
 						if ( 'fixed' == $( this ).css( 'position' ) ) {
-							$( this ).css({
-								'-webkit-transition': 'none',
-								'-o-transition'		: 'none',
-								'transition'		: 'none'
-							});
+							$( this ).css({ 'transition' : 'none' });
 							$( this ).animate( fixedPos, 200 );
 						}
 					});
@@ -782,14 +770,14 @@
 
 		/**
 		 * Resize or reposition the Flyout Menu Panel.
-		 *
-		 * @since 2.8.1
-		 * @returns void
+		 * 
+		 * @since  2.8.1
+		 * @return void
 		 */
 		_resizeFlyoutMenuPanel: function(){
 			const wrapper    = $( this.wrapperClass );
 			const wrapFlyout = wrapper.find( '.fl-menu-mobile-flyout' );
-
+				
 			if ( wrapFlyout.length > 0 ) {
 				wrapFlyout.css( this._getFlyoutMenuPanelPosition() );
 			}
@@ -797,21 +785,20 @@
 
 		/**
 		 * Compute the Flyout Menu Panel's position on the screen.
-		 *
-		 * @since 2.8.1
-		 * @returns object
+		 * 
+		 * @since  2.8.1
+		 * @return object
 		 */
 		_getFlyoutMenuPanelPosition: function() {
 			var wrapper        = $( this.wrapperClass ),
 				button         = wrapper.find( '.fl-menu-mobile-toggle' ),
-				wrapFlyout     = wrapper.find( '.fl-menu-mobile-flyout' ),
 				side           = wrapper.hasClass( 'fl-flyout-right' ) ? 'right' : 'left',
 				winHeight      = $(window).outerHeight(),
 				winTop         = $(window).scrollTop(),
 				adminBarHeight = $( '#wpadminbar' ).length ? $( '#wpadminbar' ).height() : 0,
 				flyoutPosition = {};
 
-			flyoutPosition[ side ]  = '-267px';
+			flyoutPosition[ side ]  = '-' + ( parseInt( this.flyoutWidth ) + 15 ) + 'px';
 			if ( ! button.hasClass( 'fl-active' ) ) {
 				return flyoutPosition;
 			}
@@ -819,7 +806,7 @@
 			flyoutPosition[ side ]  = '0px';
 			flyoutPosition[ 'height' ]  = winHeight + 'px';
 			flyoutPosition[ 'top' ] = '0px';
-
+			
 			if ( adminBarHeight > 0 ) {
 				const diff = adminBarHeight - winTop;
 				flyoutPosition[ 'top' ] = diff <= 0 ? '0px' : (diff) + 'px';
@@ -831,15 +818,17 @@
 		/**
 		 * Shows or hides the nav search form.
 		 *
-		 * @since 2.5
+		 * @since  2.5
 		 * @method _toggleMenuSearch
 		 */
 		_toggleMenuSearch: function(){
 			var wrapper = $( this.wrapperClass ).find('.fl-menu-search-item'),
-				button  = wrapper.find('a.fl-button'),
+				button  = wrapper.find('.fl-button:is(a, button)'),
 				form    = wrapper.find('.fl-search-form-input-wrap'),
 				self    = this;
 
+			button.attr( 'tabindex', 0 );
+			button.attr( 'aria-label', 'Search' );
 			button.on('click', function(e){
 				e.preventDefault();
 
@@ -857,7 +846,7 @@
 		/**
 		 * Hides the nav search form.
 		 *
-		 * @since 2.5
+		 * @since  2.5
 		 * @method _hideMenuSearch
 		 */
 		_hideMenuSearch: function(e){
@@ -876,7 +865,7 @@
 		/**
 		 * Adds menu node and post ID to WooCommerce ajax URL requests.
 		 *
-		 * @since  3.0
+		 * @since  2.5
 		 * @return void
 		 */
 		_wooUpdateParams: function() {

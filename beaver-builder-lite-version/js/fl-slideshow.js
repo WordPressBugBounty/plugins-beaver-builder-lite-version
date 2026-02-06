@@ -178,10 +178,16 @@ Y.namespace('FL').SlideshowCaption = Y.Base.create('fl-slideshow-caption', Y.Wid
 	renderUI: function()
 	{
         var root = this.get('root'),
-		    bb   = this.get('boundingBox');
+		    bb   = this.get('boundingBox'),
+				fallback = this.get('root').get('fallback');
 
-		this._textToggleLink = Y.Node.create('<a href="javascript:void(0);"></a>');
-		this._textToggleLink.addClass('fl-slideshow-caption-toggle');
+		if(fallback) {
+			this._textToggleLink = Y.Node.create('<a role="button" tabindex="0"></a>');
+		}
+		else {
+			this._textToggleLink = Y.Node.create('<button type="button"></button>');
+		}
+		this._textToggleLink.addClass('fl-slideshow-caption-toggle' + (!fallback ? ' fl-content-ui-button' : ''));
 		this._textToggleLink.set('innerHTML', root.get('captionMoreLinkText'));
 
 		bb.appendChild(this._textToggleLink);
@@ -2453,9 +2459,15 @@ Y.namespace('FL').SlideshowImage = Y.Base.create('fl-slideshow-image', Y.Widget,
 	_insertVideoButton: function()
 	{
 		var bb 		= this.get('boundingBox'),
-			event 	= 'ontouchstart' in window ? 'touchstart' : 'click';
+			event 	= 'ontouchstart' in window ? 'touchstart' : 'click',
+			fallback = this.get('root').get('fallback');
 
-		this._videoButton = Y.Node.create('<a class="fl-slideshow-video-button" href="javascript:void(0);"></a>');
+		if(fallback) {
+			this._videoButton = Y.Node.create('<a class="fl-slideshow-video-button" role="button" aria-label="insert video" tabindex="0"></a>');
+		}
+		else {
+			this._videoButton = Y.Node.create('<button class="fl-slideshow-video-button fl-content-ui-button" type="button" aria-label="insert video"></button>');
+		}
 		this._videoButton.on(event, Y.bind(this._showVideoBox, this));
 		bb.insert(this._videoButton);
 		this._positionVideoButton();
@@ -2485,9 +2497,13 @@ Y.namespace('FL').SlideshowImage = Y.Base.create('fl-slideshow-image', Y.Widget,
 	_showVideoBox: function()
 	{
 		var root 	= this.get('root'),
-			wrap 	= Y.Node.create('<div class="fl-slideshow-video-wrap"></div>'),
-			close 	= Y.Node.create('<a class="fl-slideshow-video-close" href="javascript:void(0);"></a>'),
-			event 	= 'ontouchstart' in window ? 'touchstart' : 'click';
+			fallback = root.get('fallback'),
+			wrap 	  = Y.Node.create('<div class="fl-slideshow-video-wrap"></div>'),
+			event 	= 'ontouchstart' in window ? 'touchstart' : 'click',
+			tag 		= fallback ? 'a' : 'button',
+			attrs		= fallback ? 'role="button"' : 'type="button"',
+			classes = fallback ? 'class="fl-slideshow-video-close"' : 'class="fl-slideshow-video-close fl-content-ui-button"',
+			close 	= Y.Node.create('<' + [tag, attrs, classes].join(' ') + '></' + tag + '>');
 
 		this._videoBox = Y.Node.create('<div class="fl-slideshow-video"></div>');
 		this._videoBox.setStyle('padding', root.get('boundingBox').getStyle('padding'));
@@ -3296,6 +3312,9 @@ Y.namespace('FL').SlideshowNav = Y.Base.create('fl-slideshow-nav', Y.Widget, [Y.
 	_renderButtons: function()
 	{
 		var name 		= '',
+			fallback 	= this.get('root').get('fallback'),
+			tag 		= fallback ? 'a' : 'button',
+			attrs 	= fallback ? 'role="button" tabindex="0"' : 'type="button"',
 			i 			= 0,
 			k			= 0,
 			b = [
@@ -3325,7 +3344,7 @@ Y.namespace('FL').SlideshowNav = Y.Base.create('fl-slideshow-nav', Y.Widget, [Y.
 					this._updateCount();
 				}
 				else {
-					this._buttons[name] = Y.Node.create('<a href="javascript:void(0);"></a>');
+					this._buttons[name] = Y.Node.create('<' + tag + ' ' + attrs + '></' + tag + '>');
 				}
 
 				if(name.indexOf('buy') > -1) {
@@ -3334,7 +3353,7 @@ Y.namespace('FL').SlideshowNav = Y.Base.create('fl-slideshow-nav', Y.Widget, [Y.
 
 				this._buttons[name].set('name', name);
 				this._buttons[name].set('aria-label', name);
-				this._buttons[name].addClass('fl-slideshow-nav-' + name);
+				this._buttons[name].addClass('fl-slideshow-nav-' + name + (!fallback ? ' fl-content-ui-button' : ''));
 				b[i].container.appendChild(this._buttons[name]);
 			}
 		}
@@ -3764,9 +3783,15 @@ Y.namespace('FL').SlideshowOverlay = Y.Base.create('fl-slideshow-overlay', Y.Plu
 	_initCloseButton: function()
 	{
 		var bb 			= this.get('host').get('boundingBox'),
+			fallback 	= this.get('host').get('root').get('fallback'),
 			closeButton = null;
 
-		closeButton = Y.Node.create('<a class="fl-slideshow-overlay-close" href="javascript:void(0);"></a>');
+		if(fallback) {
+			closeButton = Y.Node.create('<a class="fl-slideshow-overlay-close" role="button" aria-label="close overlay" tabindex="0"></a>');
+		}
+		else {
+			closeButton = Y.Node.create('<button class="fl-slideshow-overlay-close fl-content-ui-button" type="button" aria-label="close overlay"></button>');
+		}
 		closeButton.on('click', Y.bind(this._closeButtonClick, this));
 
 		if(typeof YUI.Env.mods['sm-fonticon'] !== 'undefined') {
@@ -8940,7 +8965,18 @@ Y.namespace('FL').Slideshow = Y.Base.create('fl-slideshow', Y.FL.SlideshowBase, 
 		 */
 		touchSupport: {
 			value: true
-		}
+		},
+
+		/**
+		 * Whether to fallback to link tags or use button tags.
+		 *
+		 * @attribute fallback
+		 * @type Boolean
+		 * @default false
+		 */
+		fallback: {
+			value: false
+		},
 	}
 });
 

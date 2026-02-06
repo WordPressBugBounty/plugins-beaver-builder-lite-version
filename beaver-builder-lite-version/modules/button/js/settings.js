@@ -35,11 +35,11 @@
 			}
 		},
 
-		_previewCustomWidth: function( e ) {
+		_previewCustomWidth: function() {
 			var preview	        = FLBuilder.preview,
-				selector        = preview.classes.node + ' a.fl-button',
+				selector        = preview.classes.node + ' .fl-button:is(a, button)',
 				form            = $( '.fl-builder-settings:visible' ),
-				width           = form.find( 'select[name=width]' ).val()
+				width           = form.find( 'select[name=width]' ).val(),
 				customWidth     = form.find( 'input[name=custom_width]' ).val(),
 				customWidthUnit = form.find( 'select[name=custom_width_unit]' ).val();
 
@@ -50,7 +50,7 @@
 
 		_previewBackground: function( e ) {
 			var preview	= FLBuilder.preview,
-				selector = preview.classes.node + ' a.fl-button, ' + preview.classes.node + ' a.fl-button:visited',
+				selector = preview.classes.node + ' .fl-button:is(a, button), ' + preview.classes.node + ' a.fl-button:visited',
 				form = $( '.fl-builder-settings:visible' ),
 				style = form.find( 'select[name=style]' ).val(),
 				bgColor = form.find( 'input[name=bg_color]' ).val();
@@ -69,7 +69,7 @@
 		_previewIcon: function() {
 			var node = FLBuilder.preview.elements.node,
 				wrap = node.find( '.fl-button-wrap' ).addBack( '.fl-button-wrap' ), // Use addBack for compat with v1 button
-				link = node.find( 'a.fl-button' ),
+				link = node.find( '.fl-button:is(a, button)' ),
 				form = $( '.fl-builder-settings:visible' ),
 				text = form.find( 'input[name=text]' ).val(),
 				icon = form.find( 'input[name=icon]' ).val(),
