@@ -68,6 +68,7 @@ final class FLBuilderCompatibility {
 		add_action( 'um_profile_header', array( __CLASS__, 'um_prevent_shortcode_parse' ) );
 		add_action( 'um_after_header_meta', array( __CLASS__, 'um_restore_shortcode_parse' ) );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'fix_wpd_plugins' ), 11 );
+		add_action( 'wp_head', array( __CLASS__, 'fix_cookiebot' ), -9999 );
 
 		// Filters
 		add_filter( 'fl_builder_is_post_editable', array( __CLASS__, 'bp_pages_support' ), 11, 2 );
@@ -84,7 +85,6 @@ final class FLBuilderCompatibility {
 		add_filter( 'enlighter_startup', array( __CLASS__, 'enlighter_frontend_editing' ) );
 		add_filter( 'option_sumome_site_id', array( __CLASS__, 'fix_sumo' ) );
 		add_filter( 'fl_builder_admin_edit_sort_blocklist', array( __CLASS__, 'admin_edit_sort_blocklist_edd' ) );
-		add_filter( 'option_cookiebot-nooutput', array( __CLASS__, 'fix_cookiebot' ) );
 		add_filter( 'fl_select2_enabled', array( __CLASS__, 'fix_memberium' ) );
 		add_filter( 'option_wp-smush-lazy_load', array( __CLASS__, 'fix_smush' ) );
 		add_filter( 'fl_row_bg_video_wrapper_class', array( __CLASS__, 'fix_twenty_twenty_video' ) );
@@ -110,6 +110,7 @@ final class FLBuilderCompatibility {
 		add_filter( 'fl_builder_is_post_editable', array( __CLASS__, 'fix_theme_my_login' ) );
 		add_filter( 'fl_is_tour_enabled', array( __CLASS__, 'fix_classicpress_v2_ad_js' ) );
 		add_filter( 'attachment_fields_to_edit', array( __CLASS__, 'attachment_fields_to_edit' ), 10, 2 );
+		add_filter( 'wpforms_forms_anti_spam_v3_is_honeypot_enabled', array( __CLASS__, 'wp_forms_spam_field' ), 10, 2 );
 	}
 
 	/**
@@ -164,11 +165,10 @@ final class FLBuilderCompatibility {
 	 * Fix cookiebot plugin
 	 * @since 2.2.6
 	 */
-	public static function fix_cookiebot( $arg ) {
+	public static function fix_cookiebot() {
 		if ( isset( $_GET['fl_builder'] ) ) {
-			return true;
+			define( 'COOKIEBOT_DISABLE_ON_PAGE', true );
 		}
-		return $arg;
 	}
 
 	/**
@@ -1458,6 +1458,16 @@ final class FLBuilderCompatibility {
 			include_once ABSPATH . 'wp-admin/includes/screen.php';
 		}
 		return $form_fields;
+	}
+
+	/**
+	 * @since 2.10.1
+	 */
+	public static function wp_forms_spam_field( $enabled ) {
+		if ( isset( $_GET['fl_builder'] ) ) {
+			return false;
+		}
+		return $enabled;
 	}
 }
 FLBuilderCompatibility::init();

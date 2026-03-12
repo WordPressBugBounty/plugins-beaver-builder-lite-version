@@ -349,6 +349,10 @@ class FLPhotoModule extends FLBuilderModule {
 		$photo   = $this->get_data();
 		$caption = '';
 
+		if ( ! empty( $this->settings->show_caption ) && ! empty( $this->settings->caption ) ) {
+			return esc_html( $this->settings->caption );
+		}
+
 		if ( $photo && ! empty( $this->settings->show_caption ) && ! empty( $photo->caption ) ) {
 			if ( ! empty( $photo->data_source ) && 'smugmug' === $photo->data_source ) {
 				$caption = esc_html( $photo->caption );

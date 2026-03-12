@@ -11,6 +11,14 @@ class FLVideoModule extends FLBuilderModule {
 	public $data = null;
 
 	/**
+	 * Tracks the number of autoplay video instances on the page.
+	 *
+	 * @since 2.10.1
+	 * @var int
+	 */
+	static private $autoplay_count = 0;
+
+	/**
 	 * @method __construct
 	 */
 	public function __construct() {
@@ -341,6 +349,37 @@ class FLVideoModule extends FLBuilderModule {
 			$this->add_js( 'jquery-magnificpopup' );
 			$this->add_css( 'jquery-magnificpopup' );
 		}
+
+		if ( $this->settings && ! empty( $this->settings->autoplay ) && 'media_library' === $this->settings->video_type ) {
+			self::$autoplay_count++;
+			if ( self::$autoplay_count > 1 ) {
+				self::disable_pause_other_players();
+			}
+		}
+	}
+
+	/**
+	 * Sets pauseOtherPlayers to false in the global mediaelement settings
+	 * when multiple autoplay videos are on the page. This prevents a race
+	 * condition where wp-mediaelement initializes players before our
+	 * frontend.js fix can run, leaving pauseOtherPlayers at its default
+	 * (true) which causes simultaneous autoplay videos to pause each other.
+	 *
+	 * @since 2.10.1
+	 * @return void
+	 */
+	static private function disable_pause_other_players() {
+		static $added = false;
+		if ( $added ) {
+			return;
+		}
+		$added = true;
+
+		wp_add_inline_script(
+			'wp-mediaelement',
+			'if(typeof _wpmejsSettings!=="undefined"){_wpmejsSettings.pauseOtherPlayers=false;}',
+			'after'
+		);
 	}
 }
 

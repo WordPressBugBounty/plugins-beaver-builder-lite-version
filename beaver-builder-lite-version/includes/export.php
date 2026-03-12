@@ -54,7 +54,7 @@ function fl_export_wp( $post_ids = array() ) {
 	 * @return string
 	 */
 	function wxr_cdata( $str ) {
-		if ( ! seems_utf8( $str ) ) {
+		if ( ! ( function_exists( 'wp_is_valid_utf8' ) ? wp_is_valid_utf8( $str ) : seems_utf8( $str ) ) ) {
 			$str = utf8_encode( $str );
 		}
 		// $str = ent2ncr(esc_html($str));

@@ -277,8 +277,8 @@
 			var body = $( 'body' ),
 				ua   = navigator.userAgent;
 
-			// Add the builder body class.
-			if ( ! body.hasClass( 'archive' ) && $( '.fl-builder-content-primary' ).length > 0 ) {
+			// Add the builder body class (skip on block-only frontend to avoid layout break).
+			if ( ! body.hasClass( 'fl-builder-blocks-only' ) && ! body.hasClass( 'archive' ) && $( '.fl-builder-content-primary' ).length > 0 ) {
 				body.addClass('fl-builder');
 			}
 
@@ -1128,7 +1128,7 @@
 		 */
 		_initAnchorLinks: function()
 		{
-			$( 'a' ).each( FLBuilderLayout._initAnchorLink );
+			$( 'a, [role="link"]' ).each( FLBuilderLayout._initAnchorLink );
 		},
 
 		/**
@@ -1141,7 +1141,8 @@
 		_initAnchorLink: function()
 		{
 			var link    = $( this ),
-				href    = link.attr( 'href' ),
+				href    = link.data( 'url' ) ? link.data( 'url' ) : link.attr( 'href' ),
+				target  = link.data( 'url' ) ? new URL( href, window.location.href ) : this,
 				loc     = window.location,
 				id      = null,
 				element = null,
@@ -1149,7 +1150,7 @@
 
 			if ( 'undefined' != typeof href && href.indexOf( '#' ) > -1 && link.closest('svg').length < 1 ) {
 
-				if ( loc.pathname.replace( /^\//, '' ) == this.pathname.replace( /^\//, '' ) && loc.hostname == this.hostname ) {
+				if ( loc.pathname.replace( /^\//, '' ) == target.pathname.replace( /^\//, '' ) && loc.hostname == target.hostname ) {
 
 					try {
 
@@ -1190,7 +1191,8 @@
 		 */
 		_scrollToElementOnLinkClick: function( e, callback )
 		{
-			var element = $( '#' + $( this ).attr( 'href' ).split( '#' ).pop() );
+			var attribute = $( this ).data( 'url' ) ? $( this ).data( 'url' ) : $( this ).attr( 'href' );
+			var element = $( '#' + attribute.split( '#' ).pop() );
 
 			FLBuilderLayout._scrollToElement( element, callback );
 

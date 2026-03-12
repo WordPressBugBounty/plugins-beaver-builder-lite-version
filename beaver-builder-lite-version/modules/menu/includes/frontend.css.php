@@ -1,53 +1,4 @@
 <?php
-$link_padding            = array(
-	'padding-top'    => ! empty( $settings->link_padding_top ) ? $settings->link_padding_top . $settings->link_padding_unit : '0',
-	'padding-right'  => ! empty( $settings->link_padding_right ) ? $settings->link_padding_right . $settings->link_padding_unit : '0',
-	'padding-bottom' => ! empty( $settings->link_padding_bottom ) ? $settings->link_padding_bottom . $settings->link_padding_unit : '0',
-	'padding-left'   => ! empty( $settings->link_padding_left ) ? $settings->link_padding_left . $settings->link_padding_unit : '0',
-);
-$link_padding_large      = array();
-$link_padding_medium     = array();
-$link_padding_responsive = array();
-
-if ( ! empty( $settings->link_padding_top_large ) ) {
-	$link_padding_large['padding-top'] = $settings->link_padding_top_large . $settings->link_padding_large_unit;
-}
-if ( ! empty( $settings->link_padding_right_large ) ) {
-	$link_padding_large['padding-right'] = $settings->link_padding_right_large . $settings->link_padding_large_unit;
-}
-if ( ! empty( $settings->link_padding_bottom_large ) ) {
-	$link_padding_large['padding-bottom'] = $settings->link_padding_bottom_large . $settings->link_padding_large_unit;
-}
-if ( ! empty( $settings->link_padding_left_large ) ) {
-	$link_padding_large['padding-left'] = $settings->link_padding_left_large . $settings->link_padding_large_unit;
-}
-
-if ( ! empty( $settings->link_padding_top_medium ) ) {
-	$link_padding_medium['padding-top'] = $settings->link_padding_top_medium . $settings->link_padding_medium_unit;
-}
-if ( ! empty( $settings->link_padding_right_medium ) ) {
-	$link_padding_medium['padding-right'] = $settings->link_padding_right_medium . $settings->link_padding_medium_unit;
-}
-if ( ! empty( $settings->link_padding_bottom_medium ) ) {
-	$link_padding_medium['padding-bottom'] = $settings->link_padding_bottom_medium . $settings->link_padding_medium_unit;
-}
-if ( ! empty( $settings->link_padding_left_medium ) ) {
-	$link_padding_medium['padding-left'] = $settings->link_padding_left_medium . $settings->link_padding_medium_unit;
-}
-
-if ( ! empty( $settings->link_padding_top_responsive ) ) {
-	$link_padding_responsive['padding-top'] = $settings->link_padding_top_responsive . $settings->link_padding_responsive_unit;
-}
-if ( ! empty( $settings->link_padding_right_responsive ) ) {
-	$link_padding_responsive['padding-right'] = $settings->link_padding_right_responsive . $settings->link_padding_responsive_unit;
-}
-if ( ! empty( $settings->link_padding_bottom_responsive ) ) {
-	$link_padding_responsive['padding-bottom'] = $settings->link_padding_bottom_responsive . $settings->link_padding_responsive_unit;
-}
-if ( ! empty( $settings->link_padding_left_responsive ) ) {
-	$link_padding_responsive['padding-left'] = $settings->link_padding_left_responsive . $settings->link_padding_responsive_unit;
-}
-
 $toggle_spacing       = $settings->link_padding_right > 10 ? $settings->link_padding_right : 10;
 $toggle_padding       = ! empty( $settings->link_padding_right ) ? $settings->link_padding_right : 0;
 $toggle_width         = ( $toggle_padding + 14 );
@@ -101,36 +52,18 @@ if ( 'horizontal' === $settings->menu_layout ) {
 /**
  * Links
  */
-FLBuilderCSS::rule( array(
-	'selector' => ".fl-node-$id .menu a",
-	'media'    => 'default',
-	'props'    => $link_padding,
-) );
-
-FLBuilderCSS::rule( array(
-	'selector' => ".fl-node-$id .menu a",
-	'media'    => 'large',
-	'enabled'  => ! empty( $link_padding_large ),
-	'props'    => $link_padding_large,
-) );
-
-FLBuilderCSS::rule( array(
-	'selector' => ".fl-node-$id .menu a",
-	'media'    => 'medium',
-	'enabled'  => ! empty( $link_padding_medium ),
-	'props'    => $link_padding_medium,
-) );
-
-FLBuilderCSS::rule( array(
-	'selector' => ".fl-node-$id .menu a",
-	'media'    => 'responsive',
-	'enabled'  => ! empty( $link_padding_responsive ),
-	'props'    => $link_padding_responsive,
-) );
+foreach ( $module->extract_paddings() as $media => $paddings ) {
+	FLBuilderCSS::rule( array(
+		'selector' => ".fl-node-$id .menu a",
+		'media'    => $media,
+		'enabled'  => ! empty( $paddings ),
+		'props'    => $paddings,
+	) );
+}
 ?>
 
 <?php if ( ! empty( $settings->link_color ) ) : ?>
-.fl-node-<?php echo $id; ?> .menu-item a {
+.fl-node-<?php echo $id; ?> .fl-menu li.menu-item a {
 	color: <?php echo FLBuilderColor::hex_or_rgb( $settings->link_color ); ?>;
 	<?php if ( ! empty( $settings->link_bg_color ) ) : ?>
 		background-color: #<?php echo $settings->link_bg_color; ?>;
@@ -158,9 +91,9 @@ endif;
  */
 if ( ! empty( $settings->link_hover_bg_color ) || $settings->link_hover_color ) :
 	?>
-.fl-node-<?php echo $id; ?> .menu-item :is(*:focus, a:hover, .fl-has-submenu-container:hover > *),
-.fl-node-<?php echo $id; ?> .current-menu-item > a,
-.fl-node-<?php echo $id; ?> .current-menu-item > .fl-has-submenu-container > * {
+.fl-node-<?php echo $id; ?> .fl-menu li.menu-item :is(*:focus, a:hover, .fl-has-submenu-container:hover > *),
+.fl-node-<?php echo $id; ?> .fl-menu .current-menu-item > a,
+.fl-node-<?php echo $id; ?> .fl-menu .current-menu-item > .fl-has-submenu-container > * {
 	<?php
 	if ( ! empty( $settings->link_hover_bg_color ) ) {
 		echo 'background-color: ' . FLBuilderColor::hex_or_rgb( $settings->link_hover_bg_color ) . ';';

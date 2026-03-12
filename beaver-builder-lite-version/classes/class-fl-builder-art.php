@@ -230,7 +230,7 @@ class FLBuilderArt {
 			ob_start();
 			$render = $shape['render'];
 
-			if ( is_string( $render ) && file_exists( $render ) ) {
+			if ( is_string( $render ) && strlen( $render ) < PHP_MAXPATHLEN && file_exists( $render ) ) {
 				include $render;
 			} else {
 				echo $render;

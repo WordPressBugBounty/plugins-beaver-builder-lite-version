@@ -3,7 +3,7 @@ $button_node_id = "fl-node-$id";
 
 if ( isset( $settings->click_action ) ) : ?>
 (function($){
-	<?php if ( 'button' == $settings->click_action ) : ?>
+	<?php if ( 'button' == $settings->click_action && ! isset( $_GET['fl_builder'] ) ) : ?>
 	$('.<?php echo $button_node_id; ?> .fl-button').on('click', function(){
 		<?php echo $settings->button; ?>
 	});

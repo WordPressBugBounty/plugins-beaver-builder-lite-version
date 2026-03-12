@@ -824,7 +824,7 @@ final class FLBuilderLoop {
 	 * @return bool|string
 	 */
 	static public function override_canonical( $redirect_url, $requested_url ) {
-		global $wp_the_query;
+		global $wp_the_query, $post;
 
 		if ( is_array( $wp_the_query->query ) ) {
 			foreach ( $wp_the_query->query as $key => $value ) {
@@ -846,8 +846,56 @@ final class FLBuilderLoop {
 
 			if ( FLBuilderModel::is_builder_enabled() && ! empty( $modules ) ) {
 				foreach ( $modules as $module ) {
-					if ( 'post-grid' == $module->slug ) {
+					if ( 'post-grid' == $module->slug || 'loop' == $module->slug ) {
 						return false;
+					}
+				}
+			}
+
+			// check for any global templates.
+			$layout = FLBuilderModel::get_layout_data( 'published', $post->ID );
+
+			// check for any global template shortcodes.
+			if ( false !== $wp_the_query->is_singular && ! FLBuilderModel::is_builder_enabled() ) {
+				if ( has_shortcode( $post->post_content, 'fl_builder_insert_layout' ) ) {
+					preg_match_all( '/' . get_shortcode_regex() . '/s', $post->post_content, $matches, PREG_SET_ORDER );
+
+					if ( ! empty( $matches ) ) {
+						foreach ( $matches as $shortcode ) {
+							if ( 'fl_builder_insert_layout' === $shortcode[2] ) {
+								$atts = shortcode_parse_atts( $shortcode[3] );
+
+								if ( isset( $atts['id'] ) ) {
+									$layout = array_merge( $layout, FLBuilderModel::get_layout_data( 'published', $atts['id'] ) );
+								}
+							}
+						}
+					}
+				}
+			}
+
+			if ( ! empty( $layout ) ) {
+				foreach ( $layout as $module ) {
+					if ( isset( $module->slug ) && 'module' == $module->type && ( 'post-grid' == $module->slug || 'loop' == $module->slug ) ) {
+						return false;
+					}
+
+					if ( ! empty( $module->global ) ) {
+						$global_layout = FLBuilderModel::get_layout_data( 'published', $module->global );
+
+						if ( ! empty( $global_layout ) ) {
+							foreach ( $global_layout as $global_module ) {
+								if ( 'module' == $global_module->type ) {
+									if ( ! empty( $global_module->slug ) && ( 'post-grid' == $global_module->slug || 'loop' == $global_module->slug ) ) {
+										return false;
+									}
+
+									if ( ! empty( $global_module->settings->type ) && ( 'post-grid' == $global_module->settings->type || 'loop' == $global_module->settings->type ) ) {
+										return false;
+									}
+								}
+							}
+						}
 					}
 				}
 			}

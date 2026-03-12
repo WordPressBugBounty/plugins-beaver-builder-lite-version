@@ -19,6 +19,11 @@ final class FLBuilderDynamicGlobal {
 	static private $node_suffix_map = [];
 
 	/**
+	 * Cached template details data (title, link) stored per-template.
+	 */
+	static private $template_details_cache = [];
+
+	/**
 	 * Initializer method.
 	 *
 	 * @since 2.10
@@ -30,9 +35,11 @@ final class FLBuilderDynamicGlobal {
 
 	static private function load_hooks() {
 		add_action( 'wp_enqueue_scripts', __CLASS__ . '::enqueue_scripts' );
+		add_action( 'admin_init', __CLASS__ . '::convert_to_component' );
+
+		add_filter( 'fl_builder_layout_data', __CLASS__ . '::append_layout_data_template_details' );
 		add_filter( 'fl_themer_builder_connect_node_settings_cache_key', __CLASS__ . '::maybe_update_themer_cache_key', 10, 2 );
 		add_filter( 'post_row_actions', __CLASS__ . '::row_actions' );
-		add_action( 'admin_init', __CLASS__ . '::convert_to_component' );
 	}
 
 	static public function enqueue_scripts() {
@@ -394,7 +401,9 @@ final class FLBuilderDynamicGlobal {
 			foreach ( $cat as $node_key => $node_item ) {
 
 				$dynamic_fields      = [];
-				$is_nested_component = ! empty( $node_item->global ) && ! empty( $node_item->dynamic ) && ! empty( $node_item->template_root_node );
+				$is_nested_component = ! empty( $node_item->global )
+					&& ! empty( $node_item->dynamic )
+					&& ( ! empty( $node_item->template_root_node ) || self::is_nested_component_node( $node_item ) );
 
 				if ( $is_nested_component ) {
 					$template_data      = FLBuilderModel::get_layout_data( 'published', $node_item->global );
@@ -410,6 +419,10 @@ final class FLBuilderDynamicGlobal {
 
 				if ( is_array( $dynamic_fields ) ) {
 					$dynamic_fields = (object) $dynamic_fields;
+				}
+
+				if ( ! isset( $dynamic_fields->fields ) ) {
+					continue;
 				}
 
 				$dynamic_fields_data = [
@@ -722,7 +735,7 @@ final class FLBuilderDynamicGlobal {
 				// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 				$module_type = $node->moduleType;
 			}
-			if ( ! empty( $module_type ) ) {
+			if ( ! empty( $module_type ) && isset( FLBuilderModel::$modules[ $module_type ] ) ) {
 				$form = FLBuilderModel::$modules[ $module_type ]->form;
 			}
 		}
@@ -730,34 +743,98 @@ final class FLBuilderDynamicGlobal {
 	}
 
 	/**
+	 * Check if a node is a nested component by verifying its template_node_id
+	 * exists as a root node in the template referenced by its global post ID.
+	 *
+	 * This is needed because template_root_node can be lost when module nodes
+	 * pass through clean_layout_data or get_module, which strip or fail to
+	 * preserve that property.
+	 *
+	 * @since 2.10
+	 * @param object $node_item
+	 * @return bool
+	 */
+	static private function is_nested_component_node( $node_item ) {
+		if ( empty( $node_item->global ) || empty( $node_item->template_node_id ) ) {
+			return false;
+		}
+
+		$template_data = FLBuilderModel::get_layout_data( 'published', $node_item->global );
+		if ( ! isset( $template_data[ $node_item->template_node_id ] ) ) {
+			return false;
+		}
+
+		$template_node = $template_data[ $node_item->template_node_id ];
+		return ! empty( $template_node->template_root_node );
+	}
+
+	/**
 	 * Given a component node object, retrieve its Dynamic Fields from the source Template Node.
+	 *
+	 * Fetches the template layout data directly rather than relying on
+	 * get_categorized_child_nodes, which can fail when the template root node's
+	 * properties are incomplete or when nested template children can't be resolved
+	 * through the standard child node lookup chain.
 	 *
 	 * @since 2.10
 	 * @param object $target_node
-	 * @return object
+	 * @return object|null
 	 */
 	static private function get_dynamic_fields_from_template( $target_node ) {
 		$parts          = explode( '__', $target_node->node );
-		$target_node_id = ( count( $parts ) >= 0 ) ? $parts[0] : $target_node->node;
-		$settings       = null;
+		$target_node_id = ( count( $parts ) > 1 ) ? $parts[0] : $target_node->node;
 
-		$cur_template_categorized_nodes = FLBuilderModel::get_categorized_child_nodes( self::$current_template_node );
-
-		if ( 'column' === $target_node->type ) {
-			$settings = $cur_template_categorized_nodes['columns'][ $target_node_id ]->settings;
-		} elseif ( 'module' === $target_node->type ) {
-			$settings = $cur_template_categorized_nodes['modules'][ $target_node_id ]->settings;
-		}
-
-		if ( empty( $settings ) ) {
+		// Get the template post ID from the current component node.
+		$template_post_id = FLBuilderModel::is_node_global( self::$current_component_node );
+		if ( ! $template_post_id ) {
 			return null;
 		}
 
-		if ( empty( $settings->dynamic_fields ) ) {
+		// Look for the target node directly in the template data.
+		$settings      = self::get_template_node_settings( $target_node_id, $template_post_id );
+
+		if ( empty( $settings ) || empty( $settings->dynamic_fields ) ) {
 			return null;
 		}
 
 		return $settings->dynamic_fields;
+	}
+
+	/**
+	 * Find a node's settings in a template's layout data, recursively
+	 * checking nested component templates if not found at the top level.
+	 *
+	 * @since 2.10
+	 * @param string $node_id The node ID to find.
+	 * @param int $template_post_id The template post ID to search in.
+	 * @param array $searched_posts Track already-searched posts to avoid loops.
+	 * @return object|null
+	 */
+	static private function get_template_node_settings( $node_id, $template_post_id, $searched_posts = [] ) {
+		if ( in_array( $template_post_id, $searched_posts ) ) {
+			return null;
+		}
+		$searched_posts[] = $template_post_id;
+
+		$template_data = FLBuilderModel::get_layout_data( 'published', $template_post_id );
+
+		// Direct lookup in this template's data.
+		if ( isset( $template_data[ $node_id ] ) ) {
+			return $template_data[ $node_id ]->settings ?? null;
+		}
+
+		// Not found — check nested component templates.
+		foreach ( $template_data as $node ) {
+			$nested_post_id = FLBuilderModel::is_node_global( $node );
+			if ( $nested_post_id && $nested_post_id !== $template_post_id ) {
+				$settings = self::get_template_node_settings( $node_id, $nested_post_id, $searched_posts );
+				if ( $settings ) {
+					return $settings;
+				}
+			}
+		}
+
+		return null;
 	}
 
 	/**
@@ -1003,7 +1080,7 @@ final class FLBuilderDynamicGlobal {
 			$qs_defaults = $query_settings;
 		} else {
 			$parts          = explode( '__', $node->node );
-			$target_node_id = ( count( $parts ) >= 0 ) ? $parts[0] : $node->node;
+			$target_node_id = ( count( $parts ) > 1 ) ? $parts[0] : $node->node;
 
 			if ( isset( $dynamic_node_settings->child->{ $target_node_id } ) ) {
 				$qs_defaults = $dynamic_node_settings->child->{ $target_node_id };
@@ -1023,6 +1100,41 @@ final class FLBuilderDynamicGlobal {
 			'defaults'      => $qs_defaults,
 			'file'          => $tab['file'],
 		];
+	}
+
+	/**
+	 * Appends the template details to dynamic nodes in the layout data.
+	 * This is used in various parts of the UI.
+	 *
+	 * NOTE: Use with caution as this filters the main layout data.
+	 *
+	 * @since 2.10
+	 * @param object $data
+	 * @return object
+	 */
+	static public function append_layout_data_template_details( $data ) {
+		foreach ( $data as $node_id => $node ) {
+			if ( ! is_object( $node ) || empty( $node->global ) ) {
+				continue;
+			}
+
+			if ( ! empty( self::$template_details_cache[ $node->global ] ) ) {
+				$title     = self::$template_details_cache[ $node->global ]['title'];
+				$permalink = self::$template_details_cache[ $node->global ]['permalink'];
+			} else {
+				$title     = get_the_title( $node->global );
+				$permalink = get_permalink( $node->global );
+				self::$template_details_cache[ $node->global ] = [
+					'title'     => $title,
+					'permalink' => $permalink,
+				];
+			}
+
+			$data[ $node_id ]->template_title = $title;
+			$data[ $node_id ]->template_url   = $permalink;
+		}
+
+		return $data;
 	}
 
 	/**
@@ -1278,7 +1390,7 @@ final class FLBuilderDynamicGlobal {
 		}
 
 		$parts                = explode( '__', $node->node );
-		$target_node_id       = ( count( $parts ) >= 0 ) ? $parts[0] : $node->node;
+		$target_node_id       = ( count( $parts ) > 1 ) ? $parts[0] : $node->node;
 		$target_node_settings = null;
 		if ( isset( $dynamic_node_settings->root->{ $target_node_id } ) ) {
 			$target_node_settings = $dynamic_node_settings->root->{ $target_node_id };
@@ -1354,7 +1466,7 @@ final class FLBuilderDynamicGlobal {
 
 		if ( ! empty( $form ) && self::is_query_module( $node, $form ) ) {
 			$parts                 = explode( '__', $node->node );
-			$target_node_id        = ( count( $parts ) >= 0 ) ? $parts[0] : $node->node;
+			$target_node_id        = ( count( $parts ) > 1 ) ? $parts[0] : $node->node;
 			$dynamic_node_settings = $new_settings->dynamic_node_settings;
 			$query_settings        = [];
 
@@ -1865,13 +1977,23 @@ final class FLBuilderDynamicGlobal {
 			}
 		}
 
+		/**
+		 * @see fl_builder_is_query_module_file
+		 * @since 2.10
+		 */
+		$query_setting_file  = apply_filters( 'fl_builder_dynamic_global_is_query_module_file', FL_BUILDER_DIR . 'includes/loop-settings.php', $node, $form );
 		$query_setting_found = false;
 		foreach ( $form as $tab_key => $tab ) {
-			if ( isset( $tab['file'] ) && FL_BUILDER_DIR . 'includes/loop-settings.php' === $tab['file'] ) {
-				return true;
+			if ( isset( $tab['file'] ) && $query_setting_file === $tab['file'] ) {
+				$query_setting_found = true;
+				break;
 			}
 		}
-		return $query_setting_found;
+		/**
+		 * @see fl_builder_is_query_module
+		 * @since 2.10
+		 */
+		return apply_filters( 'fl_builder_dynamic_global_is_query_module', $query_setting_found, $node, $form );
 	}
 }
 

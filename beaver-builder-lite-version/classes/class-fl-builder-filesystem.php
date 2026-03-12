@@ -50,6 +50,37 @@ class FL_Filesystem {
 	}
 
 	/**
+	 * Atomic file_put_contents — writes to temp file, then renames.
+	 * Prevents race conditions where the file is read before fully written.
+	 * @since 2.9.1
+	 */
+	public function file_put_contents_atomic( $path, $contents ) {
+
+		$wp_filesystem = $this->get_filesystem();
+
+		// Temp file in same directory ensures same filesystem for atomic rename.
+		$temp_path = $path . '.tmp.' . uniqid();
+
+		$result = $wp_filesystem->put_contents( $temp_path, $contents, FS_CHMOD_FILE );
+
+		if ( ! $result ) {
+			return false;
+		}
+
+		// Atomic rename (overwrites existing).
+		// Note: If rename fails, WP_Filesystem falls back to copy+delete (still safe, just slower).
+		$moved = $wp_filesystem->move( $temp_path, $path, true );
+
+		if ( ! $moved ) {
+			// Clean up temp file if move failed entirely.
+			$wp_filesystem->delete( $temp_path );
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
 	 * mkdir using wp_filesystem.
 	 * @since 2.0.6
 	 */

@@ -803,9 +803,9 @@ final class FLBuilderCSS {
 
 		foreach ( $parts as $i => $part ) {
 
-			if ( strpos( $part, '{node}' ) ) {
+			if ( false !== strpos( $part, '{node}' ) ) {
 				$formatted .= str_replace( '{node}', $prefix, $part );
-			} elseif ( strpos( $part, '{node_id}' ) ) {
+			} elseif ( false !== strpos( $part, '{node_id}' ) ) {
 				$formatted .= preg_replace( '/{node_id}/', $node_id, $part );
 			} else {
 				$formatted .= $prefix . ' ' . $part;

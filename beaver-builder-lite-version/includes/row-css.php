@@ -191,14 +191,16 @@ if ( 'photo' == $row->settings->bg_type ) :
 	} elseif ( 'url' == $row->settings->bg_image_source && ! empty( $row->settings->bg_image_url ) ) {
 		$row_bg_image_lg = $row_bg_image_xl;
 	}
-	if ( 'custom_pos' == $row->settings->bg_position_large ) {
+
+	$bg_position_large = '' == $row->settings->bg_position_large ? $row->settings->bg_position : $row->settings->bg_position_large;
+	if ( 'custom_pos' == $bg_position_large ) {
 		$row_bg_position_lg  = empty( $row->settings->bg_x_position_large ) ? '0' : $row->settings->bg_x_position_large;
 		$row_bg_position_lg .= $row->settings->bg_x_position_large_unit;
 		$row_bg_position_lg .= ' ';
 		$row_bg_position_lg .= empty( $row->settings->bg_y_position_large ) ? '0' : $row->settings->bg_y_position_large;
 		$row_bg_position_lg .= $row->settings->bg_y_position_large_unit;
 	} else {
-		$row_bg_position_lg = $row->settings->bg_position_large;
+		$row_bg_position_lg = $bg_position_large;
 	}
 
 	FLBuilderCSS::rule( array(
@@ -224,7 +226,9 @@ if ( 'photo' == $row->settings->bg_type ) :
 	} elseif ( 'url' == $row->settings->bg_image_source && ! empty( $row->settings->bg_image_url ) ) {
 		$row_bg_image_md = $row_bg_image_xl;
 	}
-	if ( 'custom_pos' == $row->settings->bg_position_medium ) {
+
+	$bg_position_medium = '' == $row->settings->bg_position_medium ? $row->settings->bg_position : $row->settings->bg_position_medium;
+	if ( 'custom_pos' == $bg_position_medium ) {
 		$row_bg_position_md  = empty( $row->settings->bg_x_position_medium ) ? '0' : $row->settings->bg_x_position_medium;
 		$row_bg_position_md .= $row->settings->bg_x_position_medium_unit;
 		$row_bg_position_md .= ' ';
@@ -232,7 +236,7 @@ if ( 'photo' == $row->settings->bg_type ) :
 		$row_bg_position_md .= $row->settings->bg_y_position_medium_unit;
 
 	} else {
-		$row_bg_position_md = $row->settings->bg_position_medium;
+		$row_bg_position_md = $bg_position_medium;
 	}
 
 	FLBuilderCSS::rule( array(
@@ -259,15 +263,15 @@ if ( 'photo' == $row->settings->bg_type ) :
 		$row_bg_image_sm = $row_bg_image_xl;
 	}
 
-	if ( 'custom_pos' == $row->settings->bg_position_responsive ) {
+	$bg_position_responsive = '' == $row->settings->bg_position_responsive ? $row->settings->bg_position : $row->settings->bg_position_responsive;
+	if ( 'custom_pos' == $bg_position_responsive ) {
 		$row_bg_position_sm  = empty( $row->settings->bg_x_position_responsive ) ? '0' : $row->settings->bg_x_position_responsive;
 		$row_bg_position_sm .= $row->settings->bg_x_position_responsive_unit;
 		$row_bg_position_sm .= ' ';
 		$row_bg_position_sm .= empty( $row->settings->bg_y_position_responsive ) ? '0' : $row->settings->bg_y_position_responsive;
 		$row_bg_position_sm .= $row->settings->bg_y_position_responsive_unit;
-
 	} else {
-		$row_bg_position_sm = $row->settings->bg_position_responsive;
+		$row_bg_position_sm = $bg_position_responsive;
 	}
 
 	FLBuilderCSS::rule( array(

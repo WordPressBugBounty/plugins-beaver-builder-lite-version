@@ -29,7 +29,7 @@
 	#>
 	<tbody id="fl-field-{{data.rootName}}" class="fl-field fl-builder-field-multiples" data-limit="{{limit}}" data-type="form" data-preview='{{{data.preview}}}' data-connections="{{{connections}}}">
     <# if ( ! shouldDeferRendering ) { #>
-		<# if ( data.global && data.dynamicOptions?.source !== 'legacy' && data.field.type === 'form' && 'fl-builder-template' === FLBuilderConfig.postType && ( data.dynamicEditing || data.rootNodeEditing ) ) { #>
+		<# if ( data.global && data.dynamicOptions?.source !== 'legacy' && data.field.type === 'form' && 'fl-builder-template' === FLBuilderConfig.postType && data.dynamicEditing ) { #>
 		<tr class="fl-builder-field-multiple-label">
 			<th class="fl-field-label">
 			<#

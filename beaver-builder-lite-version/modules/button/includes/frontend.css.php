@@ -2,14 +2,6 @@
 
 $breakpoints = array( '', 'large', 'medium', 'responsive' );
 
-// Cursor
-FLBuilderCSS::rule( array(
-	'selector' => '.fl-button:is(a, button)',
-	'props'    => array(
-		'cursor' => 'pointer',
-	),
-) );
-
 // Custom Width
 FLBuilderCSS::responsive_rule( array(
 	'settings'     => $settings,

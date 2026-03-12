@@ -354,12 +354,26 @@ function fl_theme_builder_has_post_grid() {
 		$data = FLBuilderModel::get_layout_data( 'published', $layout_id );
 
 		foreach ( $data as $node_id => $node ) {
-			if ( 'module' != $node->type ) {
-				continue;
+			if ( 'module' == $node->type && isset( $node->settings->type ) && ( 'post-grid' == $node->settings->type || 'loop' == $node->settings->type ) ) {
+				return true;
 			}
 
-			if ( isset( $node->settings->type ) && 'post-grid' == $node->settings->type ) {
-				return true;
+			if ( ! empty( $node->global ) ) {
+				$global_layout = FLBuilderModel::get_layout_data( 'published', $node->global );
+
+				if ( ! empty( $global_layout ) ) {
+					foreach ( $global_layout as $global_node ) {
+						if ( 'module' == $global_node->type ) {
+							if ( ! empty( $global_node->slug ) && ( 'post-grid' == $global_node->slug || 'loop' == $global_node->slug ) ) {
+								return true;
+							}
+
+							if ( ! empty( $global_node->settings->type ) && ( 'post-grid' == $global_node->settings->type || 'loop' == $global_node->settings->type ) ) {
+								return true;
+							}
+						}
+					}
+				}
 			}
 		}
 	}

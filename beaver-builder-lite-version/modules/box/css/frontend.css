@@ -13,8 +13,11 @@ a.fl-module-box {
 	margin: 0;
 }
 
-/* Ensure child modules size properly */
-:where(.fl-module-box) { 
+/* Prevent sliders and carousels from blowing out flex layouts */
+:where(.fl-module-box:has(
+    [class*="slide"],
+    [class*="carousel"],
+    [class*="swiper"]
+)) {
     min-width: 0;
-    min-height: 0;
 }

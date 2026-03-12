@@ -167,7 +167,7 @@
 		layoutDoc           : null,
 
 		/**
-		 * Node settings saved when the preview was initalized.
+		 * Node settings saved when the preview was initialized.
 		 *
 		 * @since 1.7
 		 * @access private
@@ -324,6 +324,10 @@
 		 */
 		_settingsHaveChanged: function()
 		{
+			if ( FLBuilder._autoSuggestValueChanged ) {
+				FLBuilder._autoSuggestValueChanged = false;
+				return true;
+			}
 			var form 	 = $('.fl-builder-settings-lightbox .fl-builder-settings', window.parent.document),
 				settings = FLBuilder._getSettings( form );
 
@@ -1246,10 +1250,10 @@
 		 */
 		_bgVideoChange: function(e)
 		{
-			var eles        	= this.elements,
-				source 			= eles.bgVideoSource.val(),
-				video 			= eles.bgVideo.val(),
-				videoUrl		= eles.bgVideoServiceUrl.val(),
+			var elements     	= this.elements,
+				source 			= elements.bgVideoSource.val(),
+				video 			= elements.bgVideo.val(),
+				videoUrl		= elements.bgVideoServiceUrl.val(),
 				youtubePlayer 	= 'https://www.youtube.com/iframe_api',
 				vimeoPlayer		= 'https://player.vimeo.com/api/player.js',
 				scriptTag  		= $( '<script>' );
@@ -1287,12 +1291,12 @@
 		 */
 		_bgSlideshowChange: function(e)
 		{
-			var eles        = this.elements,
-				source      = eles.bgSlideshowSource.val(),
-				photos      = eles.bgSlideshowPhotos.val(),
-				feed        = eles.bgSlideshowFeedUrl.val(),
-				speed       = eles.bgSlideshowSpeed.val(),
-				transSpeed  = eles.bgSlideshowTransSpeed.val();
+			var elements    = this.elements,
+				source      = elements.bgSlideshowSource.val(),
+				photos      = elements.bgSlideshowPhotos.val(),
+				feed        = elements.bgSlideshowFeedUrl.val(),
+				speed       = elements.bgSlideshowSpeed.val(),
+				transSpeed  = elements.bgSlideshowTransSpeed.val();
 
 			if(source == 'wordpress' && photos === '') {
 				return;
@@ -2019,9 +2023,9 @@
 		},
 
 		/**
-		 * Initializes the default preview logic specific to components. 
-		 * This mainly handles previews that are set to none because those 
-		 * type of previews are typically done via settings.js in a module. 
+		 * Initializes the default preview logic specific to components.
+		 * This mainly handles previews that are set to none because those
+		 * type of previews are typically done via settings.js in a module.
 		 * That isn't loaded for component settings since they are made up
 		 * of potentially multiple nodes, so we refresh instead.
 		 *
@@ -2605,6 +2609,7 @@
 				important = preview.important ? ' !important' : '',
 				val = ''
 
+
 			// If the selected font is a Google Font, build the font stylesheet
 			if( fontGroup == 'Google' || fontGroup == 'Recently Used' ){
 				this._buildFontStylesheet( uniqueID, font.val(), weight.val() );
@@ -2662,7 +2667,6 @@
 					weights = weights.filter( function( weight ) {
 				        return fontArray[ key ].indexOf( weight ) < 0;
 				    });
-
 					fontArray[ key ] = fontArray[ key ].concat( weights );
 
 				});
@@ -2673,6 +2677,14 @@
 				if ( 'Molle' === font ) {
 					href += font + ':i|';
 				} else {
+					/**
+					 * If default is set for weight, then we have to load all the weights so Google
+					 * can use the intended default.
+					 * This wrecked my head.
+					 */
+					if ( weight[0] == 'default' ) {
+						weight = [FLBuilderFontFamilies.google[font].join('|')]
+					}
 					href += font + ':' + weight.join() + '|';
 				}
 			} );
@@ -3827,7 +3839,6 @@
 			} );
 			this.updateCSSRule( shapeSelector, 'transform', shapeTransforms.join(' ') );
 		},
-
 	}
 
 })(jQuery);

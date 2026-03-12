@@ -1,10 +1,81 @@
+<h4>2.10.1.2 - 03/12/2026</h4>
+<p><strong>Hotfix</strong></p>
+<ul>
+	<li>Security: Check if user has unrestricted_editing before allowing JS to be changed (#4882)</li>
+	<li>Fixed row link color overriding menu module link color (#4866)</li>
+	<li>Fixed template views with duplicate handles overwriting each other in the Templates tab (#4889)</li>
+	<li>Loop Module: Fixed issues with pagination on Themer layout or when using Relationship as a source (#4641)</li>
+	<li>Fixed compatibility issue with Cookiebot plugin (#4904)</li>
+	<li>Components: Fixed nested component settings showing all fields when opened from the Outline Panel (#4906)</li>
+	<li>Box Module: Fixed min-width causing child boxes to overlap in some flex row layouts (#4911)</li>
+	<li>Video module: Fixed autoplay issues when Assistant plugin is active (#4935)</li>
+</ul>
+
+<h4>2.10.1.1 - 02/27/2026</h4>
+<p><strong>Hotfix</strong></p>
+<ul>
+	<li>Components: Fixed PHP warnings when opening a component instance containing nested components or when a component contains a module type not registered in the current context</li>
+	<li>Components: Fixed settings being missing in some components</li>
+	<li>Components: Fixed CSS missing for additional instances of the same component on a page</li>
+</ul>
+
+<h4>2.10.1 - 02/25/2026</h4>
+<p><strong>Enhancements</strong></p>
+<ul>
+	<li>Optimization: Make some adjustments to prevent recursion causing a timeout on large pages (#4852)</li>
+	<li>Optimization: Draft assets are no longer recreated after publishing a page (#4843)</li>
+	<li>Components: Improve cache handling to ensure when updating a component, it syncs to instances (#4583)</li>
+</ul>
+
+<p><strong>Fixes</strong></p>
+<ul>
+    <li>(a11y) Menu Module: Fixed accessibility issue with landmark name used twice (#3008)</li>
+	<li>Admin: Fixed BB templates title linking to frontend instead of the editor, and post status no longer showing (#4877)</li>
+     <li>Admin: Fixed settings page styling on Multi-Site (#4800)</li>
+    <li>Box Module: Fixed smooth scroll not working with link (#4720)</li>
+    <li>Box Module: Fixed background layer field shortcode rendering page/post content when inside a loop module (#4760)</li>
+    <li>Loop Module: Fixed repeater on options page not working (#4316)</li>
+    <li>Menu Module: Fixed link padding not accepting 0px on mobile (#4695)</li>
+    <li>Photo Module: Fixed caption option only showing image's caption (#4674)</li>
+	<li>Posts Module: Fixed new CSS affecting ul tags in custom layout (#4769)</li>
+    <li>Posts Module: Fixed custom layout failing to display content in Blocks mode (#4717)</li>
+    <li>Posts Module: Fixed repeating the same posts when placed in a post inside a global row (#3598)</li>
+    <li>Posts Module: Fixed out of position post items in pagination (#4437)</li>
+	<li>Row Shapes: Fixed PHP warning for file name length (#4743)</li>
+	<li>Fixed custom position for row backgrounds not being responsive (#4179)</li>
+    <li>Fixed module instance CSS check preventing use of the function elsewhere (#4808)</li>
+    <li>Fonts: Fixed Google Font previewing wrong font weight until save (#4714)</li>
+	<li>Fixed WP Forms Spam Setting causing JS errors inside UI (#4676)</li>
+	<li>Legacy UI: Fixed React errors (#4786)</li>
+</ul>
+
+<p><strong>Developer</strong></p>
+<ul>
+	<li>Components: Add new filters <pre>fl_builder_dynamic_global_is_query_module</pre> and <pre>fl_builder_dynamic_global_is_query_module_file</pre></li>
+</ul>
+
+<h4>2.10.0.7 - 02/18/2026</h4>
+<p><strong>Hotfix</strong></p>
+<ul>
+	<li>Optimize cache writes when using WP FileSystem APIs (#4832)</li>
+	<li>Box module: Remove min-height as it is not needed and is causing text overlapping in some circumstances and fix min width for children not rendering (#4830)</li>
+	<li>Button Module: Prevent code entered into onclick field from breaking the UI (#4796)</li>
+	<li>Fixed auto suggest fields not updating properly in filter section of modules with loops (#4828)</li>
+	<li>Fixed categories not rendering in the WP Admin for saved nodes and remove "View" link for Beaver Builder template categories (#4812)</li>
+	<li>Optimization: move CSS that is static for buttons to static stylesheet (#4810)</li>
+	<li>Ensure "enable component editing" only renders for components (#4805)</li>
+	<li>Advanced Settings: Fixed revision limit not working (#4794)</li>
+	<li>UI: Fixed saved tab collapsing sections not working after using search field (#4734)</li>
+	<li>UI: Fixed testimonials reloading when responsive editing is switched in the iframe UI</li>
+</ul>
+
 <h4>2.10.0.6 - 01/28/2026</h4>
 <p><strong>Hotfix</strong></p>
 <ul>
 	<li>Security: Add capability check before saving global settings (#4773)</li>
 	<li>Components: Fixed unlinking a Box component instance reverting settings (#4784)</li>
 	<li>Components: Fixed photo fields not working correctly when only enabling source (#4782)</li>
-	<li>Components: Fixed duplicating containers with components in them not working properl (#4763)</li>
+	<li>Components: Fixed duplicating containers with components in them not working properly (#4763)</li>
 	<li>Components: Fixed incorrect position of container module components when dropped or moved around (#4763)</li>
 	<li>Fixed SASS warning and deprecation notices in PHP 8.4+ (#4771)</li>
 	<li>Accordion Module: Fixed not being able to type spaces in forms (#4776)</li>
@@ -6638,3 +6709,4 @@ Fixed default text still appearing even after being removed</li>
 
 <h4>0.8.1</h4>
 <p>Initial beta release.</p>
+

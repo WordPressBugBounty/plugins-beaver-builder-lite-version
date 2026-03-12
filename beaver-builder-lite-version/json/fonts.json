@@ -239,6 +239,11 @@
     "fallback": "cursive"
   }
 }, {
+  "Allkin": {
+    "variants": ["regular"],
+    "fallback": "sans-serif"
+  }
+}, {
   "Allura": {
     "variants": ["regular"],
     "fallback": "cursive"
@@ -287,6 +292,11 @@
   "Alumni Sans SC": {
     "variants": ["100", "200", "300", "regular", "500", "600", "700", "800", "900", "100italic", "200italic", "300italic", "italic", "500italic", "600italic", "700italic", "800italic", "900italic"],
     "fallback": "sans-serif"
+  }
+}, {
+  "Alyamama": {
+    "variants": ["300", "regular", "500", "600", "700", "800", "900"],
+    "fallback": "serif"
   }
 }, {
   "Amarante": {
@@ -989,6 +999,26 @@
     "fallback": "serif"
   }
 }, {
+  "Betania Patmos": {
+    "variants": ["regular"],
+    "fallback": "cursive"
+  }
+}, {
+  "Betania Patmos GDL": {
+    "variants": ["regular"],
+    "fallback": "cursive"
+  }
+}, {
+  "Betania Patmos In": {
+    "variants": ["regular"],
+    "fallback": "cursive"
+  }
+}, {
+  "Betania Patmos In GDL": {
+    "variants": ["regular"],
+    "fallback": "cursive"
+  }
+}, {
   "Beth Ellen": {
     "variants": ["regular"],
     "fallback": "cursive"
@@ -1220,6 +1250,21 @@
   }
 }, {
   "Bowlby One SC": {
+    "variants": ["regular"],
+    "fallback": "sans-serif"
+  }
+}, {
+  "Bpmf Huninn": {
+    "variants": ["regular"],
+    "fallback": "sans-serif"
+  }
+}, {
+  "Bpmf Iansui": {
+    "variants": ["regular"],
+    "fallback": "cursive"
+  }
+}, {
+  "Bpmf Zihi Kai Std": {
     "variants": ["regular"],
     "fallback": "sans-serif"
   }
@@ -1962,6 +2007,11 @@
   "Darumadrop One": {
     "variants": ["regular"],
     "fallback": "sans-serif"
+  }
+}, {
+  "Datatype": {
+    "variants": ["100", "200", "300", "regular", "500", "600", "700", "800", "900"],
+    "fallback": "monospace"
   }
 }, {
   "David Libre": {
@@ -3014,6 +3064,11 @@
     "fallback": "sans-serif"
   }
 }, {
+  "Gveret Levin": {
+    "variants": ["regular"],
+    "fallback": "cursive"
+  }
+}, {
   "Gwendolyn": {
     "variants": ["regular", "700"],
     "fallback": "cursive"
@@ -3329,6 +3384,11 @@
     "fallback": "sans-serif"
   }
 }, {
+  "Idiqlat": {
+    "variants": ["200", "300", "regular"],
+    "fallback": "serif"
+  }
+}, {
   "Imbue": {
     "variants": ["100", "200", "300", "regular", "500", "600", "700", "800", "900"],
     "fallback": "serif"
@@ -3417,6 +3477,16 @@
   "Inter Tight": {
     "variants": ["100", "200", "300", "regular", "500", "600", "700", "800", "900", "100italic", "200italic", "300italic", "italic", "500italic", "600italic", "700italic", "800italic", "900italic"],
     "fallback": "sans-serif"
+  }
+}, {
+  "Iosevka Charon": {
+    "variants": ["300", "300italic", "regular", "italic", "500", "500italic", "700", "700italic"],
+    "fallback": "monospace"
+  }
+}, {
+  "Iosevka Charon Mono": {
+    "variants": ["300", "300italic", "regular", "italic", "500", "500italic", "700", "700italic"],
+    "fallback": "monospace"
   }
 }, {
   "Irish Grover": {
@@ -3942,6 +4012,11 @@
   "Kurale": {
     "variants": ["regular"],
     "fallback": "serif"
+  }
+}, {
+  "LINE Seed JP": {
+    "variants": ["100", "regular", "700", "800"],
+    "fallback": "sans-serif"
   }
 }, {
   "LXGW Marker Gothic": {
@@ -7119,6 +7194,16 @@
     "fallback": "cursive"
   }
 }, {
+  "Playwrite NZ Basic": {
+    "variants": ["100", "200", "300", "regular"],
+    "fallback": "cursive"
+  }
+}, {
+  "Playwrite NZ Basic Guides": {
+    "variants": ["regular"],
+    "fallback": "cursive"
+  }
+}, {
   "Playwrite NZ Guides": {
     "variants": ["regular"],
     "fallback": "cursive"
@@ -7522,6 +7607,11 @@
   "Rampart One": {
     "variants": ["regular"],
     "fallback": "sans-serif"
+  }
+}, {
+  "Ramsina": {
+    "variants": ["regular"],
+    "fallback": "serif"
   }
 }, {
   "Ranchers": {
@@ -7956,6 +8046,11 @@
 }, {
   "Rye": {
     "variants": ["regular"],
+    "fallback": "sans-serif"
+  }
+}, {
+  "SN Pro": {
+    "variants": ["200", "300", "regular", "500", "600", "700", "800", "900", "200italic", "300italic", "italic", "500italic", "600italic", "700italic", "800italic", "900italic"],
     "fallback": "sans-serif"
   }
 }, {

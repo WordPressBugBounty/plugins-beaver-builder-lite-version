@@ -3212,8 +3212,8 @@ final class FLBuilder {
 		FLBuilderCSS::render();
 		$module_css .= ob_get_clean();
 
-		if ( ! in_array( $id, self::$enqueued_module_css_assets ) && fl_builder_filesystem()->file_exists( $file ) ) {
-			self::$enqueued_module_css_assets[] = $id;
+		// Render frontend.css.php
+		if ( fl_builder_filesystem()->file_exists( $file ) ) {
 			ob_start();
 			include $file;
 			FLBuilderCSS::render();
@@ -3434,8 +3434,15 @@ final class FLBuilder {
 			}
 
 			// Instance module css
-			$module_css .= self::render_module_instance_css( $module );
-			$css        .= $module_css;
+			$module_instance_css      = self::render_module_instance_css( $module );
+			$module_instance_css_hash = md5( $module_instance_css );
+
+			// Only include this instance CSS if it hasn't already been rendered.
+			if ( ! in_array( $module_instance_css_hash, self::$enqueued_module_css_assets ) ) {
+				self::$enqueued_module_css_assets[] = $module_instance_css_hash;
+				$module_css                        .= $module_instance_css;
+			}
+			$css .= $module_css;
 		}
 
 		// Render all animation CSS when the builder is active.
@@ -3474,7 +3481,7 @@ final class FLBuilder {
 
 		// Save the CSS.
 		if ( 'file' === $enqueuemethod && $css ) {
-			fl_builder_filesystem()->file_put_contents( $path, $css );
+			fl_builder_filesystem()->file_put_contents_atomic( $path, $css );
 		}
 
 		/**
@@ -4151,7 +4158,7 @@ final class FLBuilder {
 
 			// Save the JS.
 			if ( 'file' === $enqueuemethod && $js ) {
-				fl_builder_filesystem()->file_put_contents( $path, $js );
+				fl_builder_filesystem()->file_put_contents_atomic( $path, $js );
 			}
 
 			/**

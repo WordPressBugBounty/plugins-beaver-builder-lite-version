@@ -169,6 +169,8 @@ final class FLBuilderModel {
 
 	static private $get_user_templates_cache = array();
 
+	static private $categorized_child_nodes_cache = array();
+
 	/**
 	 * Initialize hooks.
 	 *
@@ -753,6 +755,15 @@ final class FLBuilderModel {
 			self::$active = isset( $_GET['fl_builder'] ) || isset( $post_data['fl_builder'] );
 		}
 		return apply_filters( 'fl_builder_model_is_builder_active', self::$active );
+	}
+
+	/**
+	 * Resets the cached builder active state.
+	 *
+	 * @return void
+	 */
+	static public function reset_active() {
+		self::$active = false;
 	}
 
 	/**
@@ -1530,8 +1541,28 @@ final class FLBuilderModel {
 					break;
 			}
 
-			if ( self::is_node_global( $node ) ) {
-				$children               = self::get_categorized_child_nodes( $node );
+			$accepts_children = false;
+
+			if ( 'module' !== $node->type ) {
+				$accepts_children = true;
+			} else {
+				$module           = self::get_module( $node );
+				$accepts_children = $module && $module->accepts_children();
+			}
+
+			if ( $accepts_children && self::is_node_global( $node ) ) {
+
+				// Cache key must be instance-specific ($node->node) not template-specific
+				// ($node->template_node_id) so multiple instances of the same component
+				// get their own unique suffixed child node IDs for CSS targeting.
+				$cache_key = $node->node;
+				if ( isset( self::$categorized_child_nodes_cache[ $cache_key ] ) ) {
+					$children = self::$categorized_child_nodes_cache[ $cache_key ];
+				} else {
+					$children = self::get_categorized_child_nodes( $node );
+					self::$categorized_child_nodes_cache[ $cache_key ] = $children;
+				}
+
 				$categorized['rows']    = array_merge( $categorized['rows'], $children['rows'] );
 				$categorized['groups']  = array_merge( $categorized['groups'], $children['groups'] );
 				$categorized['columns'] = array_merge( $categorized['columns'], $children['columns'] );
@@ -5208,9 +5239,6 @@ final class FLBuilderModel {
 				$data[ $node_id ] = clone $node;
 
 				if ( ! empty( $data[ $node_id ]->global ) ) {
-					$data[ $node_id ]->template_title = get_the_title( $data[ $node_id ]->global );
-					$data[ $node_id ]->template_url   = get_permalink( $data[ $node_id ]->global );
-
 					if ( isset( $data[ $node_id ]->type ) && 'module' === $data[ $node_id ]->type ) {
 						$data[ $node_id ]->moduleType = $data[ $node_id ]->settings->type;
 					}
@@ -5339,6 +5367,7 @@ final class FLBuilderModel {
 						$cleaned[ $node->node ] = $node;
 					}
 
+					$cleaned[ $node->node ]          = self::clean_node_settings( $cleaned[ $node->node ] );
 					$cleaned[ $node->node ]->global  = self::is_node_global( $node );
 					$cleaned[ $node->node ]->dynamic = self::is_node_dynamic( $node );
 
@@ -5346,6 +5375,28 @@ final class FLBuilderModel {
 			}
 		}
 		return $cleaned;
+	}
+
+	/**
+	 * Low level method to clean node settings before saving or
+	 * after pulling from the database. Use with caution.
+	 *
+	 * @since 2.10
+	 * @param object $node
+	 * @return object
+	 */
+	static public function clean_node_settings( $node ) {
+		if ( ! isset( $node->settings ) || ! is_object( $node->settings ) ) {
+			return $node;
+		}
+
+		foreach ( $node->settings as $key => $value ) {
+			if ( str_starts_with( $key, 'flrich' ) ) {
+				unset( $node->settings->{ $key } );
+			}
+		}
+
+		return $node;
 	}
 
 	/**
@@ -5424,6 +5475,10 @@ final class FLBuilderModel {
 	 * @return object
 	 */
 	static public function update_layout_settings( $settings = array(), $status = null, $post_id = null ) {
+
+		if ( ! FLBuilderUserAccess::current_user_can( 'unrestricted_editing' ) ) {
+			unset( $settings['js'] );
+		}
 		$status       = ! $status ? self::get_node_status() : $status;
 		$post_id      = ! $post_id ? self::get_post_id() : $post_id;
 		$key          = 'published' == $status ? '_fl_builder_data_settings' : '_fl_builder_draft_settings';
@@ -5581,6 +5636,9 @@ final class FLBuilderModel {
 			'post_status'  => $post_status,
 			'post_content' => $editor_content,
 		));
+
+		// Reset active state so assets render with published suffix.
+		self::reset_active();
 
 		// Rerender the assets for this layout.
 		FLBuilder::render_assets();
@@ -6430,7 +6488,7 @@ final class FLBuilderModel {
 			$template_id = get_post_meta( $post_id, '_fl_builder_template_id', true );
 
 			$query = new WP_Query( array(
-				'meta_query'   => array(
+				'meta_query'     => array(
 					'relation' => 'OR',
 					array(
 						'key'     => '_fl_builder_data',
@@ -6443,9 +6501,10 @@ final class FLBuilderModel {
 						'compare' => 'LIKE',
 					),
 				),
-				'post_status'  => 'any',
-				'post_type'    => $post_types,
-				'post__not_in' => array( $post_id ),
+				'posts_per_page' => -1,
+				'post_status'    => 'any',
+				'post_type'      => $post_types,
+				'post__not_in'   => array( $post_id ),
 			) );
 
 			$posts = $query->posts;

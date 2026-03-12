@@ -108,10 +108,13 @@
 				container = node.find( '.fl-photo-caption-below' );
 			}
 
-			if ( 'library' === source && attachments[ id ] && attachments[ id ].caption ) {
+			var moduleCaption = form.find( 'input[name=caption]' ).val();
+			if ( moduleCaption && moduleCaption !== '' ) {
+				caption = moduleCaption;
+			} else if ( 'library' === source && attachments[ id ] && attachments[ id ].caption ) {
 				caption = attachments[ id ].caption;
 			} else if ( 'url' === source ) {
-				caption = form.find( 'input[name=caption]' ).val();
+				caption = moduleCaption;
 			}
 
 			container.html( caption );

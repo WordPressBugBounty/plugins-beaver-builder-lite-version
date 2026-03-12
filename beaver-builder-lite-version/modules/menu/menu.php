@@ -585,6 +585,35 @@ class FLMenuModule extends FLBuilderModule {
 
 		return $core_menus;
 	}
+
+	/**
+	 * Automate the extraction of link padding settings across breakpoints.
+	 *
+	 * @since 2.10
+	 * @method extract_paddings
+	 * @return array
+	 */
+	public function extract_paddings() {
+		$paddings = [
+			'default'    => [],
+			'large'      => [],
+			'medium'     => [],
+			'responsive' => [],
+		];
+		foreach ( $paddings as $breakpoint => $values ) {
+			$word = ( 'default' === $breakpoint ) ? '' : "_{$breakpoint}";
+			$unit = $this->settings->{ "link_padding{$word}_unit" };
+			foreach ( [ 'top', 'right', 'bottom', 'left' ] as $side ) {
+				$name = $this->settings->{ "link_padding_{$side}" . $word };
+				if ( '' !== $name ) {
+					$paddings[ $breakpoint ][ "padding-{$side}" ] = $name . $unit;
+				} elseif ( 'default' === $breakpoint ) {
+					$paddings[ $breakpoint ][ "padding-{$side}" ] = '0';
+				}
+			}
+		}
+		return $paddings;
+	}
 }
 
 /**
@@ -951,7 +980,7 @@ FLBuilder::register_module('FLMenuModule', array(
 							'type'  => 'css',
 							'rules' => array(
 								array(
-									'selector' => ':is(.menu, .sub-menu) > li.current-menu-item > a, :is(.menu, .sub-menu) > li.current-menu-item > .fl-has-submenu-container > a',
+									'selector' => '.fl-menu a:hover, .menu > li > a:hover, :is(.menu, .sub-menu) > li.current-menu-item > a, :is(.menu, .sub-menu) > li.current-menu-item > .fl-has-submenu-container > a',
 									'property' => 'color',
 								),
 								array(

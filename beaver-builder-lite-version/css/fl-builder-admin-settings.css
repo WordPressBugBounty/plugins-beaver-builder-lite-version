@@ -67,15 +67,15 @@
 /* Content
 ----------------------------------------------------------- */
 
-.settings_page_fl-builder-settings {
+body[class*="settings_page_fl-builder"] {
 	background: #fff;
 }
 
-.settings_page_fl-builder-settings a {
+body[class*="settings_page_fl-builder"]a {
   color: #EE521F;
   text-decoration: none;
 }
-.settings_page_fl-builder-settings a:hover {
+body[class*="settings_page_fl-builder"]a:hover {
   color: #1a7497;
 }
 
@@ -309,12 +309,12 @@ body .ms-options-wrap > .ms-options > ul input[type="checkbox"] {
 }
 
 @media(min-width:1540px) {
-  .settings_page_fl-builder-settings #wpbody {
+  body[class*="settings_page_fl-builder"] #wpbody {
     background: url(../img/shape-top_right.png) no-repeat top right;
     background-size: 314px;
 	min-height: 100vh;
   }
-  .settings_page_fl-builder-settings #wpbody:before {
+  body[class*="settings_page_fl-builder"] #wpbody:before {
     position: absolute;
     content: "";
     width: 260px;
@@ -324,7 +324,7 @@ body .ms-options-wrap > .ms-options > ul input[type="checkbox"] {
     left: -20px;
     bottom: 0;
   }
-  .settings_page_fl-builder-settings #wpbody:after {
+  body[class*="settings_page_fl-builder"] #wpbody:after {
     position: absolute;
     content: "";
     width: 256px;

@@ -443,12 +443,15 @@ final class FLBuilderAdminAdvanced {
 				update_option( "_fl_builder_{$key}", $setting['default'] );
 				$option = $setting['default'];
 			}
-			if ( $option != $setting['default'] && isset( $setting['callback'] ) ) {
+			if ( $option != $setting['default'] && isset( $setting['callback'] ) && 'limitrevisions_enabled' !== $key ) {
 				$action   = isset( $setting['action'] ) ? $setting['action'] : 'init';
 				$priority = isset( $setting['priority'] ) ? $setting['priority'] : 11;
 				add_action( $action, function () use ( $setting ) {
 					call_user_func( $setting['callback'] );
 				}, $priority );
+			}
+			if ( 'limitrevisions_enabled' === $key && $option ) {
+				self::limit_revisions();
 			}
 		}
 	}

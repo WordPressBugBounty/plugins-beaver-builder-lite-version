@@ -127,7 +127,12 @@ final class FLBuilderModuleDataRepeater {
 				break;
 
 			case 'acf_repeater':
-				$has_items = have_rows( $this->settings->acf_repeater_key );
+				$repeater_key = $this->settings->acf_repeater_key;
+				if ( $this->is_acf_option_field( $repeater_key ) ) {
+					$has_items = have_rows( $repeater_key, 'option' );
+				} else {
+					$has_items = have_rows( $repeater_key );
+				}
 				break;
 		}
 		/**
@@ -265,5 +270,21 @@ final class FLBuilderModuleDataRepeater {
 	 */
 	public function get_query() {
 		return $this->query;
+	}
+
+	/**
+	 * Check whether an ACF field value is stored in the options page
+	 * rather than the current post.
+	 *
+	 * @param string $key ACF field name or key.
+	 * @return bool True if the field exists in options and not in the current post.
+	 */
+	public function is_acf_option_field( $key ) {
+		global $post;
+		$post_id = ( isset( $post ) && isset( $post->ID ) ) ? $post->ID : 0;
+		if ( $post_id && ! empty( get_field( $key, $post_id ) ) ) {
+			return false;
+		}
+		return ! empty( get_field( $key, 'option' ) );
 	}
 }

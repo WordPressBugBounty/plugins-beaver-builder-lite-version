@@ -415,7 +415,7 @@
 		_initSanityChecks: function() {
 			if ( FLBuilderConfig.uploadPath && typeof FLBuilderLayout === 'undefined' ) {
 				url = '<a href="' + FLBuilderConfig.uploadUrl + '">wp-admin -> Settings -> Media</a>';
-				FLBuilder.alert( '<strong>Critcal Error</strong><p style="font-size:15px;">Please go to ' + url + ' and make sure uploads folder settings is blank</p>');
+				FLBuilder.alert( '<strong>Critical Error</strong><p style="font-size:15px;">Please go to ' + url + ' and make sure uploads folder settings is blank</p>');
 				$('.fl-builder-alert-close', window.parent.document).hide()
 			}
 		},
@@ -1994,7 +1994,7 @@
 		},
 
 		/**
-		 * Applys a template to the current layout by either appending
+		 * Applies a template to the current layout by either appending
 		 * it or replacing the current layout with it.
 		 *
 		 * @since 1.1.9
@@ -2809,7 +2809,7 @@
 		 * Callback that fires when an element that is being
 		 * dragged position changes.
 		 *
-		 * What we're doing here keeps it from appearing jumpy when draging
+		 * What we're doing here keeps it from appearing jumpy when dragging
 		 * between columns. Without this you'd see the placeholder jump into
 		 * a column position briefly when you didn't intend for it to.
 		 *
@@ -6942,7 +6942,7 @@
 		},
 
 		/**
-		* Trigger the orignal tab when a menu item is clicked.
+		* Trigger the original tab when a menu item is clicked.
 		*
 		* @since 2.0
 		* @var {Event} e
@@ -7267,19 +7267,73 @@
 				var name = $( input ).attr( 'name' ).replace( /\[(.*)\]/, '' );
 				if ( 'undefined' === name ) {
 					return;
-				} else if ( name.startsWith( 'as_values_' ) ) {
+				}
+				if ( ignore.some( ( item ) => name.startsWith( item ) ) ) {
 					return;
-				} else if ( ignore.some( ( item ) => name.startsWith( item ) ) ) {
-					return;
-				} else if ( ! ( name in settings ) ) {
+				}
+				if ( ! ( name in settings ) ) {
 					settings[ name ] = '';
+					if ( name.startsWith( 'as_values_' ) ) {
+						settings[ name.replace( 'as_values_', '' ) ] = '';
+					}
 				}
 			});
+
+			var currentSuggestNames = [],
+				setNestedSuggestValue = function( name, val ) {
+					var topKey, keys, setting, k;
+					if ( name.indexOf( '[' ) > -1 ) {
+						topKey = name.replace( /\[(.*)\]/, '' );
+						keys  = name.replace( topKey, '' ).replace( '[', '' ).replaceAll( ']', '' ).split( '[' );
+						if ( 'undefined' === typeof settings[ topKey ] ) {
+							settings[ topKey ] = {};
+						}
+						setting = settings[ topKey ];
+						for ( k = 0; k < keys.length; k++ ) {
+							if ( keys.length - 1 === k ) {
+								setting[ keys[ k ] ] = val;
+							} else {
+								if ( $.inArray( typeof setting[ keys[ k ] ], [ 'undefined', 'string' ] ) > -1 ) {
+									setting[ keys[ k ] ] = {};
+								}
+								setting = setting[ keys[ k ] ];
+							}
+						}
+					} else {
+						settings[ name ] = val;
+					}
+				};
+			form.find( '.fl-suggest-field' ).each( function() {
+				var $field = $( this ),
+					name   = $field.attr( 'name' ),
+					$vals  = $field.siblings( '.as-values' ),
+					val    = $vals.length ? $vals.val() : $field.val();
+				if ( name ) {
+					currentSuggestNames.push( name );
+					val = $.grep( ( val || '' ).split( ',' ), function( n ) { return n !== ''; } ).join( ',' );
+					setNestedSuggestValue( name, val );
+				}
+			} );
 
 			// Merge in the original settings in case legacy fields haven't rendered yet.
 			settings = $.extend( {}, FLBuilder._getOriginalSettings( form ), settings );
 
-			// Return the settings.
+			// Clear suggest field values for fields that were removed from the form (e.g. filter row deleted).
+			var storedSuggestNames = form.data( 'suggest-field-names' ) || [];
+			$.each( storedSuggestNames, function( i, name ) {
+				if ( currentSuggestNames.indexOf( name ) === -1 ) {
+					setNestedSuggestValue( name, '' );
+				}
+			} );
+
+			for ( key in settings ) {
+				if ( key.startsWith( 'as_values_' ) ) {
+					try {
+						delete settings[ key ];
+					} catch ( e ) {}
+				}
+			}
+
 			return settings;
 		},
 
@@ -7783,10 +7837,19 @@
 		_initAutoSuggestFields: function()
 		{
 			var fields = $('.fl-builder-settings:visible .fl-suggest-field', window.parent.document),
+				form   = fields.length ? fields.first().closest( '.fl-builder-settings' ) : $( '.fl-builder-settings:visible', window.parent.document ),
 				field  = null,
 				values = null,
 				name   = null,
 				data   = [];
+
+			FLBuilder._autoSuggestInitializing = true;
+
+			if ( form.length ) {
+				form.data( 'suggest-field-names', fields.map( function() {
+					return $( this ).attr( 'name' );
+				} ).get() );
+			}
 
 			fields.each( function() {
 				field = $( this );
@@ -7812,10 +7875,18 @@
 							.attr( 'data-value', values[ name ] );
 					}
 					fields.each( FLBuilder._initAutoSuggestField );
+					FLBuilder._clearAutoSuggestInitializing();
 				} );
 			} else {
 				fields.each( FLBuilder._initAutoSuggestField );
+				FLBuilder._clearAutoSuggestInitializing();
 			}
+		},
+
+		_clearAutoSuggestInitializing: function() {
+			setTimeout( function() {
+				FLBuilder._autoSuggestInitializing = false;
+			}, 0 );
 		},
 
 		/**
@@ -7871,6 +7942,13 @@
 
 			$(this).siblings('.as-values').val(selections.join(',')).trigger('change');
 
+			if ( ! FLBuilder._autoSuggestInitializing ) {
+				FLBuilder._autoSuggestValueChanged = true;
+				if ( FLBuilder.preview ) {
+					FLBuilder.preview.delayPreview();
+				}
+			}
+
 			// sortable stuff.
 			$(this).parents( '.as-selections').sortable({
 				items : ':not(.as-original)',
@@ -7881,6 +7959,12 @@
 						selected.push($(n).attr('data-value'));
 					});
 					$(that).siblings('.as-values').val(selected.join(',')).trigger('change');
+					if ( ! FLBuilder._autoSuggestInitializing ) {
+						FLBuilder._autoSuggestValueChanged = true;
+						if ( FLBuilder.preview ) {
+							FLBuilder.preview.delayPreview();
+						}
+					}
 				}
 			})
 		},
@@ -8287,7 +8371,7 @@
 		 * @since 2.9
 		 * @access private
 		 * @method _updateRepeaterFormState
-		 * @param HTMLElement table - A table element with mulitple fields
+		 * @param HTMLElement table - A table element with multiple fields
 		 */
 		_updateRepeaterFormState( table ) {
 			const { getSnapshot, setCurrentForm } = FL.Builder.settingsForms.state
@@ -10052,7 +10136,7 @@
 		 * Renders the correct weights list for a respective font.
 		 *
 		 * @since  1.6.3
-		 * @acces  private
+		 * @access private
 		 * @method _getFontWeights
 		 * @param  {Object} currentFont The font field element.
 		 */

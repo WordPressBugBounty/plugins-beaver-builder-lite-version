@@ -590,8 +590,7 @@
             this.$savedSearchType = this.$el.find('select[name="saved-search-type"]');
             this.$savedSearchType.on('change', this.onSavedSearchTermChanged.bind(this) );
 
-			this.$sectionHeaders = this.$el.find( '.fl-builder-blocks-section-header' );
-			this.$sectionHeaders.on( 'click', this.onSectionHeaderClicked );
+			this.$el.on('click', '.fl-builder-blocks-section-header', this.onSectionHeaderClicked );
         },
 
 		onSectionHeaderClicked: function( e ) {
@@ -681,7 +680,7 @@
         templateName: 'fl-content-panel-category-selector',
 
         /**
-        * Template function retreived by wp.template()
+        * Template function retrieved by wp.template()
         */
         template: null,
 

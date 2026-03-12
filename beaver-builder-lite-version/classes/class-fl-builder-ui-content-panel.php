@@ -284,7 +284,7 @@ class FLBuilderUIContentPanel {
 		foreach ( $templates['groups'] as $slug => $group ) {
 
 			$data['views'][] = array(
-				'handle'      => $slug,
+				'handle'      => 'layout-' . $slug,
 				'name'        => $group['name'],
 				'hasChildren' => count( $group['categories'] ) > 1,
 				'query'       => array(
@@ -302,10 +302,10 @@ class FLBuilderUIContentPanel {
 
 			foreach ( $group['categories'] as $cat_slug => $category ) {
 				$data['views'][] = array(
-					'handle'    => $cat_slug,
+					'handle'    => 'layout-' . $slug . '-' . $cat_slug,
 					'name'      => $category['name'],
 					'isSubItem' => true,
-					'parent'    => $slug,
+					'parent'    => 'layout-' . $slug,
 					'query'     => array(
 						'kind'        => 'template',
 						'type'        => 'core',
@@ -329,7 +329,7 @@ class FLBuilderUIContentPanel {
 		foreach ( $module_templates['groups'] as $slug => $group ) {
 
 			$data['views'][] = array(
-				'handle'       => $slug,
+				'handle'       => 'module-' . $slug,
 				'name'         => $group['name'],
 				'hasChildren'  => 0,
 				'query'        => array(
@@ -348,10 +348,10 @@ class FLBuilderUIContentPanel {
 
 			foreach ( $group['categories'] as $cat_slug => $category ) {
 				$data['views'][] = array(
-					'handle'       => $slug . '-' . $cat_slug,
+					'handle'       => 'module-' . $slug . '-' . $cat_slug,
 					'name'         => $category['name'],
 					'isSubItem'    => true,
-					'parent'       => $slug,
+					'parent'       => 'module-' . $slug,
 					'parentName'   => $group['name'],
 					'query'        => array(
 						'kind'        => 'template',
@@ -369,7 +369,7 @@ class FLBuilderUIContentPanel {
 		foreach ( $row_templates['groups'] as $slug => $group ) {
 
 			$data['views'][] = array(
-				'handle'       => $slug,
+				'handle'       => 'row-' . $slug,
 				'name'         => $group['name'],
 				'hasChildren'  => 0,
 				'query'        => array(
@@ -388,10 +388,10 @@ class FLBuilderUIContentPanel {
 
 			foreach ( $group['categories'] as $cat_slug => $category ) {
 				$data['views'][] = array(
-					'handle'       => $slug . '-' . $cat_slug,
+					'handle'       => 'row-' . $slug . '-' . $cat_slug,
 					'name'         => $category['name'],
 					'isSubItem'    => true,
-					'parent'       => $slug,
+					'parent'       => 'row-' . $slug,
 					'parentName'   => $group['name'],
 					'query'        => array(
 						'kind'        => 'template',

@@ -40,7 +40,7 @@ if ( isset( $settings->menu_search ) && 'show' == $settings->menu_search ) {
 
 		$layout = isset( $settings->menu_layout ) ? 'fl-menu-' . $settings->menu_layout : 'fl-menu-horizontal';
 
-		printf( apply_filters( 'fl_builder_menu_nav_html', '<nav role="navigation" aria-label="%s"%s>', $module, $settings ), esc_attr( $module->get_menu_label() ), FLBuilder::print_schema( ' itemscope="itemscope" itemtype="https://schema.org/SiteNavigationElement"', false ) );
+		printf( apply_filters( 'fl_builder_menu_nav_html', '<nav role="navigation" aria-label="%s %s"%s>', $module, $settings ), __( 'Navigation', 'fl-builder' ), esc_attr( $module->get_menu_label() ), FLBuilder::print_schema( ' itemscope="itemscope" itemtype="https://schema.org/SiteNavigationElement"', false ) );
 
 		$defaults = array(
 			'menu'                => $settings->menu,
@@ -73,7 +73,7 @@ if ( isset( $settings->menu_search ) && 'show' == $settings->menu_search ) {
 		do_action( 'fl_builder_menu_module_after_render', $defaults, $settings );
 		echo '</nav>';
 	} else {
-		printf( '<nav aria-label="%s"%s>', esc_attr( $module->get_menu_label() ), FLBuilder::print_schema( ' itemscope="itemscope" itemtype="https://schema.org/SiteNavigationElement"', false ) );
+		printf( '<nav aria-label="%s %s"%s>', __( 'Navigation ', 'fl-builder' ), esc_attr( $module->get_menu_label() ), FLBuilder::print_schema( ' itemscope="itemscope" itemtype="https://schema.org/SiteNavigationElement"', false ) );
 		?>
 		<ul class="menu fl-menu-horizontal">
 			<li class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home">

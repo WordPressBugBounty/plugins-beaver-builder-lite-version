@@ -543,10 +543,8 @@ class FLBuilderModuleBlocks {
 		include FL_BUILDER_DIR . 'includes/layout-js-config.php';
 		$js .= ob_get_clean();
 
-		// Include layout JS only in the block editor to support builder functions.
-		if ( self::is_block_editor() ) {
-			$js .= fl_builder_filesystem()->file_get_contents( FL_BUILDER_DIR . 'js/fl-builder-layout.js' );
-		}
+		// This is needed for both the block editor and frontend when blocks are present.
+		$js .= fl_builder_filesystem()->file_get_contents( FL_BUILDER_DIR . 'js/fl-builder-layout.js' );
 
 		// Base JS used by all modules.
 		$js .= fl_builder_filesystem()->file_get_contents( FL_BUILDER_DIR . 'js/fl-builder-layout-modules.js' );
@@ -571,6 +569,10 @@ class FLBuilderModuleBlocks {
 			$classes[] = 'fl-builder-content';
 			$classes[] = 'fl-builder-content-primary';
 			$classes[] = 'fl-builder-content-' . $post->ID;
+
+			if ( ! self::is_block_editor() ) {
+				$classes[] = 'fl-builder-blocks-only';
+			}
 		}
 
 		return $classes;
@@ -740,6 +742,37 @@ class FLBuilderModuleBlocks {
 	}
 
 	/**
+	 * Converts form field arrays to objects. Repeaters stay as arrays.
+	 *
+	 * @param array $settings
+	 * @param array $form_fields
+	 * @return array
+	 */
+	static private function convert_form_fields_to_objects( $settings, $form_fields = array() ) {
+		if ( ! is_array( $settings ) || empty( $form_fields ) ) {
+			return $settings;
+		}
+
+		foreach ( $settings as $key => $value ) {
+			if ( ! is_array( $value ) ) {
+				continue;
+			}
+
+			if ( ! isset( $form_fields[ $key ]['type'] ) || 'form' !== $form_fields[ $key ]['type'] ) {
+				continue;
+			}
+
+			if ( isset( $form_fields[ $key ]['multiple'] ) && $form_fields[ $key ]['multiple'] ) {
+				continue;
+			}
+
+			$settings[ $key ] = is_object( $value ) ? $value : (object) $value;
+		}
+
+		return $settings;
+	}
+
+	/**
 	 * Get an instance of a module class.
 	 *
 	 * @param string $block_name
@@ -759,8 +792,16 @@ class FLBuilderModuleBlocks {
 		$module->is_block = true;
 
 		if ( isset( $attributes['settings'] ) && ! empty( $attributes['settings'] ) ) {
-			$settings         = $attributes['settings'];
-			$settings         = 'string' === gettype( $settings ) ? json_decode( $settings ) : (object) $settings;
+			$settings = $attributes['settings'];
+
+			if ( 'string' === gettype( $settings ) ) {
+				$settings = json_decode( $settings, true );
+			}
+
+			// WordPress gives us arrays, but BB expects objects
+			$form_fields = FLBuilderModel::get_settings_form_fields( $module->form );
+			$settings    = (object) self::convert_form_fields_to_objects( $settings, $form_fields );
+
 			$settings->type   = $type;
 			$module->settings = $settings;
 			$module->settings = FLBuilderModel::get_node_settings_with_defaults_merged( $module );
@@ -820,7 +861,7 @@ class FLBuilderModuleBlocks {
 	 */
 	static public function get_connected_module_settings( $module ) {
 
-		if ( ! class_exists( ' FLThemeBuilderFieldConnections' ) ) {
+		if ( ! class_exists( 'FLThemeBuilderFieldConnections' ) ) {
 			return $module->settings;
 		}
 
