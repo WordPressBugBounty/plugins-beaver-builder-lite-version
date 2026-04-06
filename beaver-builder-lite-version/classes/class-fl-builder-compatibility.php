@@ -69,6 +69,7 @@ final class FLBuilderCompatibility {
 		add_action( 'um_after_header_meta', array( __CLASS__, 'um_restore_shortcode_parse' ) );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'fix_wpd_plugins' ), 11 );
 		add_action( 'wp_head', array( __CLASS__, 'fix_cookiebot' ), -9999 );
+		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'fix_espresso_decaf' ), 3 );
 
 		// Filters
 		add_filter( 'fl_builder_is_post_editable', array( __CLASS__, 'bp_pages_support' ), 11, 2 );
@@ -1468,6 +1469,18 @@ final class FLBuilderCompatibility {
 			return false;
 		}
 		return $enabled;
+	}
+
+	/**
+	 * @since 2.10.1
+	 * Fixes issue 4925
+	 */
+	public static function fix_espresso_decaf() {
+		if ( defined( 'EVENT_ESPRESSO_MAIN_FILE' ) && isset( $_GET['fl_builder'] ) ) {
+			wp_dequeue_script( 'jquery-validate' );
+			$js_url = FLBuilder::plugin_url() . 'js/';
+			wp_enqueue_script( 'jquery-validate', $js_url . 'libs/jquery.validate.min.js', array( 'jquery' ), FL_BUILDER_VERSION );
+		}
 	}
 }
 FLBuilderCompatibility::init();

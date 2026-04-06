@@ -8,7 +8,7 @@
 <?php endif; ?>
 
 <?php if ( ! empty( $settings->link_color ) ) : // Link Color ?>
-.fl-builder-content .fl-node-<?php echo $id; ?> .fl-row-content-wrap a {
+.fl-builder-content .fl-node-<?php echo $id; ?> :where(.fl-row-content-wrap) a {
 	color: <?php echo FLBuilderColor::hex_or_rgb( $settings->link_color ); ?>;
 }
 <?php elseif ( ! empty( $settings->text_color ) ) : ?>
@@ -18,7 +18,7 @@
 <?php endif; ?>
 
 <?php if ( ! empty( $settings->hover_color ) ) : // Link Hover Color ?>
-.fl-builder-content .fl-node-<?php echo $id; ?> .fl-row-content-wrap a:hover {
+.fl-builder-content .fl-node-<?php echo $id; ?> :where(.fl-row-content-wrap) a:hover {
 	color: <?php echo FLBuilderColor::hex_or_rgb( $settings->hover_color ); ?>;
 }
 <?php elseif ( ! empty( $settings->text_color ) ) : ?>

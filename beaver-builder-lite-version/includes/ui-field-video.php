@@ -4,6 +4,13 @@ var video = null;
 
 if ( FLBuilderSettingsConfig.attachments[ data.value ] ) {
 	video = FLBuilderSettingsConfig.attachments[ data.value ];
+} else if ( ! _.isEmpty( data.value ) && ! isNaN( data.value ) ) {
+	video = {
+		id: data.value,
+		url: '',
+		filename: '',
+		_needsFetch: true
+	};
 } else if ( ! _.isEmpty( data.value ) ) {
 	video = {
 		id: data.value,

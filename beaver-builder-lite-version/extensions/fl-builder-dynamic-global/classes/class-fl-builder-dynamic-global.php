@@ -19,6 +19,14 @@ final class FLBuilderDynamicGlobal {
 	static private $node_suffix_map = [];
 
 	/**
+	 * Cached suffix hashes keyed by dynamic_node_settings object ID.
+	 * Ensures the hash is computed once from clean data and reused
+	 * across rendering passes even if connection resolution mutates
+	 * the shared dynamic_node_settings object.
+	 */
+	static private $suffix_hash_cache = [];
+
+	/**
 	 * Cached template details data (title, link) stored per-template.
 	 */
 	static private $template_details_cache = [];
@@ -152,6 +160,7 @@ final class FLBuilderDynamicGlobal {
 
 		$root_node_settings  = [];
 		$child_node_settings = [];
+		$video_attachments   = [];
 
 		foreach ( $node_sections as $section_key => $section_data ) {
 			if ( ! isset( $section_data['nodeId'] ) ) {
@@ -188,6 +197,14 @@ final class FLBuilderDynamicGlobal {
 
 								$root_node_settings[ $section_field_key . '_src' ] = $photo_src;
 							}
+
+							// Prep video attachment data for the settings form.
+							if ( isset( $section_field_data['type'] ) && 'video' === $section_field_data['type'] && is_numeric( $setting_val ) ) {
+								$video_data = FLBuilderUISettingsForms::prep_attachment_for_js_config( (int) $setting_val );
+								if ( $video_data ) {
+									$video_attachments[ (int) $setting_val ] = $video_data;
+								}
+							}
 						}
 					} else {
 						$target_field_name = str_replace( '__' . $target_node_id . '__', '', $section_field_key );
@@ -209,6 +226,14 @@ final class FLBuilderDynamicGlobal {
 								}
 
 								$child_node_settings[ $section_field_key . '_src' ] = $photo_src;
+							}
+
+							// Prep video attachment data for the settings form.
+							if ( isset( $section_field_data['type'] ) && 'video' === $section_field_data['type'] && is_numeric( $setting_val ) ) {
+								$video_data = FLBuilderUISettingsForms::prep_attachment_for_js_config( (int) $setting_val );
+								if ( $video_data ) {
+									$video_attachments[ (int) $setting_val ] = $video_data;
+								}
 							}
 						}
 					}
@@ -257,6 +282,7 @@ final class FLBuilderDynamicGlobal {
 		$config['tabs']                  = $tabs;
 		$config['settings']              = $all_settings;
 		$config['dynamic_node_settings'] = $dynamic_node_settings;
+		$config['attachments']           = $video_attachments;
 
 		return $config;
 	}
@@ -421,7 +447,7 @@ final class FLBuilderDynamicGlobal {
 					$dynamic_fields = (object) $dynamic_fields;
 				}
 
-				if ( ! isset( $dynamic_fields->fields ) ) {
+				if ( empty( $dynamic_fields->fields ) ) {
 					continue;
 				}
 
@@ -973,7 +999,7 @@ final class FLBuilderDynamicGlobal {
 						}
 					}
 
-					if ( ! isset( $field['preview'] ) ) {
+					if ( ! isset( $field['preview'] ) || ! is_array( $field['preview'] ) ) {
 						continue;
 					}
 
@@ -1362,8 +1388,13 @@ final class FLBuilderDynamicGlobal {
 		// Without this, styles and scripts that depend on the node ID will
 		// conflict with other instances of the same node.
 		if ( $add_suffix ) {
+			$hash_key = spl_object_id( $dynamic );
+			if ( ! isset( self::$suffix_hash_cache[ $hash_key ] ) ) {
+				self::$suffix_hash_cache[ $hash_key ] = md5( json_encode( $dynamic ) );
+			}
+
 			$original_node_id                           = $node->node;
-			$node->node                                .= '__' . md5( json_encode( $dynamic ) );
+			$node->node                                .= '__' . self::$suffix_hash_cache[ $hash_key ];
 			self::$node_suffix_map[ $original_node_id ] = $node->node;
 
 			// Map the parent ID to an ID with a suffix if it exists.

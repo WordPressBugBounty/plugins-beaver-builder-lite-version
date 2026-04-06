@@ -40,7 +40,10 @@ if ( isset( $settings->menu_search ) && 'show' == $settings->menu_search ) {
 
 		$layout = isset( $settings->menu_layout ) ? 'fl-menu-' . $settings->menu_layout : 'fl-menu-horizontal';
 
-		printf( apply_filters( 'fl_builder_menu_nav_html', '<nav role="navigation" aria-label="%s %s"%s>', $module, $settings ), __( 'Navigation', 'fl-builder' ), esc_attr( $module->get_menu_label() ), FLBuilder::print_schema( ' itemscope="itemscope" itemtype="https://schema.org/SiteNavigationElement"', false ) );
+		/**
+		 * HTML format string for the navigation menu wrapper element.
+		 */
+		printf( apply_filters( 'fl_builder_menu_nav_html', '<nav aria-label="%s %s"%s>', $module, $settings ), __( 'Navigation', 'fl-builder' ), esc_attr( $module->get_menu_label() ), FLBuilder::print_schema( ' itemscope="itemscope" itemtype="https://schema.org/SiteNavigationElement"', false ) );
 
 		$defaults = array(
 			'menu'                => $settings->menu,

@@ -364,6 +364,14 @@
 				const config = FLBuilder._jsonParse( response );
 				const showTemplate = typeof( nodeData.showTemplate ) !== 'undefined' ? nodeData.showTemplate : true;
 
+				// Merge video attachment data into the settings config.
+				if ( config.attachments ) {
+					FLBuilderSettingsConfig.attachments = Object.assign(
+						FLBuilderSettingsConfig.attachments || {},
+						config.attachments
+					);
+				}
+
 				if ( config.dynamicEditing && ! config.isEmpty ) {
 
 					if ( nodeData.layout ) {

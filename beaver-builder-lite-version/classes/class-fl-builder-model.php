@@ -1650,6 +1650,16 @@ final class FLBuilderModel {
 
 		$settings = FLBuilderDynamicGlobal::merge_settings_with_template( $node, $settings );
 
+		// Refresh cached row video data for component instances where
+		// the video attachment ID may have been overridden by the instance.
+		if ( 'row' === $node->type
+			&& ! empty( $node->template_node_id )
+			&& 'video' === ( $settings->bg_type ?? '' )
+			&& 'wordpress' === ( $settings->bg_video_source ?? '' )
+		) {
+			$settings = self::process_row_settings( $node, $settings );
+		}
+
 		return ! $filter ? $settings : apply_filters( 'fl_builder_node_settings', $settings, $node );
 	}
 
@@ -5028,11 +5038,18 @@ final class FLBuilderModel {
 				if ( '_fl_builder_template_id' == $meta_key ) {
 					$meta_value = self::generate_node_id();
 				} else {
-					$meta_value = addslashes( $meta_info->meta_value );
+					$meta_value = $meta_info->meta_value;
 				}
-				// @codingStandardsIgnoreStart
-				$wpdb->query( "INSERT INTO {$wpdb->postmeta} (post_id, meta_key, meta_value) values ({$new_post_id}, '{$meta_key}', '{$meta_value}')" );
-				// @codingStandardsIgnoreEnd
+
+				$wpdb->insert(
+					$wpdb->postmeta,
+					array(
+						'post_id'    => $new_post_id,
+						'meta_key'   => $meta_key,
+						'meta_value' => $meta_value,
+					),
+					array( '%d', '%s', '%s' )
+				);
 			}
 		}
 
@@ -5367,7 +5384,15 @@ final class FLBuilderModel {
 						$cleaned[ $node->node ] = $node;
 					}
 
-					$cleaned[ $node->node ]          = self::clean_node_settings( $cleaned[ $node->node ] );
+					$cleaned[ $node->node ] = self::clean_node_settings( $cleaned[ $node->node ] );
+
+					// Remove erroneous dynamic_node_settings from non-root nodes.
+					// This property belongs only on template root nodes and was incorrectly
+					// added to child modules by a previous outline panel label save bug.
+					if ( isset( $cleaned[ $node->node ]->settings->dynamic_node_settings ) && empty( $node->template_root_node ) ) {
+						unset( $cleaned[ $node->node ]->settings->dynamic_node_settings );
+					}
+
 					$cleaned[ $node->node ]->global  = self::is_node_global( $node );
 					$cleaned[ $node->node ]->dynamic = self::is_node_dynamic( $node );
 
@@ -5475,6 +5500,7 @@ final class FLBuilderModel {
 	 * @return object
 	 */
 	static public function update_layout_settings( $settings = array(), $status = null, $post_id = null ) {
+		$settings = (array) $settings;
 
 		if ( ! FLBuilderUserAccess::current_user_can( 'unrestricted_editing' ) ) {
 			unset( $settings['js'] );

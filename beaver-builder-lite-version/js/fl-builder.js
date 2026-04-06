@@ -935,6 +935,9 @@
 			// Live Preview
 			FLBuilder.addHook( 'didCompleteAJAX', FLBuilder._refreshSettingsPreviewReference );
 			FLBuilder.addHook( 'didRenderLayoutComplete', FLBuilder._refreshSettingsPreviewReference );
+
+			// Resolve video attachment filenames on form init
+			FLBuilder.addHook( 'settings-form-init', FLBuilder._resolveVideoFieldAttachments );
 		},
 
 		/**
@@ -5972,7 +5975,7 @@
 							FLBuilder._initModuleMarginPlaceholders();
 							FLBuilder.triggerHook( 'didAddModule', {
 								nodeId: data.nodeId,
-								moduleType: settings.type,
+								moduleType: settings ? settings.type : data.type,
 								settings: settings,
 								newNodes: data.newNodes,
 								updatedNodes: data.updatedNodes,
@@ -9324,6 +9327,43 @@
 			filename.html('');
 			wrap.addClass('fl-video-empty');
 			videoField.val('').trigger('change');
+		},
+
+		/**
+		 * Resolves video attachment filenames for fields that have a
+		 * numeric ID but no attachment data in the config.
+		 *
+		 * @since 2.10
+		 * @access private
+		 * @method _resolveVideoFieldAttachments
+		 */
+		_resolveVideoFieldAttachments: function()
+		{
+			$( '.fl-video-field', window.parent.document ).each( function() {
+				var wrap     = $( this ),
+					input    = wrap.find( 'input[type=hidden]' ),
+					id       = input.val(),
+					filename = wrap.find( '.fl-video-preview-filename' );
+
+				if ( ! id || isNaN( id ) || FLBuilderSettingsConfig.attachments[ id ] ) {
+					return;
+				}
+
+				if ( filename.length && ( ! filename.html() || filename.html() == id ) ) {
+					var attachment = wp.media.attachment( id );
+					attachment.fetch().then( function() {
+						var name = attachment.get( 'filename' );
+						if ( name ) {
+							filename.html( name );
+							FLBuilderSettingsConfig.attachments[ id ] = {
+								id: id,
+								url: attachment.get( 'url' ),
+								filename: name
+							};
+						}
+					} );
+				}
+			} );
 		},
 
 		/* Multiple Audios Field

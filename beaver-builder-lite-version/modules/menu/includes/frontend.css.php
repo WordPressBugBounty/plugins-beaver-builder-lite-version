@@ -20,7 +20,7 @@ FLBuilderCSS::typography_field_rule( array(
 ) );
 
 ?>
-<?php if ( ! empty( $settings->menu_bg_color ) && ! $module->is_responsive_menu_flyout() ) : ?>
+<?php if ( ! empty( $settings->menu_bg_color ) ) : ?>
 .fl-node-<?php echo $id; ?> .fl-menu .menu {
 	background-color : <?php echo FLBuilderColor::hex_or_rgb( $settings->menu_bg_color ); ?>;
 }
@@ -63,7 +63,7 @@ foreach ( $module->extract_paddings() as $media => $paddings ) {
 ?>
 
 <?php if ( ! empty( $settings->link_color ) ) : ?>
-.fl-node-<?php echo $id; ?> .fl-menu li.menu-item a {
+.fl-node-<?php echo $id; ?> .menu-item a {
 	color: <?php echo FLBuilderColor::hex_or_rgb( $settings->link_color ); ?>;
 	<?php if ( ! empty( $settings->link_bg_color ) ) : ?>
 		background-color: #<?php echo $settings->link_bg_color; ?>;
@@ -91,9 +91,9 @@ endif;
  */
 if ( ! empty( $settings->link_hover_bg_color ) || $settings->link_hover_color ) :
 	?>
-.fl-node-<?php echo $id; ?> .fl-menu li.menu-item :is(*:focus, a:hover, .fl-has-submenu-container:hover > *),
-.fl-node-<?php echo $id; ?> .fl-menu .current-menu-item > a,
-.fl-node-<?php echo $id; ?> .fl-menu .current-menu-item > .fl-has-submenu-container > * {
+.fl-node-<?php echo $id; ?> .menu-item :is(*:focus, a:hover, .fl-has-submenu-container:hover > *),
+.fl-node-<?php echo $id; ?> .current-menu-item > a,
+.fl-node-<?php echo $id; ?> .current-menu-item > .fl-has-submenu-container > * {
 	<?php
 	if ( ! empty( $settings->link_hover_bg_color ) ) {
 		echo 'background-color: ' . FLBuilderColor::hex_or_rgb( $settings->link_hover_bg_color ) . ';';
@@ -391,6 +391,8 @@ if ( 'always' != $module->get_media_breakpoint() ) :
 		.fl-node-<?php echo $id; ?> .fl-menu-mobile-flyout {
 			<?php if ( ! empty( $settings->mobile_menu_bg ) ) : ?>
 				background-color: <?php echo FLBuilderColor::hex_or_rgb( $settings->mobile_menu_bg ); ?>;
+			<?php elseif ( ! empty( $settings->menu_bg_color ) ) : ?>
+				background-color: <?php echo FLBuilderColor::hex_or_rgb( $settings->menu_bg_color ); ?>;
 			<?php else : ?>
 				background-color: #fff;
 			<?php endif; ?>
@@ -417,6 +419,7 @@ if ( 'always' != $module->get_media_breakpoint() ) :
 			margin: 0 auto;
 		}
 		.fl-node-<?php echo $id; ?> .fl-menu .fl-menu-mobile-flyout .menu {
+			background-color: transparent;
 			display: block !important;
 			float: none;
 		}

@@ -54,12 +54,12 @@
 				return;
 			}
 			// Trigger focus on the mobile toggle button if the user is shift tabbing from the first menu item
-			if ( event.shiftKey && $( event.target ).is( 'a' ) ) {
+			if ( event.shiftKey && $( event.currentTarget ).is( 'a' ) ) {
 				event.preventDefault();
 				$( this.wrapperClass ).find( '.fl-menu-mobile-toggle' ).trigger( 'focus' );
 			}
 			// Trigger focus on the first menu item if the user is tabbing from the mobile toggle button
-			else if ( ! event.shiftKey && $( event.target ).hasClass( 'fl-menu-mobile-toggle' ) && $( event.target ).hasClass( 'fl-active' )  ) {
+			else if ( ! event.shiftKey && $( event.currentTarget ).hasClass( 'fl-menu-mobile-toggle' ) && $( event.currentTarget ).hasClass( 'fl-active' )  ) {
 				event.preventDefault();
 				$( this.wrapperClass ).find( '.menu-item:first a:first' ).trigger( 'focus' );
 			}
@@ -219,7 +219,7 @@
 		 */
 		_menuOnFocus: function(){
 			$( this.wrapperClass ).on( 'focus', 'a, .fl-menu-toggle', $.proxy( function( event ) {
-				const focusedMenuItem = $( event.target ).closest( '.menu-item' );
+				const focusedMenuItem = $( event.currentTarget ).closest( '.menu-item' );
 				const blurredMenuItem = $( event.relatedTarget ).closest( '.menu-item' );
 				// In case the blurred & focused items are siblings
 				if ( focusedMenuItem.closest( 'ul' ).is( blurredMenuItem.closest( 'ul' ) ) )	{
@@ -298,7 +298,7 @@
 			$( this.wrapperClass ).on( 'keydown', 'span.fl-menu-toggle', $.proxy( function( event ) {
 				if ( event.key === 'Enter' || event.key === ' ' ) {
 					event.preventDefault();
-					$( event.target ).trigger( 'click' );
+					$( event.currentTarget ).trigger( 'click' );
 				}
 			}, this ) );
 			$( this.wrapperClass ).on( 'click', 'a, .fl-menu-toggle', $.proxy( function( event ) {
@@ -306,14 +306,14 @@
 				// Only allow mouse clicks with accordion & mobile menus
 				if ( this._isMouseAvailable() && ! this._isMenuToggle() && event.detail && this.type !== 'accordion' ) return;
 				// Links only open & do not toggle submenus if there is either a submenu icon or an accordion layout
-				if ( $( event.target ).is( 'a' ) && ( this.submenuIcon !== 'none' || this.type === 'accordion' ) ) return;
-				const menuItem = $( event.target ).closest( '.menu-item' );
+				if ( $( event.currentTarget ).is( 'a' ) && ( this.submenuIcon !== 'none' || this.type === 'accordion' ) ) return;
+				const menuItem = $( event.currentTarget ).closest( '.menu-item, .fl-menu-logo' );
 				const menuLink = menuItem.find( 'a:first' ).attr( 'href' );
 				const submenuHidden = menuItem.find( '.sub-menu:first' ).is( ':hidden' );
 				if ( typeof menuLink === 'undefined' || menuLink === '#' || submenuHidden ) {
 					event.preventDefault();
 				}
-				if ( $( event.target ).hasClass( 'fl-menu-toggle' ) || submenuHidden ) {
+				if ( $( event.currentTarget ).hasClass( 'fl-menu-toggle' ) || submenuHidden ) {
 					this._toggleSubmenu( menuItem, submenuHidden );
 				}
 			}, this ) );
@@ -471,7 +471,6 @@
 				$menu    = null,
 				self     = this;
 
-			$( this.wrapperClass ).find( 'ul.menu' ).attr( 'role', 'menu');
 			$( this.wrapperClass ).find( '.fl-menu-mobile-toggle' ).attr('aria-controls', $( this.wrapperClass ).find( 'ul.menu' ).attr('id'));
 
 			if( this._isMenuToggle() ){
@@ -671,9 +670,14 @@
 
 			var module = $( this.nodeClass ),
 				clone  = $( this.nodeClass + '-clone' ),
-				menu   = clone.find( 'ul.menu' );
+				menu   = clone.find( 'ul.menu' ),
+				nav    = module.find( 'nav' );
 
-			module.find( '.fl-menu-mobile-toggle' ).after( menu );
+			if ( nav.length ) {
+				nav.append( menu );
+			} else {
+				module.find( '.fl-menu-mobile-toggle' ).after( menu );
+			}
 			clone.remove();
 			menu.find( 'a' ).each( FLBuilderLayout._initAnchorLink );
 		},

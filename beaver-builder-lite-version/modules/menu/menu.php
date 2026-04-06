@@ -1537,7 +1537,7 @@ class FL_Menu_Module_Walker extends Walker_Nav_Menu {
 
 	public function start_lvl( &$output, $depth = 0, $args = array() ) {
 		$indent  = ( $depth ) ? str_repeat( "\t", $depth ) : '';
-		$output .= $indent . '<ul id="sub-menu-' . $this->parent_id . '" class="sub-menu" role="menu">';
+		$output .= $indent . '<ul id="sub-menu-' . $this->parent_id . '" class="sub-menu">';
 	}
 
 	public function start_el( &$output, $item, $depth = 0, $args = array(), $id = 0 ) {
@@ -1570,14 +1570,14 @@ class FL_Menu_Module_Walker extends Walker_Nav_Menu {
 
 		$item_output  = $args->has_children ? '<div class="fl-has-submenu-container">' : '';
 		$item_output .= $args->before;
-		$item_output .= '<a role="menuitem"' . $attributes . '>';
+		$item_output .= '<a ' . $attributes . '>';
 		$item_output .= $args->link_before . apply_filters( 'the_title', $item->title, $item->ID ) . $args->link_after;
 		$item_output .= '</a>';
 
 		if ( $args->has_children && $toggle && ! $hidden ) {
 			$tag          = 1 === $this->version ? 'span' : 'button';
 			$attributes   = 1 === $this->version ? 'role="button" tabindex="0"' : 'type="button"';
-			$attributes  .= ' role="menuitem" aria-label="' . esc_attr( $item->title ) . ' submenu toggle" ' . $aria_attributes;
+			$attributes  .= ' aria-label="' . esc_attr( $item->title ) . ' submenu toggle" ' . $aria_attributes;
 			$item_output .= '<' . $tag . ' ' . $attributes . ' class="fl-menu-toggle fl-content-ui-button"></' . $tag . '>';
 		}
 

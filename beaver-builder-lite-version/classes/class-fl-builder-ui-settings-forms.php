@@ -459,6 +459,7 @@ class FLBuilderUISettingsForms {
 			if ( ! is_object( $node ) || ! isset( $node->settings ) || ! is_object( $node->settings ) ) {
 				continue;
 			}
+
 			$node_settings[ $node_id ] = FLBuilderModel::get_node_settings( $node, false );
 		}
 
@@ -498,6 +499,36 @@ class FLBuilderUISettingsForms {
 					$child_node_attachments = self::get_node_attachments( $child_node );
 					$attachments            = array_merge( $attachments, $child_node_attachments );
 				}
+
+				// Also prep attachments from component instance overrides
+				// stored in dynamic_node_settings (e.g. video fields).
+				$dynamic_overrides = isset( $node->settings->dynamic_node_settings )
+					? $node->settings->dynamic_node_settings
+					: null;
+
+				if ( $dynamic_overrides ) {
+					$override_groups = array();
+					if ( isset( $dynamic_overrides->root ) ) {
+						foreach ( (array) $dynamic_overrides->root as $node_overrides ) {
+							$override_groups[] = (array) $node_overrides;
+						}
+					}
+					if ( isset( $dynamic_overrides->child ) ) {
+						foreach ( (array) $dynamic_overrides->child as $node_overrides ) {
+							$override_groups[] = (array) $node_overrides;
+						}
+					}
+					foreach ( $override_groups as $overrides ) {
+						foreach ( $overrides as $value ) {
+							if ( is_numeric( $value ) && (int) $value > 0 ) {
+								$data = self::prep_attachment_for_js_config( (int) $value );
+								if ( $data ) {
+									$attachments[ (int) $value ] = $data;
+								}
+							}
+						}
+					}
+				}
 			}
 
 			$node_attachments = self::get_node_attachments( $node );
@@ -520,6 +551,16 @@ class FLBuilderUISettingsForms {
 
 		if ( empty( $node ) || empty( $node->settings ) ) {
 			return $attachments;
+		}
+
+		// Get field definitions for this node type to identify video fields.
+		$fields = [];
+		if ( 'row' === $node->type && isset( FLBuilderModel::$settings_forms['row'] ) ) {
+			$fields = FLBuilderModel::get_settings_form_fields( FLBuilderModel::$settings_forms['row']['tabs'] );
+		} elseif ( 'column' === $node->type && isset( FLBuilderModel::$settings_forms['col'] ) ) {
+			$fields = FLBuilderModel::get_settings_form_fields( FLBuilderModel::$settings_forms['col']['tabs'] );
+		} elseif ( 'module' === $node->type && isset( $node->settings->type, FLBuilderModel::$modules[ $node->settings->type ] ) ) {
+			$fields = FLBuilderModel::get_settings_form_fields( FLBuilderModel::$modules[ $node->settings->type ]->form );
 		}
 
 		foreach ( $node->settings as $key => $value ) {
@@ -578,7 +619,7 @@ class FLBuilderUISettingsForms {
 	 * @param int $id
 	 * @return array|bool
 	 */
-	static private function prep_attachment_for_js_config( $id ) {
+	static public function prep_attachment_for_js_config( $id ) {
 
 		$url = wp_get_attachment_url( $id );
 

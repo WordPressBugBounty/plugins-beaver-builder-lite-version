@@ -1,3 +1,35 @@
+<h4>2.10.1.5 - 04/02/2026</h4>
+<p><strong>Hotfix</strong></p>
+<ul>
+	<li>Menu Module: Fixed <code>ul</code> sitting outside of <code>nav</code> after switching from responsive layout (#5044)</li>
+	<li>Menu Module: Reverted fix for inline logo link not working on touchscreen devices in favor of new fix so that it doesn't cause sub-menus to not work properly on mobile (#4983)</li>
+	<li>Menu Module: Remove unneeded accessibility attributes (#4772)</li>
+</ul>
+
+<h4>2.10.1.4 - 03/26/2026</h4>
+<p><strong>Hotfix</strong></p>
+<ul>
+	<li>Accordion Module: Fixed opening issue when label is an anchor link and expand on tab is enabled (#4976)</li>
+	<li>Callout Modoule: Fixed conflict with Event Espresso (#4925)</li>
+	<li>Menu Module: Fixed inline logo link not working on touchscreen devices (#4983)</li>
+	<li>Fixed fatal error when using a role with restricted editing (#5012)</li>
+	<li>Fixed Stripe being enqueued even when Cloud access is disabled (#4934)</li>
+	<li>Menu Module: Fixed background color not rendering when responsive menu is set to flyout (#5019)</li>
+</ul>
+
+<h4>2.10.1.3 - 03/19/2026</h4>
+<p><strong>Hotfix</strong></p>
+<ul>
+	<li>Security: Fixed possible SQL injection in duplicate_post meta key handling (#4965)</li>
+	<li>Components: Fixed component not opening for editing in some cases (#4790 & #4747)</li>
+	<li>Components: Fixed CSS breaking when child module is using a global color (#4947)</li>
+	<li>Components: Fixed settings not opening after setting node label in the Outline Panel (#4990)</li>
+	<li>Components: Fixed row background video not rendering (#4999)</li>
+	<li>Accordion Module: Fixed accordion not opening when clicking the title/label if HTML tags are used in label (#4863)</li>
+	<li>Menu Module: Fixed menu link color overriding dropdown link color (#4995)</li>
+	<li>Fixed JS error when using Post Slider and Post Carousel in the block editor (#4733)</li>
+</ul>
+
 <h4>2.10.1.2 - 03/12/2026</h4>
 <p><strong>Hotfix</strong></p>
 <ul>

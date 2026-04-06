@@ -28,8 +28,8 @@ final class FLBuilderEnqueue {
 	 */
 	static public function on_enqueue() {
 
-		// Frontend
-		if ( ! is_admin() ) {
+		// Minimize load by not registering JS libraries outside of the block editor and frontend where they are needed.
+		if ( FLBuilderModuleBlocks::is_block_editor() || ! is_admin() ) {
 			self::register_layout_libraries();
 		}
 
