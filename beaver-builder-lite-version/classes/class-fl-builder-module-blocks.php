@@ -291,7 +291,12 @@ class FLBuilderModuleBlocks {
 			return;
 		}
 
+		// Save and restore the loop counter so posts blocks rendered
+		// during this pre-render pass don't corrupt pagination for the
+		// actual page render.
+		$saved_loop_counter = FLBuilderLoop::$loop_counter;
 		do_blocks( $post->post_content );
+		FLBuilderLoop::$loop_counter = $saved_loop_counter;
 
 		FLBuilder::clear_enqueued_global_assets();
 	}

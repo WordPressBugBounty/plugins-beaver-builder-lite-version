@@ -4942,7 +4942,11 @@ final class FLBuilderModel {
 		$settings     = self::sanitize_global( $settings );
 
 		if ( ! current_user_can( 'unfiltered_html' ) ) {
-			unset( $settings['js'] );
+			if ( is_object( $settings ) ) {
+				unset( $settings->js );
+			} else {
+				unset( $settings['js'] );
+			}
 		}
 
 		$new_settings = (object) array_merge( (array) $old_settings, (array) $settings );
@@ -5503,7 +5507,11 @@ final class FLBuilderModel {
 		$settings = (array) $settings;
 
 		if ( ! FLBuilderUserAccess::current_user_can( 'unrestricted_editing' ) ) {
-			unset( $settings['js'] );
+			if ( is_object( $settings ) ) {
+				unset( $settings->js );
+			} else {
+				unset( $settings['js'] );
+			}
 		}
 		$status       = ! $status ? self::get_node_status() : $status;
 		$post_id      = ! $post_id ? self::get_post_id() : $post_id;

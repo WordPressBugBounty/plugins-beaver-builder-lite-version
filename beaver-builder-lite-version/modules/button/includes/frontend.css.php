@@ -296,8 +296,8 @@ foreach ( $breakpoints as $device ) {
 		'enabled'  => 'enable' === $settings->{$setting_name} && 'flat' === $settings->style,
 		'media'    => $device,
 		'selector' => array(
-			'.fl-builder-content .fl-node-' . $id . ' .fl-button:is(a, button)',
-			'.fl-builder-content .fl-node-' . $id . ' .fl-button:is(a, button) *',
+			':where(.fl-builder-content .fl-node-' . $id . ' .fl-button:is(a, button))',
+			':where(.fl-builder-content .fl-node-' . $id . ' .fl-button:is(a, button) *)',
 		),
 		'props'    => array(
 			'transition'         => $transition,
@@ -311,8 +311,8 @@ foreach ( $breakpoints as $device ) {
 		'enabled'  => 'disable' === $settings->{$setting_name} && 'flat' === $settings->style,
 		'media'    => $device,
 		'selector' => array(
-			'.fl-builder-content .fl-node-' . $id . ' .fl-button:is(a, button)',
-			'.fl-builder-content .fl-node-' . $id . ' .fl-button:is(a, button) *',
+			':where(.fl-builder-content .fl-node-' . $id . ' .fl-button:is(a, button))',
+			':where(.fl-builder-content .fl-node-' . $id . ' .fl-button:is(a, button) *)',
 		),
 		'props'    => array(
 			'transition'         => 'none',
@@ -358,6 +358,15 @@ FLBuilderCSS::rule( array(
 	'enabled'  => 'adv-gradient' === $settings->style && FLBuilderColor::gradient( $settings->bg_gradient_hover, true ),
 	'props'    => array(
 		'background-image' => FLBuilderColor::gradient( $settings->bg_gradient_hover ),
+	),
+) );
+
+// Click action - copy text (disabled state)
+FLBuilderCSS::rule( array(
+	'selector' => ".fl-builder-content .fl-node-$id .fl-button:disabled, .fl-builder-content .fl-node-$id .fl-button.disabled",
+	'enabled'  => isset( $settings->click_action ) && 'copy_text' === $settings->click_action,
+	'props'    => array(
+		'opacity' => '.5',
 	),
 ) );
 

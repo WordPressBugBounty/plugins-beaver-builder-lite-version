@@ -817,7 +817,7 @@ final class FLBuilderDynamicGlobal {
 		}
 
 		// Look for the target node directly in the template data.
-		$settings      = self::get_template_node_settings( $target_node_id, $template_post_id );
+		$settings = self::get_template_node_settings( $target_node_id, $template_post_id );
 
 		if ( empty( $settings ) || empty( $settings->dynamic_fields ) ) {
 			return null;

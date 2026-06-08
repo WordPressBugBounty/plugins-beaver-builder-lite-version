@@ -233,9 +233,13 @@
 			// Resize the layout.
 			FLBuilder._resizeLayout();
 
-			// Preview all responsive settings.
+			// Set placeholders based on the new mode.
 			this._setMarginPaddingPlaceholders();
-			this._previewFields();
+
+			// Preview all responsive settings.
+			if ( ! FLBuilder.UIIFrame.isEnabled() ) {
+				this._previewFields();
+			}
 
 			// Broadcast the switch.
 			FLBuilder.triggerHook( 'responsive-editing-switched', mode );
@@ -608,6 +612,8 @@
 						}
 					} else{
 						field.find( 'input' ).trigger( 'keyup' );
+						field.find( 'input' ).trigger( 'input' );
+						field.find( 'input' ).trigger( 'change' );
 						field.find( 'select' ).trigger( 'change' );
 					}
 				} );

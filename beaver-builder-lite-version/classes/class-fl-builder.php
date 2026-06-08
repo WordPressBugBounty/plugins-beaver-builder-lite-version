@@ -840,7 +840,6 @@ final class FLBuilder {
 			wp_enqueue_script( 'wplink' );
 			wp_enqueue_script( 'editor' );
 			wp_enqueue_script( 'quicktags' );
-			wp_enqueue_script( 'json2' );
 			wp_enqueue_script( 'jquery-ui-droppable' );
 			wp_enqueue_script( 'jquery-ui-draggable' );
 			wp_enqueue_script( 'jquery-ui-slider' );
@@ -1043,6 +1042,11 @@ final class FLBuilder {
 
 		if ( FLBuilderModel::is_builder_active() ) {
 			$classes[] = 'fl-builder-edit';
+
+			// Template editing
+			if ( 'fl-builder-template' === get_post_type() ) {
+				$classes[] = 'fl-builder-template-edit';
+			}
 
 			// Lite version
 			if ( true === FL_BUILDER_LITE ) {

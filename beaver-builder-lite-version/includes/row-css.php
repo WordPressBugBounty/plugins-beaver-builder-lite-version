@@ -350,11 +350,19 @@ FLBuilderCSS::rule( array(
 ) );
 
 // Border
-FLBuilderCSS::border_field_rule( array(
-	'settings'     => $settings,
-	'setting_name' => 'border',
-	'selector'     => ".fl-node-$id > .fl-row-content-wrap",
-) );
+if ( 'multiple' === $settings->bg_type ) {
+	FLBuilderCSS::border_field_rule( array(
+		'settings'     => $settings,
+		'setting_name' => 'border',
+		'selector'     => ".fl-node-$id",
+	) );
+} else {
+	FLBuilderCSS::border_field_rule( array(
+		'settings'     => $settings,
+		'setting_name' => 'border',
+		'selector'     => ".fl-node-$id > .fl-row-content-wrap",
+	) );
+}
 
 // Min Height
 FLBuilderCSS::responsive_rule( array(
@@ -445,6 +453,61 @@ if ( isset( $settings->max_content_width ) || isset( $settings->max_content_widt
 }
 
 FLBuilderArt::render_shape_layers_css( $row );
+
+$breakpoints = array( '', 'large', 'medium', 'responsive' );
+
+foreach ( $breakpoints as $breakpoint ) {
+	$name    = empty( $breakpoint ) ? 'border' : "border_{$breakpoint}";
+	$setting = isset( $settings->{$name} ) ? $settings->{$name} : null;
+
+	if ( ! $setting ) {
+		continue;
+	}
+
+	$radius = array(
+		'top_left'     => (int) ( $setting['radius']['top_left'] ?? 0 ),
+		'top_right'    => (int) ( $setting['radius']['top_right'] ?? 0 ),
+		'bottom_right' => (int) ( $setting['radius']['bottom_right'] ?? 0 ),
+		'bottom_left'  => (int) ( $setting['radius']['bottom_left'] ?? 0 ),
+	);
+
+	$width = array(
+		'top'    => (int) ( $setting['width']['top'] ?? 0 ),
+		'right'  => (int) ( $setting['width']['right'] ?? 0 ),
+		'bottom' => (int) ( $setting['width']['bottom'] ?? 0 ),
+		'left'   => (int) ( $setting['width']['left'] ?? 0 ),
+	);
+
+	$props = array();
+
+	if ( array_filter( $radius ) ) {
+		$props['border-top-left-radius']     = sprintf( '%dpx', max( 0, $radius['top_left'] - max( $width['top'], $width['left'] ) ) );
+		$props['border-top-right-radius']    = sprintf( '%dpx', max( 0, $radius['top_right'] - max( $width['top'], $width['right'] ) ) );
+		$props['border-bottom-right-radius'] = sprintf( '%dpx', max( 0, $radius['bottom_right'] - max( $width['bottom'], $width['right'] ) ) );
+		$props['border-bottom-left-radius']  = sprintf( '%dpx', max( 0, $radius['bottom_left'] - max( $width['bottom'], $width['left'] ) ) );
+
+		// Filter out any properties with zero or negative values
+		$props = array_filter( $props, function ( $prop ) {
+			return (int) $prop > 0;
+		} );
+	}
+
+	if ( ! empty( $props ) ) {
+		FLBuilderCSS::rule(
+			array(
+				'selector' => array(
+					'.fl-node-' . $id . '.fl-row .fl-row-content-wrap .fl-builder-layer',
+					'.fl-node-' . $id . '.fl-row-bg-multiple .fl-row-content-wrap .fl-row-content',
+					'.fl-node-' . $id . '.fl-row-bg-embed .fl-row-content-wrap .fl-bg-embed-code',
+					'.fl-node-' . $id . '.fl-row-bg-slideshow .fl-row-content-wrap .fl-bg-slideshow',
+					'.fl-node-' . $id . '.fl-row-bg-video .fl-row-content-wrap .fl-bg-video',
+				),
+				'media'    => empty( $breakpoint ) ? 'default' : $breakpoint,
+				'props'    => $props,
+			)
+		);
+	}
+}
 
 if ( ! empty( $settings->full_height ) && ( 'full' == $settings->full_height || 'custom' == $row->settings->full_height ) ) :
 	?>

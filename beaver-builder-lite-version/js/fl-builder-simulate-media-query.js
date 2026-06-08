@@ -201,6 +201,7 @@
 					for ( k = 0; k < this.reparsed.length; k++ ) {
 						if ( key.indexOf( this.reparsed[ k ] ) > -1 ) {
 							this.sheets[ key ] = null;
+							delete this.sheets[ key ];
 							break;
 						}
 					}
@@ -219,6 +220,19 @@
 				}
 			}
 
+			// Remove sheets that need to be reparsed.
+			// This helps remove the old styles when 
+			// switching between responsive modes.
+			for ( key in this.sheets ) {
+				for ( k = 0; k < this.reparsed.length; k++ ) {
+					if ( key.indexOf( this.reparsed[ k ] ) > -1 ) {
+						this.sheets[ key ] = null;
+						delete this.sheets[ key ];
+						break;
+					}
+				}
+			}
+			
 			return this.queue.length;
 		},
 

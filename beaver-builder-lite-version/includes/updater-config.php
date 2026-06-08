@@ -3,7 +3,7 @@
 if ( class_exists( 'FLUpdater' ) ) {
 	FLUpdater::add_product(array(
 		'name'    => 'Beaver Builder Plugin (Lite Version)',
-		'version' => '2.10.1.5',
+		'version' => '2.10.2.2',
 		'slug'    => 'bb-plugin',
 		'type'    => 'plugin',
 	));

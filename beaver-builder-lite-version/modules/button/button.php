@@ -253,7 +253,7 @@ FLBuilder::register_module('FLButtonModule', array(
 			'general'  => array(
 				'title'  => '',
 				'fields' => array(
-					'text'           => array(
+					'text'                 => array(
 						'type'        => 'text',
 						'label'       => __( 'Text', 'fl-builder' ),
 						'default'     => __( 'Click Here', 'fl-builder' ),
@@ -263,7 +263,7 @@ FLBuilder::register_module('FLButtonModule', array(
 						),
 						'connections' => array( 'string' ),
 					),
-					'icon'           => array(
+					'icon'                 => array(
 						'type'        => 'icon',
 						'label'       => __( 'Icon', 'fl-builder' ),
 						'show_remove' => true,
@@ -274,7 +274,7 @@ FLBuilder::register_module('FLButtonModule', array(
 							'type' => 'none',
 						),
 					),
-					'icon_position'  => array(
+					'icon_position'        => array(
 						'type'    => 'select',
 						'label'   => __( 'Icon Position', 'fl-builder' ),
 						'default' => 'before',
@@ -286,7 +286,7 @@ FLBuilder::register_module('FLButtonModule', array(
 							'type' => 'none',
 						),
 					),
-					'icon_animation' => array(
+					'icon_animation'       => array(
 						'type'    => 'select',
 						'label'   => __( 'Icon Visibility', 'fl-builder' ),
 						'default' => 'disable',
@@ -298,31 +298,35 @@ FLBuilder::register_module('FLButtonModule', array(
 							'type' => 'none',
 						),
 					),
-					'click_action'   => array(
+					'click_action'         => array(
 						'type'    => 'select',
 						'label'   => __( 'Click Action', 'fl-builder' ),
 						'default' => 'link',
 						'options' => array(
-							'link'     => __( 'Link', 'fl-builder' ),
-							'button'   => __( 'Button', 'fl-builder' ),
-							'lightbox' => __( 'Lightbox', 'fl-builder' ),
+							'link'      => __( 'Link', 'fl-builder' ),
+							'button'    => __( 'Button', 'fl-builder' ),
+							'lightbox'  => __( 'Lightbox', 'fl-builder' ),
+							'copy_text' => __( 'Copy Text', 'fl-builder' ),
 						),
 						'toggle'  => array(
-							'link'     => array(
+							'link'      => array(
 								'fields' => array( 'link' ),
 							),
-							'button'   => array(
+							'button'    => array(
 								'fields' => array( 'button' ),
 							),
-							'lightbox' => array(
+							'lightbox'  => array(
 								'sections' => array( 'lightbox' ),
+							),
+							'copy_text' => array(
+								'fields' => array( 'copy_text', 'copy_success_message' ),
 							),
 						),
 						'preview' => array(
 							'type' => 'none',
 						),
 					),
-					'link'           => array(
+					'link'                 => array(
 						'type'          => 'link',
 						'label'         => __( 'Link', 'fl-builder' ),
 						'placeholder'   => 'https://www.example.com',
@@ -334,12 +338,29 @@ FLBuilder::register_module('FLButtonModule', array(
 						),
 						'connections'   => array( 'url' ),
 					),
-					'button'         => array(
+					'button'               => array(
 						'type'    => 'code',
 						'editor'  => 'javascript',
 						'label'   => __( 'Button Code', 'fl-builder' ),
 						'rows'    => '18',
 						'help'    => __( 'Implement custom button functionality using JavaScript. Your logic will be available to the button\'s click event.', 'fl-builder' ),
+						'preview' => array(
+							'type' => 'none',
+						),
+					),
+					'copy_text'            => array(
+						'type'    => 'text',
+						'label'   => __( 'Text to Copy', 'fl-builder' ),
+						'default' => '',
+						'preview' => array(
+							'type' => 'none',
+						),
+					),
+
+					'copy_success_message' => array(
+						'type'    => 'text',
+						'label'   => __( 'Copy Success Message', 'fl-builder' ),
+						'default' => __( 'Copied!', 'fl-builder' ),
 						'preview' => array(
 							'type' => 'none',
 						),

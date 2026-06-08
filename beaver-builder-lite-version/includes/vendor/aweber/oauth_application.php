@@ -55,6 +55,7 @@ interface OAuthServiceProvider {
  * @version $id$
  */
 class OAuthApplication implements AWeberOAuthAdapter {
+    public $app   = null;
     public $debug = false;
 
     public $userAgent = 'AWeber OAuth Consumer Application 1.0 - https://labs.aweber.com/';

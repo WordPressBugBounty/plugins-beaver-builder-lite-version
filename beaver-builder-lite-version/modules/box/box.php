@@ -131,6 +131,28 @@ class FLBuilderBoxModule extends FLBuilderModule {
 		echo $tag;
 	}
 
+	/**
+	 * Checks if the box container points to a link
+	 * @since 2.10
+	 * @method check_linking
+	 * @return bool
+	 */
+	public function check_linking() {
+		// No linking is allowed while the builder is active
+		if ( FLBuilderModel::is_builder_active() ) {
+			return false;
+		}
+		// No settings link or connection link
+		if ( empty( $this->settings->link ) && empty( $this->settings->connections['link'] ) ) {
+			return false;
+		}
+		// Not supported deprecated module version
+		if ( 1 == $this->version ) {
+			return false;
+		}
+		return true;
+	}
+
 	static public function child_selector( $specificity = 0 ) {
 		if ( 1 === $specificity ) {
 			return '{node} > :not( .fl-block-overlay, .fl-drop-target )';

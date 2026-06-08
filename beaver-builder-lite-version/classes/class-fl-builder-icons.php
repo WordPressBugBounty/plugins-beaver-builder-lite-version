@@ -267,8 +267,44 @@ final class FLBuilderIcons {
 
 			$folder = trailingslashit( $folder );
 
-			// This is an Icomoon font.
-			if ( fl_builder_filesystem()->file_exists( $folder . 'selection.json' ) ) {
+			// This is a new-format IcoMoon font (*.icomoon.json).
+			$icomoon_new_files = glob( $folder . '*.icomoon.json' );
+			if ( ! empty( $icomoon_new_files ) ) {
+
+				$data = json_decode( fl_builder_filesystem()->file_get_contents( $icomoon_new_files[0] ) );
+				$key  = basename( $folder );
+				$url  = str_ireplace( $upload_info['path'], $upload_info['url'], $folder );
+
+				if ( isset( $data->glyphs ) && isset( $data->formats[0]->item->args[0] ) ) {
+
+					if ( is_admin() || in_array( $key, $enabled_icons ) ) {
+
+						$fmt = $data->formats[0]->item->args[0];
+						// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+						$font_name = isset( $fmt->fontFamily->value ) ? $fmt->fontFamily->value : basename( $icomoon_new_files[0], '.icomoon.json' );
+						$prefix    = isset( $fmt->prefix->value ) ? $fmt->prefix->value : '';
+						// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+						$font_class = isset( $fmt->fontClass->value ) ? $fmt->fontClass->value . ' ' : '';
+
+						self::$sets[ $key ] = array(
+							'name'       => $font_name,
+							'prefix'     => '',
+							'type'       => 'icomoon',
+							'path'       => $folder,
+							'url'        => $url,
+							'stylesheet' => $url . 'style.css',
+							'icons'      => array(),
+						);
+
+						foreach ( $data->glyphs as $glyph ) {
+							if ( isset( $glyph->extras->name ) ) {
+								self::$sets[ $key ]['icons'][] = $font_class . $prefix . $glyph->extras->name;
+							}
+						}
+					}
+				}
+			} elseif ( fl_builder_filesystem()->file_exists( $folder . 'selection.json' ) ) {
+				// This is an old-format IcoMoon font (selection.json).
 
 				$data = json_decode( fl_builder_filesystem()->file_get_contents( $folder . 'selection.json' ) );
 				$key  = basename( $folder );

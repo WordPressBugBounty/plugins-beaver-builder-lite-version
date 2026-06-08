@@ -1,3 +1,67 @@
+<h4>2.10.2.2 - 05/26/2026</h4>
+<p><strong>Hotfix</strong></p>
+<ul>
+	<li>Fixed Global color connection on gradient fields not rendering properly in some circumstances (#5189)</li>
+	<li>Fixed field connections cache poisoned in custom post loops (#5180)</li>
+	<li>Added capability checks to broken admin AJAX handlers in User Access. Props: Austin Grinder (#5175)</li>
+	<li>Fixed wpbb-if shortcodes returning true when there is no match (#5186)</li>
+</ul>
+
+<h4>2.10.2.1 - 05/18/2026</h4>
+<p><strong>Hotfix</strong></p>
+<ul>
+	<li>Components: Fixed changes to main component not reflecting on instance that has been edited when using global colors (#5113)</li>
+	<li>MultiSite: Fixed <code>maybe_flush_rewrites</code> using get_option instead of <code>get_site_option</code>(#5138)</li>
+	<li>Icons: Fixed incompability with new version of IcoMoon (#5144)</li>
+	<li>Fixed fatal error in <code>update_layout_settings</code> when $settings is an object (#5150)</li>
+	<li>Fixed wpbb / wpbb-if shortcodes treating "0" as empty (#5168)</li>
+</ul>
+
+<h4>2.10.2 - 04/21/2026</h4>
+<p><strong>Enhancements</strong></p>
+<ul>
+	<li>Button Module: Add copy text action (#4653)</li>
+</ul>
+
+<p><strong>Bug Fixes</strong></p>
+<ul>
+	<li>Fixed nodes not being visible in builder when visibility is hidden in some circumstances (#4900)</li>
+	<li>Accordion Module: Fixed icons not being visible when nested inside a Tabs module (#4985)</li>
+	<li>Box Module: Fixed links opening as a pop-up window and not a new tab when new window and nofollow are enabled (#5023)</li>
+	<li>Box Module: Fixed links not working when connected to Post Custom Field and Box is inside Loop Modules (#4672)</li>
+	<li>Fixed Global Styles device toggle button not syncing with responsive editing (#4095)</li>
+	<li>Popup Maker integration: Fixed not being able to scroll down while editing (#3625)</li>
+	<li>Fixed row border radius not applying to slideshow and video backgrounds (#3365)</li>
+	<li>Outline Panel: Fixed context menu not being visible at the very bottom of the page (#4670)</li>
+	<li>Outline Panel: Fixed draggable areas appearing when they should not (#4319)</li>
+	<li>Advanced Settings: Fixed the Mod_Security fix interfering with node import/export (#3507)</li>
+	<li>Separator Module: Fixed module not working properly when placed inside a Box Module (#4270)</li>
+	<li>Fixed permalinks when switching from Lite to Premium version (#3185)</li>
+	<li>Fixed some layout CSS affecting color picker swatches (#4708)</li>
+	<li>Debug Mode: Fixed undefined key when there's an unassigned menu in the BB theme (#4135)</li>
+	<li>Loop Module: Fixed rendering issue when page ID matches repeater ID (#4648)</li>
+	<li>Button Module: Fixed background animation CSS specificity (#4658)</li>
+	<li>Subscribe Module: Fixed issue with AWeber integration (#4493)</li>
+	<li>Subscribe Module: Ensure choose option stays at top in select (#4544)</li>
+	<li>Fixed missing translations for color picker (#5037)</li>
+	<li>Fixed fatal error when a page title contains a new line or control character (#5059)</li>
+	<li>Fixed PHP warning in update object when a slug property is missing (#5065)</li>
+	<li>Remove deprecated json2 script enqueue (#4972)</li>
+	<li>FontAwesome: Catch API exception in get_kit_data to prevent fatal error (#5089)</li>
+	<li>Fixed incorrect pagination url when using Post Module Block (#4953)</li>
+	<li>Outline Panel: ensure you can only have 1 top level container when editing a template (#4638)</li>
+	<li>Fixed saved element thumbnail images displaying distorted (#3313)</li>
+	<li>Fixed _load_textdomain_just_in_time notice on WordPress 6.7+ for non-US locales (#5117)</li>
+</ul>
+
+<h4>2.10.1.6 - 04/09/2026</h4>
+<p><strong>Hotfix</strong></p>
+<ul>
+	<li>Reworked CSS preview to fire a preview refresh when the value is empty so the correct fallback is used (#5063)</li>
+	<li>Fixed Cloud icon not showing up in Toolbar until User Access settings are saved (#5073)</li>
+	<li>Fixed Themer activation link in Available Downloads requiring a refresh</li>
+</ul>
+
 <h4>2.10.1.5 - 04/02/2026</h4>
 <p><strong>Hotfix</strong></p>
 <ul>

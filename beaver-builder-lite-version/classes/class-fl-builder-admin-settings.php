@@ -712,19 +712,21 @@ final class FLBuilderAdminSettings {
 				$check_path = apply_filters( 'fl_builder_icon_set_check_path', $new_path );
 
 				// Check for supported sets.
-				$is_icomoon  = fl_builder_filesystem()->file_exists( $check_path . 'selection.json' );
-				$is_fontello = fl_builder_filesystem()->file_exists( $check_path . 'config.json' );
-				$is_awesome  = fl_builder_filesystem()->file_exists( $check_path . '/metadata/icons.json' );
+				$is_icomoon        = fl_builder_filesystem()->file_exists( $check_path . 'selection.json' );
+				$icomoon_new_files = glob( $check_path . '*.icomoon.json' );
+				$is_icomoon_new    = ! empty( $icomoon_new_files );
+				$is_fontello       = fl_builder_filesystem()->file_exists( $check_path . 'config.json' );
+				$is_awesome        = fl_builder_filesystem()->file_exists( $check_path . '/metadata/icons.json' );
 
 				// Show an error if we don't have a supported icon set.
-				if ( ! $is_icomoon && ! $is_fontello && ! $is_awesome ) {
+				if ( ! $is_icomoon && ! $is_icomoon_new && ! $is_fontello && ! $is_awesome ) {
 					fl_builder_filesystem()->rmdir( $new_path, true );
 					self::add_error( __( 'Error! Please upload an icon set from either Icomoon, Fontello or Font Awesome Pro Subset.', 'fl-builder' ) );
 					return;
 				}
 
-				// check for valid Icomoon
-				if ( $is_icomoon ) {
+				// Validate old-format IcoMoon (selection.json must have metadata).
+				if ( $is_icomoon && ! $is_icomoon_new ) {
 					$data = json_decode( fl_builder_filesystem()->file_get_contents( $check_path . 'selection.json' ) );
 					if ( ! isset( $data->metadata ) ) {
 						fl_builder_filesystem()->rmdir( $new_path, true );

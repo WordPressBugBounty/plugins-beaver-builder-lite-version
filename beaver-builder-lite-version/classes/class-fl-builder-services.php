@@ -359,7 +359,7 @@ final class FLBuilderServices {
 		$settings                  = new stdClass();
 		$settings->service_account = $active;
 		$options                   = array(
-			'' => __( 'Choose...', 'fl-builder' ),
+			'0' => __( 'Choose...', 'fl-builder' ),
 		);
 
 		// Build the account select options.

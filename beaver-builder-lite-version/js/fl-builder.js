@@ -1799,7 +1799,7 @@
 			}, function() {
 				FLBuilder._layoutSettingsInitCSS();
 				FLBuilder.original_shapes = FLBuilderSettingsConfig.settings.global.shape_form;
-
+				FLBuilderResponsiveEditing._switchAllSettingsToCurrentMode();
 			} );
 		},
 
@@ -11346,6 +11346,9 @@
 
 						if ( 'string' == type || 'number' == type ) {
 							settings[ prop ] = FLBuilder._btoa( settings[ prop ] );
+						}
+						else if ( 'boolean' == type ) {
+							settings[ prop ] = FLBuilder._btoa( settings[ prop ] ? '1' : '' );
 						}
 						else if( 'object' == type ) {
 							settings[ prop ] = FLBuilder._ajaxModSecFix( settings[ prop ] );

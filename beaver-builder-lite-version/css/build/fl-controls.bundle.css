@@ -295,6 +295,7 @@ body div.fl-color-picker-toolbar .picker-input-wrap > input {
   border: none;
   outline: none;
   display: grid;
+  padding: unset;
   place-content: center;
 }
 .fl-controls-color-swatch:is(button, a) {

@@ -257,9 +257,13 @@ final class FLBuilderFontAwesome {
 		$result = get_transient( self::$cache_slug );
 		if ( false === $result ) {
 			// It wasn't there, so regenerate the data and save the transient
-			$query  = sprintf( '{ me { kit(token:"%s") { name token iconUploads { name } } } }', $token );
-			$result = json_decode( fa()->query( $query ) );
-			set_transient( self::$cache_slug, $result );
+			$query = sprintf( '{ me { kit(token:"%s") { name token iconUploads { name } } } }', $token );
+			try {
+				$result = json_decode( fa()->query( $query ) );
+				set_transient( self::$cache_slug, $result );
+			} catch ( \Exception $e ) {
+				return false;
+			}
 		}
 		return $result;
 	}

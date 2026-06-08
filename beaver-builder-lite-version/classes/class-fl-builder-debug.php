@@ -262,7 +262,7 @@ final class FL_Debug {
 		foreach ( (array) $locations as $k => $location ) {
 			$args = array(
 				'name' => ucfirst( $k ),
-				'data' => $menus[ $location ] ? 'Menu - ' . $menus[ $location ] : 'No Menu Set',
+				'data' => isset( $menus[ $location ] ) ? 'Menu - ' . $menus[ $location ] : 'No Menu Set',
 			);
 			self::register( 'menu_location_' . $k, $args );
 		}

@@ -754,6 +754,11 @@
     "fallback": "serif"
   }
 }, {
+  "BJCree": {
+    "variants": ["regular", "500", "600", "700"],
+    "fallback": "serif"
+  }
+}, {
   "Babylonica": {
     "variants": ["regular"],
     "fallback": "cursive"
@@ -3015,7 +3020,7 @@
   }
 }, {
   "Grenze": {
-    "variants": ["100", "100italic", "200", "200italic", "300", "300italic", "regular", "italic", "500", "500italic", "600", "600italic", "700", "700italic", "800", "800italic", "900", "900italic"],
+    "variants": ["100", "200", "300", "regular", "500", "600", "700", "800", "900", "100italic", "200italic", "300italic", "italic", "500italic", "600italic", "700italic", "800italic", "900italic"],
     "fallback": "serif"
   }
 }, {
@@ -4806,6 +4811,11 @@
 }, {
   "Miniver": {
     "variants": ["regular"],
+    "fallback": "sans-serif"
+  }
+}, {
+  "Miranda Sans": {
+    "variants": ["regular", "500", "600", "700", "italic", "500italic", "600italic", "700italic"],
     "fallback": "sans-serif"
   }
 }, {
@@ -8101,6 +8111,11 @@
 }, {
   "Saira Semi Condensed": {
     "variants": ["100", "200", "300", "regular", "500", "600", "700", "800", "900"],
+    "fallback": "sans-serif"
+  }
+}, {
+  "Saira Stencil": {
+    "variants": ["100", "200", "300", "regular", "500", "600", "700", "800", "900", "100italic", "200italic", "300italic", "italic", "500italic", "600italic", "700italic", "800italic", "900italic"],
     "fallback": "sans-serif"
   }
 }, {

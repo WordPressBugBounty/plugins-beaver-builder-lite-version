@@ -1,4 +1,4 @@
-<?php if ( '' !== $settings->link && 1 !== $module->version ) { ?>
+<?php if ( $module->check_linking() ) { ?>
 .fl-node-<?php echo $id; ?> {
 cursor: pointer;
 }

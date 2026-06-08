@@ -404,18 +404,23 @@ final class FLBuilderAdminAdvanced {
 	}
 
 	static public function advanced_submit() {
-		if ( isset( $_POST['action'] ) && wp_verify_nonce( $_POST['_wpnonce'], 'advanced' ) ) {
-			$setting = $_POST['setting'];
-			if ( ! isset( $_POST['type'] ) ) {
-					$value = 'true' === $_POST['value'] ? '1' : '0';
-			} else {
-				$value = (int) $_POST['value'];
-			}
-			update_option( "_fl_builder_{$setting}", $value );
-			wp_send_json_success();
-		} else {
+		if ( ! isset( $_POST['action'] ) || ! wp_verify_nonce( $_POST['_wpnonce'], 'advanced' ) ) {
 			wp_send_json_error();
 		}
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( 'Insufficient permissions' );
+		}
+		$setting = isset( $_POST['setting'] ) ? sanitize_key( $_POST['setting'] ) : '';
+		if ( ! array_key_exists( $setting, self::get_settings() ) ) {
+			wp_send_json_error( 'Invalid setting' );
+		}
+		if ( ! isset( $_POST['type'] ) ) {
+			$value = 'true' === $_POST['value'] ? '1' : '0';
+		} else {
+			$value = (int) $_POST['value'];
+		}
+		update_option( "_fl_builder_{$setting}", $value );
+		wp_send_json_success();
 	}
 
 	/**

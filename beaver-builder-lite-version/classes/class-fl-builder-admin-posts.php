@@ -276,7 +276,6 @@ final class FLBuilderAdminPosts {
 		wp_enqueue_style( 'fl-builder-admin-posts', FLBuilder::plugin_url() . 'css/fl-builder-admin-posts.css', array(), FL_BUILDER_VERSION );
 
 		// Scripts
-		wp_enqueue_script( 'json2' );
 		wp_enqueue_script( 'fl-builder-admin-posts', FLBuilder::plugin_url() . 'js/fl-builder-admin-posts.js', array(), FL_BUILDER_VERSION );
 	}
 

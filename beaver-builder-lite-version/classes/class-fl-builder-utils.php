@@ -527,4 +527,11 @@ final class FLBuilderUtils {
 	public static function ctype_xdigit( $text ) {
 		return is_string( $text ) && '' !== $text && ! preg_match( '/[^A-Fa-f0-9]/', $text );
 	}
+
+	static public function __( $text, $domain ) {
+		if ( ! did_action( 'after_setup_theme' ) ) {
+			return $text;
+		}
+		return __( $text, $domain ); //phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText, WordPress.WP.I18n.NonSingularStringLiteralDomain
+	}
 }

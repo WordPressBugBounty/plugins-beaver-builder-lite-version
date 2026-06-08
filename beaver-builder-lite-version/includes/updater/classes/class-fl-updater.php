@@ -116,7 +116,7 @@ final class FLUpdater {
 		$response_obj = isset( $response->response ) ? (array) $response->response : new StdClass();
 
 		foreach ( $response_obj as $k => $obj ) {
-			if ( $slug === $obj->slug && $version === $obj->new_version ) {
+			if ( isset( $obj->slug, $obj->new_version ) && $slug === $obj->slug && $version === $obj->new_version ) {
 				unset( $response->response[ $k ] );
 			}
 		}

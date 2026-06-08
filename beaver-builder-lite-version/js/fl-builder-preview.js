@@ -546,6 +546,10 @@
 			// Get the default value if needed.
 			if ( '' === value || 'null' === value ) {
 				value = this._getDefaultValue( selector, property );
+
+				// Trigger a preview refresh to ensure the existing layout styles
+				// don't override preview styles when the value is empty.
+				this.delayPreview();
 			}
 
 			// Fire a hook for the block editor.

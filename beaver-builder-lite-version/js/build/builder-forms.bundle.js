@@ -279,7 +279,7 @@ eval("{__webpack_require__.r(__webpack_exports__);\n// extracted by mini-css-ext
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("{__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   __: () => (/* binding */ __)\n/* harmony export */ });\n/**\n * @since 2.8\n * @param {String} string\n * @return {String}\n */\nfunction __(string) {\n  if (typeof window.parent.FLBuilderStrings === 'undefined') {\n    return string;\n  }\n  var strings = window.parent.FLBuilderStrings.i18n;\n  if (typeof strings[string] !== 'undefined') {\n    return strings[string];\n  } else {\n    console.warn('No translation found for \"' + string + '\" Please add string to FLBuilderStrings.i18n object in includes/ui-js-config.php');\n    return string;\n  }\n}\n\n//# sourceURL=webpack://bb-plugin/./src/FL/Builder/system/ui/i18n/index.js?\n}");
+eval("{__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpack_require__.d(__webpack_exports__, {\n/* harmony export */   __: () => (/* binding */ __)\n/* harmony export */ });\n/**\n * @since 2.8\n * @param {String} string\n * @return {String}\n */\nfunction __(string) {\n  if (typeof window.parent.FLBuilderStrings === 'undefined') {\n    return string;\n  }\n  var strings = window.parent.FLBuilderStrings.i18n;\n  if (typeof strings[string] !== 'undefined') {\n    return strings[string];\n  } else {\n    console.warn('No translation found for \"' + string + '\" Please add string to FLBuilderStrings.i18n object in classes/class-fl-builder-config.php');\n    return string;\n  }\n}\n\n//# sourceURL=webpack://bb-plugin/./src/FL/Builder/system/ui/i18n/index.js?\n}");
 
 /***/ }),
 

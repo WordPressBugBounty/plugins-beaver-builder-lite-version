@@ -44,6 +44,46 @@ if ( isset( $settings->click_action ) ) : ?>
 			tLoading: '<i class="fas fa-spinner fa-spin fa-3x fa-fw"></i>',
 		});
 	});
+	<?php elseif ( 'copy_text' == $settings->click_action ) : ?>
+	$('.<?php echo $button_node_id; ?> .fl-button').on('click', function(e){
+		e.preventDefault();
+
+		var $btn           = $(this);
+		var textToCopy     = $btn.data('copy-text');
+		var successMessage = $btn.data('copy-success-message');
+		var $label         = $btn.find('.fl-button-text');
+
+		if (!textToCopy || !successMessage) return;
+
+		var originalHtml = $label.html();
+		$btn.prop('disabled', true);
+		$btn.addClass('disabled');
+
+		function showSuccess() {
+			$label.text(successMessage);
+		}
+
+		function showError() {
+			$label.text('Failed to copy');
+		}
+
+		function showFinish() {
+			setTimeout(function() {
+				$btn.prop('disabled', false);
+				$btn.removeClass('disabled');
+				$label.html(originalHtml);
+				$btn.focus();
+			}, 1500);
+		}
+
+		if (!navigator.clipboard) {
+			showError();
+			showFinish();
+			return;
+		}
+
+		navigator.clipboard.writeText(textToCopy).then(showSuccess).catch(showError).finally(showFinish);
+	});
 	<?php endif; ?>
 })(jQuery);
 <?php endif; ?>

@@ -11,12 +11,26 @@ if ( isset( $settings->id ) && ! empty( $settings->id ) ) {
 }
 
 $element_attributes = join( ' ', [ $module->get_tag(), $module->get_link(), $module->get_label(), $module->get_target() ] );
+
+$copy_attrs = '';
+if ( isset( $settings->click_action ) && 'copy_text' === $settings->click_action ) {
+	$copy_attrs .= ' aria-live="polite"';
+
+	if ( ! empty( $settings->copy_text ) ) {
+		$copy_attrs .= ' data-copy-text="' . esc_attr( $settings->copy_text ) . '"';
+	}
+
+	if ( ! empty( $settings->copy_success_message ) ) {
+		$copy_attrs .= ' data-copy-success-message="' . esc_attr( $settings->copy_success_message ) . '"';
+	}
+}
+
 ?>
 <div <?php $module->render_attributes( $attrs ); ?>>
 	<?php if ( isset( $settings->click_action ) && 'lightbox' == $settings->click_action ) : ?>
 		<<?php echo $element_attributes; ?> class="fl-button <?php echo $button_node_id; ?> fl-button-lightbox<?php echo ( 'enable' == $settings->icon_animation ) ? ' fl-button-icon-animation' : ''; ?>">
 	<?php else : ?>
-		<<?php echo $element_attributes; ?> <?php echo ( isset( $settings->link_download ) && 'yes' === $settings->link_download ) ? ' download' : ''; ?> class="fl-button<?php echo ( 'enable' == $settings->icon_animation ) ? ' fl-button-icon-animation' : ''; ?>" <?php echo $module->get_rel(); ?>>
+		<<?php echo $element_attributes; ?> <?php echo ( isset( $settings->link_download ) && 'yes' === $settings->link_download ) ? ' download' : ''; ?> class="fl-button<?php echo ( 'enable' == $settings->icon_animation ) ? ' fl-button-icon-animation' : ''; ?>" <?php echo $module->get_rel(); ?> <?php echo $copy_attrs; ?>>
 	<?php endif; ?>
 		<?php
 		if ( ! empty( $settings->icon ) && ( 'before' == $settings->icon_position || ! isset( $settings->icon_position ) ) ) :

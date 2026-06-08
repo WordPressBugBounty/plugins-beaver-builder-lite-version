@@ -1341,7 +1341,7 @@ html.fl-builder-show-admin-bar #wpadminbar {
 /* @group Visibility Rules
 ------------------------------------------------------ */
 body:not(.fl-builder-edit) .fl-node-hidden,
-.fl-builder-edit .fl-node-hidden.fl-node-global,
+body.fl-builder-edit:not(.fl-builder-template-edit) [data-dynamic-editing="1"] .fl-node-hidden,
 .fl-builder-edit.fl-responsive-preview-enabled .fl-node-hidden {
   display: none;
 }
@@ -7224,6 +7224,13 @@ Rules to ensure compatibility with v2.0.
   transform: translate(-50%, -120%);
   box-shadow: 1px 1px 5px #093a26;
   z-index: 9999999;
+}
+
+/* Popup Maker
+ ------------------------------------------------------ */
+.fl-builder-edit .pum-container {
+  height: calc(100vh - 110px);
+  overflow-y: auto !important;
 }
 
 /* Dynamic Node
