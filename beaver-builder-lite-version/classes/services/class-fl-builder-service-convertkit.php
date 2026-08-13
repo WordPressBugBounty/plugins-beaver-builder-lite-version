@@ -201,7 +201,7 @@ final class FLBuilderServiceConvertKit extends FLBuilderService {
 	 *      @type bool|string $error The error message or false if no error.
 	 * }
 	 */
-	public function subscribe( $settings, $email, $name, $custom_fields ) {
+	public function subscribe( $settings, $email, $name, $custom_fields = array() ) {
 		$account_data = $this->get_account_data( $settings->service_account );
 		$response     = array(
 			'error' => false,

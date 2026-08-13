@@ -383,6 +383,7 @@ class FLBuilderUISettingsForms {
 				'tabs'    => $module->form,
 				'assets'  => array(
 					'css'   => $css,
+					'cssurl' => $css_file_uri,
 					'js'    => $js,
 					'jsurl' => $js_file_uri,
 				),
@@ -994,6 +995,10 @@ class FLBuilderUISettingsForms {
 	 */
 	static public function render_settings_field( $name, $field, $settings = null, $data = null ) {
 
+		// Normalize $settings to an object before the filter so third-party callbacks
+		// using property_exists()/->prop don't fatal on PHP 8+ when $settings is null.
+		$settings = ! $settings ? new stdClass() : $settings;
+
 		/**
 		 * Use this filter to modify the config array for a field before it is rendered.
 		 * @see fl_builder_render_settings_field
@@ -1009,7 +1014,6 @@ class FLBuilderUISettingsForms {
 		$i                 = null;
 		$is_multiple       = isset( $field['multiple'] ) && true === (bool) $field['multiple'];
 		$supports_multiple = 'editor' != $field['type'] && 'service' != $field['type'];
-		$settings          = ! $settings ? new stdClass() : $settings;
 		$preview           = isset( $field['preview'] ) ? json_encode( $field['preview'] ) : json_encode( array(
 			'type' => 'refresh',
 		) );

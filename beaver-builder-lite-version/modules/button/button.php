@@ -176,6 +176,18 @@ class FLButtonModule extends FLBuilderModule {
 	}
 
 	/**
+	 * Returns just the element name (a or button) for use in closing tags.
+	 * @since 2.10
+	 * @return string
+	 */
+	public function get_tag_name() {
+		if ( isset( $this->settings->click_action ) && 'link' !== $this->settings->click_action && $this->version > 2 ) {
+			return 'button';
+		}
+		return 'a';
+	}
+
+	/**
 	 * Returns a link attribute or data attribute based on the click action
 	 * @since 2.10
 	 * @return string
@@ -349,19 +361,21 @@ FLBuilder::register_module('FLButtonModule', array(
 						),
 					),
 					'copy_text'            => array(
-						'type'    => 'text',
-						'label'   => __( 'Text to Copy', 'fl-builder' ),
-						'default' => '',
-						'preview' => array(
+						'type'        => 'text',
+						'label'       => __( 'Text to Copy', 'fl-builder' ),
+						'default'     => '',
+						'min_version' => 3,
+						'preview'     => array(
 							'type' => 'none',
 						),
 					),
 
 					'copy_success_message' => array(
-						'type'    => 'text',
-						'label'   => __( 'Copy Success Message', 'fl-builder' ),
-						'default' => __( 'Copied!', 'fl-builder' ),
-						'preview' => array(
+						'type'        => 'text',
+						'label'       => __( 'Copy Success Message', 'fl-builder' ),
+						'default'     => __( 'Copied!', 'fl-builder' ),
+						'min_version' => 3,
+						'preview'     => array(
 							'type' => 'none',
 						),
 					),

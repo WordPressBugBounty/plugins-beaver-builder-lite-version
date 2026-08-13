@@ -823,7 +823,7 @@ ul.fl-builder-node-outline.is-dragging-type-column .fl-builder-node-type-module 
   top: var(--fl-builder-top-bar-height);
   right: 0;
   bottom: 0;
-  width: var(--fl-builder-panel-width);
+  width: var(--fl-builder-outline-panel-width);
   pointer-events: auto;
   z-index: 100009; /* sits between overlays and settings panel */
   display: flex;

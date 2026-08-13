@@ -17,7 +17,7 @@ for ( $i = 0; $i < count( $settings->items ); $i++ ) :
 					<?php echo $settings->items[ $i ]->button; ?>
 				});
 				<?php elseif ( 'lightbox' == $settings->items[ $i ]->click_action ) : ?>
-				$this.find('.fl-button-lightbox').magnificPopup({
+				$this.find('<?php echo $button_item_id; ?> .fl-button-lightbox').magnificPopup({
 					<?php if ( 'video' == $settings->items[ $i ]->lightbox_content_type ) : ?>
 					type: 'iframe',
 					mainClass: 'fl-button-lightbox-wrap',

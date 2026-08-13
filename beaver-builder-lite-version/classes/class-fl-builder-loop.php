@@ -636,8 +636,14 @@ final class FLBuilderLoop {
 		$has_archive = is_string( $args->has_archive ) ? $args->has_archive : false;
 		$is_single   = false;
 
+		// Build the full page path for multi-segment archive slug comparison
+		$full_page_path = $custom_paged['current_page'];
+		if ( ! empty( $custom_paged['parent_page'] ) ) {
+			$full_page_path = $custom_paged['parent_page'] . '/' . $custom_paged['current_page'];
+		}
+
 		// Check if it's a CPT archive or CPT single.
-		if ( $custom_paged['current_page'] != $post_type && $has_archive != $custom_paged['current_page'] ) {
+		if ( $custom_paged['current_page'] != $post_type && $has_archive != $custom_paged['current_page'] && $has_archive != $full_page_path ) {
 
 			// Is a child post of the current post type?
 			$post_object = get_page_by_path( $custom_paged['current_page'], OBJECT, $post_type );
@@ -651,7 +657,7 @@ final class FLBuilderLoop {
 
 		$slug = $args->rewrite['slug'];
 
-		if ( is_string( $args->has_archive ) ) {
+		if ( is_string( $args->has_archive ) && ! $is_single ) {
 			$slug = $args->has_archive;
 		}
 
@@ -828,8 +834,13 @@ final class FLBuilderLoop {
 
 		if ( is_array( $wp_the_query->query ) ) {
 			foreach ( $wp_the_query->query as $key => $value ) {
-				if ( strpos( $key, 'flpaged' ) === 0 && is_page() && get_option( 'page_on_front' ) ) {
-					return false;
+				if ( strpos( $key, 'flpaged' ) === 0 ) {
+					if ( is_page() && get_option( 'page_on_front' ) ) {
+						return false;
+					}
+					if ( is_post_type_archive() || is_archive() || is_home() ) {
+						return false;
+					}
 				}
 			}
 

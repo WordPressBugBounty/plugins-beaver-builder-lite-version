@@ -457,7 +457,7 @@ final class FL_Debug {
 		);
 		self::register( 'bb', $args );
 
-		$info = get_option( '_fl_builder_update_info', array() );
+		$info = get_site_option( '_fl_builder_update_info', array() );
 		$from = '';
 		if ( isset( $info['from'] ) && ! empty( $info['from'] ) ) {
 			$from = ' - Previous ' . $info['from'];

@@ -2,9 +2,9 @@
 Contributors: justinbusa, RobbyMcCullough, billyyoung, hinampaksh, diegoliv, webmandesign, eugenealegiojo, helgatheviking, ozancanakli, brentjettgmailcom, jproffitt71, brainstormforce, ideaboxcreations, laubsterboy, nikolayyordanov, codente, pross, pedromendonca
 Tags: page builder, beaver builder, landing page, front-end builder, drag and drop editor
 Requires at least: 6.6
-Tested up to: 7.0
-Requires PHP: 7.2
-Stable tag: 2.10.2.2
+Tested up to: 7.1
+Requires PHP: 7.4
+Stable tag: 2.10.3.2
 License: GPL2+
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 

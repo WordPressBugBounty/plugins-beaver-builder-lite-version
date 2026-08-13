@@ -105,6 +105,8 @@ final class FLBuilder {
 		add_filter( 'wp_handle_upload_prefilter', __CLASS__ . '::wp_handle_upload_prefilter_filter' );
 		add_filter( 'wp_link_query_args', __CLASS__ . '::wp_link_query_args_filter' );
 		add_filter( 'fl_builder_load_modules_paths', __CLASS__ . '::load_module_paths', 9999 );
+		add_filter( 'fl_builder_render_module_content', __CLASS__ . '::escape_foreign_module_shortcodes', 10, 2 );
+		add_filter( 'fl_builder_render_module_html_content', __CLASS__ . '::escape_foreign_module_html_shortcodes', 10, 4 );
 	}
 
 	/**
@@ -2106,6 +2108,67 @@ final class FLBuilder {
 	}
 
 	/**
+	 * Entity-encodes the brackets of any registered shortcode found in a string
+	 * so the layout's do_shortcode passes cannot execute it.
+	 *
+	 * Modules that render third-party content (widgets, blocks) can echo
+	 * untrusted user data — a comment author name, for example — that happens to
+	 * contain shortcode syntax. Because BB runs do_shortcode over the assembled
+	 * layout, that syntax would otherwise execute. Encoding only the brackets of
+	 * matches against the registered-shortcode regex neutralizes them while
+	 * leaving unrelated brackets (inline JS, JSON) untouched, and renders the
+	 * text literally, exactly as it appears outside a builder layout.
+	 *
+	 * @since 2.10.2.4
+	 * @param string $content The rendered module output to sanitize.
+	 * @return string
+	 */
+	static public function escape_foreign_shortcodes( $content ) {
+		if ( '' === $content || false === strpos( $content, '[' ) ) {
+			return $content;
+		}
+		return preg_replace_callback(
+			'/' . get_shortcode_regex() . '/s',
+			function ( $matches ) {
+				return str_replace( array( '[', ']' ), array( '&#91;', '&#93;' ), $matches[0] );
+			},
+			$content
+		);
+	}
+
+	/**
+	 * Neutralizes shortcodes in a module's rendered output when the module does
+	 * not own its content (renders_shortcodes = false). Hooked to both module
+	 * content filters so it covers the live-page and AJAX render paths.
+	 *
+	 * @since 2.10.2.4
+	 * @param string $content The rendered module HTML.
+	 * @param object $module  The module instance (last arg on both filters).
+	 * @return string
+	 */
+	static public function escape_foreign_module_shortcodes( $content, $module ) {
+		if ( isset( $module->renders_shortcodes ) && ! $module->renders_shortcodes ) {
+			$content = self::escape_foreign_shortcodes( $content );
+		}
+		return $content;
+	}
+
+	/**
+	 * Filter adapter for fl_builder_render_module_html_content, whose $module
+	 * argument is fourth rather than second.
+	 *
+	 * @since 2.10.2.4
+	 * @param string $content The rendered module HTML.
+	 * @param string $type    The module type.
+	 * @param object $settings The module settings.
+	 * @param object $module  The module instance.
+	 * @return string
+	 */
+	static public function escape_foreign_module_html_shortcodes( $content, $type, $settings, $module ) {
+		return self::escape_foreign_module_shortcodes( $content, $module );
+	}
+
+	/**
 	 * Renders the CSS classes for the main content div tag.
 	 *
 	 * @since 1.6.4
@@ -3825,8 +3888,8 @@ final class FLBuilder {
 					$selector_suffix = ' > .fl-module-content';
 				}
 
-				// Extra specificity for top-level modules
-				if ( ! $node->parent ) {
+				// Extra specificity for top-level modules (not applicable for standalone module blocks)
+				if ( ! $node->parent && empty( $node->is_block ) ) {
 					$selector_prefix = '.fl-builder-content > ' . $selector_prefix;
 				}
 				break;
@@ -4019,8 +4082,8 @@ final class FLBuilder {
 				$selector = '.fl-node-' . $module->node . '.fl-module-' . $module->settings->type;
 			}
 
-			// Extra specificity for top-level modules
-			if ( ! $module->parent ) {
+			// Extra specificity for top-level modules (not applicable for standalone module blocks)
+			if ( ! $module->parent && empty( $module->is_block ) ) {
 				$selector = '.fl-builder-content > ' . $selector;
 			}
 

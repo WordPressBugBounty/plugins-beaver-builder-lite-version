@@ -6071,7 +6071,7 @@
 			actions.addModule( type, parentId, position, {
 				widget: typeof widget === 'undefined' ? '' : widget,
 				alias: typeof alias === 'undefined' ? '' : alias,
-				nodePreview: 1
+				nodePreview: {}
 			} )
 		},
 
@@ -6159,6 +6159,7 @@
 				form: null,
 				rules: {},
 				init: function(){},
+				initForComponent: function(){},
 				submit: function(){ return true; },
 				preview: function(){},
 				getForm: function() {
@@ -7767,6 +7768,15 @@
 
 			if ( ! nestedBoxObj ) {
 				return
+			}
+
+			// Cancel any pending preview-save debounce in the nested form so it
+			// can't fire after close on a partially-unmounted DOM.
+			var nestedForm = nestedBoxWrap.find( '.fl-builder-settings' );
+			var pendingTimeout = nestedForm.data( 'timeout' );
+			if ( pendingTimeout ) {
+				clearTimeout( pendingTimeout );
+				nestedForm.removeData( 'timeout' );
 			}
 
 			nestedBoxObj.on( 'close', function() {
@@ -9684,6 +9694,16 @@
 		_saveFormFieldClicked: function()
 		{
 			var form = $( this ).closest( '.fl-builder-settings' );
+
+			// Cancel any pending preview-save debounce before closing the form.
+			// Otherwise it fires after close on a partially-unmounted DOM (React
+			// color/background fields are gone by then) and wipes connections.
+			var pendingTimeout = form.data( 'timeout' );
+			if ( pendingTimeout ) {
+				clearTimeout( pendingTimeout );
+				form.removeData( 'timeout' );
+			}
+
 			var saved = FLBuilder._saveFormFieldSettings( form );
 
 			if ( saved ) {
@@ -9767,6 +9787,14 @@
 		 */
 		_saveFormFieldSettings: function( form )
 		{
+			// Guard against orphan saves on a detached form. A debounced preview
+			// save can fire after the nested lightbox closes; by then deferred
+			// React fields have unmounted and serializing would drop their
+			// connection inputs.
+			if ( ! form || ! form.length || ! form[0].isConnected ) {
+				return false;
+			}
+
 			var lightboxId    = form.attr( 'data-instance-id' ),
 				type          = form.attr( 'data-type' ),
 				settings      = FLBuilder._getSettings( form ),

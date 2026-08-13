@@ -4109,12 +4109,13 @@ Y.namespace('FL').SlideshowSocial = Y.Base.create('fl-slideshow-social', Y.Widge
 	 */
 	_updateLikeButton: function()
 	{
-		var src				= null,
-			cb				= this.get('contentBox'),
-			root			= this.get('root'),
-			albumIndex		= root.albumIndex,
-			rootSource 		= root.get('source')[albumIndex],
-			imageInfo 		= root.imageInfo;
+		var href			 = 'https://www.facebook.com/sharer/sharer.php?u=',
+				svg				 = null,
+				cb				 = this.get('contentBox'),
+				root			 = this.get('root'),
+				albumIndex = root.albumIndex,
+				rootSource = root.get('source')[albumIndex],
+				imageInfo  = root.imageInfo;
 
 		if(this._buttons.like) {
 			this._buttons.like.remove();
@@ -4122,30 +4123,16 @@ Y.namespace('FL').SlideshowSocial = Y.Base.create('fl-slideshow-social', Y.Widge
 		}
 
 		if(rootSource.type == 'smugmug') {
-			src = 'https://www.facebook.com/plugins/like.php?';
-			src += 'href=' + 'https://www.smugmug.com/services/graph/gallery/';
-			src += rootSource.id + '_' + rootSource.key +'/' + imageInfo.id + '_' + imageInfo.key;
+			href += encodeURIComponent('https://www.smugmug.com/services/graph/gallery/' + rootSource.id + '_' + rootSource.key + '/' + imageInfo.id + '_' + imageInfo.key);
 		}
 		else {
-			src = 'https://www.facebook.com/plugins/like.php?';
-			src += 'href=' + encodeURIComponent(imageInfo.largeURL);
+			href += encodeURIComponent(imageInfo.largeURL);
 		}
+		svg = '<svg viewBox="0 0 320 512" width="10" height="12" aria-hidden="true">';
+		svg += '<path fill="currentColor" d="M279.14 288l14.22-92.66h-88.91v-60.13c0-25.35 12.42-50.06 52.24-50.06h40.42V6.26S260.43 0 225.36 0c-73.22 0-121.08 44.38-121.08 124.72v70.62H22.89V288h81.39v224h100.17V288z"/>';
+		svg += '</svg>';
 
-		src += '&send=false';
-		src += '&layout=button_count';
-		src += '&width=90';
-		src += '&show_faces=false';
-		src += '&action=like';
-		src += '&colorscheme=light';
-		src += '&height=21';
-
-		this._buttons.like = Y.Node.create('<iframe src="'+ src +'" scrolling="no" allowTransparency="true"></iframe>');
-
-		this._buttons.like.setStyles({
-			overflow: 'hidden',
-			width: '90px',
-			height: '21px'
-		});
+		this._buttons.like = Y.Node.create('<a href="'+ href +'" class="fl-slideshow-social-facebook" target="_blank" rel="noopener noreferrer">' + svg + '<span>Share</span></a>');
 
 		cb.appendChild(this._buttons.like);
 	},
@@ -4156,26 +4143,22 @@ Y.namespace('FL').SlideshowSocial = Y.Base.create('fl-slideshow-social', Y.Widge
 	 */
 	_updateTweetButton: function()
 	{
-		var src			= null,
-			imageInfo 	= this.get('root').imageInfo,
-			cb			= this.get('contentBox');
+		var href			= 'https://x.com/intent/tweet?url=',
+				svg				= null,
+				imageInfo = this.get('root').imageInfo,
+				cb				= this.get('contentBox');
 
 		if(this._buttons.tweet) {
 			this._buttons.tweet.remove();
 			this._buttons.tweet = null;
 		}
 
-		src = 'https://platform.twitter.com/widgets/tweet_button.html?';
-		src += 'url=' + encodeURIComponent(imageInfo.largeURL);
-		src += '&count=none';
+		href += encodeURIComponent(imageInfo.largeURL);
+		svg = '<svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true">';
+		svg += '<path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>';
+		svg += '</svg>';
 
-		this._buttons.tweet = Y.Node.create('<iframe src="'+ src +'" scrolling="no" allowTransparency="true"></iframe>');
-
-		this._buttons.tweet.setStyles({
-			overflow: 'hidden',
-			width: '90px',
-			height: '21px'
-		});
+		this._buttons.tweet = Y.Node.create('<a href="'+ href +'" class="fl-slideshow-social-x" target="_blank" rel="noopener noreferrer">' + svg + '<span>Post</span></a>');
 
 		cb.appendChild(this._buttons.tweet);
 	},
@@ -4186,9 +4169,10 @@ Y.namespace('FL').SlideshowSocial = Y.Base.create('fl-slideshow-social', Y.Widge
 	 */
 	_updatePinterestButton: function()
 	{
-		var href		= 'https://pinterest.com/pin/create/button/',
-			imageInfo 	= this.get('root').imageInfo,
-			cb			= this.get('contentBox');
+		var href			= 'https://pinterest.com/pin/create/button/',
+				svg				= null,
+				imageInfo = this.get('root').imageInfo,
+				cb				= this.get('contentBox');
 
 		if(this._buttons.pin) {
 			this._buttons.pin.remove();
@@ -4198,13 +4182,11 @@ Y.namespace('FL').SlideshowSocial = Y.Base.create('fl-slideshow-social', Y.Widge
 		href += '?url=' + encodeURIComponent(window.location.href);
 		href += '&media='+ encodeURIComponent(imageInfo.mediumURL);
 		href += '&description='+ encodeURIComponent(imageInfo.caption);
+		svg = '<svg viewBox="0 0 384 512" width="12" height="14" aria-hidden="true">';
+		svg += '<path fill="currentColor" d="M204 6.5C101.4 6.5 0 74.9 0 185.6 0 256 39.6 296 63.6 296c9.9 0 15.6-27.6 15.6-35.4 0-9.3-23.7-29.1-23.7-67.8 0-80.4 61.2-137.4 140.4-137.4 68.1 0 118.5 38.7 118.5 109.8 0 53.1-21.3 152.7-90.3 152.7-24.9 0-46.2-18-46.2-43.8 0-37.8 26.4-74.4 26.4-113.4 0-66.2-93.9-54.2-93.9 25.8 0 16.8 2.1 35.4 9.6 50.7-13.8 59.4-42 147.9-42 209.1 0 18.9 2.7 37.5 4.5 56.4 3.4 3.8 1.7 3.4 6.9 1.5 50.4-69 48.6-82.5 71.4-172.8 12.3 23.4 44.1 36 69.3 36 106.2 0 153.9-103.5 153.9-196.8C384 71.3 298.2 6.5 204 6.5z"/>';
+		svg += '</svg>';
 
-		this._buttons.pin = Y.Node.create('<a></a>');
-		this._buttons.pin.setAttribute('data-pin-config', 'none');
-		this._buttons.pin.setAttribute('data-pin-do', 'buttonPin');
-		this._buttons.pin.setAttribute('href', href);
-		this._buttons.pin.setAttribute('target', '_blank');
-		this._buttons.pin.set('innerHTML', '<img src="https://assets.pinterest.com/images/pidgets/pin_it_button.png" border="0" />');
+		this._buttons.pin = Y.Node.create('<a href="' + href + '" class="fl-slideshow-social-pinterest" target="_blank" rel="noopener noreferrer">' + svg + '<span>Pin</span></a>');
 
 		cb.appendChild(this._buttons.pin);
 	}
@@ -8055,10 +8037,6 @@ Y.namespace('FL').Slideshow = Y.Base.create('fl-slideshow', Y.FL.SlideshowBase, 
 	_toggleSocial: function()
 	{
 		this._toggleOverlay(this.social.slideshowOverlay);
-		// Refresh iframe to fix tweet button issue visibility inside hidden elements
-		var iFrame = jQuery('.fl-slideshow-social-content').find('iframe');
-		iFrame.remove();
-		jQuery('.fl-slideshow-social-content').prepend(iFrame);
 	},
 
 	/**

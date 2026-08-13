@@ -626,6 +626,10 @@ final class FLBuilderCompatibility {
 	 * @since 1.10.7
 	 */
 	public static function render_module_content_filter( $contents, $module ) {
+		if ( 'box' === $module->slug ) {
+			return $contents;
+		}
+
 		$postdata = FLBuilderModel::get_post_data();
 		if ( isset( $_GET['safemode'] ) && FLBuilderModel::is_builder_active() || ( isset( $postdata['safemode'] ) && 'true' === $postdata['safemode'] ) ) {
 			return sprintf( '<h3>[%1$s] %2$s %3$s</h3>', __( 'SAFEMODE', 'fl-builder' ), $module->name, __( 'module', 'fl-builder' ) );

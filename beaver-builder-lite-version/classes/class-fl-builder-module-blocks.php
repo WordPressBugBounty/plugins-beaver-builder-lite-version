@@ -63,12 +63,27 @@ class FLBuilderModuleBlocks {
 	}
 
 	/**
+	 * Check if we are in the Widgets editor.
+	 *
+	 * @return bool
+	 */
+	static public function is_widgets_editor() {
+		global $pagenow;
+		return 'widgets.php' === $pagenow;
+	}
+
+	/**
 	 * Checks if module blocks should load.
 	 *
 	 * @return bool
 	 */
 	static public function should_load() {
 		global $wp_version;
+
+		// Module blocks are not supported in Widgets editor
+		if ( self::is_widgets_editor() ) {
+			return false;
+		}
 
 		$enabled = self::get_enabled_block_editor_modules();
 

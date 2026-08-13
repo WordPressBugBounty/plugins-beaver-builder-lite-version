@@ -1475,7 +1475,22 @@ final class FLBuilderDynamicGlobal {
 		}
 
 		if ( isset( $orig_node_settings->connections ) ) {
-			$new_settings->connections = $orig_node_settings->connections;
+			// Per-key merge so non-customizable connections stay sourced from the
+			// template — the instance carries a snapshot of them from edit time
+			// and a wholesale replace would freeze it after the template changes.
+			// Instance wins only for keys whose root field is customizable.
+			$template_connections      = isset( $new_settings->connections ) ? (array) $new_settings->connections : [];
+			$instance_connections      = (array) $orig_node_settings->connections;
+			$merged_connections        = $template_connections;
+			foreach ( $instance_connections as $conn_key => $conn_value ) {
+				$root_field = strstr( (string) $conn_key, '.' ) ? strstr( (string) $conn_key, '.', true ) : $conn_key;
+				if ( in_array( $root_field, $merged_dynamic_fields, true ) ) {
+					$merged_connections[ $conn_key ] = $conn_value;
+				}
+			}
+			if ( ! empty( $merged_connections ) ) {
+				$new_settings->connections = $merged_connections;
+			}
 		}
 
 		$new_settings->dynamic_node_settings = $orig_node_settings->dynamic_node_settings;
@@ -1647,6 +1662,8 @@ final class FLBuilderDynamicGlobal {
 		$template_root_node  = null;
 		$template_post_title = '';
 		$template_post_id    = FLBuilderModel::is_node_global( $node );
+		$modules = [];
+
 		if ( $template_post_id ) {
 			$template_post       = get_post( $template_post_id );
 			$template_post_title = isset( $template_post->post_title ) ? $template_post->post_title : '';
@@ -1662,11 +1679,19 @@ final class FLBuilderDynamicGlobal {
 			}
 
 			$root_node_settings[ $node->node ] = $root_settings;
+			// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+			if ( 'module' === $node->type && ! empty( $node->moduleType ) ) {
+				// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+				$modules[ $node->node ] = $node->moduleType;
+			}
 		}
 
 		$categorized_nodes = FLBuilderModel::get_categorized_child_nodes( $template_root_node );
 		foreach ( $categorized_nodes as $cat_key => $cat ) {
 			foreach ( $cat as $node_key => $node_item ) {
+				if ( isset( $node_item->type ) && 'module' === $node_item->type ) {
+					$modules[ $node_item->node ] = $node_item->slug;
+				}
 				if ( empty( $node_item->settings->dynamic_fields->fields ) ) {
 					continue;
 				}
@@ -1684,6 +1709,7 @@ final class FLBuilderDynamicGlobal {
 			'title'            => $template_post_title,
 			'root'             => $root_node_settings,
 			'child'            => $child_settings,
+			'modules'          => $modules,
 		];
 	}
 
@@ -1722,6 +1748,15 @@ final class FLBuilderDynamicGlobal {
 		}
 
 		$categorized_nodes = FLBuilderModel::get_categorized_child_nodes( $node );
+		$cat_modules       = $categorized_nodes['modules'] ?? [];
+		$ref_modules       = [];
+		$modules           = [];
+		foreach ( $cat_modules as $mod_key => $mod ) {
+			if ( isset( $mod->slug ) ) {
+				$parts = explode( '__', $mod_key );
+				$ref_modules[ $parts[0] ] = $mod->slug;
+			}
+		}
 
 		$child_obj      = $dynamic_node_settings->child;
 		$child_settings = [];
@@ -1729,6 +1764,10 @@ final class FLBuilderDynamicGlobal {
 			if ( ! is_object( $child_node ) ) {
 				continue;
 			}
+			if ( array_key_exists( $child_node_key, $ref_modules ) ) {
+				$modules[ $child_node_key ] = $ref_modules[ $child_node_key ];
+			}
+
 			foreach ( $child_node as $field_key => $field_value ) {
 				if ( 'connections' === $field_key ) {
 					continue;
@@ -1748,6 +1787,7 @@ final class FLBuilderDynamicGlobal {
 			'title'            => $template_post_title,
 			'root'             => $root_settings,
 			'child'            => $child_settings,
+			'modules'          => $modules,
 		];
 	}
 

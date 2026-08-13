@@ -115,6 +115,17 @@ class FLBuilderModule {
 	public $partial_refresh = false;
 
 	/**
+	 * Whether shortcodes in this module's rendered output should be processed
+	 * by the layout's do_shortcode pass. Modules that render third-party content
+	 * (widgets, blocks) can echo untrusted user data and set this to false so
+	 * that data cannot inject shortcodes.
+	 *
+	 * @since 2.10.2.4
+	 * @var boolean $renders_shortcodes
+	 */
+	public $renders_shortcodes = true;
+
+	/**
 	 * The module settings object.
 	 *
 	 * @since 1.0
@@ -252,20 +263,21 @@ class FLBuilderModule {
 	 * @since 1.0
 	 */
 	public function __construct( $params ) {
-		$class_info            = new ReflectionClass( $this );
-		$class_path            = $class_info->getFileName();
-		$dir_path              = dirname( $class_path );
-		$this->slug            = isset( $params['slug'] ) ? $params['slug'] : basename( $class_path, '.php' );
-		$this->enabled         = isset( $params['enabled'] ) ? $params['enabled'] : true;
-		$this->editor_export   = isset( $params['editor_export'] ) ? $params['editor_export'] : true;
-		$this->partial_refresh = isset( $params['partial_refresh'] ) ? $params['partial_refresh'] : false;
-		$this->include_wrapper = isset( $params['include_wrapper'] ) ? $params['include_wrapper'] : true;
-		$this->element_setting = isset( $params['element_setting'] ) ? $params['element_setting'] : true;
-		$this->accepts         = isset( $params['accepts'] ) ? $params['accepts'] : [];
-		$this->parents         = isset( $params['parents'] ) ? $params['parents'] : 'all';
-		$this->template        = isset( $params['template'] ) ? $params['template'] : [];
-		$this->block_editor    = isset( $params['block_editor'] ) ? $params['block_editor'] : false;
-		$this->auto_style      = isset( $params['auto_style'] ) ? $params['auto_style'] : false;
+		$class_info               = new ReflectionClass( $this );
+		$class_path               = $class_info->getFileName();
+		$dir_path                 = dirname( $class_path );
+		$this->slug               = isset( $params['slug'] ) ? $params['slug'] : basename( $class_path, '.php' );
+		$this->enabled            = isset( $params['enabled'] ) ? $params['enabled'] : true;
+		$this->editor_export      = isset( $params['editor_export'] ) ? $params['editor_export'] : true;
+		$this->partial_refresh    = isset( $params['partial_refresh'] ) ? $params['partial_refresh'] : false;
+		$this->renders_shortcodes = isset( $params['renders_shortcodes'] ) ? $params['renders_shortcodes'] : true;
+		$this->include_wrapper    = isset( $params['include_wrapper'] ) ? $params['include_wrapper'] : true;
+		$this->element_setting    = isset( $params['element_setting'] ) ? $params['element_setting'] : true;
+		$this->accepts            = isset( $params['accepts'] ) ? $params['accepts'] : [];
+		$this->parents            = isset( $params['parents'] ) ? $params['parents'] : 'all';
+		$this->template           = isset( $params['template'] ) ? $params['template'] : [];
+		$this->block_editor       = isset( $params['block_editor'] ) ? $params['block_editor'] : false;
+		$this->auto_style         = isset( $params['auto_style'] ) ? $params['auto_style'] : false;
 
 		// We need to normalize the paths here since path comparisons
 		// break on Windows because they use backslashes.

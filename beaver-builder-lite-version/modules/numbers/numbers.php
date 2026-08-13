@@ -130,7 +130,10 @@ class FLNumbersModule extends FLBuilderModule {
 
 	public function render_circle_bar() {
 
-		$width  = ! empty( $this->settings->circle_width ) ? $this->settings->circle_width : 100;
+		// Cast to a number so the value can never break out of the SVG
+		// viewBox attribute below (stored settings are only tag-stripped, not
+		// attribute-safe). CVE-2026-15242.
+		$width  = ! empty( $this->settings->circle_width ) ? (float) $this->settings->circle_width : 100;
 		$pos    = ( $width / 2 );
 		$radius = $pos - 10;
 		$dash   = number_format( ( ( M_PI * 2 ) * $radius ), 2, '.', '' );

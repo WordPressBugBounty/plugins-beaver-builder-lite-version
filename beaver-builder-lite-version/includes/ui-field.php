@@ -17,7 +17,7 @@
 				}
 			}
 
-			if ( data.field.type === 'form' ) {
+			if ( data.field.type === 'form' || data.field.type === 'raw' ) {
 				dynamicFieldIcons = '';
 			} else if ( data.field.type === 'button' && data.name === 'service_connect_button' ) {
 				dynamicFieldIcons = '';
@@ -31,7 +31,7 @@
 	#>
 	<# if ( ! data.field.label ) { #>
 	<td class="fl-field-control" colspan="2">
-		<# if ( dynamicFieldIcons && 'fl-builder-template' === FLBuilderConfig.postType && 'form' !== data.field.type ) { #>
+		<# if ( dynamicFieldIcons && 'fl-builder-template' === FLBuilderConfig.postType && 'form' !== data.field.type && ! data.isMultiple ) { #>
 			<i class="fl-dynamic-node-field dashicons fl-tip {{dynamicFieldIcons}}" title="{{dynamicEditingTitle}}" data-target-field="{{data.name}}" data-target-field-type="{{data.field.type}}"></i>
 		<# } #>
 	<# } else { #>
@@ -52,7 +52,7 @@
 					<span class="fl-builder-field-index">{{ data.index + 1 }}</span>
 				<# } #>
 			<# } #>
-				<# if ( dynamicFieldIcons && 'fl-builder-template' === FLBuilderConfig.postType && 'form' !== data.field.type ) { #>
+				<# if ( dynamicFieldIcons && 'fl-builder-template' === FLBuilderConfig.postType && 'form' !== data.field.type && ! data.isMultiple ) { #>
 				<i class="fl-dynamic-node-field dashicons fl-tip {{dynamicFieldIcons}}" title="{{dynamicEditingTitle}}" data-target-field="{{targetFieldName}}" data-target-field-type="{{data.field.type}}" data-target-field-index="{{ ( undefined !== data.index ) ? data.index : '' }}"></i>
 				<# } #>
 			<# if ( data.responsive ) { #>

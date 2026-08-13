@@ -302,7 +302,6 @@
 				}
 			}, this ) );
 			$( this.wrapperClass ).on( 'click', 'a, .fl-menu-toggle', $.proxy( function( event ) {
-				event.stopPropagation();
 				// Only allow mouse clicks with accordion & mobile menus
 				if ( this._isMouseAvailable() && ! this._isMenuToggle() && event.detail && this.type !== 'accordion' ) return;
 				// Links only open & do not toggle submenus if there is either a submenu icon or an accordion layout

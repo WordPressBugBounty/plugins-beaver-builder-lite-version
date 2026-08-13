@@ -10,12 +10,15 @@ class FLWidgetModule extends FLBuilderModule {
 	 */
 	public function __construct() {
 		parent::__construct(array(
-			'name'            => __( 'Widget', 'fl-builder' ),
-			'description'     => __( 'Display a WordPress widget.', 'fl-builder' ),
-			'group'           => __( 'WordPress Widgets', 'fl-builder' ),
-			'category'        => __( 'WordPress Widgets', 'fl-builder' ),
-			'editor_export'   => false,
-			'partial_refresh' => true,
+			'name'               => __( 'Widget', 'fl-builder' ),
+			'description'        => __( 'Display a WordPress widget.', 'fl-builder' ),
+			'group'              => __( 'WordPress Widgets', 'fl-builder' ),
+			'category'           => __( 'WordPress Widgets', 'fl-builder' ),
+			'editor_export'      => false,
+			'partial_refresh'    => true,
+			// Widgets render third-party output that can contain untrusted user
+			// data (e.g. comment author names); do not run its shortcodes.
+			'renders_shortcodes' => false,
 		));
 	}
 

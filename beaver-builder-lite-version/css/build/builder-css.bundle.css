@@ -38,6 +38,7 @@
   --fl-builder-target-size: 36px;
   --fl-builder-min-node-size: 24px;
   --fl-builder-panel-width: 320px;
+  --fl-builder-outline-panel-width: 320px;
   --fl-builder-panel-min-width: 310px;
   --fl-builder-panel-max-width: 600px;
   --fl-builder-panel-min-height: 500px;
@@ -4372,13 +4373,8 @@ button.fl-builder-button.fl-builder-bar-title-caret:focus {
   mix-blend-mode: normal;
 }
 
-.fl-block-overlay i.fl-block-has-rules {
-  font-family: "Font Awesome 5 Free" !important;
-  font-size: 14px !important;
-  text-decoration: none !important;
-  text-shadow: none !important;
-  line-height: 1 !important;
-  font-style: normal !important;
+.fl-block-overlay .fl-block-has-rules svg {
+  display: block;
 }
 
 .fl-block-overlay-active {

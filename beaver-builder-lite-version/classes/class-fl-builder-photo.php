@@ -50,7 +50,21 @@ final class FLBuilderPhoto {
 	 * @return object
 	 */
 	static public function get_attachment_data( $id ) {
-		$data = wp_prepare_attachment_for_js( $id );
+		$attachment = get_post( $id );
+
+		// wp_prepare_attachment_for_js() checks current_user_can('read_post', $post_parent)
+		// which triggers a PHP notice if the parent's post type is not registered (e.g. after
+		// a plugin that registered the post type has been deactivated). Clear the parent
+		// temporarily to avoid this.
+		if ( $attachment && $attachment->post_parent ) {
+			$parent = get_post( $attachment->post_parent );
+			if ( $parent && ! get_post_type_object( $parent->post_type ) ) {
+				$attachment              = clone $attachment;
+				$attachment->post_parent = 0;
+			}
+		}
+
+		$data = wp_prepare_attachment_for_js( $attachment ? $attachment : $id );
 
 		if ( gettype( $data ) == 'array' ) {
 			return json_decode( json_encode( $data ) );

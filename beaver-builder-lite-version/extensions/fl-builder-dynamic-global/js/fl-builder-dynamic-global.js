@@ -364,6 +364,12 @@
 				const config = FLBuilder._jsonParse( response );
 				const showTemplate = typeof( nodeData.showTemplate ) !== 'undefined' ? nodeData.showTemplate : true;
 
+				if ( ! config ) {
+					return;
+				}
+
+				FLBuilderDynamicGlobal._loadScripts( config );
+
 				// Merge video attachment data into the settings config.
 				if ( config.attachments ) {
 					FLBuilderSettingsConfig.attachments = Object.assign(
@@ -447,6 +453,67 @@
 
 				FLBuilderDynamicGlobal._bindDynamicNodeEditLink( nodeData.nodeId );
 			} );
+		},
+
+		/**
+		 * Loads script assets of modules used by the component. 
+		 * 
+		 * @since TBD
+		 * @access private
+		 * @method _loadScripts
+		 */
+		_loadScripts: function( config ) {
+			const modules = config.dynamic_node_settings.modules || {};
+			const head    = $( 'head', window.parent.document );
+
+			if ( modules.length === 0 ) {
+				return;
+			}
+
+			for ( const [ nodeId, module ] of Object.entries( modules ) ) {
+				let moduleConfig = FLBuilderSettingsConfig.modules[ module ];
+				let scriptElement = '';
+				let jsUrl = '';
+				let cssUrl = '';
+				let linkElement = '';
+
+				if ( ! moduleConfig ) {
+					continue;
+				}
+
+				if ( -1 === $.inArray( module, FLBuilder._loadedModuleAssets ) ) {
+					let assetAdded = false;
+
+					if ( '' !== moduleConfig.assets.js ) {
+						jsUrl = moduleConfig.assets.jsurl;
+						scriptElement = document.createElement( 'script' );
+						scriptElement.src = jsUrl;
+
+						scriptElement.onload = function() {
+							if ( FLBuilder._moduleHelpers[ module ] && typeof FLBuilder._moduleHelpers[ module ].initForComponent === 'function' ) {
+								FLBuilder._moduleHelpers[ module ].initForComponent();
+							}
+						};
+						document.head.appendChild( scriptElement );
+						assetAdded = true;
+					}
+
+					if ( '' !== moduleConfig.assets.css ) {
+						cssUrl = moduleConfig.assets.cssurl;
+						linkElement = document.createElement( 'link' );
+						linkElement.rel = 'stylesheet';
+						linkElement.type = 'text/css';
+						linkElement.href = cssUrl;
+						document.head.appendChild( linkElement );
+						assetAdded = true;
+					}
+
+					if ( assetAdded ) {
+						FLBuilder._loadedModuleAssets.push( module );
+					}
+				}
+			}
+
 		},
 	}
 

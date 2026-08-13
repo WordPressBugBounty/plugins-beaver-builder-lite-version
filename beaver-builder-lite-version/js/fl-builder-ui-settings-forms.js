@@ -144,7 +144,7 @@
 
 		/**
 		 * Preprocesses module config before rendering.
-		 * 
+		 *
 		 * @since 2.9
 		 * @param {Object} config
 		 */
@@ -152,62 +152,155 @@
 			const module = FLBuilderConfig.contentItems.module.filter( module => {
 				return ! module.isAlias && module.slug === config.id;
 			} ).pop();
-			const deprecations = FLBuilderConfig.deprecations[ config.id ];
-			let version = null;
 
 			if ( ! module ) {
 				return config;
-			} else if ( FL.Builder.utils.isBlockEditor() ) {
-				const block = wp.data.select( 'core/block-editor' ).getBlock( config.nodeId );
-				version = block && block.attributes.version ? `v${ block.attributes.version }` : 'v1';
-			} else {
-				const node = FL.Builder.data.getNode( config.nodeId );
-				version = node.version ? `v${ node.version }` : 'v1';
 			}
 
-			// Handle support for the container element setting in the
-			// module's advanced tab. Remove it if not supported.
-			if ( ! module.element_setting ) {
-				
-				// If this module is deprecated and still supports the element setting,
-				// then we don't need to remove it.
-				let enableElementSetting = false;
+			const deprecations = FLBuilderConfig.deprecations[ config.id ];
+			const version      = this.getNodeVersion( config.nodeId );
 
-				if ( deprecations && deprecations[ version ] && deprecations[ version ].config ) {
-					const deprecationConfig = deprecations[ version ].config;
-					if ( deprecationConfig.element_setting ) {
-						enableElementSetting = true;
-					}
-				} 
-
-				// Remove the element setting.
-				if ( ! enableElementSetting ) {
-					delete config.tabs.advanced.sections.css_selectors.fields.container_element;
-				}
-			}
-
-			// Set the margin preview selector to the root element 
-			// if the module does not include a wrapper.
-			if ( ! module.include_wrapper ) {
-
-				// If this module is deprecated and still includes the wrapper,
-				// then we don't need change the selector.
-				let updateMarginSelector = true;
-
-				if ( deprecations && deprecations[ version ] && deprecations[ version ].config ) {
-					const deprecationConfig = deprecations[ version ].config;
-					if ( deprecationConfig.include_wrapper ) {
-						updateMarginSelector = false;
-					}
-				} 
-
-				// Update the margin preview selector.
-				if ( updateMarginSelector ) {
-					config.tabs.advanced.sections.margins.fields.margin.preview.selector = '';
-				}
-			}
+			this.removeUnsupportedElementSetting( config, module, deprecations, version );
+			this.updateMarginPreviewSelector( config, module, deprecations, version );
+			this.removeVersionRestrictedFields( config, version );
 
 			return config;
+		},
+
+		/**
+		 * @param {String} nodeId
+		 * @return {String}
+		 */
+		getNodeVersion: function( nodeId ) {
+			if ( FL.Builder.utils.isBlockEditor() ) {
+				const block = wp.data.select( 'core/block-editor' ).getBlock( nodeId );
+				return block && block.attributes.version ? `v${ block.attributes.version }` : 'v1';
+			}
+			const node = FL.Builder.data.getNode( nodeId );
+			return node.version ? `v${ node.version }` : 'v1';
+		},
+
+		/**
+		 * Removes the container element setting from the advanced tab
+		 * if the current module version does not support it.
+		 *
+		 * @param {Object} config
+		 * @param {Object} module
+		 * @param {Object} deprecations
+		 * @param {String} version
+		 */
+		removeUnsupportedElementSetting: function( config, module, deprecations, version ) {
+			if ( module.element_setting ) {
+				return;
+			}
+
+			// If this module is deprecated and still supports the element setting,
+			// then we don't need to remove it.
+			let enableElementSetting = false;
+
+			if ( deprecations && deprecations[ version ] && deprecations[ version ].config ) {
+				if ( deprecations[ version ].config.element_setting ) {
+					enableElementSetting = true;
+				}
+			}
+
+			if ( ! enableElementSetting ) {
+				delete config.tabs.advanced.sections.css_selectors.fields.container_element;
+			}
+		},
+
+		/**
+		 * Sets the margin preview selector to the root element
+		 * if the current module version does not include a wrapper.
+		 *
+		 * @param {Object} config
+		 * @param {Object} module
+		 * @param {Object} deprecations
+		 * @param {String} version
+		 */
+		updateMarginPreviewSelector: function( config, module, deprecations, version ) {
+			if ( module.include_wrapper ) {
+				return;
+			}
+
+			// If this module is deprecated and still includes the wrapper,
+			// then we don't need to change the selector.
+			let updateMarginSelector = true;
+
+			if ( deprecations && deprecations[ version ] && deprecations[ version ].config ) {
+				if ( deprecations[ version ].config.include_wrapper ) {
+					updateMarginSelector = false;
+				}
+			}
+
+			if ( updateMarginSelector ) {
+				config.tabs.advanced.sections.margins.fields.margin.preview.selector = '';
+			}
+		},
+
+		/**
+		 * Removes fields whose min_version exceeds the node's version,
+		 * then prunes any toggle options and show/hide arrays that
+		 * referenced only removed fields.
+		 *
+		 * @param {Object} config
+		 * @param {String} version
+		 */
+		removeVersionRestrictedFields: function( config, version ) {
+			const nodeVersionNum = parseInt( version.replace( 'v', '' ), 10 );
+			const removedFields  = new Set();
+
+			for ( const tab in config.tabs ) {
+				for ( const section in config.tabs[ tab ].sections ) {
+					const fields = config.tabs[ tab ].sections[ section ].fields;
+					if ( ! fields ) {
+						continue;
+					}
+					for ( const [ fieldKey, field ] of Object.entries( fields ) ) {
+						if ( field.min_version && field.min_version > nodeVersionNum ) {
+							removedFields.add( fieldKey );
+							delete fields[ fieldKey ];
+						}
+					}
+				}
+			}
+
+			if ( 0 === removedFields.size ) {
+				return;
+			}
+
+			for ( const tab in config.tabs ) {
+				for ( const section in config.tabs[ tab ].sections ) {
+					const fields = config.tabs[ tab ].sections[ section ].fields;
+					if ( ! fields ) {
+						continue;
+					}
+					for ( const field of Object.values( fields ) ) {
+						// Drop toggle options whose only targets were removed.
+						if ( ( 'select' === field.type || 'button-group' === field.type ) && field.toggle ) {
+							for ( const option of Object.keys( field.toggle ) ) {
+								const toggle     = field.toggle[ option ];
+								const hasFields  = toggle.fields && toggle.fields.length > 0;
+								const allRemoved = hasFields && toggle.fields.every( f => removedFields.has( f ) );
+								const noSections = ! toggle.sections || 0 === toggle.sections.length;
+								const noTabs     = ! toggle.tabs || 0 === toggle.tabs.length;
+
+								if ( allRemoved && noSections && noTabs ) {
+									delete field.options[ option ];
+									delete field.toggle[ option ];
+								}
+							}
+						}
+
+						// Prune removed fields from show/hide arrays.
+						for ( const key of [ 'show', 'hide' ] ) {
+							if ( field[ key ] && field[ key ].fields ) {
+								field[ key ].fields = field[ key ].fields.filter( f => ! removedFields.has( f ) );
+							}
+						}
+					}
+				}
+			}
 		},
 
 		/**

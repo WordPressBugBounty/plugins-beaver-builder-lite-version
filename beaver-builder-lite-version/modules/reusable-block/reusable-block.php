@@ -13,14 +13,17 @@ class FLReusableBlockModule extends FLBuilderModule {
 	 */
 	public function __construct() {
 		parent::__construct( array(
-			'name'            => __( 'WordPress Pattern', 'fl-builder' ),
-			'description'     => __( 'Display a WordPress Pattern.', 'fl-builder' ),
-			'group'           => __( 'WordPress Patterns', 'fl-builder' ),
-			'category'        => __( 'WordPress Patterns', 'fl-builder' ),
-			'icon'            => 'layout.svg',
-			'editor_export'   => true,
-			'partial_refresh' => true,
-			'enabled'         => false, // We use aliases instead.
+			'name'               => __( 'WordPress Pattern', 'fl-builder' ),
+			'description'        => __( 'Display a WordPress Pattern.', 'fl-builder' ),
+			'group'              => __( 'WordPress Patterns', 'fl-builder' ),
+			'category'           => __( 'WordPress Patterns', 'fl-builder' ),
+			'icon'               => 'layout.svg',
+			'editor_export'      => true,
+			'partial_refresh'    => true,
+			'enabled'            => false, // We use aliases instead.
+			// Renders arbitrary block output that can contain untrusted user
+			// data; do not run its shortcodes through the layout pass.
+			'renders_shortcodes' => false,
 		) );
 	}
 

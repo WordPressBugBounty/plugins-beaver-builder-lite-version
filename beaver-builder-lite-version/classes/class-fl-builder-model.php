@@ -1628,11 +1628,28 @@ final class FLBuilderModel {
 			}
 		}
 
+		$is_preview = $node_preview_id && $node_preview_id == $node->node;
+
+		// Node preview is only ever sent by the builder's own live preview
+		// request (action `render_layout`), which already requires a
+		// logged in user with edit_post capability on the target post
+		// before reaching this point (see FLBuilderAJAX::call_action()).
+		// Re-check the same guarantee here so any other caller that
+		// resolves node settings (e.g. a module's own front-end ajax
+		// action) can't honor an attacker-supplied node_preview override.
+		if ( $is_preview && ( ! is_user_logged_in() || ! current_user_can( 'edit_post', self::get_post_id() ) ) ) {
+			$is_preview = false;
+		}
+
 		// Get either the preview settings or saved node settings merged with the defaults.
-		if ( $node_preview_id && $node_preview_id == $node->node ) {
+		if ( $is_preview ) {
 
 			if ( ! isset( $post_data['node_preview_processed_settings'] ) ) {
 				$settings = $post_data['node_preview'];
+
+				// Preview settings are client-supplied and rendered as-is, so
+				// gate JS code fields the same way the save path does.
+				$settings = (array) self::strip_client_js_code_overrides( (object) $settings, isset( $node->settings->type ) ? $node->settings->type : '', $node->settings );
 
 				if ( isset( $settings['dynamic_node_settings'] ) ) {
 					$settings = FLBuilderDynamicGlobal::merge_settings_for_save( $node, (object) $settings );
@@ -2232,8 +2249,10 @@ final class FLBuilderModel {
 		// Apply settings that were passed if we have them.
 		if ( $settings && $settings_id ) {
 			if ( $settings_id === $row->node ) {
+				$settings                             = self::strip_client_js_code_overrides( (object) $settings, isset( $row->settings->type ) ? $row->settings->type : '', $row->settings );
 				$layout_data[ $new_row_id ]->settings = (object) array_merge( (array) $row->settings, (array) $settings );
 			} elseif ( isset( $new_nodes[ $settings_id ] ) ) {
+				$settings                            = self::strip_client_js_code_overrides( (object) $settings, isset( $new_nodes[ $settings_id ]->settings->type ) ? $new_nodes[ $settings_id ]->settings->type : '', $new_nodes[ $settings_id ]->settings );
 				$new_nodes[ $settings_id ]->settings = (object) array_merge( (array) $new_nodes[ $settings_id ]->settings, (array) $settings );
 			}
 		}
@@ -3132,8 +3151,10 @@ final class FLBuilderModel {
 		// Apply settings that were passed if we have them.
 		if ( $settings && $settings_id ) {
 			if ( $settings_id === $col->node ) {
+				$settings                             = self::strip_client_js_code_overrides( (object) $settings, isset( $col->settings->type ) ? $col->settings->type : '', $col->settings );
 				$layout_data[ $new_col_id ]->settings = (object) array_merge( (array) $col->settings, (array) $settings );
 			} elseif ( isset( $new_nodes[ $settings_id ] ) ) {
+				$settings                            = self::strip_client_js_code_overrides( (object) $settings, isset( $new_nodes[ $settings_id ]->settings->type ) ? $new_nodes[ $settings_id ]->settings->type : '', $new_nodes[ $settings_id ]->settings );
 				$new_nodes[ $settings_id ]->settings = (object) array_merge( (array) $new_nodes[ $settings_id ]->settings, (array) $settings );
 			}
 		}
@@ -3414,7 +3435,8 @@ final class FLBuilderModel {
 
 		// Merge form settings passed from the frontend
 		if ( $form_settings ) {
-			$settings = (object) array_merge( (array) $settings, $form_settings );
+			$form_settings = (array) self::strip_client_js_code_overrides( (object) $form_settings, isset( $settings->type ) ? $settings->type : '', $settings );
+			$settings      = (object) array_merge( (array) $settings, $form_settings );
 		}
 
 		// Merge alias settings
@@ -4129,6 +4151,7 @@ final class FLBuilderModel {
 		if ( ! $module ) {
 			return false;
 		} elseif ( $settings ) {
+			$settings         = self::strip_client_js_code_overrides( (object) $settings, isset( $module->settings->type ) ? $module->settings->type : '', $module->settings );
 			$module->settings = (object) array_merge( (array) $module->settings, (array) $settings );
 		}
 
@@ -4649,6 +4672,229 @@ final class FLBuilderModel {
 	}
 
 	/**
+	 * JS code field plan per module type: which top-level fields and which
+	 * repeater sub-fields carry a JavaScript code editor. Memoized so the copy
+	 * hot path does not re-walk settings forms for every node.
+	 *
+	 * @var array
+	 */
+	static private $js_code_field_plan = array();
+
+	/**
+	 * Node-level JavaScript code fields that apply to any node type.
+	 *
+	 * These are only added to the settings form for privileged users
+	 * (FLBuilderNodeCodeSettings::filter_settings_fields), so the form walk
+	 * below cannot discover them for the users who need gating. They are
+	 * stripped by name instead.
+	 *
+	 * @var array
+	 */
+	static private $node_js_code_fields = array( 'bb_js_code' );
+
+	/**
+	 * Removes JavaScript code field values from a client-supplied settings
+	 * object for users who lack the unfiltered_html capability.
+	 *
+	 * Code fields with a JavaScript editor are echoed raw into the generated
+	 * layout JS, so an unprivileged user who can set one can inject arbitrary
+	 * script. This strips those keys from the incoming client settings before
+	 * they are merged, at every entry point that accepts node settings (save,
+	 * copy, alias, preview), so the stored/source value is kept instead.
+	 *
+	 * Node-level code fields are stripped for every node type, rows and
+	 * columns included. Module form fields are stripped from the module's
+	 * registered form, one level into form repeaters.
+	 *
+	 * Top-level keys are removed outright so the merge that follows keeps the
+	 * stored value. Repeater sub-fields cannot rely on that: the merge replaces
+	 * the whole repeater key with the client array, so the stored per-item
+	 * value is written back onto each item instead, matched by item key. Items
+	 * with no stored counterpart (newly added ones) have the field removed.
+	 *
+	 * Privileged users are unaffected. Forms without JS code fields are
+	 * returned unchanged. The incoming object is never mutated.
+	 *
+	 * @since 2.10.2.4
+	 * @param object $settings  The incoming client settings object.
+	 * @param string $node_type The type of the node being written (module type).
+	 * @param object $stored    The settings the client settings will be merged
+	 *                          into, used to restore repeater sub-field values.
+	 * @return object The settings object with disallowed JS code fields removed.
+	 */
+	static public function strip_client_js_code_overrides( $settings, $node_type, $stored = null ) {
+		if ( FLBuilderModel::user_has_unfiltered_html() ) {
+			return $settings;
+		}
+		if ( ! is_object( $settings ) ) {
+			return $settings;
+		}
+
+		$settings = clone $settings;
+
+		foreach ( self::$node_js_code_fields as $name ) {
+			unset( $settings->$name );
+		}
+
+		if ( empty( $node_type ) || ! isset( self::$modules[ $node_type ] ) ) {
+			return $settings;
+		}
+
+		$plan = self::get_js_code_field_plan( $node_type );
+
+		foreach ( $plan['top'] as $name ) {
+			unset( $settings->$name );
+		}
+		foreach ( $plan['repeaters'] as $name => $sub_names ) {
+			if ( isset( $settings->$name ) ) {
+				$stored_items    = self::get_container_value( $stored, $name );
+				$settings->$name = self::strip_js_fields_from_items( $settings->$name, $sub_names, $stored_items );
+			}
+		}
+
+		return $settings;
+	}
+
+	/**
+	 * Builds (and memoizes) the JS code field plan for a module type.
+	 *
+	 * @param string $node_type The module type.
+	 * @return array The plan: 'top' field names and 'repeaters' sub-field names.
+	 */
+	static private function get_js_code_field_plan( $node_type ) {
+		if ( isset( self::$js_code_field_plan[ $node_type ] ) ) {
+			return self::$js_code_field_plan[ $node_type ];
+		}
+
+		$plan = array(
+			'top'       => array(),
+			'repeaters' => array(),
+		);
+
+		foreach ( self::get_settings_form_fields( $node_type, 'module' ) as $name => $field ) {
+			if ( self::is_js_code_field( $field ) ) {
+				$plan['top'][] = $name;
+			} elseif ( isset( $field['type'], $field['form'] ) && 'form' === $field['type'] ) {
+				$sub_names = self::get_js_code_field_names( $field['form'] );
+				if ( ! empty( $sub_names ) ) {
+					$plan['repeaters'][ $name ] = $sub_names;
+				}
+			}
+		}
+
+		self::$js_code_field_plan[ $node_type ] = $plan;
+		return $plan;
+	}
+
+	/**
+	 * Returns the names of JavaScript code fields in a registered settings form.
+	 *
+	 * @param string $form The registered form id.
+	 * @return array The JS code field names.
+	 */
+	static private function get_js_code_field_names( $form ) {
+		$names = array();
+		foreach ( self::get_settings_form_fields( $form, 'general' ) as $sub_name => $sub_field ) {
+			if ( self::is_js_code_field( $sub_field ) ) {
+				$names[] = $sub_name;
+			}
+		}
+		return $names;
+	}
+
+	/**
+	 * Replaces the given field names on every item of a client repeater value
+	 * with the value stored on the matching item, removing the field when there
+	 * is nothing stored to restore.
+	 *
+	 * Handles both array- and object-shaped containers and items: the AJAX
+	 * decode path (json_decode( ..., true )) yields associative arrays, while
+	 * some payloads and internal callers pass objects. Neither the incoming
+	 * value nor the stored value is mutated.
+	 *
+	 * @param array|object $items        The client repeater value.
+	 * @param array        $field_names  Field names to restore or remove.
+	 * @param array|object $stored_items The stored repeater value, if any.
+	 * @return array|object The repeater value with the fields gated.
+	 */
+	static private function strip_js_fields_from_items( $items, $field_names, $stored_items = null ) {
+		if ( ! is_array( $items ) && ! is_object( $items ) ) {
+			return $items;
+		}
+		$items = is_object( $items ) ? clone $items : $items;
+
+		foreach ( $items as $key => $item ) {
+			$stored_item = self::get_container_value( $stored_items, $key );
+			$item        = is_object( $item ) ? clone $item : $item;
+
+			foreach ( $field_names as $field_name ) {
+				$item = self::set_container_value( $item, $field_name, self::get_container_value( $stored_item, $field_name ) );
+			}
+
+			if ( is_array( $items ) ) {
+				$items[ $key ] = $item;
+			} else {
+				$items->$key = $item;
+			}
+		}
+		return $items;
+	}
+
+	/**
+	 * Reads a key from an array- or object-shaped container.
+	 *
+	 * @param array|object $container The container to read from.
+	 * @param string|int   $key       The key to read.
+	 * @return mixed The value, or null when the container or key is absent.
+	 */
+	static private function get_container_value( $container, $key ) {
+		if ( is_array( $container ) ) {
+			return array_key_exists( $key, $container ) ? $container[ $key ] : null;
+		}
+		if ( is_object( $container ) ) {
+			return isset( $container->$key ) ? $container->$key : null;
+		}
+		return null;
+	}
+
+	/**
+	 * Writes a key on an array- or object-shaped container, removing the key
+	 * instead when the value is null.
+	 *
+	 * @param array|object $container The container to write to.
+	 * @param string|int   $key       The key to write.
+	 * @param mixed        $value     The value, or null to remove the key.
+	 * @return array|object The updated container.
+	 */
+	static private function set_container_value( $container, $key, $value ) {
+		if ( is_array( $container ) ) {
+			if ( null === $value ) {
+				unset( $container[ $key ] );
+			} else {
+				$container[ $key ] = $value;
+			}
+		} elseif ( is_object( $container ) ) {
+			if ( null === $value ) {
+				unset( $container->$key );
+			} else {
+				$container->$key = $value;
+			}
+		}
+		return $container;
+	}
+
+	/**
+	 * Whether a settings form field is a code field using the JavaScript editor.
+	 *
+	 * @since 2.10.2.4
+	 * @param array $field A settings form field definition.
+	 * @return bool
+	 */
+	static private function is_js_code_field( $field ) {
+		return isset( $field['type'], $field['editor'] ) && 'code' === $field['type'] && 'javascript' === $field['editor'];
+	}
+
+	/**
 	 * Save the settings for a node.
 	 *
 	 * @since 1.0
@@ -4678,6 +4924,10 @@ final class FLBuilderModel {
 			);
 		}
 
+		// Prevent users without unfiltered_html from introducing raw JS via
+		// code fields (e.g. the Button module's Button Code setting).
+		$settings = self::strip_client_js_code_overrides( $settings, isset( $node->settings->type ) ? $node->settings->type : '', $node->settings );
+
 		// Merge the new settings.
 		if ( $is_dynamic_global ) {
 			$new_settings = FLBuilderDynamicGlobal::merge_settings_for_save( $node, $settings );
@@ -4691,12 +4941,10 @@ final class FLBuilderModel {
 			$new_settings->dynamic_fields = (object) $new_settings->dynamic_fields;
 		}
 
-		/**
-		 * Remove any js setting for users with no unfiltered role
-		 */
-		if ( ! FLBuilderModel::user_has_unfiltered_html() ) {
-			unset( $new_settings->bb_js_code );
-		}
+		// bb_js_code is gated by strip_client_js_code_overrides() above, which
+		// drops it from the incoming client settings rather than from the merged
+		// object, so an existing admin-authored value survives an edit by a
+		// lower-privileged user.
 
 		// Save the settings to the node.
 		$data                       = self::get_layout_data();

@@ -110,9 +110,9 @@ class FLVideoModule extends FLBuilderModule {
 			$vid_data = $this->get_data();
 			$preload  = FLBuilderModel::is_builder_active() && ! empty( $vid_data->poster ) ? ' preload="none"' : '';
 
-			$video_meta .= '<meta itemprop="url" content="' . ( empty( $vid_data->url ) ? '' : $vid_data->url ) . '" />';
+			$video_meta .= '<meta itemprop="url" content="' . esc_url( empty( $vid_data->url ) ? '' : $vid_data->url ) . '" />';
 			if ( $schema ) {
-				$video_meta .= '<meta itemprop="thumbnail" content="' . $video_poster . '" />';
+				$video_meta .= '<meta itemprop="thumbnail" content="' . esc_url( $video_poster ) . '" />';
 			}
 
 			$video_html = $video_meta;
@@ -120,7 +120,7 @@ class FLVideoModule extends FLBuilderModule {
 			$video_sc = sprintf( '%s', __( 'Video not specified. Please select one to display.', 'fl-builder' ) );
 
 			if ( ! empty( $vid_data->url ) ) {
-				$video_sc = '[video src="' . preg_replace( '/\/?\?.*/', '', $vid_data->url ) . '" ' . $vid_data->extension . '="' . preg_replace( '/\/?\?.*/', '', $vid_data->url ) . '"' . $vid_data->video_webm . ' poster="' . $video_poster . '" ' . $vid_data->autoplay . $vid_data->loop . $preload . '][/video]';
+				$video_sc = '[video src="' . esc_url( preg_replace( '/\/?\?.*/', '', $vid_data->url ) ) . '" ' . $vid_data->extension . '="' . esc_url( preg_replace( '/\/?\?.*/', '', $vid_data->url ) ) . '"' . $vid_data->video_webm . ' poster="' . esc_url( $video_poster ) . '" ' . $vid_data->autoplay . $vid_data->loop . $preload . '][/video]';
 			}
 
 			if ( 'yes' === $this->settings->video_lightbox ) {

@@ -45,7 +45,7 @@ if ( isset( $settings->click_action ) && 'copy_text' === $settings->click_action
 			?>
 		<i class="fl-button-icon fl-button-icon-after <?php echo esc_attr( $settings->icon ); ?>" aria-hidden="true"></i>
 		<?php endif; ?>
-	</<?php echo esc_attr( $module->get_tag() ); ?>>
+	</<?php echo esc_attr( $module->get_tag_name() ); ?>>
 	<?php if ( 'lightbox' == $settings->click_action && 'html' == $settings->lightbox_content_type && isset( $settings->lightbox_content_html ) ) : ?>
 		<div class="<?php echo $button_node_id; ?> fl-button-lightbox-content mfp-hide">
 			<?php echo $settings->lightbox_content_html; ?>
