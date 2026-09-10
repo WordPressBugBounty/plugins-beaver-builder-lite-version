@@ -81,6 +81,9 @@ final class FLBuilderIcons {
 		self::register_core_sets();
 
 		// Get the new sets.
+		/**
+		 * Array of icon sets registered and available for the current site.
+		 */
 		$sets = apply_filters( 'fl_builder_current_site_icon_sets', self::$sets );
 
 		// Revert to the original sets.
@@ -220,6 +223,9 @@ final class FLBuilderIcons {
 					}
 				}
 
+				/**
+				 * File path to the JSON configuration file for a core icon set.
+				 */
 				$config_path = apply_filters( 'fl_builder_core_icon_set_config', FL_BUILDER_DIR . 'json/' . $key . '.json', $set_data );
 
 				$icons                           = json_decode( file_get_contents( $config_path ) );
@@ -506,11 +512,19 @@ final class FLBuilderIcons {
 	 * @return void
 	 */
 	static public function enqueue_styles_for_icon( $icon, $field = false, $settings = false ) {
+		if ( ! is_string( $icon ) || empty( $icon ) ) {
+			return;
+		}
+
 		/**
 		 * Enqueue the stylesheet for an icon.
 		 * @see fl_builder_enqueue_styles_for_icon
 		 */
 		do_action( 'fl_builder_enqueue_styles_for_icon', $icon );
+
+		if ( isset( $settings->extra ) && '' !== $settings->extra ) {
+			wp_enqueue_style( 'font-awesome-5' );
+		}
 
 		// Make sure there is no whitespace
 		// Fixes broken uabb icons
@@ -572,6 +586,9 @@ final class FLBuilderIcons {
 	 * @return void
 	 */
 	static private function enqueue_custom_styles_by_key( $key ) {
+		/**
+		 * Whether to enqueue the stylesheet for a custom icon set.
+		 */
 		if ( apply_filters( 'fl_builder_enqueue_custom_styles_by_key', true, $key ) ) {
 			$sets = self::get_sets();
 

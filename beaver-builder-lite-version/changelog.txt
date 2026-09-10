@@ -1,411 +1,347 @@
-<h4>2.10.3.2 - 08/06/2026</h4>
-<p><strong>Enhancements</strong></p>
+<h4>2.11.0.4 - 09/01/2026</h4>
+<p><strong>Hotfix</strong></p>
+<ul>
+	<li>Fixed sr-only opens in a new tab script firing in the classic editor (#5564)</li>
+	<li>Translations installation/updates will now only be for the needed locales instead of all locales (#5535)</li>
+	<li>Components: Fixes needed to support AI generated modules being saved as components in the future (#5433)</li> 
+	<li>Fixed <code>_removeOverlay</code> causing a TypeError in some instances (#5558)</li>
+</ul>
+
+<h4>2.11.0.3 - 08/20/2026</h4>
+<p><strong>Hotfix</strong></p>
+<ul>
+	<li>Content Slider: Fixed outgoing slide not hidden after the Fade transition completes (#5537)</li>
+	<li>Fixed some instances of background colors rendering as invalid CSS (#5519)</li>
+</ul>
+
+<h4>2.11.0.2 - 08/12/2026</h4>
+<p><strong>Hotfix</strong></p>
 <ul>
 	<li>Security: Fixed possible XSS issue in Button module code field (#5429)</li>
 	<li>Security: Fixed possible arbitrary shortcode execution in foreign module render output (#5438)</li>
 	<li>Security: Fixed possible XSS issue in Search module no results field (#5455)</li>
+	<li>Popup Module: Fixed corrupt serialization in module templates (#5397)</li>
+	<li>MultiSite: Fixed <code>flush_rewrite_rules</code> firing on every <code>admin_init</code> after a version change (#5442)</li>
+	<li>MultiSite: Fixed <code>run_multisite</code> writing the version only after a full loop (#5443)</li>
+	<li>UI: Fixed overlays when using an RTL language (#5413)</li>
+	<li>UI: Fixed overlays never showing for a global column (#5418)</li>
+	<li>History: Only fire didAddModule for new modules in the settings preview callback (#5501)</li>
 </ul>
 
-<h4>2.10.3.1 - 07/23/2026</h4>
-<p><strong>Enhancements</strong></p>
+<h4>2.11.0.1 - 07/23/2026</h4>
+<p><strong>Hotfix</strong></p>
 <ul>
 	<li>Security: Fixed possible XSS issue with poster_src field in the Video module and circle_width in the Number Counter module (#5394)</li>
+	<li>Menu module: Fixed responsive submenu toggle throwing TypeError (#5385)</li>
+	<li>Fixed Global button module overlay rendering as component overlay instead of global (#5414)</li>
 </ul>
 
-<h4>2.10.3 - 07/07/2026</h4>
+<h4>2.11 "Kariba" - 07/07/2026</h4>
+<p>Beaver Builder 2.11 is here! This is a major update and will be released as the official download on the My Account page first. Remote updates to all existing sites will begin soon.</p>
+<p>Please check out the <a href="https://www.wpbeaverbuilder.com/beaver-builder-2-11" target="_blank" rel="noopener">Release Post</a> for highlights of what's new or the <a href="https://docs.wpbeaverbuilder.com/beaver-builder/introduction/about-release" target="_blank" rel="noopener">"About this Release"</a> doc for all of the details.</p>
 <p><strong>Enhancements</strong></p>
 <ul>
-	<li>Developer: Add min_version support to hide settings fields for deprecated module instances (#5182)</li>
-	<li>WooCommerce Module: Add Product Title and Random to Order options (#4867)</li>
+	<li>Popup Module: New container module for creating a variety of popups, flyouts, and interstitials. <a href="https://vimeo.com/1134022900">See this video</a> for more info.</li>
+	<li>Popup Module: Added support for using within the Loop Module</li>
+	<li>Popup Module: Add 9 pre-built module templates</li>
+	<li>Add integration hooks and surfaces for bb-ai-design-system</li>
+	<li>Global colors are now available in the Multiple Background field and refresh is no longer required after adding new Global Colors</li>
+	<li>Overlays: Show parent container overlays similar to rows when there is enough space. <a href="https://vimeo.com/1134028241">See this video</a> for more info.</li>
+	<li>Overlays: Render in the body instead of layout markup to prevent styling conflicts with the design panel coming in 3.0.</li>
+	<li>Updated FontAwesome to FontAwesome 7.2</li>
+	<li>Add WordPress (7.0+) Font Library support to typography fields</li>
+	<li>Rename Layout CSS/JS menu item to Layout Settings and add Post Settings tab to be able to edit post/page info inside the UI</li>
+	<li>a11y: Every link that opens a new tab has a screen reader text to notify users</li>
+	<li>a11y: Add new option for styling outlines in Global Styles for interactive elements</li>
+	<li>a11y: Accessibility improvements to the HTML structure of the Accordion Module. This uses module deprecation to ensure backwards compatibility. Buttons now have unique accessible names</li>
+	<li>Advanced Tab: Add controls to add custom HTML attributes to every node</li>
+	<li>Add hooks before rendering the custom attributes</li>
+	<li>Performance: Add filter <code>fl_builder_remove_orphaned_nodes</code> to clean up any orphaned nodes when saving a layout</li>
+	<li>Add <code>didUpdateLayoutExternally</code> JS hook so external integrations can mark the layout as needing publish</li>
+	<li>Field Connections: Add support to select post ID</li>
+	<li>Add Prepend option when applying a Template</li>
+	<li>WP Admin Settings pages design refresh, add Settings snapshots and a Maintenance Mode option</li>
+	<li>Optimization: Serve translations from translate.wpbeaverbuilder.com</li>
+	<li>Enable field connection support in icon fields</li>
+	<li>Rows: Text, Link, Link Hover, Heading and Background color fields and Overlay fields are now responsive</li>
+	<li>Global Styles: Add padding, gradient and width options for buttons</li>
+	<li>Outline Panel: Add Save As option to context menu</li>
+	<li>Outline Panel: Add ability to directly export Globals/Components to context menu</li>
+	<li>Box Module: Fix force download option for the link field not working</li>
+	<li>Button Module: Add support to trigger any existing Popup module</li>
+	<li>Button Group Module: Width, Text, Background, and Border Colors are now responsive</li>
+	<li>Icon Module: Text Spacing, Text Color, Icon Color & Hover Color, Icon Background & Icon Background Hover fields are now responsive</li>
+	<li>Icons: Add support for Pro Styles, and add extra classes field to support animations and other features that can be used by adding a class</li>
+	<li>List Module: Ensure more fields are responsive</li>
+	<li>Number Counter Module: Wrap number Prefix/Suffix in SPANs. This uses module deprecation to ensure backwards compatibility</li>
+	<li>Photo Module: Added ability to add <code>no-lazy</code> class to the module to disable lazy load on a per module/image basis</li>
+	<li>Popup Module: Added various accessibility enhancements including keyboard navigation for arrow keys with keyboard focus, a new modal popup type with focus lock, fallback accessibility support for all triggering links and more</li>
+	<li>Pricing Table Module: Add options to choose tooltip display on hover or click and add 2 new styles for tooltips</li>
+	<li>Search Module: Added the ability to limit the search results by post type when displaying results via AJAX</li>
+	<li>Search Module: Add new reveal layout and proper attributes for accessibility</li>
+	<li>Slideshow Module: height field is now responsive</li>
+	<li>Testimonials Module: Add typography field and make text and arrow color fields responsive</li>
+	<li>Testimonials Module: Add an option to control looping</li>
+	<li>Added a new module type registry to support rendering of static HTML, CSS, and JavaScript</li>
+	<li>When exporting Saved Nodes, add label for what type of Saved Node it is</li>
+	<li>Performance: optimizations to reduce database queries, repeated object cloning and repeated work during builder loads</li>
 </ul>
 
-<p><strong>Bug Fixes</strong></p>
+<p><strong>Fixes</strong></p>
 <ul>
-	<li>Color Picker: Trim whitespace from color picker values on blur and load to prevent corrupting CSS strings (#5039)</li>
-	<li>Components: Fixed repeatable fields not being able to be enabled as component fields (#5200)</li>
-	<li>Accordion module: Fixed functionality when nested inside another Accordion module (#4984)</li>
-	<li>Button Module: Fixed closing tag containing escaped attributes when click action is set to link (#5169)</li>
-	<li>Button Group Module: Fixed first button popup showing “Content not found” or JS error when using lightbox on multiple buttons (#4861)</li>
-	<li>Subscribe Module: Fixed fatal when using ConvertKit service in third party modules (#4974)</li>
-	<li>Module Blocks: Fixed margin not rendering on the frontend (#5131)</li>
-	<li>Module Blocks: Fixed React security warning in the WP editor (#4847)</li>
-	<li>Photo Module: Fixed AJAX error when attachment parent post type is unregistered (#5094)</li>
-	<li>Post Module: Fixed content color overriding link color for Read More link (#4766)</li>
-	<li>Slideshow Module: Fixed repetitive links in the social caption of the Slideshow module when multiple modules appear on the page (#4108)</li>
-	<li>Outline Panel: Fixed context menu remaining open when it should close (#4806)</li>
-	<li>Outline Panel: Fixed preview not always being accurate when re-ordering in the Outline Panel (#4381)</li>
-	<li>Outline Panel: Fixed adjusting content panel width when pinned left also adjusting Outline Panel width (#4205)</li>
-	<li>Fixed fatal error in 3rd party callbacks for <code>fl_builder_render_settings_field</code> (#5157)</li>
-	<li>Debug: Previous installed version was not showing when on a Multi-Site setup (#5269)</li>
-	<li>Fixed connections being removed from nested form items after debounced preview-save fires post-close (#5217)</li>
-	<li>Query Monitor: Fixed icon missing from UI with Query Monitor 4.0+ (#5204)</li>
-	<li>Safe Mode: Fixed container modules causing JS error when moved in the Outline Panel in Safe Mode (#4678)</li>
-	<li>UI: Fixed AJAX loader SVG 404 error (#4608)</li>
-	<li>Fixed conflict with Estatik Pro where modules were not able to be dropped on the page (#3945)</li>
-	<li>Fixed pagination 404ing with multiple loops and using a custom archive slug with a prefix (#4991)</li>
+	<li>PHP 8.5 compatibility: Fix PHP deprecation notices</li>
+	<li>Fire a preview refresh when removing values to fix inconsistent behavior with empty values</li>
+	<li>Fixed CSS keyword none incorrectly wrapped in url() for background-image property</li>
+	<li>Fixed Row Text colors overriding Box Module text color</li>
+	<li>Add missing module dependencies</li>
+	<li>Fixed <code>max_input_vars</code> causing silent save failures across the builder</li>
+	<li>Box Module: Fix link field not working properly</li>
+	<li>Fixed node changes not being saved when done immediately before importing styles</li>
+	<li>Fixed SVG backgrounds in Box module breaking due to insufficient data URI encoding and CSS minification</li>
+	<li>Fixed fatal TypeError in Box module link attributes when using v1 of the module</li>
 </ul>
 
 <p><strong>Changes</strong></p>
 <ul>
-	<li>Replace Font Awesome visibility rules icon with inline SVG (#5234)</li>
-	<li>Components: Disable connect icons for raw fields (#4945)</li>
-	<li>Module Blocks are now disabled inside widget areas (#4803)</li>
-	<li>Components now load module settings.js when editing a component to prevent breaking AJAX fields (#5072)</li>
+	<li>Required WP version is now 6.8+</li>
+	<li>Updated welcome page for 2.11 release</li>
+	<li>Rename Content tab in Post Modules to Query for consistency with Components</li>
+	<li>Add admin notice for sites that have the iFrame UI disabled</li>
+	<li>When looping is disabled remove navigation at the end for Content Slider, Post Slider, Post Carousel modules and add aria-hidden when needed</li>
+	<li>Advanced Settings: Enable shortcodes in CSS/JS by default and remove toggle</li>
+	<li>Visibility: For breakpoint icons, put a line through when a node is not visible at that breakpoint</li>
+	<li>Modularize the BxSlider plugin wrapper margins property</li>
+	<li>Update fl-builder/layout block to API v3</li>
+	<li>Remove redundant logic in the Pricing Table module</li>
+	<li>Add Beaver Builder menu item to WordPress importer and it now respects the Content Options setting</li>
+	<li>Adjust wording in admin notice when legacy UI is enabled to clarify it is no longer supported</li>
+	<li>Addons installer script is no longer enqueued on every admin page</li>
+	<li>Updated stale URLs in core templates</li>
+	<li>Inline editing is now skipped for fields containing shortcodes to prevent shortcode content rendering inside text modules when clicking the shortcode</li>
+	<li>Synced status indicator on <code>didUpdateLayoutExternally</code> hook</li>
+	<li>Debug Mode: Added a Database section with a table AUTO_INCREMENT check</li>
 </ul>
 
-
-<h4>2.10.2.3 - 06/25/2026</h4>
-<p><strong>Hotfix</strong></p>
-<ul>
-	<li>Menu Module: Fixed triggering additional user event handlers not working (#4792 & #5184)</li>
-	<li>Fixed Global color connections in component instances remaining stale after main component changes (#5303)</li>
-</ul>
-
-<h4>2.10.2.2 - 05/26/2026</h4>
-<p><strong>Hotfix</strong></p>
-<ul>
-	<li>Fixed Global color connection on gradient fields not rendering properly in some circumstances (#5189)</li>
-	<li>Fixed field connections cache poisoned in custom post loops (#5180)</li>
-	<li>Added capability checks to broken admin AJAX handlers in User Access. Props: Austin Grinder (#5175)</li>
-	<li>Fixed wpbb-if shortcodes returning true when there is no match (#5186)</li>
-</ul>
-
-<h4>2.10.2.1 - 05/18/2026</h4>
-<p><strong>Hotfix</strong></p>
-<ul>
-	<li>Components: Fixed changes to main component not reflecting on instance that has been edited when using global colors (#5113)</li>
-	<li>MultiSite: Fixed <code>maybe_flush_rewrites</code> using get_option instead of <code>get_site_option</code>(#5138)</li>
-	<li>Icons: Fixed incompability with new version of IcoMoon (#5144)</li>
-	<li>Fixed fatal error in <code>update_layout_settings</code> when $settings is an object (#5150)</li>
-	<li>Fixed wpbb / wpbb-if shortcodes treating "0" as empty (#5168)</li>
-</ul>
-
-<h4>2.10.2 - 04/21/2026</h4>
+<h4>2.11-beta.rc1 - 07/02/2026</h4>
 <p><strong>Enhancements</strong></p>
 <ul>
-	<li>Button Module: Add copy text action (#4653)</li>
-</ul>
-
-<p><strong>Bug Fixes</strong></p>
-<ul>
-	<li>Fixed nodes not being visible in builder when visibility is hidden in some circumstances (#4900)</li>
-	<li>Accordion Module: Fixed icons not being visible when nested inside a Tabs module (#4985)</li>
-	<li>Box Module: Fixed links opening as a pop-up window and not a new tab when new window and nofollow are enabled (#5023)</li>
-	<li>Box Module: Fixed links not working when connected to Post Custom Field and Box is inside Loop Modules (#4672)</li>
-	<li>Fixed Global Styles device toggle button not syncing with responsive editing (#4095)</li>
-	<li>Popup Maker integration: Fixed not being able to scroll down while editing (#3625)</li>
-	<li>Fixed row border radius not applying to slideshow and video backgrounds (#3365)</li>
-	<li>Outline Panel: Fixed context menu not being visible at the very bottom of the page (#4670)</li>
-	<li>Outline Panel: Fixed draggable areas appearing when they should not (#4319)</li>
-	<li>Advanced Settings: Fixed the Mod_Security fix interfering with node import/export (#3507)</li>
-	<li>Separator Module: Fixed module not working properly when placed inside a Box Module (#4270)</li>
-	<li>Fixed permalinks when switching from Lite to Premium version (#3185)</li>
-	<li>Fixed some layout CSS affecting color picker swatches (#4708)</li>
-	<li>Debug Mode: Fixed undefined key when there's an unassigned menu in the BB theme (#4135)</li>
-	<li>Loop Module: Fixed rendering issue when page ID matches repeater ID (#4648)</li>
-	<li>Button Module: Fixed background animation CSS specificity (#4658)</li>
-	<li>Subscribe Module: Fixed issue with AWeber integration (#4493)</li>
-	<li>Subscribe Module: Ensure choose option stays at top in select (#4544)</li>
-	<li>Fixed missing translations for color picker (#5037)</li>
-	<li>Fixed fatal error when a page title contains a new line or control character (#5059)</li>
-	<li>Fixed PHP warning in update object when a slug property is missing (#5065)</li>
-	<li>Remove deprecated json2 script enqueue (#4972)</li>
-	<li>FontAwesome: Catch API exception in get_kit_data to prevent fatal error (#5089)</li>
-	<li>Fixed incorrect pagination url when using Post Module Block (#4953)</li>
-	<li>Outline Panel: ensure you can only have 1 top level container when editing a template (#4638)</li>
-	<li>Fixed saved element thumbnail images displaying distorted (#3313)</li>
-	<li>Fixed _load_textdomain_just_in_time notice on WordPress 6.7+ for non-US locales (#5117)</li>
-</ul>
-
-<h4>2.10.1.6 - 04/09/2026</h4>
-<p><strong>Hotfix</strong></p>
-<ul>
-	<li>Reworked CSS preview to fire a preview refresh when the value is empty so the correct fallback is used (#5063)</li>
-	<li>Fixed Cloud icon not showing up in Toolbar until User Access settings are saved (#5073)</li>
-	<li>Fixed Themer activation link in Available Downloads requiring a refresh</li>
-</ul>
-
-<h4>2.10.1.5 - 04/02/2026</h4>
-<p><strong>Hotfix</strong></p>
-<ul>
-	<li>Menu Module: Fixed <code>ul</code> sitting outside of <code>nav</code> after switching from responsive layout (#5044)</li>
-	<li>Menu Module: Reverted fix for inline logo link not working on touchscreen devices in favor of new fix so that it doesn't cause sub-menus to not work properly on mobile (#4983)</li>
-	<li>Menu Module: Remove unneeded accessibility attributes (#4772)</li>
-</ul>
-
-<h4>2.10.1.4 - 03/26/2026</h4>
-<p><strong>Hotfix</strong></p>
-<ul>
-	<li>Accordion Module: Fixed opening issue when label is an anchor link and expand on tab is enabled (#4976)</li>
-	<li>Callout Modoule: Fixed conflict with Event Espresso (#4925)</li>
-	<li>Menu Module: Fixed inline logo link not working on touchscreen devices (#4983)</li>
-	<li>Fixed fatal error when using a role with restricted editing (#5012)</li>
-	<li>Fixed Stripe being enqueued even when Cloud access is disabled (#4934)</li>
-	<li>Menu Module: Fixed background color not rendering when responsive menu is set to flyout (#5019)</li>
-</ul>
-
-<h4>2.10.1.3 - 03/19/2026</h4>
-<p><strong>Hotfix</strong></p>
-<ul>
-	<li>Security: Fixed possible SQL injection in duplicate_post meta key handling (#4965)</li>
-	<li>Components: Fixed component not opening for editing in some cases (#4790 & #4747)</li>
-	<li>Components: Fixed CSS breaking when child module is using a global color (#4947)</li>
-	<li>Components: Fixed settings not opening after setting node label in the Outline Panel (#4990)</li>
-	<li>Components: Fixed row background video not rendering (#4999)</li>
-	<li>Accordion Module: Fixed accordion not opening when clicking the title/label if HTML tags are used in label (#4863)</li>
-	<li>Menu Module: Fixed menu link color overriding dropdown link color (#4995)</li>
-	<li>Fixed JS error when using Post Slider and Post Carousel in the block editor (#4733)</li>
-</ul>
-
-<h4>2.10.1.2 - 03/12/2026</h4>
-<p><strong>Hotfix</strong></p>
-<ul>
-	<li>Security: Check if user has unrestricted_editing before allowing JS to be changed (#4882)</li>
-	<li>Fixed row link color overriding menu module link color (#4866)</li>
-	<li>Fixed template views with duplicate handles overwriting each other in the Templates tab (#4889)</li>
-	<li>Loop Module: Fixed issues with pagination on Themer layout or when using Relationship as a source (#4641)</li>
-	<li>Fixed compatibility issue with Cookiebot plugin (#4904)</li>
-	<li>Components: Fixed nested component settings showing all fields when opened from the Outline Panel (#4906)</li>
-	<li>Box Module: Fixed min-width causing child boxes to overlap in some flex row layouts (#4911)</li>
-	<li>Video module: Fixed autoplay issues when Assistant plugin is active (#4935)</li>
-</ul>
-
-<h4>2.10.1.1 - 02/27/2026</h4>
-<p><strong>Hotfix</strong></p>
-<ul>
-	<li>Components: Fixed PHP warnings when opening a component instance containing nested components or when a component contains a module type not registered in the current context</li>
-	<li>Components: Fixed settings being missing in some components</li>
-	<li>Components: Fixed CSS missing for additional instances of the same component on a page</li>
-</ul>
-
-<h4>2.10.1 - 02/25/2026</h4>
-<p><strong>Enhancements</strong></p>
-<ul>
-	<li>Optimization: Make some adjustments to prevent recursion causing a timeout on large pages (#4852)</li>
-	<li>Optimization: Draft assets are no longer recreated after publishing a page (#4843)</li>
-	<li>Components: Improve cache handling to ensure when updating a component, it syncs to instances (#4583)</li>
+	<li>Photo Module: Added ability to add <code>no-lazy</code> class to the module to disable lazy load on a per module/image basis</li>
+	<li>Popup Module: Added various accessibility enhancements including keyboard navigation for arrow keys with keyboard focus, a new modal popup type with focus lock, fallback accessibility support for all triggering links and more</li>
+	<li>Button Module: Add support to trigger any existing Popup module</li>
 </ul>
 
 <p><strong>Fixes</strong></p>
 <ul>
-    <li>(a11y) Menu Module: Fixed accessibility issue with landmark name used twice (#3008)</li>
-	<li>Admin: Fixed BB templates title linking to frontend instead of the editor, and post status no longer showing (#4877)</li>
-     <li>Admin: Fixed settings page styling on Multi-Site (#4800)</li>
-    <li>Box Module: Fixed smooth scroll not working with link (#4720)</li>
-    <li>Box Module: Fixed background layer field shortcode rendering page/post content when inside a loop module (#4760)</li>
-    <li>Loop Module: Fixed repeater on options page not working (#4316)</li>
-    <li>Menu Module: Fixed link padding not accepting 0px on mobile (#4695)</li>
-    <li>Photo Module: Fixed caption option only showing image's caption (#4674)</li>
-	<li>Posts Module: Fixed new CSS affecting ul tags in custom layout (#4769)</li>
-    <li>Posts Module: Fixed custom layout failing to display content in Blocks mode (#4717)</li>
-    <li>Posts Module: Fixed repeating the same posts when placed in a post inside a global row (#3598)</li>
-    <li>Posts Module: Fixed out of position post items in pagination (#4437)</li>
-	<li>Row Shapes: Fixed PHP warning for file name length (#4743)</li>
-	<li>Fixed custom position for row backgrounds not being responsive (#4179)</li>
-    <li>Fixed module instance CSS check preventing use of the function elsewhere (#4808)</li>
-    <li>Fonts: Fixed Google Font previewing wrong font weight until save (#4714)</li>
-	<li>Fixed WP Forms Spam Setting causing JS errors inside UI (#4676)</li>
-	<li>Legacy UI: Fixed React errors (#4786)</li>
-</ul>
-
-<p><strong>Developer</strong></p>
-<ul>
-	<li>Components: Add new filters <pre>fl_builder_dynamic_global_is_query_module</pre> and <pre>fl_builder_dynamic_global_is_query_module_file</pre></li>
-</ul>
-
-<h4>2.10.0.7 - 02/18/2026</h4>
-<p><strong>Hotfix</strong></p>
-<ul>
-	<li>Optimize cache writes when using WP FileSystem APIs (#4832)</li>
-	<li>Box module: Remove min-height as it is not needed and is causing text overlapping in some circumstances and fix min width for children not rendering (#4830)</li>
-	<li>Button Module: Prevent code entered into onclick field from breaking the UI (#4796)</li>
-	<li>Fixed auto suggest fields not updating properly in filter section of modules with loops (#4828)</li>
-	<li>Fixed categories not rendering in the WP Admin for saved nodes and remove "View" link for Beaver Builder template categories (#4812)</li>
-	<li>Optimization: move CSS that is static for buttons to static stylesheet (#4810)</li>
-	<li>Ensure "enable component editing" only renders for components (#4805)</li>
-	<li>Advanced Settings: Fixed revision limit not working (#4794)</li>
-	<li>UI: Fixed saved tab collapsing sections not working after using search field (#4734)</li>
-	<li>UI: Fixed testimonials reloading when responsive editing is switched in the iframe UI</li>
-</ul>
-
-<h4>2.10.0.6 - 01/28/2026</h4>
-<p><strong>Hotfix</strong></p>
-<ul>
-	<li>Security: Add capability check before saving global settings (#4773)</li>
-	<li>Components: Fixed unlinking a Box component instance reverting settings (#4784)</li>
-	<li>Components: Fixed photo fields not working correctly when only enabling source (#4782)</li>
-	<li>Components: Fixed duplicating containers with components in them not working properly (#4763)</li>
-	<li>Components: Fixed incorrect position of container module components when dropped or moved around (#4763)</li>
-	<li>Fixed SASS warning and deprecation notices in PHP 8.4+ (#4771)</li>
-	<li>Accordion Module: Fixed not being able to type spaces in forms (#4776)</li>
-	<li>Content Slider Module:Fixed JS error when using some special characters or HTML tags (#4710)</li>
-	<li>Testimonials Module: Ensure that new markup only applies to new modules (#4767)</li>
-</ul>
-
-<h4>2.10.0.5 - 01/14/2026</h4>
-<p><strong>Hotfix</strong></p>
-<ul>
-	<li>Security: Sanitize auto suggest action function (#4659)</li>
-	<li>Accordion Module: item no longer automatically closes when clicking outside of content (#4722)</li>
-	<li>Components: Fixed node label added in Outline Panel breaking components (#4637)</li>
-	<li>HTML Module: Fix module not being selectable when it contains only  script or style tags (#4645)</li>
-	<li>ACF Blocks: Fix block assets loading in WP 6.9+ (#4731)</li>
-	<li>Lite: Add Pro message when clicking "Save as" in node overlay (#4700)</li>
-</ul>
-
-<h4>2.10.0.4 - 12/18/2025</h4>
-<p><strong>Hotfix</strong></p>
-<ul>
-	<li>Security: Add capability check on the 'duplicate_wpml_layout' function (#4636)</li>
-	<li>Menu Module: Fixed markup issue when using HTML in menu item(#4609)</li>
-	<li>Global Colors: When removing a global color from a gradient field, ensure color stays selected (#4622)</li>
-	<li>Components: Ensure nested components are disabled for drag and drop (#4693)</li>
-	<li>UI: Remove More layouts link in the content panel if core templates are disabled(#4665)</li>
-</ul>
-
-<h4>2.10.0.3 - 11/25/2025</h4>
-<strong>There is a companion BB Themer release for this version. Please update to Themer 1.5.2.1.</strong>
-<p><strong>Hotfix</strong></p>
-<ul>
-	<li>Security: Added better capability checking to ensure only proper users can view attachment data for media attached to posts that are private, draft, or password-protected (#4604)</li>
-	<li>Security: Added better capability checking for disable layout action (#4623)</li>
-	<li>Security: Only Administrator and Editor roles will be checked by default for Builder Access and Unrestricted Editing in User Access settings</li>
-	<li>Security: Ensure users have Builder Access and Unrestricted editing capabilities to allow them to add or delete color picker presets</li>
-	<li>Accordion Module: Fixed accordion closing upon clicking inside the content (#4615)</li>
-	<li>Box Module: Fix issue with saving fields after saving as a template (#4530)</li>
-	<li>Button Group Module: Fixed PHP warnings (#4489)</li>
-	<li>Content Slider Module: Fixed JS error when using a single quote in the label (#4626)</li>
-	<li>Loop Module: Fixed PHP warnings if post has no taxonomy (#4642)</li>
-	<li>Loop Module: Fixed field connection logic for post grid loop (#4646)</li>
-	<li>Global Settings: Fixed Row default max width not being responsive (#4634)</li>
-	<li>Advanced Settings: Fix Node Code settings toggle not working (#4611)</li>
-</ul>
-
-<h4>2.10.0.2 - 11/06/2025</h4>
-<p><strong>Hotfix</strong></p>
-<ul>
-	<li>Components: Fixed toggled fields in components not syncing properly (#4567)</li>
-	<li>Globals: Fixed unlinking causing a fatal error when the node contains modules that no longer exist (#4613)</li>
-	<li>Icon Module: Revert change from display: block to inline for span (#341)</li>
-	<li>Menu Module: Fixed aria-expanded not working on nested submenus (#4594)</li>
-	<li>Menu Module: Fixed Menu Background Color (Mobile) being applied twice (#4598)</li>
-	<li>Photo Module: Add missing field connections for source URL, caption and title attribute and fix caption field not toggling correctly (#4508)</li>
-	<li>Rank Math: Fixed integration to ensure Focus Keyword feature still works on posts/pages where BB is used (#4599)</li>
-</ul>
-
-<h4>2.10.0.1 - 10/30/2025</h4>
-<p><strong>Hotfix</strong></p>
-<ul>
-	<li>Components: Fixed Query Fields not showing form and instance settings not overriding the default (#4563)</li>
-	<li>Components: Fixed repeating fields dynamic editing icon rendering as not selected when it is (#4569)</li>
-	<li>Components: Fixed field connections in components (#4579)</li>
-	<li>UI: Fix back link appearing on top of group dropdown (#4557)</li>
-	<li>Menu Module: Fix CSS for current menu item not rendering and ensure the proper menu ID is used (#4559)</li>
-	<li>Fixed missing pop-up when inserting saved template with Box Module (#4565)</li>
-	<li>User Access: Changed default selected roles for Cloud to administrator only (#4572)</li>
-	<li>Fixed post URL field connection not working correctly in a Box module link field inside of a Loop module (#4585)</li>
-</ul>
-
-<h4>2.10 "Monticello" - 10/14/2025</h4>
-<p><strong>Enhancements</strong></p>
-<ul>
-	<li>Introduced the ability to save nodes as Components, allowing specific fields within global templates to be customized per page while maintaining shared defaults.</li>
-	<li>Added 60+ pre-built Box module templates.</li>
-	<li>Added Prebuilt node templates to the templates tab.</li>
-	<li>Box Module: Added a global setting for applying global row spacing to top-level boxes. This will be enabled by default on new sites and disabled for existing 2.9 sites updating to 2.10 to ensure backward compatibility.</li>
-	<li>Box Module: Added an icon for toggling a grid guidelines overlay when building grids</li>
-	<li>Assistant Integration: Added new cloud icon to the toolbar for connecting to the cloud and saving templates. A new user access setting for enabling or disabling cloud access based on user role was also added.</li>
-	<li>Added a new Star Rating module</li>
-	<li>Added a more layouts link to the Box module section</li>
-	<li>Reworked the pre-built rows and modules panels to show categories instead of a dropdown</li>
-	<li>Added a new "Type" select in the "Save As" form for choosing to save a component or template</li>
-	<li>Added a "Type" filter to the "Saved" panel for filtering components, global templates, and static templates</li>
-	<li>Added "Edit Component" and "Unlink Component" actions to the settings dropdown on component overlays and context menu in the outline panel</li>
-	<li>Outline Panel: add copy and paste options to the context menu</li>
-	<li>Added the ability to collapse the sections in the Saved panel</li>
-	<li>Button & Button Group Modules: Added option for button as a click action which will render an actual button tag powered by custom click logic</li>
-	<li>Button Module: Enabled responsive behavior on custom width, text color, background colors and border color fields</li>
-	<li>Contact Form Module: Added styling controls for form labels</li>
-	<li>Login Form Module: Added styling controls for form labels</li>
-	<li>Subscribe Form Module: Added styling controls for form labels</li>
-	<li>Menu Module: Added width option for flyout menu</li>
-	<li>Photo Module: Added option to choose image size in lightbox</li>
-	<li>Subscribe Module: Added support for ConvertKit custom fields</li>
-	<li>Subscribe Module: Added support for MailChimp tags</li>
-	<li>List Module: Added option to populate list in bulk</li>
-	<li>Performance: Assets are not rendered for nodes if they are not rendering on page</li>
-	<li>Performance: Improved the time it takes for settings to initially render when first opened</li>
-	<li>Debug Mode: Added version control tab when it is enabled</li>
-	<li>Update jQuery validate script and move external libraries into their own folder</li>
-</ul>
-
-<p><strong>Accessibility Improvements</strong></p>
-<ul>
-	<li>Accordion Module: changes to HTML tags used for elements for new modules dropped on the page, increase focus ring size and change key event listener from keypress to keydown, ensure proper ARIA attributes are used, replace the .fl-menu-mobile-toggle with the generic class .fl-content-ui-button so those buttons are excluded from Global Styles button styling, implement closing accordion tabs with Escape key, ensure event handlers only target interactive buttons, close all items when focus is outside of the accordion</li>
-	<li>Button Module: A button tag is now used when lightbox option is chosen. This uses the module deprecation API so the markup changes only affect new modules dropped on the page. Old versions of the module will now render ARIA attributes on the link tags to provide proper accessibility support.</li>
-	<li>Contact Form Module: Added proper role attributes for alerts. Changes in markup tags use the module deprecation API and only applies to new modules dropped on the page.</li>
-	<li>Search Module: Changes when using button only layout to fix links not having a discernible name issue</li>
-	<li>Content Slider: Various improvements including making sure focus ring shows for links, add support for reduced-motion preference, prevent auto play on focus in or out, add aria-label and role attributes and more</li>
-	<li>Post Slider & Post Carousel: Many accessibility improvements including using list tags for slides, button tags for navigation and pagination, proper aria attributes and making sure focus is visible on all controls</li>
-	<li>Gallery Module: various accessibility improvements including deprecating div tags in favor of list tags and adding ARIA roles for the deprecated div tags. This uses the module deprecation API so the markup changes only affect new modules dropped on the page</li>
-	<li>Login Form Module: Ensured use of proper semantic tags and aria attributes. Changes in markup tags use the module deprecation API and only applies to new modules dropped on the page.</li>
-	<li>Menu Module: various accessibility improvements including enhancements for keyboard navigation, using appropriate aria attributes and roles, adjusted some markup and sizing of sub-menu icon as well. This uses the module deprecation API so the markup changes only affect new modules dropped on the page</li>
-	<li>Photo Module: change markup to use figcaption for caption per accessibility recommendations. This uses the module deprecation API so the markup changes only affect new modules dropped on the page</li>
-	<li>Posts Module: various accessibility improvements including deprecating the div container tag in favor of a unordered list and added a new option in the post container field. This uses the module deprecation API so the markup changes only affect new modules dropped on the page</li>
-	<li>Posts Modules: Ensure if there are redundant links, they are hidden from screen readers and are not used by keyboard navigation</li>
-	<li>Subscribe Form Module: Ensured use of proper semantic tags and aria attributes. Changes in markup tags use the module deprecation API and only applies to new modules dropped on the page.</li>
-	<li>Tabs Module: various accessibility fixes including using button tags for any buttons instead of links or divs. This uses the module deprecation API so the markup changes only affect new modules dropped on the page.</li>
-	<li>Testimonials Module: Changed HTML tag from div to blockquote. This uses the module deprecation API so the markup changes only affect new modules dropped on the page. Also support the reduced-motion preference, added option for showing play/pause button</li>
-	<li>Row Shapes: Add generic title/desc to row shapes for accessibility</li>
-	<li>In modules that display excerpts, change default read more text to provide more context per accessibility recommendations. This affects the following modules: Post Carousel, Post Slider, Posts, Accordion, Tabs</li>
-</ul>
-
-<p><strong>Fixes</strong></p>
-<ul>
-	<li>Box Module: Fix incorrect values for grid-auto-flow and justify-item</li>
-	<li>Box Module: Add some default CSS to ensure child modules size properly</li>
-	<li>Menu Module: fix some issues with Mega Menus not updating after right click</li>
-	<li>Fixed update notice still showing immediately after updating</li>
+	<li>Maintenance Mode: Fixed various issues including a conflict with block based themes and issues with the bypass roles option</li>
+	<li>Fixed Prepend template placing content after popups and box module templates</li>
+	<li>Fixed Cloud icon missing from UI Toolbar</li>
+	<li>Fixed fatal error <code>cannot use object of type stdClass as array</code> with typography field</li>
+	<li>Fixed <code>_moduleClicked isTrusted</code> guard skipping <code>stopPropagation/preventDefault</code></li>
+	<li>Fixed branding leaks and branding reset button resetting even when cancel was selected</li>
+	<li>Color Picker: Increased contrast on the preset labels</li>
+	<li>Fixed content panel search crashing when a widget is registered with a null name</li>
+	<li>Developer: Fixed set modifier not working for dimension fields</li>
+	<li>Components: Fixed PHP warning when a child node had a per-instance connections override but no connections property of its own</li>
 </ul>
 
 <p><strong>Changes</strong></p>
 <ul>
-	<li>Disable widgets for new installations</li>
-	<li>Icon Module: adjust CSS for text to display: inline</li>
-	<li>Revision limit for BB designed posts/pages is now enabled by default</li>
-	<li>Advanced Settings: The iFrame UI toggle is not visible unless debug mode is enabled</li>
+	<li>Addons installer script is no longer enqueued on every admin page</li>
+	<li>Updated stale URLs in core templates</li>
+	<li>Inline editing is now skipped for fields containing shortcodes to prevent shortcode content rendering inside text modules when clicking the shortcode</li>
+	<li>Synced status indicator on <code>didUpdateLayoutExternally</code> hook</li>
+	<li>Updated welcome page for 2.11 release</li>
+	<li>Debug Mode: Added a Database section with a table AUTO_INCREMENT check</li>
 </ul>
 
-<p><strong>Developer</strong></p>
-<ul>
-	<li>The SET field modifier now works with compound fields</li>
-	<li>Added new <code>fl_builder_filter_settings_form</code> filter that runs on the wp action to allow modifying the form based on the post type</li>
-</ul>
-
-<h4>2.10-rc.3- 10/09/2025</h4>
-<p><strong>Fixes</strong></p>
-<ul>
-	<li>Components: Fixed nested component settings not always showing on the main component</li>
-</ul>
-
-<h4>2.10-rc.2- 10/07/2025</h4>
+<h4>2.11-beta.4 - 06/10/2026</h4>
 <p><strong>Enhancements</strong></p>
 <ul>
-	<li>Star Rating Module: Add field connections for Total Stars, Star Rating and color fields and ensure fields are responsive</li>
+	<li>Popup Module: Add 9 pre-built module templates</li>
+	<li>Add integration hooks and surfaces for bb-ai-design-system</li>
+	<li>Global colors are now available in the Multiple Background field and refresh is no longer required after adding new Global Colors</li>
 </ul>
 
 <p><strong>Fixes</strong></p>
 <ul>
-	<li>Fixed module titles being cut-off in the settings window</li>
-	<li>Pricing Table Module: Fixed the Button module position when set to full width</li>
-	<li>Components: Fixed module not showing title in the Outline Panel</li>
-	<li>Components: Fixed JS error when switching Display field in a Box Module</li>
-	<li>Components: Sync source component selection to component instance</li>
-	<li>Components: Fix nested components showing full settings when used in a box component</li>
+	<li>Popup Module: Fixed a popup in a Header layout preventing editing of a Themer popup and ensure close button works in Themer layouts</li>
+	<li>Popup Module: Fixed popup centering positions being overridden by module margin CSS</li>
+	<li>Popup Module: Fixed loop navigation arrows not always rendering properly</li>
+	<li>Fixed fatal TypeError in Box module link attributes when using v1 of the module</li>
+	<li>Color Picker: fixed rendering issues in Preset tab when on a Multiple Background field</li>
 </ul>
 
-<h4>2.10-rc.1- 10/01/2025</h4>
+<p><strong>Changes</strong></p>
+<ul>
+	<li>Update notices when license is expired or not entered</li>
+</ul>
+
+<h4>2.11-beta.3 - 05/29/2026</h4>
+<strong>Fixes</strong>
+<ul>
+ 	<li>Popup Module: Fixed delay trigger when no Schedule dates are set</li>
+ 	<li>Fixed nested form connections being wiped by orphan preview-save</li>
+ 	<li>Button module: Fixed malformed closing tag and code optimization</li>
+ 	<li>Fixed Prepend Template option not working properly</li>
+ 	<li>Additional tweaks for Font Library integration</li>
+ 	<li>Various admin settings page styling tweaks and fixes to make things more consistent across tabs</li>
+</ul>
+<strong>Changes</strong>
+<ul>
+ 	<li>Required WP version is now 6.8+</li>
+	<li>Adjust wording in admin notice when legacy UI is enabled to clarify it is no longer supported</li>
+</ul>
+
+<h4>2.11-beta.2 - 05/22/2026</h4>
 <p><strong>Enhancements</strong></p>
+<ul>
+	<li>Add WordPress (7.0+) Font Library support to typography fields</li>
+	<li>Rename Layout CSS/JS menu item to Layout Settings and add Post Settings tab to be able to edit post/page info inside the UI</li>
+	<li>Testimonials Module: Add an option to control looping</li>
+</ul>
+
+<p><strong>Fixes</strong></p>
+<ul>
+	<li>Fixed SVG backgrounds in Box module breaking due to insufficient data URI encoding and CSS minification</li>
+	<li>Fixed plugin translations re-queued on every Updates page visit</li>
+	<li>Fixed Row overlay overhang click opens settings for the wrong node</li>
+</ul>
+
+<p><strong>Changes</strong></p>
+<ul>
+	<li>Visibility: For breakpoint icons, put a line through when a node is not visible at that breakpoint</li>
+	<li>Modularize the BxSlider plugin wrapper margins property</li>
+	<li>Update fl-builder/layout block to API v3</li>
+	<li>Remove redundant logic in the Pricing Table module</li>
+	<li>Add Beaver Builder menu item to WordPress importer and it now respects the Content Options setting</li>
+</ul>
+
+<h4>2.11-beta.1 - 05/08/2026</h4>
+<p><strong>Enhancements</strong></p>
+<ul>
+	<li>Add hooks before rendering the custom attributes</li>
+	<li>Performance: Add filter <code>fl_builder_remove_orphaned_nodes</code> to clean up any orphaned nodes when saving a layout</li>
+	<li>Add <code>didUpdateLayoutExternally</code> JS hook so external integrations can mark the layout as needing publish</li>
+</ul>
+
+<p><strong>Fixes</strong></p>
+<ul>
+	<li>Box Module: Fix force download option for the link field not working</li>
+	<li>Tweak performance optimizations to prevent a fatal error when creating globals or components and to prevent rendering issues with the Loop module</li>
+</ul>
+
+<h4>2.11-alpha.3 - 04/24/2026</h4>
+<p><strong>Enhancements</strong></p>
+<ul>
+	<li>BB Settings: Add setting snapshots and a new Maintenance Mode option</li>
+	<li>Added a new module type registry to support rendering of static HTML, CSS, and JavaScript</li>
+	<li>Icon Fields: Improvements to the Extra classes field and add field it to all icon fields</li>
+	<li>Button Group Module: Width, Text, Background, and Border Colors are now responsive</li>
+	<li>Testimonials Module: Add typography field and make text and arrow color fields responsive</li>
+	<li>Popup Module: Add option for navigation arrows in a Loop Module</li>
+	<li>Search Module: Add new reveal layout and proper attributes for accessibility</li>
+	<li>a11y: Add new option for styling outlines in Global Styles for interactive elements</li>
+	<li>a11y: Accessibility improvements to the HTML structure of the Accordion Module. This uses module deprecation to ensure backwards compatibility. Buttons now have unique accessible names</li>
+	<li>Rows: Text, Link, Link Hover, Heading and Background color fields and Overlay fields are now responsive</li>
+	<li>When exporting Saved Nodes, add label for what type of Saved Node it is</li>
+	<li>Performance: optimizations to reduce database queries, repeated object cloning and repeated work during builder loads</li>
+</ul>
+
+<p><strong>Fixes</strong></p>
+<ul>
+	<li>Box Module: Fix link field not working properly</li>
+	<li>Fixed node changes not being saved when done immediately before importing styles</li>
+</ul>
+
+<p><strong>Changes</strong></p>
+<ul>
+	<li>When looping is disabled remove navigation at the end for Content Slider, Post Slider, Post Carousel modules and add aria-hidden when needed</li>
+	<li>Advanced Settings: Enable shortcodes in CSS/JS by default and remove toggle</li>
+</ul>
+
+<h4>2.11-alpha.2 - 03/31/2026</h4>
+<p><strong>Enhancements</strong></p>
+<ul>
+	<li>Update FontAwesome to 7.2</li>
+	<li>Pricing Table Module: Add options to choose tooltip display on hover or click and add 2 new styles for tooltips</li>
+	<li>Outline Panel: Add ability to directly export Globals/Components to context menu</li>
+	<li>Add Prepend option when applying a Template</li>
+	<li>New WP Admin Settings pages design refresh</li>
+	<li>Optimization: Serve translations from translate.wpbeaverbuilder.com</li>
+	<li>Enable field connection support to icon fields</li>
+</ul>
+
+<p><strong>Fixes</strong></p>
+<ul>
+	<li>Fixed Row Text colors overriding Box Module text color</li>
+	<li>Popup Module: Various fixes while editing</li>
+	<li>Add missing module dependencies</li>
+	<li>Fixed <code>max_input_vars</code> causing silent save failures across the builder</li>
+</ul>
+
+<p><strong>Changes</strong></p>
+<ul>
+	<li>Rename Content tab in Post Modules to Query for consistency with Components</li>
+	<li>Add admin notice for sites that have the iFrame UI disabled</li>
+</ul>
+
+<h4>2.11-alpha.1 - 02/12/2026</h4>
+<p><strong>Enhancements</strong></p>
+<ul>
+	<li>a11y: Every link that opens a new tab has a screen reader text to notify users</li>
+	<li>Advanced Tab: Add controls to add custom HTML attributes to every node</li>
+	<li>Icons: Add support for FontAwesome 7.1, Pro Styles, and add extra classes field to support animations and other features that can be used by adding a class</li>
+	<li>Outline Panel: Add Save As option to context menu</li>
+	<li>List Module: Ensure more fields are responsive</li>
+	<li>Number Counter Module: Wrap number Prefix/Suffix in SPANs. This using module deprecation to ensure backwards compatibility</li>
+	<li>Popup Module: Added support for using within the Loop Module</li>
+</ul>
+
+<p><strong>Fixes</strong></p>
+<ul>
+	<li>Fix recursion in <code>FLBuilderModel::get_categorized_child_nodes</code> causing timeout on large pages</li>
+	<li>Popups: Fixed popup not opening when clicked with settings panel open</li>
+	<li>Fixed overlays in the legacy UI</li>
+	<li>Fixed tiptips rendering below overlays and popups</li>
+	<li>Prevent default on node settings click handlers to stop link navigation</li>
+	<li>Fixed new overlays with nested globals and components</li>
+	<li>Fixed saved module templates dropped into popup losing parent on refresh</li>
+	<li>Fire a preview refresh when removing values to fix inconsistent behavior with empty values</li>
+	<li>Fixed CSS keyword none incorrectly wrapped in url() for background-image property</li>
+</ul>
+
+<h4>2.11-dev.2 - 12/19/2025</h4>
+<p><strong>Enhancements</strong></p>
+<ul>
+	<li>Popup Module: Added date settings to schedule when the popup should render.</li>
+	<li>Popup Module: Added layout selector icons.</li>
+	<li>Field Connections: Add support to select post ID</li>
+	<li>Global Styles: Add padding, gradient and width options for buttons</li>
+	<li>Slideshow Module: height field is now responsive</li>
+</ul>
+<p><strong>Fixes</strong></p>
+<ul>
+	<li>Popup Module: Fixed trigger buttons causing the page to scroll to the top.</li>
+	<li>Popup Module: Fixed clearing the backdrop background not previewing correctly.</li>
+	<li>Popup Module: Fixed popup background color not rendering after save.</li>
+	<li>Popup Module: Fixed Themer layout selector showing when editing regular layouts.</li>
+	<li>Popup Module: Prevent popups from being dropped into other popups.</li>
+</ul>
+
+<h4>2.11-dev.1 - 11/07/25</h4>
+<p><strong>Enhancements</strong></p>
+<ul>
+	<li>Popup Module: New container module for creating a variety of popups, flyouts, and interstitials. <a href="https://vimeo.com/1134022900">See this video</a> for more info.</li>
+	<li>Overlays: Show parent container overlays similar to rows when there is enough space. <a href="https://vimeo.com/1134028241">See this video</a> for more info.</li>
+	<li>Overlays: Render in the body instead of layout markup to prevent styling conflicts with the design panel coming in 3.0.</li>
+	<li>Search Module: Added the ability to limit the search results by post type when displaying results via AJAX</li>
+	<li>Updated FontAwesome to FontAwesome 7</li>
+	<li>Icon Module: Text Spacing, Text Color, Icon Color & Hover Color, Icon Background & Icon Background Hover fields are now responsive</li>
+	<li>PHP 8.5 compatibility: Fix PHP deprecation notices</li>
+</ul>
+
+<h4>2.10-rc.1- 09/30/2025</h4>
+<p><strong>Fixes</strong></p>
 <ul>
 	<li>Update the welcome page for the 2.10 release</li>
 </ul>
@@ -413,7 +349,6 @@
 <p><strong>Fixes</strong></p>
 <ul>
 	<li>Fixed update notice still showing immediately aftering updating</li>
-	<li>Components: Fixed fatal error when duplicating a node inside of a component</li>
 	<li>Box Module: additional fixes for the grid guide overlay icon disappearing in some circumstances</li>
 	<li>Box Module: Add some default CSS to ensure child modules size properly</li>
 	<li>Accordion Module: Fixed tabbing to a link in accordion content closing the accordion</li>
@@ -6868,4 +6803,3 @@ Fixed default text still appearing even after being removed</li>
 
 <h4>0.8.1</h4>
 <p>Initial beta release.</p>
-

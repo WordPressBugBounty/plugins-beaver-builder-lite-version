@@ -34,13 +34,9 @@ class FLBuilderModuleBlocks {
 			return;
 		}
 
-		// Classes
-		require_once FL_BUILDER_DIR . 'classes/class-fl-block.php';
-
 		// Actions
 		add_action( 'rest_api_init', __CLASS__ . '::register_routes' );
 		add_action( 'parse_request', __CLASS__ . '::setup_settings_config_query' );
-		add_action( 'init', __CLASS__ . '::load_blocks' );
 		add_action( 'init', __CLASS__ . '::register_block_types' );
 		add_action( 'block_categories_all', __CLASS__ . '::register_category', 10, 2 );
 		add_action( 'wp', __CLASS__ . '::pre_render_blocks' );
@@ -113,30 +109,6 @@ class FLBuilderModuleBlocks {
 				},
 			]
 		);
-	}
-
-	/**
-	 * Loads the core builder blocks from the blocks directory.
-	 *
-	 * @return void
-	 */
-	static public function load_blocks() {
-		return; // Disabled for demo build.
-
-		$paths = glob( FL_BUILDER_DIR . 'blocks/*' );
-
-		foreach ( $paths as $path ) {
-			if ( ! is_dir( $path ) ) {
-				continue;
-			}
-
-			$basename   = basename( $path );
-			$block_path = FL_BUILDER_DIR . 'blocks/' . $basename . '/' . $basename . '.php';
-
-			if ( file_exists( $block_path ) ) {
-				require_once $block_path;
-			}
-		}
 	}
 
 	/**
@@ -425,6 +397,7 @@ class FLBuilderModuleBlocks {
 		wp_enqueue_script( 'fl-builder-libs', $js_url . 'fl-builder-libs.js', [ 'fl-builder' ], $ver );
 		wp_enqueue_script( 'fl-builder-preview', $js_url . 'fl-builder-preview.js', [], $ver );
 		wp_enqueue_script( 'fl-builder-responsive-editing', $js_url . 'fl-builder-responsive-editing.js', [], $ver );
+		wp_enqueue_script( 'fl-builder-ui-node-settings', $js_url . 'fl-builder-ui-node-settings.js', array(), $ver );
 		wp_enqueue_script( 'fl-builder-ui-settings-forms', $js_url . 'fl-builder-ui-settings-forms.js', [], $ver );
 
 		// Themer Styles
@@ -803,8 +776,7 @@ class FLBuilderModuleBlocks {
 	 */
 	static public function get_module_instance( $block_name, $client_id = null, $attributes = [], $content = '' ) {
 		$type             = str_replace( 'fl-builder/', '', $block_name );
-		$class            = get_class( FLBuilderModel::$modules[ $type ] );
-		$module           = new $class();
+		$module           = FLBuilderModel::create_module_instance( $type );
 		$module->type     = 'module';
 		$module->node     = $client_id ? $client_id : FLBuilderModel::generate_node_id();
 		$module->form     = FLBuilderModel::$modules[ $type ]->form;

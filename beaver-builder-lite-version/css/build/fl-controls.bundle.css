@@ -163,6 +163,102 @@
 .fl-controls-dialog.fl-appearance-panel::backdrop {
   background: transparent;
 }
+/*!**************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[1].use[1]!./node_modules/sass-loader/dist/cjs.js!./src/FL/controls/components/color/ui/tab-presets.css ***!
+  \**************************************************************************************************************************************************************************/
+@charset "UTF-8";
+.saved-colors-toolbar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--bg-color);
+  .saved-colors-title {
+    margin-right: auto;
+  }
+  .view-button-group {
+    --radius: var(--fl-builder-radius);
+    display: flex;
+    background: var(--fl-builder-platter-bg-color);
+    color: var(--fl-builder-platter-color);
+    border-radius: var(--radius);
+    button {
+      display: grid;
+      place-items: center;
+      border: none !important;
+      background: transparent;
+      min-height: 30px;
+      &:first-child {
+        border-top-left-radius: var(--radius);
+        border-bottom-left-radius: var(--radius);
+      }
+      &:last-child {
+        border-top-right-radius: var(--radius);
+        border-bottom-right-radius: var(--radius);
+      }
+      &:hover,
+      &:focus-visible {
+        background: oklch(from var(--fl-builder-platter-bg-color) calc(l - 0.03) calc(c + 0.01) h);
+      }
+      &.is-selected {
+        background: oklch(from var(--fl-builder-platter-bg-color) calc(l - 0.05) calc(c + 0.02) h);
+      }
+    }
+  }
+}
+
+::view-transition-group(.--fl-color-preset) {
+  animation-duration: 0.15s;
+}
+
+.sortable-preset-list {
+  display: grid;
+  &.appearance-list {
+    --size: 30px;
+    grid-template-columns: minmax(0, var(--size)) minmax(0, 1fr) minmax(0, var(--size));
+    grid-auto-rows: minmax(0, var(--size));
+    gap: 5px 8px;
+    & > li {
+      grid-template-columns: subgrid;
+      grid-column: 1/-1;
+      &.ui-sortable-helper {
+        display: grid;
+        grid-template-columns: minmax(0, var(--size)) minmax(0, 1fr) minmax(0, var(--size));
+        gap: 5px 8px;
+      }
+      .fl-sortable-placeholder {
+        background: grey;
+      }
+      .swatch-title {
+        display: flex;
+        align-items: center;
+      }
+      button.delete-preset {
+        background: transparent !important;
+        border: none !important;
+      }
+    }
+  }
+  &.appearance-swatch {
+    /* 40px — the original saved-swatch grid size. */
+    --size: 40px;
+    grid-template-columns: repeat(auto-fit, minmax(0, var(--size)));
+    grid-auto-rows: minmax(0, var(--size));
+    gap: 4px;
+  }
+  & > li {
+    display: grid;
+    overflow: clip;
+    .fl-control.fl-controls-color-swatch {
+      /* inherit (not var(--size)): self-referencing a custom property is a
+         cycle, which invalidates --size and collapses the swatch. */
+      --size: inherit;
+      height: var(--size);
+    }
+  }
+}
 /*!*********************************************************************************************************************************************************************!*\
   !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[1].use[1]!./node_modules/sass-loader/dist/cjs.js!./src/FL/controls/components/color/ui/style.scss ***!
   \*********************************************************************************************************************************************************************/
@@ -424,6 +520,7 @@ body div.fl-color-picker-toolbar .picker-input-wrap > input {
   display: grid;
   grid-auto-rows: var(--fl-controls-target-size);
   border-radius: var(--radius);
+  /* Connections Grid */
 }
 .fl-controls-swatch-group .fl-controls-swatch-group-heading {
   grid-column: 1/-1;
@@ -437,6 +534,13 @@ body div.fl-color-picker-toolbar .picker-input-wrap > input {
 }
 .fl-controls-swatch-group .fl-controls-swatch-group-heading > span {
   flex-grow: 1;
+}
+.fl-controls-swatch-group > button {
+  cursor: pointer;
+  padding: 0px;
+  background: none;
+  border: none;
+  text-transform: capitalize;
 }
 .fl-controls-swatch-group .fl-controls-color-swatch {
   --size: auto;
@@ -465,12 +569,35 @@ body div.fl-color-picker-toolbar .picker-input-wrap > input {
   gap: 5px 8px;
 }
 .fl-controls-swatch-group.fl-appearance-list > button {
-  cursor: pointer;
+  grid-column: 1/-1;
+  display: grid;
+  grid-template-columns: subgrid;
+  place-items: center start;
 }
 .fl-controls-swatch-group.fl-appearance-list .fl-controls-color-swatch {
   --size: inherit;
 }
-
+.fl-controls-swatch-group.fl-appearance-swatch {
+  --size: 30px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: minmax(0, 1fr);
+  gap: 8px;
+}
+.fl-controls-swatch-group.fl-appearance-swatch > button {
+  --color: lightgrey;
+  display: grid;
+  grid-template-columns: minmax(0, var(--size)) minmax(0, 1fr);
+  gap: 5px;
+  align-items: center;
+  background: oklch(from var(--color) 0.96 0.01 h);
+  color: #1e1e1e !important;
+  border-radius: var(--fl-builder-radius);
+  padding: 6px;
+}
+.fl-controls-swatch-group.fl-appearance-swatch > button > div {
+  color: inherit !important;
+  text-align: left;
+}
 .colorscale {
   background: black;
 }
@@ -731,7 +858,7 @@ body div.fl-color-picker-toolbar .picker-input-wrap > input {
   margin: 0;
   padding: 0;
 }
-.fl-controls-series ul.fl-controls-series-list li {
+.fl-controls-series ul.fl-controls-series-list > li {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   margin: 0;
@@ -740,15 +867,15 @@ body div.fl-color-picker-toolbar .picker-input-wrap > input {
   background: var(--background);
   transition: background 0.15s;
 }
-.fl-controls-series ul.fl-controls-series-list li:hover {
+.fl-controls-series ul.fl-controls-series-list > li:hover {
   --background: color-mix( in srgb, var(--fl-controls-panel-bg-color) 96%, black );
   background: var(--background);
 }
-.fl-controls-series ul.fl-controls-series-list li > * {
+.fl-controls-series ul.fl-controls-series-list > li > * {
   grid-column: 1/-1;
   grid-row: 1/-1;
 }
-.fl-controls-series ul.fl-controls-series-list li .fl-series-item-actions {
+.fl-controls-series ul.fl-controls-series-list > li .fl-series-item-actions {
   display: flex;
   place-content: end;
   place-items: stretch;
@@ -760,10 +887,10 @@ body div.fl-color-picker-toolbar .picker-input-wrap > input {
   transition-behavior: allow-discrete;
   transition-duration: 0.25s;
 }
-.fl-controls-series ul.fl-controls-series-list li .fl-series-item-actions div {
+.fl-controls-series ul.fl-controls-series-list > li .fl-series-item-actions div {
   margin-right: auto;
 }
-.fl-controls-series ul.fl-controls-series-list li .fl-series-item-actions button {
+.fl-controls-series ul.fl-controls-series-list > li .fl-series-item-actions button {
   background: var(--background);
   border: none;
   padding: 0 6px;
@@ -772,7 +899,7 @@ body div.fl-color-picker-toolbar .picker-input-wrap > input {
   place-items: center;
   pointer-events: auto;
 }
-.fl-controls-series ul.fl-controls-series-list li:hover .fl-series-item-actions, .fl-controls-series ul.fl-controls-series-list li:focus-within .fl-series-item-actions {
+.fl-controls-series ul.fl-controls-series-list > li:hover .fl-series-item-actions, .fl-controls-series ul.fl-controls-series-list > li:focus-within .fl-series-item-actions {
   opacity: 1;
 }
 .fl-controls-series .fl-series-toolbar {
@@ -907,14 +1034,14 @@ body div.fl-color-picker-toolbar .picker-input-wrap > input {
   gap: 1px;
   background: var(--fl-controls-outline-color);
 }
-.fl-controls-series.fl-appearance-compact .fl-controls-series-list li {
+.fl-controls-series.fl-appearance-compact .fl-controls-series-list > li {
   min-height: var(--fl-controls-target-size);
 }
-.fl-controls-series.fl-appearance-compact .fl-controls-series-list li:last-child {
+.fl-controls-series.fl-appearance-compact .fl-controls-series-list > li:last-child {
   border-bottom-left-radius: var(--radius);
   border-bottom-right-radius: var(--radius);
 }
-.fl-builder-ui-skin--dark .fl-controls-series.fl-appearance-compact .fl-controls-series-list li {
+.fl-builder-ui-skin--dark .fl-controls-series.fl-appearance-compact .fl-controls-series-list > li {
   background: var(--fl-controls-platter-bg-color);
 }
 .fl-controls-series.fl-appearance-compact .fl-controls-series-list .fl-series-placeholder {

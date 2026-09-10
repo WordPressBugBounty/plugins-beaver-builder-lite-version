@@ -111,6 +111,9 @@ class FLBuilderModuleDeprecations {
 	 * @return array
 	 */
 	static public function force_node_wrappers( $data ) {
+		/**
+		 * Whether to force deprecated module wrapper divs to be rendered, e.g. for safe mode.
+		 */
 		$force = apply_filters( 'fl_builder_force_module_wrappers', false || isset( $_GET['safemode'] ) );
 
 		if ( $force ) {
@@ -267,7 +270,7 @@ class FLBuilderModuleDeprecations {
 					if ( ! is_array( $value ) ) {
 						continue;
 					} elseif ( isset( $fields[ $key ]['multiple'] ) ) {
-						$defaults->$key[0] = (object) array_merge( (array) $defaults->$key[0], $value );
+						$defaults->{$key}[0] = (object) array_merge( (array) $defaults->{$key}[0], $value );
 					} else {
 						$defaults->$key = (object) array_merge( (array) $defaults->$key, $value );
 					}

@@ -119,7 +119,7 @@ class FLBuilderSeoPlugins {
 		$post = $orig;
 
 		if ( $data ) {
-			wp_enqueue_script( 'bb-seo-scripts', FL_BUILDER_SEO_PLUGINS_URL . "js/plugin-$plugin.js", $deps, false, true );
+			wp_enqueue_script( 'bb-seo-scripts', FL_BUILDER_SEO_PLUGINS_URL . "js/plugin-$plugin.js", $deps, FL_BUILDER_VERSION, true );
 			wp_localize_script( 'bb-seo-scripts', 'bb_seo_data', array( 'content' => $data ) );
 		}
 	}

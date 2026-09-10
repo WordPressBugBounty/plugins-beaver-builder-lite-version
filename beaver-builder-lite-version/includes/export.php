@@ -54,6 +54,7 @@ function fl_export_wp( $post_ids = array() ) {
 	 * @return string
 	 */
 	function wxr_cdata( $str ) {
+		// phpcs:ignore WordPress.WP.DeprecatedFunctions.seems_utf8Found -- fallback for WP < 6.9
 		if ( ! ( function_exists( 'wp_is_valid_utf8' ) ? wp_is_valid_utf8( $str ) : seems_utf8( $str ) ) ) {
 			$str = utf8_encode( $str );
 		}

@@ -210,7 +210,7 @@
 	            queryCats = [queryCats];
             }
 
-            // Loop over multipe query categories
+            // Loop over multiple query categories
             for ( i in queryCats ) {
                 queryCat = queryCats[ i ];
 
@@ -252,12 +252,12 @@
                 termLowercase = term.toLowerCase();
 
             // Match Slug
-        	if ( !_.isUndefined( obj.slug ) && obj.slug.toLowerCase().includes( termLowercase ) ) {
+        	if ( _.isString( obj.slug ) && obj.slug.toLowerCase().includes( termLowercase ) ) {
         		return true;
         	}
 
         	// Match Name
-        	if ( !_.isUndefined( obj.name ) && obj.name.toLowerCase().includes( termLowercase ) ) {
+        	if ( _.isString( obj.name ) && obj.name.toLowerCase().includes( termLowercase ) ) {
         		return true;
         	}
 
@@ -267,12 +267,12 @@
         	}
 
         	// Match Description
-        	if ( !_.isUndefined( obj.description ) && obj.description.toLowerCase().includes( termLowercase ) ) {
+        	if ( _.isString( obj.description ) && obj.description.toLowerCase().includes( termLowercase ) ) {
         		return true;
         	}
 
         	// Match Widget Base ID (slug equivalent)
-        	if ( !_.isUndefined( obj.id_base ) && obj.id_base.includes(term)) {
+        	if ( _.isString( obj.id_base ) && obj.id_base.toLowerCase().includes( termLowercase ) ) {
         		return true;
         	}
 

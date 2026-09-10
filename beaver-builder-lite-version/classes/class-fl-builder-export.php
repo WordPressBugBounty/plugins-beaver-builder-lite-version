@@ -69,9 +69,35 @@ final class FLBuilderExport {
 		) );
 
 		foreach ( $query->posts as $post ) {
+			$terms = get_the_terms( $post->ID, 'fl-builder-template-type' );
+			$meta  = get_post_meta( $post->ID );
+			if ( ! $terms ) {
+				$terms = array();
+			}
+
+			$type      = ( is_wp_error( $terms ) || 0 === count( $terms ) ) ? false : $terms[0]->slug;
+			$global    = isset( $meta['_fl_builder_template_global'] ) ? $meta['_fl_builder_template_global'][0] : false;
+			$component = isset( $meta['_fl_builder_template_dynamic_editing'] ) ? $meta['_fl_builder_template_dynamic_editing'][0] : false;
+
+			if ( ! $type ) {
+				$type = get_post_meta( $post->ID, '_fl_theme_layout_type', true );
+				if ( $type ) {
+					$type = sprintf( ' - %s', ucfirst( $type ) );
+				}
+			} else {
+				$type = sprintf( ' - %s %s', __( 'Saved', 'fl-builder' ), ucfirst( $type ) );
+			}
+
+			if ( $component ) {
+				$type .= sprintf( ' - %s', __( 'Component', 'fl-builder' ) );
+			}
+			if ( $global && ! $component ) {
+				$type .= sprintf( ' - %s', __( 'Global', 'fl-builder' ) );
+			}
+
 			$data[] = array(
 				'id'    => $post->ID,
-				'title' => $post->post_title,
+				'title' => $post->post_title . $type,
 			);
 		}
 

@@ -2,12 +2,20 @@
 
 $breakpoints = array( '', 'large', 'medium', 'responsive' );
 
-// Custom Width
+// Width
+FLBuilderCSS::rule( array(
+	'selector' => ".fl-builder-content .fl-node-$id .fl-button:is(a, button)",
+	'enabled'  => ! empty( $settings->width ) && 'full' === $settings->width,
+	'props'    => array(
+		'width' => '100%',
+	),
+) );
+
 FLBuilderCSS::responsive_rule( array(
 	'settings'     => $settings,
 	'setting_name' => 'custom_width',
 	'enabled'      => 'custom' === $settings->width,
-	'selector'     => ".fl-node-$id .fl-button:is(a, button)",
+	'selector'     => ".fl-builder-content .fl-node-$id .fl-button:is(a, button)",
 	'prop'         => 'width',
 ) );
 
@@ -174,6 +182,7 @@ foreach ( $breakpoints as $device ) {
 		),
 		'props'    => array(
 			'background-color' => FLBuilderColor::hex_or_rgb( $settings->{$setting_name} ),
+			'background-image' => 'none',
 		),
 	) );
 
@@ -191,6 +200,7 @@ foreach ( $breakpoints as $device ) {
 		),
 		'props'    => array(
 			'background-color' => FLBuilderColor::hex_or_rgb( $settings->{$setting_name} ),
+			'background-image' => 'none',
 		),
 	) );
 }
@@ -363,7 +373,7 @@ FLBuilderCSS::rule( array(
 
 // Click action - copy text (disabled state)
 FLBuilderCSS::rule( array(
-	'selector' => ".fl-builder-content .fl-node-$id .fl-button:disabled, .fl-builder-content .fl-node-$id .fl-button.disabled",
+	'selector' => ".fl-builder-content .fl-node-$id .fl-button:disabled",
 	'enabled'  => isset( $settings->click_action ) && 'copy_text' === $settings->click_action,
 	'props'    => array(
 		'opacity' => '.5',

@@ -240,6 +240,9 @@ final class FLBuilderHistoryManager {
 	 * Returns the max states that can be saved.
 	 */
 	static private function get_states_max() {
+		/**
+		 * Maximum number of history states that can be saved for undo/redo.
+		 */
 		return (int) apply_filters( 'fl_history_states_max', FL_BUILDER_HISTORY_STATES );
 	}
 
@@ -256,7 +259,15 @@ final class FLBuilderHistoryManager {
 	 */
 	static public function set_state( $state, $position ) {
 		$history_post_id = self::get_history_post_id();
-		update_post_meta( $history_post_id, "_fl_builder_history_state_{$position}", $state );
+		$key             = "_fl_builder_history_state_{$position}";
+		$state           = FLBuilderModel::slash_settings( $state );
+		$raw_data        = get_metadata( 'post', $history_post_id, $key );
+
+		if ( ! is_array( $raw_data ) || 0 === count( $raw_data ) ) {
+			add_metadata( 'post', $history_post_id, $key, $state );
+		} else {
+			update_metadata( 'post', $history_post_id, $key, $state );
+		}
 	}
 
 	/**

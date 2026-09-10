@@ -204,10 +204,39 @@
 						}
 					}
 
-					// merge copied data with existing node
-					const mergedData = $.extend({}, FLBuilderSettingsConfig.nodes[nodeId], jsonData);
+					function traverseObject(data, target) {
+						const keys = Object.keys(data);
+						for (let i = 0; i < keys.length; i++) {
+							if (Array.isArray(data[keys[i]])) {
+								for (let j = 0; j < data[keys[i]].length; j++) {
+									target[keys[i]][j] = traverseObject(data[keys[i]][j], target[keys[i]][j]);
+								}
+							} else if (data[keys[i]] !== null && typeof data[keys[i]] === "object") {
+								target[keys[i]] = traverseObject(data[keys[i]], target[keys[i]]);
+							} else if (data[keys[i]] !== "") {
+								target[keys[i]] = data[keys[i]];
+							}
+						}
+						return target;
+					}
+
+					function mergeObjects() {
+						// get form settings
+						const form = $('.fl-builder-settings[data-node=' + nodeId + ']');
+						// check if the settings have changed
+						if ( FLBuilder.preview && FLBuilder.preview._settingsHaveChanged() ) {
+							// combine form changed settings with copied data & merge it with existing node
+							const formSettings = FLBuilder._getSettings(form);
+							const combinedSettings = traverseObject(jsonData, formSettings);
+							return $.extend(true, {}, FLBuilderSettingsConfig.nodes[nodeId], combinedSettings);
+						} else {
+							// merge copied data with existing node
+							return $.extend(true, {}, FLBuilderSettingsConfig.nodes[nodeId], jsonData);
+						}
+					}
 
 					// set node data
+					const mergedData = mergeObjects();
 					FLBuilderSettingsConfig.nodes[nodeId] = mergedData;
 
 					// dispatch to store

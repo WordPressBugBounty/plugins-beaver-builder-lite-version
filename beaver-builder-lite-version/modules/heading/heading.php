@@ -117,26 +117,6 @@ class FLHeadingModule extends FLBuilderModule {
 		// Return the filtered settings.
 		return $settings;
 	}
-
-	/**
-	 * Returns link rel based on settings.
-	 * @since 2.2
-	 * @return string
-	 */
-	public function get_rel() {
-		$rel = array();
-		if ( '_blank' == $this->settings->link_target ) {
-			$rel[] = 'noopener';
-		}
-		if ( isset( $this->settings->link_nofollow ) && 'yes' == $this->settings->link_nofollow ) {
-			$rel[] = 'nofollow';
-		}
-		$rel = implode( ' ', $rel );
-		if ( $rel ) {
-			$rel = ' rel="' . $rel . '" ';
-		}
-		return $rel;
-	}
 }
 
 /**

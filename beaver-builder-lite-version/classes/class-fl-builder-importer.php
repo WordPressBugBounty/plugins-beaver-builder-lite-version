@@ -9,6 +9,48 @@
  */
 class FLBuilderImporter extends WP_Import {
 
+	// Display import page title
+	public function header() {
+		echo '<div class="wrap">';
+		echo '<h2>' . __( 'Import Beaver Builder Content', 'fl-builder' ) . '</h2>';
+	}
+
+	/**
+	 * Display introductory text and file upload form
+	 */
+	public function greet() {
+		echo '<div class="narrow">';
+		echo '<p>' . __( 'Howdy! Upload your WordPress eXtended RSS (WXR) file and we&#8217;ll import the posts, pages, comments, custom fields, categories, and tags into this site.', 'wordpress-importer' ) . '</p>';
+		echo '<p>' . __( 'Choose a WXR (.xml) file to upload, then click Upload file and import.', 'wordpress-importer' ) . '</p>';
+		wp_import_upload_form( 'admin.php?import=bb_import&amp;step=1' );
+		echo '</div>';
+	}
+
+	public function dispatch() {
+
+		add_filter( 'wp_import_post_meta', function ( $meta, $id, $post ) {
+			foreach ( $meta as $k => $data ) {
+				if ( '_fl_builder_data' === $data['key'] ) {
+					$meta[ $k ]['value'] = serialize( fl_maybe_fix_unserialize( $this->rewrite_urls( $data['value'] ) ) );
+				}
+			}
+			return $meta;
+		}, 10, 3);
+		parent::dispatch();
+	}
+
+	private function rewrite_urls( $data ) {
+		$rewrites = isset( $_REQUEST['rewrite_urls'] ) ? $_REQUEST['rewrite_urls'] : false;
+
+		if ( ! $rewrites ) {
+			return $data;
+		}
+		$old_url = $this->base_url;
+		$new_url = get_site_url();
+		$data    = str_replace( $old_url, $new_url, $data );
+		return $data;
+	}
+
 	/**
 	 * @since 1.8
 	 * @return array
@@ -80,6 +122,9 @@ class FLBuilderImportParserXML extends WXR_Parser_XML {
 			case 'wp:postmeta':
 				if ( ! empty( $this->sub_data ) ) {
 					if ( stristr( $this->sub_data['key'], '_fl_builder_' ) ) {
+						/**
+						 * PCRE backtrack limit used when processing imported builder data.
+						 */
 						FLBuilderImporterDataFix::set_pcre_limit( apply_filters( 'fl_builder_importer_pcre', '23001337' ) );
 						if ( '_fl_builder_data_settings' == $this->sub_data['key'] || '_fl_builder_draft_settings' == $this->sub_data['key'] ) {
 							$data = FLBuilderImporterDataFix::run( $this->sub_data['value'], false );
@@ -380,7 +425,7 @@ final class FLBuilderImporterDataFix {
 	}
 
 	/**
-	 * Fix strange behaviour if you have escaped quotes in your replacement.
+	 * Fix strange behavior if you have escaped quotes in your replacement.
 	 *
 	 * @since 1.8
 	 * @access private

@@ -204,6 +204,12 @@
 		 */
 		_init: function()
 		{
+			FLBuilder.triggerHook( 'didRenderLayoutInit', {
+				nodeId: this._data.nodeId,
+				nodeType: this._data.nodeType,
+				moduleType: this._data.moduleType
+			} );
+
 			// Set the body height so the page doesn't scroll.
 			this._body.height( this._body.height() );
 
@@ -605,12 +611,17 @@
 				FLBuilder._initSortables();
 				FLBuilder._highlightEmptyCols();
 				FLBuilder._resizeLayout();
+				FLBuilder._repositionOverlays();
 			}
 
 			FLBuilder._initMediaElements();
 			FLBuilderLayout.init();
 			FLBuilderResponsiveEditing.refreshPreview( this._callback );
-			FLBuilder.triggerHook( 'didRenderLayoutComplete' );
+			FLBuilder.triggerHook( 'didRenderLayoutComplete', {
+				nodeId: this._data.nodeId,
+				nodeType: this._data.nodeType,
+				moduleType: this._data.moduleType
+			} );
 
 			this._body.height( 'auto' );
 		}

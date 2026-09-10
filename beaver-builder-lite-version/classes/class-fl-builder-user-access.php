@@ -221,7 +221,10 @@ final class FLBuilderUserAccess {
 
 		$editable_roles = get_editable_roles();
 		$roles          = array();
-		$caps           = apply_filters( 'fl_builder_user_access_capabilities', array( 'edit_posts' ) );
+		/**
+		 * WordPress capabilities used to determine which user roles can access the builder.
+		 */
+		$caps = apply_filters( 'fl_builder_user_access_capabilities', array( 'edit_posts' ) );
 
 		foreach ( $editable_roles as $role => $data ) {
 			foreach ( $caps as $cap ) {

@@ -93,6 +93,20 @@
 	right: -50px;
 }
 
+/*
+ * The connections toggle keeps its LTR right offset, which in RTL is the slot
+ * the responsive toggle mirrors into. The two then stack and the responsive
+ * toggle can't be clicked, so mirror the connections toggle as well.
+ */
+.fl-field-control-wrapper .fl-field-connections-toggle {
+	left: -25px;
+	right: auto;
+}
+.has-scrollbar .fl-field-control-wrapper .fl-field-connections-toggle {
+	left: -22px;
+	right: auto;
+}
+
 /* Color Picker Fields
 ------------------------------------------------------ */
 
@@ -481,4 +495,39 @@ body .fl-dimension-field-units > *:last-child > input {
 .fl-lightbox .ace_editor {
 	direction: ltr;
 	text-align: left;
+}
+
+/* Popovers
+------------------------------------------------------ */
+
+/*
+ * Overlays and tooltips are [popover] elements positioned from JS with
+ * top/left. The UA popover style leaves inset:0 in effect, so once a width
+ * resolves the box is over-constrained. RTL then drops left in favor of
+ * right:0, pinning them to the right edge of the viewport (issue #5413).
+ */
+.fl-block-overlay[popover],
+#tiptip_holder {
+	right: auto;
+	bottom: auto;
+}
+
+/*
+ * TipTip centers the tooltip on its target in viewport coordinates, but the
+ * holder is absolutely positioned against the initial containing block, whose
+ * origin sits after the scrollbar gutter — on the left in RTL. Pull the holder
+ * back by the gutter width. Resolves to 0 when the scrollbar takes no space.
+ *
+ * The arrow has no left/right of its own, so in RTL its static position anchors
+ * to the right edge of the holder and TipTip's margin-left pushes it further
+ * out. Anchoring it left restores the centering math.
+ *
+ * Scoped to the document direction because the builder UI shell loads this
+ * stylesheet but renders LTR.
+ */
+html[dir="rtl"] #tiptip_holder {
+	left: calc(100% - 100vw);
+}
+html[dir="rtl"] #tiptip_arrow {
+	left: 0;
 }

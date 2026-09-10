@@ -1,63 +1,118 @@
-<?php if ( ! empty( $settings->text_color ) ) : // Text Color ?>
-.fl-node-<?php echo $id; ?> {
-	color: <?php echo FLBuilderColor::hex_or_rgb( $settings->text_color ); ?>;
-}
-.fl-builder-content .fl-node-<?php echo $id; ?> *:not(input):not(textarea):not(select):not(a):not(h1):not(h2):not(h3):not(h4):not(h5):not(h6):not(.fl-menu-mobile-toggle) {
-	color: inherit;
-}
-<?php endif; ?>
+<?php
+// Text Color
+FLBuilderCSS::responsive_rule( array(
+	'settings'     => $settings,
+	'setting_name' => 'text_color',
+	'selector'     => ".fl-node-$id",
+	'prop'         => 'color',
+) );
 
-<?php if ( ! empty( $settings->link_color ) ) : // Link Color ?>
-.fl-builder-content .fl-node-<?php echo $id; ?> :where(.fl-row-content-wrap) a {
-	color: <?php echo FLBuilderColor::hex_or_rgb( $settings->link_color ); ?>;
-}
-<?php elseif ( ! empty( $settings->text_color ) ) : ?>
-.fl-builder-content .fl-node-<?php echo $id; ?> a {
-	color: <?php echo FLBuilderColor::hex_or_rgb( $settings->text_color ); ?>;
-}
-<?php endif; ?>
+$has_text_color = ! empty( $settings->text_color ) || ! empty( $settings->text_color_large ) || ! empty( $settings->text_color_medium ) || ! empty( $settings->text_color_responsive );
 
-<?php if ( ! empty( $settings->hover_color ) ) : // Link Hover Color ?>
-.fl-builder-content .fl-node-<?php echo $id; ?> :where(.fl-row-content-wrap) a:hover {
-	color: <?php echo FLBuilderColor::hex_or_rgb( $settings->hover_color ); ?>;
-}
-<?php elseif ( ! empty( $settings->text_color ) ) : ?>
-.fl-builder-content .fl-node-<?php echo $id; ?> a:hover {
-	color: <?php echo FLBuilderColor::hex_or_rgb( $settings->text_color ); ?>;
-}
-<?php endif; ?>
+FLBuilderCSS::rule( array(
+	'selector' => ":where(.fl-builder-content .fl-node-$id *:not(input):not(textarea):not(select):not(a):not(.fl-menu-mobile-toggle))",
+	'enabled'  => $has_text_color,
+	'props'    => array( 'color' => 'inherit' ),
+) );
+?>
 
-<?php if ( ! empty( $settings->heading_color ) ) : // Heading Color ?>
-.fl-builder-content .fl-node-<?php echo $id; ?> h1,
-.fl-builder-content .fl-node-<?php echo $id; ?> h2,
-.fl-builder-content .fl-node-<?php echo $id; ?> h3,
-.fl-builder-content .fl-node-<?php echo $id; ?> h4,
-.fl-builder-content .fl-node-<?php echo $id; ?> h5,
-.fl-builder-content .fl-node-<?php echo $id; ?> h6,
-.fl-builder-content .fl-node-<?php echo $id; ?> h1 a,
-.fl-builder-content .fl-node-<?php echo $id; ?> h2 a,
-.fl-builder-content .fl-node-<?php echo $id; ?> h3 a,
-.fl-builder-content .fl-node-<?php echo $id; ?> h4 a,
-.fl-builder-content .fl-node-<?php echo $id; ?> h5 a,
-.fl-builder-content .fl-node-<?php echo $id; ?> h6 a {
-	color: <?php echo FLBuilderColor::hex_or_rgb( $settings->heading_color ); ?>;
-}
-<?php elseif ( ! empty( $settings->text_color ) ) : ?>
-.fl-builder-content .fl-node-<?php echo $id; ?> h1,
-.fl-builder-content .fl-node-<?php echo $id; ?> h2,
-.fl-builder-content .fl-node-<?php echo $id; ?> h3,
-.fl-builder-content .fl-node-<?php echo $id; ?> h4,
-.fl-builder-content .fl-node-<?php echo $id; ?> h5,
-.fl-builder-content .fl-node-<?php echo $id; ?> h6,
-.fl-builder-content .fl-node-<?php echo $id; ?> h1 a,
-.fl-builder-content .fl-node-<?php echo $id; ?> h2 a,
-.fl-builder-content .fl-node-<?php echo $id; ?> h3 a,
-.fl-builder-content .fl-node-<?php echo $id; ?> h4 a,
-.fl-builder-content .fl-node-<?php echo $id; ?> h5 a,
-.fl-builder-content .fl-node-<?php echo $id; ?> h6 a {
-	color: <?php echo FLBuilderColor::hex_or_rgb( $settings->text_color ); ?>;
-}
-<?php endif; ?>
+<?php
+// Link Color
+FLBuilderCSS::responsive_rule( array(
+	'settings'     => $settings,
+	'setting_name' => 'link_color',
+	'selector'     => ".fl-builder-content .fl-node-$id :where(.fl-row-content-wrap) a",
+	'prop'         => 'color',
+) );
+
+// Link Color - text_color fallback when no link_color set
+FLBuilderCSS::rule( array(
+	'selector' => ".fl-builder-content .fl-node-$id a",
+	'enabled'  => empty( $settings->link_color ) && ! empty( $settings->text_color ),
+	'props'    => array( 'color' => $settings->text_color ),
+) );
+?>
+
+<?php
+// Link Hover Color — text_color < link_color < hover_color via source order
+FLBuilderCSS::responsive_rule( array(
+	'settings'     => $settings,
+	'setting_name' => 'text_color',
+	'selector'     => ".fl-builder-content .fl-node-$id :where(.fl-row-content-wrap) a:hover",
+	'prop'         => 'color',
+) );
+
+FLBuilderCSS::responsive_rule( array(
+	'settings'     => $settings,
+	'setting_name' => 'link_color',
+	'selector'     => ".fl-builder-content .fl-node-$id :where(.fl-row-content-wrap) a:hover",
+	'prop'         => 'color',
+) );
+
+FLBuilderCSS::responsive_rule( array(
+	'settings'     => $settings,
+	'setting_name' => 'hover_color',
+	'selector'     => ".fl-builder-content .fl-node-$id :where(.fl-row-content-wrap) a:hover",
+	'prop'         => 'color',
+) );
+?>
+
+<?php
+// Heading Color
+$heading_selectors = array(
+	".fl-builder-content .fl-node-$id h1",
+	".fl-builder-content .fl-node-$id h2",
+	".fl-builder-content .fl-node-$id h3",
+	".fl-builder-content .fl-node-$id h4",
+	".fl-builder-content .fl-node-$id h5",
+	".fl-builder-content .fl-node-$id h6",
+	".fl-builder-content .fl-node-$id h1 a",
+	".fl-builder-content .fl-node-$id h2 a",
+	".fl-builder-content .fl-node-$id h3 a",
+	".fl-builder-content .fl-node-$id h4 a",
+	".fl-builder-content .fl-node-$id h5 a",
+	".fl-builder-content .fl-node-$id h6 a",
+);
+
+// Text Color applied to headings (heading_color overrides via source order)
+FLBuilderCSS::responsive_rule( array(
+	'settings'     => $settings,
+	'setting_name' => 'text_color',
+	'selector'     => $heading_selectors,
+	'prop'         => 'color',
+) );
+
+FLBuilderCSS::responsive_rule( array(
+	'settings'     => $settings,
+	'setting_name' => 'heading_color',
+	'selector'     => $heading_selectors,
+	'prop'         => 'color',
+) );
+
+// Link color overrides heading color for links within headings
+$heading_link_selectors = array(
+	".fl-builder-content .fl-node-$id h1 a",
+	".fl-builder-content .fl-node-$id h2 a",
+	".fl-builder-content .fl-node-$id h3 a",
+	".fl-builder-content .fl-node-$id h4 a",
+	".fl-builder-content .fl-node-$id h5 a",
+	".fl-builder-content .fl-node-$id h6 a",
+);
+
+FLBuilderCSS::responsive_rule( array(
+	'settings'     => $settings,
+	'setting_name' => 'link_color',
+	'selector'     => $heading_link_selectors,
+	'prop'         => 'color',
+) );
+
+FLBuilderCSS::responsive_rule( array(
+	'settings'     => $settings,
+	'setting_name' => 'hover_color',
+	'selector'     => array_map( fn( $s ) => $s . ':hover', $heading_link_selectors ),
+	'prop'         => 'color',
+) );
+?>
 
 <?php if ( 'yes' === $row->settings->bg_video_play_pause ) : ?>
 .fl-node-<?php echo $row->node; ?> .fl-bg-video-play-pause {
@@ -99,12 +154,12 @@
 <?php
 
 // Background Color
-FLBuilderCSS::rule( array(
-	'selector' => ".fl-node-$id > .fl-row-content-wrap",
-	'enabled'  => in_array( $settings->bg_type, array( 'color', 'photo', 'parallax', 'slideshow', 'video' ) ),
-	'props'    => array(
-		'background-color' => $settings->bg_color,
-	),
+FLBuilderCSS::responsive_rule( array(
+	'settings'     => $settings,
+	'setting_name' => 'bg_color',
+	'selector'     => ".fl-node-$id > .fl-row-content-wrap",
+	'enabled'      => array( 'bg_type' => array( 'color', 'photo', 'parallax', 'slideshow', 'video' ) ),
+	'prop'         => 'background-color',
 ) );
 
 // Background Gradient
@@ -114,6 +169,15 @@ FLBuilderCSS::rule( array(
 	'media'    => 'default',
 	'props'    => array(
 		'background-image' => FLBuilderColor::gradient( $settings->bg_gradient ),
+	),
+) );
+
+FLBuilderCSS::rule( array(
+	'selector' => ".fl-node-$id > .fl-row-content-wrap",
+	'enabled'  => 'gradient' === $settings->bg_type && ! empty( $settings->bg_gradient_large ) && isset( $settings->bg_gradient_large['colors'] ) && is_array( $settings->bg_gradient_large['colors'] ) && ! empty( array_filter( $settings->bg_gradient_large['colors'] ) ),
+	'media'    => 'large',
+	'props'    => array(
+		'background-image' => FLBuilderColor::gradient( $settings->bg_gradient_large ),
 	),
 ) );
 
@@ -135,7 +199,7 @@ FLBuilderCSS::rule( array(
 	),
 ) );
 
-// Background Overlay
+// Background Overlay - Default
 FLBuilderCSS::rule( array(
 	'selector' => ".fl-node-$id > .fl-row-content-wrap:after",
 	'enabled'  => 'none' !== $settings->bg_overlay_type && in_array( $settings->bg_type, array( 'photo', 'parallax', 'slideshow', 'video' ) ),
@@ -144,6 +208,64 @@ FLBuilderCSS::rule( array(
 		'background-image' => 'gradient' === $settings->bg_overlay_type ? FLBuilderColor::gradient( $settings->bg_overlay_gradient ) : '',
 	),
 ) );
+
+// Background Overlay - Responsive breakpoints
+foreach ( array( 'large', 'medium', 'responsive' ) as $bp ) {
+	$suffix = '_' . $bp;
+	$type   = empty( $settings->{ 'bg_overlay_type' . $suffix } ) ? '' : $settings->{ 'bg_overlay_type' . $suffix };
+
+	if ( '' === $type ) {
+		continue;
+	}
+
+	if ( 'none' === $type ) {
+		FLBuilderCSS::rule( array(
+			'selector' => ".fl-node-$id > .fl-row-content-wrap:after",
+			'media'    => $bp,
+			'props'    => array(
+				'display' => 'none',
+			),
+		) );
+	} else {
+		$color_key    = 'bg_overlay_color' . $suffix;
+		$gradient_key = 'bg_overlay_gradient' . $suffix;
+		$color        = empty( $settings->{ $color_key } ) ? $settings->bg_overlay_color : $settings->{ $color_key };
+		$gradient     = empty( $settings->{ $gradient_key } ) ? $settings->bg_overlay_gradient : $settings->{ $gradient_key };
+
+		FLBuilderCSS::rule( array(
+			'selector' => ".fl-node-$id > .fl-row-content-wrap:after",
+			'enabled'  => in_array( $settings->bg_type, array( 'photo', 'parallax', 'slideshow', 'video' ) ),
+			'media'    => $bp,
+			'props'    => array(
+				'display'          => 'block',
+				'background-color' => 'color' === $type ? $color : 'transparent',
+				'background-image' => 'gradient' === $type ? FLBuilderColor::gradient( $gradient ) : 'none',
+			),
+		) );
+	}
+}
+
+// Vertical Alignment - Responsive breakpoints
+$align_selectors  = array(
+	".fl-node-$id.fl-row-default-height > .fl-row-content-wrap",
+	".fl-node-$id.fl-row-full-height > .fl-row-content-wrap",
+	".fl-node-$id.fl-row-custom-height > .fl-row-content-wrap",
+);
+$align_substitute = array(
+	'top'    => 'flex-start',
+	'center' => 'center',
+	'bottom' => 'flex-end',
+);
+
+foreach ( array( 'align-items', 'justify-content' ) as $prop ) {
+	FLBuilderCSS::responsive_rule( array(
+		'settings'        => $settings,
+		'setting_name'    => 'content_alignment',
+		'selector'        => $align_selectors,
+		'prop'            => $prop,
+		'substitute_vals' => $align_substitute,
+	) );
+}
 
 // Background Photo - Desktop
 if ( 'photo' == $row->settings->bg_type ) :

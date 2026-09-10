@@ -1,0 +1,46 @@
+/**
+ * Wrapper element to display a visible placeholder in the editor page.
+ */
+.fl-module-popup.fl-popup-wrapper {
+    margin: 0;
+}
+
+/**
+ * Display the popup's node ID as a placeholder in the editor page.
+ */
+.fl-module-popup.fl-popup-wrapper::before {
+    content: "Popup ID: " attr(data-node-id);
+    text-align: center;
+    font-weight: bold;
+    display: block;
+    padding: 20px;
+}
+
+/**
+ * Hide all overlay actions except the settings and remove buttons when the popup is open.
+ */
+:has(.fl-popup[popover]:popover-open, dialog[open].fl-popup) .fl-module-overlay[data-type="popup"] .fl-block-overlay-actions>*:not(:has(.fl-block-settings), .fl-block-remove) {
+    display: none !important;
+}
+
+/**
+ * Styles for the popup's layout selector.
+ */
+.fl-popup:has(.fl-module-layout-selector) {
+    box-shadow: 0 0 10px rgba(106, 119, 124, 0.2);
+}
+
+/**
+ * Disable all interactions with other modules in the builder when the popup is open.
+ */
+.fl-builder-edit :has(.fl-popup:popover-open, dialog[open].fl-popup) {
+    pointer-events: none;
+}
+
+/**
+ * Only enable interactions for the open popup and its content.
+ */
+.fl-popup:popover-open,
+dialog[open].fl-popup {
+    pointer-events: auto;
+}

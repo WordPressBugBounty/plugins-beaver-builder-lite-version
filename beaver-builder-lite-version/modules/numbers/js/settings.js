@@ -250,7 +250,7 @@
 				return false;
 			}
 
-			// Finaly if number is invalid set to 100, the default
+			// Finally if number is invalid set to 100, the default
 			if (!$.isNumeric(number)) {
 				numberInput.val("100");
 			}

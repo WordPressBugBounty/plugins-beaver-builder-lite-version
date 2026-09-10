@@ -143,7 +143,6 @@
   !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[1].use[1]!./node_modules/sass-loader/dist/cjs.js!./src/FL/Builder/system/ui/inline-editor/style.scss ***!
   \************************************************************************************************************************************************************************/
 .fl-editable {
-  position: relative;
   -webkit-user-select: text;
 }
 .fl-editable .mce-content-body {
@@ -164,17 +163,6 @@
   outline: none !important;
 }
 
-.fl-editable-focused.fl-module {
-  cursor: pointer;
-}
-.fl-editable-focused .fl-block-overlay {
-  pointer-events: none;
-}
-.fl-editable-focused .fl-block-overlay-actions,
-.fl-editable-focused .fl-block-col-resize {
-  pointer-events: auto;
-}
-
 .fl-inline-editor {
   border: 2px solid #00A0D2;
   border-radius: 4px;
@@ -182,11 +170,11 @@
   overflow: hidden;
   pointer-events: none;
   position: absolute;
-  top: -32px;
-  right: 4px;
-  bottom: 4px;
-  left: 4px;
   z-index: 100008;
+  /* Popover reset */
+  background: transparent;
+  margin: 0;
+  padding: 0;
   /* Toolbar wrappers */
   /* Toolbar buttons */
 }

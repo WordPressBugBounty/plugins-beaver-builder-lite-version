@@ -15,6 +15,9 @@ final class FLBuilderNodeCodeSettings {
 		}
 
 		// Are these settings disabled?
+		/**
+		 * Whether the per-node custom CSS/JS code settings panel is enabled.
+		 */
 		if ( ! apply_filters( 'fl_builder_enable_node_code_settings', true ) ) {
 			return;
 		}
@@ -109,6 +112,9 @@ final class FLBuilderNodeCodeSettings {
 						$name = isset( $node->name ) ? $node->name : $node->type;
 						$css .= "\n/*\n!!bb-code-settings compile error!!\nNode: {$node->node}\nType: {$name}\n{$e->getMessage()}\n*/\n";
 					}
+					/**
+					 * CSS output for a node's custom code settings after SCSS compilation.
+					 */
 					$css = apply_filters( 'fl_builder_node_code_css', $css, $node );
 				}
 			}

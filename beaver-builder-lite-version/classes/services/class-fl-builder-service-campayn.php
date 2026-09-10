@@ -34,7 +34,7 @@ final class FLBuilderServiceCampayn extends FLBuilderService {
 	private $api_version = 1;
 
 	/**
-	 * Request data from the thir party API.
+	 * Request data from the third party API.
 	 *
 	 * @since 1.5.4
 	 * @param string $base_url  Base URL where API is available

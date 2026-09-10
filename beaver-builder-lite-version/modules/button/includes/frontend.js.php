@@ -45,7 +45,7 @@ if ( isset( $settings->click_action ) ) : ?>
 		});
 	});
 	<?php elseif ( 'copy_text' == $settings->click_action ) : ?>
-	$('.<?php echo $button_node_id; ?> .fl-button').on('click', function(e){
+	$('.<?php echo $button_node_id; ?> button.fl-button').on('click', function(e){
 		e.preventDefault();
 
 		var $btn           = $(this);
@@ -57,7 +57,6 @@ if ( isset( $settings->click_action ) ) : ?>
 
 		var originalHtml = $label.html();
 		$btn.prop('disabled', true);
-		$btn.addClass('disabled');
 
 		function showSuccess() {
 			$label.text(successMessage);
@@ -70,7 +69,6 @@ if ( isset( $settings->click_action ) ) : ?>
 		function showFinish() {
 			setTimeout(function() {
 				$btn.prop('disabled', false);
-				$btn.removeClass('disabled');
 				$label.html(originalHtml);
 				$btn.focus();
 			}, 1500);

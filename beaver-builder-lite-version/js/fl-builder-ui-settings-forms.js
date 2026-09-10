@@ -149,10 +149,10 @@
 		 * @param {Object} config
 		 */
 		preprocessModuleConfig: function( config ) {
-			const module = FLBuilderConfig.contentItems.module.filter( module => {
-				return ! module.isAlias && module.slug === config.id;
-			} ).pop();
-
+			const finder = module => ! module.isAlias && module.slug === config.id;
+			const unlisted = FLBuilderConfig.unlistedModules || [];
+			const module = FLBuilderConfig.contentItems.module.filter( finder ).pop()
+				|| unlisted.filter( finder ).pop();
 			if ( ! module ) {
 				return config;
 			}
@@ -1015,6 +1015,7 @@
 			};
 			return text.replace(/[&<>"']/g, function(m) { return map[m]; });
 		},
+
 		/**
 		 * Traverse compound fields for the set modifier.
 		 * @since 2.10
@@ -1024,19 +1025,19 @@
 		 * @param {Object} field
 		 */
 		traverseCompoundFields: function( value, keys, field ) {
-			if ( 'object' === typeof value ) {
-				if ( Array.isArray( value ) ) {
-					value.forEach( ( item ) => {
-						this.traverseCompoundFields( item, keys + '[]', field )
-					})
-				} else {
-					for ( let key in value ) {
-						this.traverseCompoundFields( value[key], keys + `[${key}]`, field )
-					}
-				}
-			} else {
-				field.setSubValue( keys, value, FLBuilderResponsiveEditing._mode )
+			if ( Array.isArray( value ) ) {
+					value.forEach( item => this.traverseCompoundFields( item, keys + '[]', field ) );
+					return;
 			}
+			if ( 'object' === typeof value ) {
+				const dimension = field.field.dataset.type === 'dimension';
+				for ( const key in value ) {
+					const nested = dimension ? `_${key}` : `${keys}[${key}]`;
+					this.traverseCompoundFields( value[key], nested, field );
+				}
+				return;
+			}
+			field.setSubValue( keys, value, FLBuilderResponsiveEditing._mode );
 		}
 	};
 

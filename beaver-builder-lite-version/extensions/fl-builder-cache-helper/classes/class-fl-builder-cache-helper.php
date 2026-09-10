@@ -44,7 +44,7 @@ class Plugin {
 		add_action( 'plugins_loaded', array( $this, 'unload_helper_plugin' ) );
 		add_action( 'plugins_loaded', array( $this, 'load_files' ) );
 		add_action( 'admin_init', array( $this, 'check_urls' ) );
-		add_action( 'fl_builder_admin_settings_save', array( $this, 'save_settings' ) );
+		add_action( 'wp_ajax_fl_cache_plugins_toggle', array( $this, 'ajax_toggle' ) );
 	}
 
 	/**
@@ -72,28 +72,40 @@ class Plugin {
 				}
 
 				\FLBuilder::log( 'Beaver Builder: URL change detected, cache cleared.' );
+				/**
+				 * Fires when the site URL is detected as having changed, triggering a cache rebuild.
+				 */
 				do_action( 'fl_site_url_changed', $current, $saved );
 			}
 		}
 	}
 
 	/**
-	 * Save settings added to Tools page.
-	 * @since 2.1.5
+	 * AJAX handler for the Cache Clearing Tool toggles on the Tools page.
+	 *
+	 * @since 2.11
 	 */
-	public function save_settings() {
-		if ( ! isset( $_POST['fl-cache-plugins-nonce'] ) || ! wp_verify_nonce( $_POST['fl-cache-plugins-nonce'], 'cache-plugins' ) ) {
-			return false;
+	public function ajax_toggle() {
+		if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( $_POST['_wpnonce'], 'cache-plugins' ) ) {
+			wp_send_json_error();
 		}
 
-		$enabled = isset( $_POST['fl-cache-plugins-enabled'] ) ? $_POST['fl-cache-plugins-enabled'] : 0;
-		$varnish = isset( $_POST['fl-cache-varnish-enabled'] ) ? $_POST['fl-cache-varnish-enabled'] : 0;
+		if ( ! \FLBuilderAdmin::current_user_can_access_settings() ) {
+			wp_send_json_error();
+		}
 
-		$settings = array(
-			'enabled' => $enabled,
-			'varnish' => $varnish,
-		);
+		$setting = isset( $_POST['setting'] ) ? sanitize_text_field( $_POST['setting'] ) : '';
+		if ( ! in_array( $setting, array( 'enabled', 'varnish' ), true ) ) {
+			wp_send_json_error();
+		}
+
+		$enabled              = 'true' === $_POST['enabled'];
+		$settings             = self::get_settings();
+		$settings[ $setting ] = $enabled ? 1 : 0;
+
 		\FLBuilderModel::update_admin_settings_option( '_fl_builder_cache_plugins', $settings, false, true );
+
+		wp_send_json_success();
 	}
 
 	/**

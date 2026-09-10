@@ -1032,7 +1032,7 @@ endif;
 /**
  * Search Menu
  */
-if ( isset( $settings->menu_search ) && 'show' == $settings->menu_search && ! FL_BUILDER_LITE ) :
+if ( isset( $settings->menu_search ) && 'show' == $settings->menu_search && true !== FL_BUILDER_LITE ) :
 
 	if ( isset( $settings->show_separator ) && 'yes' == $settings->show_separator && ! empty( $settings->separator_color ) ) {
 		FLBuilderCSS::rule( array(
@@ -1099,6 +1099,11 @@ if ( isset( $settings->menu_search ) && 'show' == $settings->menu_search && ! FL
 		$search_position = array(
 			"$position" => '0',
 		);
+	}
+
+	if ( 2 < $module->version ) {
+		$search_position[ isset( $search_position['left'] ) ? 'right' : 'left' ] = 'auto';
+		$search_position['transform'] = 'none';
 	}
 
 	FLBuilderCSS::rule( array(
@@ -1179,6 +1184,123 @@ if ( isset( $settings->menu_search ) && 'show' == $settings->menu_search && ! FL
 			'padding-right'  => 'search_form_padding_right',
 			'padding-bottom' => 'search_form_padding_bottom',
 			'padding-left'   => 'search_form_padding_left',
+		),
+	) );
+
+	if ( 'show' === $settings->search_label ) :
+		$label_selector = ".fl-node-$id .fl-search-form-label";
+
+		// Label padding
+		FLBuilderCSS::dimension_field_rule( array(
+			'settings'     => $settings,
+			'setting_name' => 'search_label_padding',
+			'selector'     => $label_selector,
+			'unit'         => 'px',
+			'props'        => array(
+				'padding-top'    => 'search_label_padding_top',
+				'padding-right'  => 'search_label_padding_right',
+				'padding-bottom' => 'search_label_padding_bottom',
+				'padding-left'   => 'search_label_padding_left',
+			),
+		) );
+
+		// Label color
+		FLBuilderCSS::rule( array(
+			'selector' => $label_selector,
+			'props'    => array(
+				'color' => $settings->search_label_color,
+			),
+		) );
+
+		// Label typography
+		FLBuilderCSS::typography_field_rule( array(
+			'settings'     => $settings,
+			'setting_name' => 'search_label_typography',
+			'selector'     => $label_selector,
+		) );
+
+	endif;
+
+	$input_selector = ".fl-node-$id .fl-form-field input[type=search]";
+
+	// Default input styles
+	FLBuilderCSS::rule( array(
+		'selector' => $input_selector,
+		'props'    => array(
+			'border-radius' => '4px',
+			'font-size'     => '16px',
+			'line-height'   => '16px',
+			'padding'       => '12px 24px',
+		),
+	) );
+
+	// Input color
+	FLBuilderCSS::rule( array(
+		'selector' => $input_selector . ',' . $input_selector . '::placeholder',
+		'enabled'  => ! empty( $settings->input_color ),
+		'props'    => array(
+			'color' => $settings->input_color,
+		),
+	) );
+
+	// Input hover color
+	FLBuilderCSS::rule( array(
+		'selector' => $input_selector . ':hover,' . $input_selector . ':focus,' . $input_selector . ':hover::placeholder, ' . $input_selector . ':focus::placeholder',
+		'enabled'  => ! empty( $settings->input_hover_color ),
+		'props'    => array(
+			'color' => $settings->input_hover_color,
+		),
+	) );
+
+	// Input background
+	FLBuilderCSS::rule( array(
+		'selector' => $input_selector,
+		'enabled'  => ! empty( $settings->input_bg_color ),
+		'props'    => array(
+			'background-color' => $settings->input_bg_color,
+		),
+	) );
+
+	// Input hover background
+	FLBuilderCSS::rule( array(
+		'selector' => $input_selector . ':hover, ' . $input_selector . ':focus',
+		'enabled'  => ! empty( $settings->input_bg_hover_color ),
+		'props'    => array(
+			'background-color' => $settings->input_bg_hover_color,
+		),
+	) );
+
+	// Input typography
+	FLBuilderCSS::typography_field_rule( array(
+		'settings'     => $settings,
+		'setting_name' => 'input_typography',
+		'selector'     => $input_selector,
+	) );
+
+	// Input Border
+	FLBuilderCSS::border_field_rule( array(
+		'settings'     => $settings,
+		'setting_name' => 'input_border',
+		'selector'     => $input_selector,
+	) );
+
+	FLBuilderCSS::border_field_rule( array(
+		'settings'     => $settings,
+		'setting_name' => 'input_border_hover',
+		'selector'     => $input_selector . ':hover,' . $input_selector . ':focus',
+	) );
+
+	// Input padding
+	FLBuilderCSS::dimension_field_rule( array(
+		'settings'     => $settings,
+		'setting_name' => 'input_padding',
+		'selector'     => $input_selector,
+		'unit'         => 'px',
+		'props'        => array(
+			'padding-top'    => 'input_padding_top',
+			'padding-right'  => 'input_padding_right',
+			'padding-bottom' => 'input_padding_bottom',
+			'padding-left'   => 'input_padding_left',
 		),
 	) );
 

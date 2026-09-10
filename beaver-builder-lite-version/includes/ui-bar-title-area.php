@@ -1,4 +1,10 @@
-<?php do_action( 'fl_builder_before_ui_bar_title' ); ?>
+<?php
+/**
+ * Fires before the builder toolbar title area is rendered.
+ *
+ * @since 1.0
+ */
+do_action( 'fl_builder_before_ui_bar_title' ); ?>
 <span class="<?php echo implode( ' ', $wrapper_classes ); ?>">
 	<?php if ( '' != $icon_url ) { ?>
 	<div class="fl-builder-bar-title-icon">
@@ -17,4 +23,10 @@
 	</button>
 	<?php } ?>
 </span>
-<?php do_action( 'fl_builder_after_ui_bar_title' ); ?>
+<?php
+/**
+ * Fires after the builder toolbar title area is rendered.
+ *
+ * @since 1.0
+ */
+do_action( 'fl_builder_after_ui_bar_title' ); ?>

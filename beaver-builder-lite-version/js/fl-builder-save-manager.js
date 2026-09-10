@@ -52,6 +52,17 @@
             // we can't yet reliably set it to needing publish when settings are changed.
             FLBuilder.addHook('didShowLightbox', this.setLayoutNeedsPublish.bind(this));
 
+            // Allow external integrations that mutate the layout outside the
+            // builder's AJAX pipeline (e.g. REST-based editors) to flag the
+            // layout as needing publish. Payload: { source?: string }, currently unused.
+            // Unlike didShowLightbox (which fires on settings-panel open, before any
+            // real edit), this hook only fires after the layout has actually changed,
+            // so we also refresh the status indicator to show "Edited" immediately.
+            FLBuilder.addHook('didUpdateLayoutExternally', function() {
+                this.setLayoutNeedsPublish();
+                this.resetStatusMessage();
+            }.bind(this));
+
             if ( FLBuilderConfig.layoutHasDraftedChanges || ! FLBuilderConfig.builderEnabled ) {
                 this.setLayoutNeedsPublish();
                 this.resetStatusMessage();

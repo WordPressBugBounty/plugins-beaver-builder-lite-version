@@ -1,6 +1,15 @@
 (function($){
 
 	/**
+	 * Whether _logForeignTipTipHolder has already reported, so a page whose
+	 * #tiptip_holder belongs to another plugin is named once per session rather
+	 * than on every mouse move.
+	 *
+	 * @since 2.11
+	 */
+	var foreignTipTipHolderLogged = false;
+
+	/**
 	 * The main builder interface class.
 	 *
 	 * @since 1.0
@@ -71,6 +80,17 @@
 		 * @property {String} _contentClass
 		 */
 		_contentClass               : false,
+
+		/**
+		 * The root class used for jQuery sortables in the builder's layout. 
+		 * Can be overridden using FLBuilder.setSortableRootClass and reset 
+		 * using FLBuilder.resetSortableRootClass.
+		 *
+		 * @since 2.11
+		 * @access private
+		 * @property {String} _sortableRootClass
+		 */
+		_sortableRootClass			: null,
 
 		/**
 		 * Whether dragging has been enabled or not.
@@ -378,6 +398,7 @@
 
 			FLBuilder.addHook('didInitUI', FLBuilder._showTourOrTemplates.bind(FLBuilder) );
 			FLBuilder.addHook('endEditingSession', FLBuilder._doStats.bind(this) );
+			FLBuilder.addHook('didSaveLayoutSettingsComplete', FLBuilder._reloadIfPostSettingsChanged);
 
 			FLBuilder.triggerHook('init');
 		},
@@ -415,7 +436,7 @@
 		_initSanityChecks: function() {
 			if ( FLBuilderConfig.uploadPath && typeof FLBuilderLayout === 'undefined' ) {
 				url = '<a href="' + FLBuilderConfig.uploadUrl + '">wp-admin -> Settings -> Media</a>';
-				FLBuilder.alert( '<strong>Critical Error</strong><p style="font-size:15px;">Please go to ' + url + ' and make sure uploads folder settings is blank</p>');
+				FLBuilder.alert( '<strong>Critcal Error</strong><p style="font-size:15px;">Please go to ' + url + ' and make sure uploads folder settings is blank</p>');
 				$('.fl-builder-alert-close', window.parent.document).hide()
 			}
 		},
@@ -495,6 +516,7 @@
 			}
 
 			FLBuilder._contentClass = '.fl-builder-content-' + FLBuilderConfig.postId;
+			FLBuilder._sortableRootClass = FLBuilder._contentClass;
 
 			$( FLBuilder._contentClass ).addClass( 'fl-builder-content-editing' );
 		},
@@ -569,7 +591,7 @@
 		{
 			var defaults = {
 				frame: null,
-				appendTo: FLBuilder._contentClass,
+				appendTo: FLBuilder._sortableRootClass,
 				scroll: true,
 				cursor: 'move',
 				cursorAt: {
@@ -583,7 +605,8 @@
 				change: FLBuilder._blockDragChange,
 				stop: FLBuilder._blockDragStop,
 				placeholder: 'fl-builder-drop-zone',
-				tolerance: 'intersect'
+				tolerance: 'intersect',
+				cancel: '.fl-sortable-disabled'
 			},
 			rowConnections 	  = '',
 			columnConnections = '',
@@ -597,51 +620,54 @@
 			}
 
 			// Mark modules that have an inner children wrapper.
-			$( FLBuilder._contentClass + ' [data-children-wrapper]' ).each( function() {
+			$( FLBuilder._sortableRootClass + ' [data-children-wrapper]' ).each( function() {
 				$( this ).closest( '.fl-module' ).attr( 'data-has-children-wrapper', 'true' )
 			} );
 
 			// Module Connections.
 			if ( 'row' == FLBuilderConfig.userTemplateType )  {
-				moduleConnections = FLBuilder._contentClass + ' .fl-row:not(.fl-builder-node-loading) .fl-col-group-drop-target, ' +
-									FLBuilder._contentClass + ' .fl-row:not(.fl-builder-node-loading) .fl-col-drop-target, ' +
-							  		FLBuilder._contentClass + ' .fl-row:not(.fl-builder-node-loading) .fl-col-content, ' +
-									FLBuilder._contentClass + ' .fl-row:not(.fl-builder-node-loading) .fl-module[data-accepts]:not([data-has-children-wrapper]):not(:has(> .fl-module-content)), ' +
-									FLBuilder._contentClass + ' .fl-row:not(.fl-builder-node-loading) .fl-module[data-accepts]:not([data-has-children-wrapper]) > .fl-module-content, ' +
-									FLBuilder._contentClass + ' [data-children-wrapper]';
+				moduleConnections = FLBuilder._sortableRootClass + ' .fl-row:not(.fl-builder-node-loading) .fl-col-group-drop-target, ' +
+									FLBuilder._sortableRootClass + ' .fl-row:not(.fl-builder-node-loading) .fl-col-drop-target, ' +
+							  		FLBuilder._sortableRootClass + ' .fl-row:not(.fl-builder-node-loading) .fl-col-content, ' +
+									FLBuilder._sortableRootClass + ' .fl-row:not(.fl-builder-node-loading) .fl-module[data-accepts]:not([data-has-children-wrapper]):not(:has(> .fl-module-content)), ' +
+									FLBuilder._sortableRootClass + ' .fl-row:not(.fl-builder-node-loading) .fl-module[data-accepts]:not([data-has-children-wrapper]) > .fl-module-content, ' +
+									FLBuilder._sortableRootClass + ' [data-children-wrapper], ' + 
+									FLBuilder._sortableRootClass + '[data-children-wrapper]';
 			}
 			else if ( 'column' == FLBuilderConfig.userTemplateType ) {
-				moduleConnections = FLBuilder._contentClass + ' .fl-col-group-drop-target, ' +
-			                        FLBuilder._contentClass + ' .fl-col-drop-target, ' +
-			                        FLBuilder._contentClass + ' .fl-col-content, ' +
-									FLBuilder._contentClass + ' .fl-module[data-accepts]:not([data-has-children-wrapper]):not(:has(> .fl-module-content)), ' +
-									FLBuilder._contentClass + ' .fl-module[data-accepts]:not([data-has-children-wrapper]) > .fl-module-content, ' +
-									FLBuilder._contentClass + ' [data-children-wrapper]';
+				moduleConnections = FLBuilder._sortableRootClass + ' .fl-col-group-drop-target, ' +
+			                        FLBuilder._sortableRootClass + ' .fl-col-drop-target, ' +
+			                        FLBuilder._sortableRootClass + ' .fl-col-content, ' +
+									FLBuilder._sortableRootClass + ' .fl-module[data-accepts]:not([data-has-children-wrapper]):not(:has(> .fl-module-content)), ' +
+									FLBuilder._sortableRootClass + ' .fl-module[data-accepts]:not([data-has-children-wrapper]) > .fl-module-content, ' +
+									FLBuilder._sortableRootClass + ' [data-children-wrapper], ' + 
+									FLBuilder._sortableRootClass + '[data-children-wrapper]';
 			}
 			else if ( 'module' == FLBuilderConfig.userTemplateType ) {
-				moduleConnections = FLBuilder._contentClass + ' .fl-module[data-accepts]:not([data-has-children-wrapper]):not(:has(> .fl-module-content)), ' +
-									FLBuilder._contentClass + ' .fl-module[data-accepts]:not([data-has-children-wrapper]) > .fl-module-content, ' +
-									FLBuilder._contentClass + ' [data-children-wrapper]';
+				moduleConnections = FLBuilder._sortableRootClass + ' .fl-module[data-accepts]:not([data-has-children-wrapper]):not(:has(> .fl-module-content)), ' +
+									FLBuilder._sortableRootClass + ' .fl-module[data-accepts]:not([data-has-children-wrapper]) > .fl-module-content, ' +
+									FLBuilder._sortableRootClass + ' [data-children-wrapper]';
 			}
 			else {
-				moduleConnections = FLBuilder._contentClass + ' .fl-row-drop-target, ' +
-									FLBuilder._contentClass + ' .fl-row:not(.fl-builder-node-loading) .fl-col-group-drop-target, ' +
-									FLBuilder._contentClass + ' .fl-row:not(.fl-builder-node-loading) .fl-col-drop-target, ' +
-							  		FLBuilder._contentClass + ' .fl-row:not(.fl-builder-node-loading) .fl-col:not(.fl-builder-node-loading):not(.fl-node-global) .fl-col-content, ' +
-									FLBuilder._contentClass + ' .fl-module[data-accepts]:not([data-has-children-wrapper]):not(:has(> .fl-module-content)):not(.fl-node-global), ' +
-									FLBuilder._contentClass + ' .fl-module[data-accepts]:not([data-has-children-wrapper]):not(.fl-node-global) > .fl-module-content, ' +
-									FLBuilder._contentClass + ' :not(.fl-node-global) [data-children-wrapper]';
+				moduleConnections = FLBuilder._sortableRootClass + ' .fl-row-drop-target, ' +
+									FLBuilder._sortableRootClass + ' .fl-row:not(.fl-builder-node-loading) .fl-col-group-drop-target, ' +
+									FLBuilder._sortableRootClass + ' .fl-row:not(.fl-builder-node-loading) .fl-col-drop-target, ' +
+							  		FLBuilder._sortableRootClass + ' .fl-row:not(.fl-builder-node-loading) .fl-col:not(.fl-builder-node-loading):not(.fl-node-global) .fl-col-content, ' +
+									FLBuilder._sortableRootClass + ' .fl-module[data-accepts]:not([data-has-children-wrapper]):not(:has(> .fl-module-content)):not(.fl-node-global), ' +
+									FLBuilder._sortableRootClass + ' .fl-module[data-accepts]:not([data-has-children-wrapper]):not(.fl-node-global) > .fl-module-content, ' +
+									FLBuilder._sortableRootClass + ' :not(.fl-node-global) [data-children-wrapper], ' + 
+									FLBuilder._sortableRootClass + '[data-children-wrapper]';
 			}
 
 			// Column Connections.
 			if ( 'row' == FLBuilderConfig.userTemplateType )  {
-				columnConnections = FLBuilder._contentClass + ' .fl-row:not(.fl-builder-node-loading) .fl-col-group-drop-target, ' +
-									FLBuilder._contentClass + ' .fl-row:not(.fl-builder-node-loading) .fl-col-drop-target';
+				columnConnections = FLBuilder._sortableRootClass + ' .fl-row:not(.fl-builder-node-loading) .fl-col-group-drop-target, ' +
+									FLBuilder._sortableRootClass + ' .fl-row:not(.fl-builder-node-loading) .fl-col-drop-target';
 			}
 			else {
-				columnConnections = FLBuilder._contentClass + ' .fl-row-drop-target, ' +
-									FLBuilder._contentClass + ' .fl-row:not(.fl-builder-node-loading) .fl-col-group-drop-target, ' +
-									FLBuilder._contentClass + ' .fl-row:not(.fl-builder-node-loading) .fl-col-drop-target';
+				columnConnections = FLBuilder._sortableRootClass + ' .fl-row-drop-target, ' +
+									FLBuilder._sortableRootClass + ' .fl-row:not(.fl-builder-node-loading) .fl-col-group-drop-target, ' +
+									FLBuilder._sortableRootClass + ' .fl-row:not(.fl-builder-node-loading) .fl-col-drop-target';
 			}
 
 			// Row Connections.
@@ -649,13 +675,13 @@
 				rowConnections = moduleConnections;
 			}
 			else if ( 'row' == FLBuilderConfig.userTemplateType )  {
-				rowConnections = FLBuilder._contentClass + ' .fl-row:not(.fl-builder-node-loading) .fl-col-group-drop-target, ' +
-								 FLBuilder._contentClass + ' .fl-row:not(.fl-builder-node-loading) .fl-col-drop-target';
+				rowConnections = FLBuilder._sortableRootClass + ' .fl-row:not(.fl-builder-node-loading) .fl-col-group-drop-target, ' +
+								 FLBuilder._sortableRootClass + ' .fl-row:not(.fl-builder-node-loading) .fl-col-drop-target';
 			}
 			else {
-				rowConnections = FLBuilder._contentClass + ' .fl-row-drop-target, ' +
-								 FLBuilder._contentClass + ' .fl-row:not(.fl-builder-node-loading) .fl-col-group-drop-target, ' +
-								 FLBuilder._contentClass + ' .fl-row:not(.fl-builder-node-loading) .fl-col-drop-target';
+				rowConnections = FLBuilder._sortableRootClass + ' .fl-row-drop-target, ' +
+								 FLBuilder._sortableRootClass + ' .fl-row:not(.fl-builder-node-loading) .fl-col-group-drop-target, ' +
+								 FLBuilder._sortableRootClass + ' .fl-row:not(.fl-builder-node-loading) .fl-col-drop-target';
 			}
 
 			// Row layouts from the builder panel.
@@ -667,7 +693,7 @@
 
 			// Row templates from the builder panel.
 			$('.fl-builder-row-templates', window.parent.document).sortable($.extend({}, defaults, {
-				connectWith: FLBuilder._contentClass + ' .fl-row-drop-target',
+				connectWith: FLBuilder._sortableRootClass + ' .fl-row-drop-target',
 				items: '.fl-builder-block-row-template:not(.fl-builder-block-disabled)',
 				stop: FLBuilder._nodeTemplateDragStop
 			}));
@@ -675,7 +701,7 @@
 			// Saved rows from the builder panel.
 			$('.fl-builder-saved-rows', window.parent.document).sortable($.extend({}, defaults, {
 				cancel: '.fl-builder-node-template-actions, .fl-builder-node-template-edit, .fl-builder-node-template-delete',
-				connectWith: FLBuilder._contentClass + ' .fl-row-drop-target',
+				connectWith: FLBuilder._sortableRootClass + ' .fl-row-drop-target',
 				items: '.fl-builder-block-saved-row',
 				stop: FLBuilder._nodeTemplateDragStop
 			}));
@@ -712,7 +738,7 @@
 
 			// Rows
 			$('.fl-row-sortable-proxy', window.parent.document).sortable($.extend({}, defaults, {
-				connectWith: FLBuilder._contentClass + ' .fl-row-drop-target',
+				connectWith: FLBuilder._sortableRootClass + ' .fl-row-drop-target',
 				helper: FLBuilder._rowDragHelper,
 				start: FLBuilder._rowDragStart,
 				stop: FLBuilder._rowDragStop
@@ -735,33 +761,58 @@
 			}));
 
 			// Modules and groups in columns.
-			$(FLBuilder._contentClass + ' .fl-col-content').sortable($.extend({}, defaults, {
+			$(FLBuilder._sortableRootClass + ' .fl-col-content').sortable($.extend({}, defaults, {
 				cancel: '.fl-module, .fl-col-group',
 				handle: '.fl-module-sortable-proxy',
 			}));
 
 			// Modules in container modules WITHOUT a wrapper.
-			$(FLBuilder._contentClass + ' .fl-module[data-accepts]:not([data-has-children-wrapper]):not(:has(> .fl-module-content))').sortable($.extend({}, defaults, {
+			$(FLBuilder._sortableRootClass + ' .fl-module[data-accepts]:not([data-has-children-wrapper]):not(:has(> .fl-module-content))').sortable($.extend({}, defaults, {
 				cancel: '.fl-module',
 				handle: '.fl-module-sortable-proxy',
 			}));
 
 			// Modules in container modules WITH a wrapper.
-			$(FLBuilder._contentClass + ' .fl-module[data-accepts]:not([data-has-children-wrapper]) > .fl-module-content').sortable($.extend({}, defaults, {
+			$(FLBuilder._sortableRootClass + ' .fl-module[data-accepts]:not([data-has-children-wrapper]) > .fl-module-content').sortable($.extend({}, defaults, {
 				cancel: '.fl-module',
 				handle: '.fl-module-sortable-proxy',
 			}));
 
 			// Modules in container modules WITH a CHILD wrapper.
-			$(FLBuilder._contentClass + ' [data-children-wrapper]').sortable($.extend({}, defaults, {
+			$(FLBuilder._sortableRootClass + ' [data-children-wrapper]').sortable($.extend({}, defaults, {
 				cancel: '.fl-module',
 				handle: '.fl-module-sortable-proxy',
 			}));
 
 			// Drop targets
-			$(FLBuilder._contentClass + ' .fl-row-drop-target').sortable( defaults );
-			$(FLBuilder._contentClass + ' .fl-col-group-drop-target').sortable( defaults );
-			$(FLBuilder._contentClass + ' .fl-col-drop-target').sortable( defaults );
+			$(FLBuilder._sortableRootClass + ' .fl-row-drop-target').sortable( defaults );
+			$(FLBuilder._sortableRootClass + ' .fl-col-group-drop-target').sortable( defaults );
+			$(FLBuilder._sortableRootClass + ' .fl-col-drop-target').sortable( defaults );
+
+			FLBuilder.triggerHook( 'didInitSortables' );
+		},
+
+		/**
+		 * Sets the root class for jQuery sortables in the layout.
+		 * 
+		 * @since 2.11
+		 * @param {String} sortableRootClass 
+		 */
+		setSortableRootClass: function( sortableRootClass ) {
+			FLBuilder.resetSortableRootClass();
+			FLBuilder._sortableRootClass = sortableRootClass;
+            FLBuilder._initSortables();
+		},
+
+		/**
+		 * Resets the root class for jQuery sortables in the layout
+		 * to the builder's content class.
+		 * 
+		 * @since 2.11
+		 */
+		resetSortableRootClass: function() {
+			FLBuilder._sortableRootClass = FLBuilder._contentClass;
+            FLBuilder._initSortables();
 		},
 
 		/**
@@ -846,6 +897,7 @@
 			$('body', window.parent.document).on( 'click', '.fl-user-template-edit', FLBuilder._editUserTemplateClicked);
 			$('body', window.parent.document).on( 'click', '.fl-user-template-delete', FLBuilder._deleteUserTemplateClicked);
 			$('body', window.parent.document).on( 'click', '.fl-builder-template-replace-button', FLBuilder._templateReplaceClicked);
+			$('body', window.parent.document).on( 'click', '.fl-builder-template-prepend-button', FLBuilder._templatePrependClicked);
 			$('body', window.parent.document).on( 'click', '.fl-builder-template-append-button', FLBuilder._templateAppendClicked);
 			$('body', window.parent.document).on( 'click', '.fl-builder-template-actions .fl-builder-cancel-button', FLBuilder._templateCancelClicked);
 
@@ -1095,6 +1147,111 @@
 			alert.open( template( { feature : feature } ) );
 		},
 
+		/* Popovers
+		----------------------------------------------------------*/
+
+		/**
+		 * Hides a popover, but only when the Popover API will accept the call.
+		 *
+		 * hidePopover() throws NotSupportedError on an element that carries no
+		 * popover attribute. Every caller in the builder sits inside a loop driven
+		 * by a body mouse handler, and neither jQuery's .each() nor a for..in
+		 * catches, so a single unhidable element aborts the sweep and strands every
+		 * remaining overlay — module editing then dies page-wide. (#5558)
+		 *
+		 * @since 2.11
+		 * @access private
+		 * @method _hidePopover
+		 * @param {HTMLElement} element The element to hide. Absent is not an error.
+		 * @return {Boolean} Whether hidePopover() was called.
+		 */
+		_hidePopover: function( element )
+		{
+			if ( ! element || 'function' !== typeof element.hidePopover ) {
+				return false;
+			}
+
+			// A missing attribute is exactly the spec's "no popover state", which is
+			// the whole of the NotSupportedError condition — every present value
+			// maps to a real state, so there is nothing to parse. The known source
+			// is a #tiptip_holder created by another plugin's copy of jQuery
+			// tipTip, which BB's unscoped lookup then finds; ours always carries
+			// popover="auto", and every overlay template hardcodes popover="manual".
+			//
+			// Deliberately not also checking :popover-open. Hiding a popover that
+			// is already hidden stopped throwing in whatwg/html#9142, and BB's own
+			// tipTip fork has been calling showPopover() on an already-showing
+			// holder in shipped code without incident, which is field evidence that
+			// no engine BB supports still has the old behavior.
+			if ( ! element.hasAttribute( 'popover' ) ) {
+				return false;
+			}
+
+			element.hidePopover();
+
+			return true;
+		},
+
+		/**
+		 * Shows a popover, but only when the Popover API will accept the call.
+		 *
+		 * The mirror of _hidePopover, and it exists so the two halves state one
+		 * policy instead of two: no Popover API call anywhere in the builder may
+		 * throw out of a mousemove-driven sweep. _hidePopover skips on an engine
+		 * with no Popover API; without this, showPopover() still threw there,
+		 * from inside _appendOverlay — the same aborted-creation path #5558 is
+		 * about, one step earlier, leaving the hide-side guards unreachable.
+		 *
+		 * What skipping buys is narrower than "it still works", and the two
+		 * callers differ:
+		 *
+		 * - #tiptip_holder genuinely degrades: css/jquery.tiptip.css gives it its
+		 *   own position and display, so the popover attribute only bought top
+		 *   layer. Tooltips work, they can just paint behind overlays.
+		 * - An overlay does not. BB ships no position of its own for it — the UA
+		 *   [popover] rule supplies position:fixed along with the display:none,
+		 *   so without the API the element lands unpositioned in normal flow,
+		 *   and the rect _positionOverlay caches for hit-testing is wrong.
+		 *
+		 * So on such an engine the builder is still visually broken; what the
+		 * guard prevents is the throw that also kills editing page-wide for
+		 * every other node. A misplaced box beats a dead editor. The uniform
+		 * guard is also what lets any of this be tested at all: jsdom implements
+		 * no Popover API, so an unguarded call is untestable there.
+		 *
+		 * Skips silently, unlike the hide side. Its two log sites report an
+		 * anomaly found by re-querying the DOM (a foreign holder, a stray node
+		 * ID); the dominant skip here is a session-constant engine capability,
+		 * which would log on every frame, and the anomalous branch is
+		 * unreachable from both shipped callers — overlay templates hardcode
+		 * popover="manual" and the tipTip fork writes popover="auto" itself.
+		 *
+		 * @since 2.11
+		 * @access private
+		 * @method _showPopover
+		 * @param {HTMLElement} element The element to show. Absent is not an error.
+		 * @return {Boolean} Whether showPopover() was called.
+		 */
+		_showPopover: function( element )
+		{
+			if ( ! element || 'function' !== typeof element.showPopover ) {
+				return false;
+			}
+
+			// Same NotSupportedError condition as the hide side: no attribute is
+			// the spec's "no popover state". BB's own elements always carry it —
+			// overlay templates hardcode popover="manual" and our tipTip fork
+			// writes popover="auto" — so this only ever skips a foreign element,
+			// which must be left alone because popover implies display:none.
+			if ( ! element.hasAttribute( 'popover' ) ) {
+				return false;
+			}
+
+			element.showPopover();
+
+			return true;
+		},
+
 		/* TipTips
 		----------------------------------------------------------*/
 
@@ -1136,8 +1293,52 @@
 		 */
 		_hideTipTips: function()
 		{
-			$('#tiptip_holder').stop().hide();
+			var holder = $('#tiptip_holder');
+
+			holder.stop().hide();
 			$('#tiptip_holder', window.parent.document).stop().hide();
+
+			// Two reasons the holder may not be hidable, both of them #5558 one
+			// frame earlier than _removeOverlay's own guard — which this runs
+			// before, so an unguarded call here makes that guard unreachable and
+			// module editing dies page-wide either way:
+			//
+			// - It is absent. .tipTip() creates it lazily and _initTipTips skips
+			//   .tipTip() entirely on touch devices and when no tips match.
+			// - It exists but is not a popover, because another plugin's copy of
+			//   jQuery tipTip created it and this lookup is not scoped to ours.
+			FLBuilder._hidePopover( holder[0] );
+
+			// Report the second case, which the guard would otherwise make silent —
+			// and silence is what made #5558 take two rounds of stack traces to
+			// diagnose. Bounded at one line per session: there is only ever one
+			// #tiptip_holder per document, and this runs from body mouse handlers.
+			if ( holder.length && ! holder[0].hasAttribute( 'popover' ) ) {
+				FLBuilder._logForeignTipTipHolder();
+			}
+		},
+
+		/**
+		 * Reports a #tiptip_holder that another plugin's copy of jQuery tipTip
+		 * created, which BB reuses because the ID is unscoped. BB's tooltips then
+		 * work without the top layer, so inside the builder they can paint behind
+		 * module overlays — which are themselves popovers.
+		 *
+		 * Logged once per session; see _hideTipTips for why. (#5558)
+		 *
+		 * @since 2.11
+		 * @access private
+		 * @method _logForeignTipTipHolder
+		 */
+		_logForeignTipTipHolder: function()
+		{
+			if ( foreignTipTipHolderLogged ) {
+				return;
+			}
+
+			foreignTipTipHolderLogged = true;
+
+			FLBuilder.log( 'Beaver Builder: the #tiptip_holder on this page is not a popover, so it was created by another plugin\'s copy of jQuery tipTip. Beaver Builder tooltips will work but may render behind builder overlays. See issue #5558.' );
 		},
 
 		/* Submenus
@@ -1190,12 +1391,17 @@
 
 			var body    = $('body'),
 				parent  = $(this),
-				submenu = parent.find('.fl-builder-submenu');
+				menu 	= parent.find( '> .fl-builder-submenu' ),
+				open	= parent.hasClass( 'fl-builder-submenu-open' );
 
 			$( '.fl-builder-submenu' ).each( function() {
 				var timeout = $( this ).data( 'timeout' );
 				if ( 'undefined' !== typeof timeout ) {
 					clearTimeout( timeout );
+				}
+				var showTimeout = $( this ).data( 'show-timeout' );
+				if ( 'undefined' !== typeof showTimeout ) {
+					clearTimeout( showTimeout );
 				}
 			} );
 
@@ -1205,14 +1411,22 @@
 			$('.fl-row-menu-active').removeClass('fl-row-menu-active');
 
 			// determine align
-			if (parent.offset().left + submenu.width() > $(window).width()) {
+			if (parent.offset().left + menu.width() > $(window).width()) {
 				parent.addClass('fl-builder-submenu-right');
 			}
 
 			// add classes
-			parent.closest('.fl-row-overlay').addClass('fl-row-menu-active');
-			body.addClass('fl-builder-submenu-open');
-			parent.addClass('fl-builder-submenu-open');
+			if ( open ) {
+				parent.closest('.fl-row-overlay').addClass('fl-row-menu-active');
+				parent.addClass('fl-builder-submenu-open');
+				body.addClass('fl-builder-submenu-open');
+			} else {
+				menu.data( 'show-timeout', setTimeout( function() {
+					parent.closest('.fl-row-overlay').addClass('fl-row-menu-active');
+					parent.addClass('fl-builder-submenu-open');
+					body.addClass('fl-builder-submenu-open');
+				}, 250 ) ); // Slight timeout to prevent opening when mousing through overlays
+			}
 		},
 
 		/**
@@ -1233,6 +1447,11 @@
 			}, 500 );
 
 			submenu.data( 'timeout', timeout );
+
+			var showTimeout = submenu.data( 'show-timeout' );
+			if ( 'undefined' !== typeof showTimeout ) {
+				clearTimeout( showTimeout );
+			}
 		},
 
 		/**
@@ -1269,10 +1488,14 @@
 			}
 
 			var menu 	= $( this ),
-				timeout = menu.data( 'timeout' );
+				timeout = menu.data( 'timeout' ),
+				showTimeout = menu.data( 'show-timeout' );
 
 			if ( 'undefined' != typeof timeout ) {
 				clearTimeout( timeout );
+			}
+			if ( 'undefined' != typeof showTimeout ) {
+				clearTimeout( showTimeout );
 			}
 		},
 
@@ -1299,6 +1522,11 @@
 
 			menu.closest('.fl-row-overlay').removeClass('fl-row-menu-active');
 			menu.data( 'timeout', timeout );
+
+			var showTimeout = menu.data( 'show-timeout' );
+			if ( 'undefined' !== typeof showTimeout ) {
+				clearTimeout( showTimeout );
+			}
 		},
 
 		/**
@@ -1776,6 +2004,46 @@
 			FLBuilder._updateLayout()
 		},
 
+		/**
+		 * Reloads the builder page when a post slug or page template change is detected.
+		 * Fires on didSaveLayoutSettingsComplete; compares submitted values against
+		 * page-load defaults so only actual changes trigger a reload.
+		 *
+		 * @since 2.10
+		 * @access private
+		 * @method _reloadIfPostSettingsChanged
+		 */
+		_reloadIfPostSettingsChanged: function( e, settings )
+		{
+			var initial = FLBuilderSettingsConfig &&
+			              FLBuilderSettingsConfig.settings &&
+			              FLBuilderSettingsConfig.settings.layout;
+
+			if ( ! initial ) {
+				return;
+			}
+
+			var slugChanged = settings.slug !== undefined &&
+			                  settings.slug !== ( initial.slug || '' );
+
+			var tplChanged  = settings.page_template !== undefined &&
+			                  settings.page_template !== ( initial.page_template || '' );
+
+			if ( ! slugChanged && ! tplChanged ) {
+				return;
+			}
+
+			if ( slugChanged ) {
+				// Navigate to the new permalink — reloading the old URL would 404.
+				FLBuilder.ajax( { action: 'get_post_permalink' }, function( response ) {
+					var data = FLBuilder._jsonParse( response );
+					window.parent.location.href = ( data && data.url ) ? data.url : window.parent.location.href;
+				} );
+			} else {
+				window.parent.location.reload( true );
+			}
+		},
+
 		/* Global Settings
 		----------------------------------------------------------*/
 
@@ -1941,6 +2209,11 @@
 				'label': FLBuilderStrings.templateReplace
 			};
 
+			buttons[ 15 ] = {
+				'key': 'template-prepend',
+				'label': FLBuilderStrings.templatePrepend
+			};
+
 			buttons[ 20 ] = {
 				'key': 'template-append',
 				'label': FLBuilderStrings.templateAppend
@@ -1967,6 +2240,20 @@
 				FLBuilder._actionsLightbox.close();
 				FLBuilder._applyTemplate(FLBuilder._selectedTemplateId, false, FLBuilder._selectedTemplateType);
 			}
+		},
+
+		/**
+		 * Prepend a template to the current layout when the prepend
+		 * button is clicked.
+		 *
+		 * @since 3.0
+		 * @access private
+		 * @method _templatePrependClicked
+		 */
+		_templatePrependClicked: function()
+		{
+			FLBuilder._actionsLightbox.close();
+			FLBuilder._applyTemplate(FLBuilder._selectedTemplateId, '2', FLBuilder._selectedTemplateType);
 		},
 
 		/**
@@ -1997,7 +2284,7 @@
 		},
 
 		/**
-		 * Applies a template to the current layout by either appending
+		 * Applys a template to the current layout by either appending
 		 * it or replacing the current layout with it.
 		 *
 		 * @since 1.1.9
@@ -2009,11 +2296,12 @@
 		 */
 		_applyTemplate: function( id, append, type )
 		{
-			append  = typeof append === 'undefined' || ! append ? '0' : '1'
+			append  = typeof append === 'undefined' || ! append ? '0' : ( '2' === append ? '2' : '1' )
 			type    = typeof type === 'undefined' ? 'core' : type
 
 			FLBuilder._lightbox.close();
 			FLBuilder.showAjaxLoader();
+			FLBuilder.triggerHook('beforeApplyTemplate');
 
 			const actions = FL.Builder.data.getLayoutActions()
 			actions.applyTemplate( id, append, type )
@@ -2607,6 +2895,9 @@
 		_blockDragInit: function( e )
 		{
 			var target        = $( e.currentTarget ),
+				content 	  = $( FLBuilder._contentClass ),
+				overlay	   	  = target.closest( '.fl-block-overlay' ),
+				nodeId        = null,
 				node          = null,
 				scrollTop     = $( window ).scrollTop(),
 				initialPos    = 0;
@@ -2618,10 +2909,11 @@
 			FLBuilder._dragInitialScrollTop = scrollTop;
 
 			// Get the node to scroll to once the node highlights have affected the body height.
-			if ( target.closest( '[data-node]' ).length > 0 ) {
+			if ( overlay.length > 0 ) {
 
 				// Set the node to a node instance being dragged.
-				node = target.closest( '[data-node]' );
+				nodeId = overlay.attr( 'data-node' );
+				node = content.find( '.fl-block-overlay-active[data-node="' + nodeId + '"]' );
 
 				// Mark this node as initialized for dragging.
 				node.addClass( 'fl-node-drag-init' );
@@ -2629,7 +2921,7 @@
 			else if ( target.hasClass( 'fl-builder-block' ) ) {
 
 				// Set the node to the first visible row instance.
-				$( '.fl-row' ).each( function() {
+				$( FLBuilder._sortableRootClass + ' .fl-row' ).each( function() {
 					if ( node === null && $( this ).offset().top - scrollTop > 0 ) {
 						node = $( this );
 					}
@@ -2662,7 +2954,7 @@
 				scrollTo( 0, node.offset().top - initialPos );
 			}
 
-			FLBuilder.triggerHook('didInitDrag');
+			FLBuilder.triggerHook('didInitDrag', { target } );
 		},
 
 		/**
@@ -2762,14 +3054,17 @@
 					var itemType = ui.item.data( 'type' );
 					var alias = ui.item.data( 'alias' );
 
-					var config = FLBuilderConfig.contentItems.module.filter( config => {
-						return alias === config.alias && itemType === config.slug
-					} ).pop();
+					var configFinder = function( config ) {
+						return alias === config.alias && itemType === config.slug;
+					};
+					var config = FLBuilderConfig.contentItems.module.filter( configFinder ).pop()
+						|| ( FLBuilderConfig.unlistedModules || [] ).filter( configFinder ).pop();
 
 					var accepts = config ? config.accepts : false;
+					var isTopLevel = config ? config.top_level : false;
 					var name = config ? config.name : '';
 
-					if ( accepts && accepts.length ) {
+					if ( ( accepts && accepts.length ) || isTopLevel ) {
 						title = name;
 					} else {
 						title = FLBuilderStrings.newRow;
@@ -2854,12 +3149,12 @@
 				isDisabled		  	 = parent.closest( '.fl-node-disabled' ).length > 0,
 				group                = parent.parents( '.fl-col-group:not(.fl-col-group-nested)' ),
 				nestedGroup          = parent.parents( '.fl-col-group-nested' ),
-				parentType			 = parent.data( 'type' ),
 				itemType			 = item.data( 'type' );
 
 			// Handle container modules.
 			if ( isContainerModule || isChildrenWrapper ) {
-				var config = FLBuilderConfig.contentItems.module.filter( config => itemType === config.slug ).pop();
+				var config = FLBuilderConfig.contentItems.module.filter( config => itemType === config.slug ).pop()
+					|| ( FLBuilderConfig.unlistedModules || [] ).filter( config => itemType === config.slug ).pop();
 				var accepts = config ? config.accepts : false;
 
 				// Handle disabled container modules.
@@ -2878,11 +3173,17 @@
 
 			// Prevent modules in unaccepted parents.
 			if ( isModule && 'widget' !== itemType ) {
-				var config = FLBuilderConfig.contentItems.module.filter( config => itemType === config.slug ).pop();
+				var config = FLBuilderConfig.contentItems.module.filter( config => itemType === config.slug ).pop()
+					|| ( FLBuilderConfig.unlistedModules || [] ).filter( config => itemType === config.slug ).pop();
 				var parents = config ? config.parents : false;
+				var parentType = parent.data( 'type' );
 
-				if ( 'object' === typeof parents && ! parents.includes( parentType ) ) {
-					prevent = true;
+				if ( 'object' === typeof parents ) {
+					if ( 0 === parents.length && ! parent.hasClass( 'fl-row-drop-target' ) ) {
+						prevent = true; // Only allow main layout if no parents are defined.
+					} else if ( parents.length && ! parents.includes( parentType ) ) {
+						prevent = true;
+					}
 				}
 			}
 
@@ -2936,7 +3237,7 @@
 			}
 
 			// Add the disabled class if we are preventing a sort.
-			if ( prevent ) {
+			if ( prevent && ! parent.hasClass( 'fl-builder-blocks-section-content' ) ) {
 				parent.addClass( 'fl-sortable-disabled' );
 			}
 
@@ -3152,6 +3453,71 @@
 		},
 
 		/**
+		 * Whether an element the builder matched as a node really is a layout
+		 * node, rather than markup that merely carries the class.
+		 *
+		 * The row, column and module handlers are all delegated on class alone
+		 * (.fl-row, .fl-col, .fl-module), so anything inside a module's *content*
+		 * carrying one of those classes matches first — delegation is
+		 * innermost-first — and reaches a handler that then reads node data off
+		 * it. Pasted builder markup in an HTML or Text field is the usual source.
+		 *
+		 * data-node is the test because the PHP that renders a node writes the
+		 * class and the attribute together — for modules, both sit inside the
+		 * same `if ( $module->node )` branch — so a real node never has one
+		 * without the other. The CSS already leans on this: the breakpoint
+		 * selectors in class-fl-builder.php are written .fl-module[data-node] for
+		 * exactly this reason.
+		 *
+		 * Callers bail rather than stop the event, so it keeps bubbling to the
+		 * real node that contains the stray — clicking inside an HTML module
+		 * still opens that module's settings. (#5558)
+		 *
+		 * @since 2.11
+		 * @access private
+		 * @method _isLayoutNode
+		 * @param {HTMLElement|Object} node An element or jQuery reference. Absent
+		 *                                  is not an error — an empty set is not
+		 *                                  a layout node either.
+		 * @return {Boolean}
+		 */
+		_isLayoutNode: function( node )
+		{
+			return $( node ).is( '[data-node]' );
+		},
+
+		/**
+		 * Whether an element the builder matched as a module really is one,
+		 * rather than markup pasted straight off a rendered page.
+		 *
+		 * data-node alone isn't enough here (see _isLayoutNode above) — the PHP
+		 * that renders a module writes data-node whenever the node has an ID,
+		 * but only writes data-type, data-parent, data-name and friends when
+		 * FLBuilderModel::is_builder_active() is true. A page saved and viewed
+		 * on the front end therefore carries data-node but never data-type, so
+		 * markup copied off it and pasted into an HTML/Text module passes
+		 * _isLayoutNode and reaches _showModuleSettings with an undefined type,
+		 * which throws looking up FLBuilderSettingsConfig.modules[ undefined ].
+		 * Module click/hover handlers only ever run while the builder itself is
+		 * active, so a real module in that context always has data-type. (#5597)
+		 *
+		 * Rows and columns have no equivalent builder-only attribute to test —
+		 * they keep using _isLayoutNode.
+		 *
+		 * @since 2.11
+		 * @access private
+		 * @method _isModuleNode
+		 * @param {HTMLElement|Object} node An element or jQuery reference. Absent
+		 *                                  is not an error — an empty set is not
+		 *                                  a module node either.
+		 * @return {Boolean}
+		 */
+		_isModuleNode: function( node )
+		{
+			return $( node ).is( '[data-type]' );
+		},
+
+		/**
 		 * Returns whether a node lays its children out
 		 * horizontally, vertically, or layered.
 		 *
@@ -3229,79 +3595,6 @@
 		_enableGlobalNodes: function()
 		{
 			$( '.fl-node-disabled' ).removeClass( 'fl-node-disabled' );
-		},
-
-		/**
-		 * Called when the node settings overlay action is clicked.
-		 *
-		 * @since 2.8
-		 */
-		_nodeSettingsClicked: function( e )
-		{
-			const button = $( this );
-			const nodeId = button.closest( '[data-node]' ).attr( 'data-node' );
-			const targetNodeId = button.attr('data-target-node') || nodeId;
-			const targetNode  = $( `.fl-node-${ targetNodeId }` );
-
-			e.stopPropagation();
-
-			if ( FLBuilderConfig.postType === 'fl-builder-template' && targetNode.data( 'node-type' ) === 'module' ) {
-
-				const templateNode            = button.closest('[data-template-url]');
-				const module                  = targetNode;
-				const isModuleTemplateEditing = !! $( module ).closest( '.fl-builder-content-editing' ).is( '.fl-builder-module-template' );
-
-				if ( isModuleTemplateEditing ) {
-					FLBuilder.showNodeSettings( { nodeId: targetNodeId } );
-				} else {
-					FLBuilder._showModuleSettingsOfTemplateNode( templateNode, module );
-				}
-
-			} else {
-				FLBuilder.showNodeSettings( { nodeId: targetNodeId } );
-			}
-
-
-		},
-
-		showNodeSettings: function( targetNode ) {
-			const currentNode      = $( `[data-node="${ targetNode.nodeId }"]` );
-			const parentNodeId     = targetNode.parentNodeId ?? currentNode.data( 'parent' );
-			const nodeType         = targetNode.nodeType ?? currentNode?.attr( 'data-node-type' );
-			const moduleType       = targetNode.moduleType ?? currentNode?.attr( 'data-type' );
-			const isNewModule      = false;
-			const isTemplate       = FLBuilderConfig.userTemplateType === nodeType;
-			const templateUrl      = targetNode.templateUrl ?? currentNode.data( 'template-url' );
-			const isGlobalNode     = targetNode.global ?? !! currentNode.data( 'global' );
-			const isDynamicNode    = targetNode.dynamicEditing ?? !! currentNode.data('dynamic-editing');
-			const hasDynamicFields = targetNode.dynamicFields ?? !! currentNode.data('dynamic-fields');
-			const isRootNode       = currentNode.parent().is( FLBuilder._contentClass );
-
-			if ( ( isDynamicNode || isGlobalNode ) && ( ( isTemplate && ! isRootNode ) || ! isTemplate ) ) {
-				let globalData = {
-					nodeId: targetNode.nodeId,
-					nodeType,
-					isNewModule,
-					templateUrl,
-				};
-
-				if ( nodeType === 'module' ) {
-					globalData = {
-						...globalData,
-						parentId: parentNodeId,
-						type: moduleType,
-						dynamicFields: hasDynamicFields,
-					}
-				}
-
-				FLBuilderDynamicGlobal.handleGlobalNodeDisplay( globalData );
-
-			} else {
-
-				const actions = FL.Builder.getActions();
-				actions.openSettings( targetNode.nodeId );
-
-			}
 		},
 
 		/**
@@ -3459,8 +3752,11 @@
 		_rowDragInit: function( e )
 		{
 			var handle = $( e.target ),
+				content = $( FLBuilder._contentClass ),
+				overlay = handle.closest( '.fl-block-overlay' ),
+				nodeId = overlay.data( 'node' ),
 				helper = $( '.fl-row-sortable-proxy-item', window.parent.document ),
-				row    = handle.closest( '.fl-row' );
+				row = content.find( '.fl-block-overlay-active[data-node="' + nodeId + '"]' );
 
 			if ( handle.closest( '.fl-block-move-menu' ).length ) {
 				return;
@@ -3753,7 +4049,7 @@
 			let nodeId = menuEl.data('target-node');
 
 			if ( ! nodeId ) {
-				nodeId = menuEl.closest('.fl-row').data('node');
+				nodeId = menuEl.closest('.fl-row-overlay').data('node');
 			}
 
 			// bind copy to the el
@@ -3773,7 +4069,7 @@
 			let nodeId = menuEl.data('target-node');
 
 			if ( ! nodeId ) {
-				nodeId = menuEl.closest('.fl-row').data('node');
+				nodeId = menuEl.closest('.fl-row-overlay').data('node');
 			}
 
 			const success  = FLBuilderSettingsCopyPaste._importFromClipboard('row', nodeId);
@@ -3852,78 +4148,6 @@
 					oldNodeId : data.duplicatedRow
 				} );
 			} );
-		},
-
-		/**
-		 * Shows the settings lightbox and loads the row settings
-		 * when the row settings button is clicked.
-		 *
-		 * @since 1.0
-		 * @access private
-		 * @method _rowSettingsClicked
-		 */
-		_rowSettingsClicked: function( e )
-		{
-			var button = $( this),
-				nodeId = $( this ).closest( '.fl-row' ).attr( 'data-node' ),
-				global = button.closest( '.fl-block-overlay-global' ).length > 0;
-
-			const actions = FL.Builder.getActions()
-			actions.openSettings( nodeId )
-
-			e.stopPropagation()
-		},
-
-		/**
-		 * Show settings for a row node
-		 *
-		 * @since 2.?
-		 * @access private
-		 * @method _showRowSettings
-		 */
-		_showRowSettings: function( nodeId, global )
-		{
-			let win = null;
-
-			// If we're on a global row template page
-			if ( global && 'row' != FLBuilderConfig.userTemplateType ) {
-				FLBuilderDynamicGlobal.handleGlobalNodeDisplay( { nodeId, nodeType: 'row' } );
-			} else {
-				const rowNode           = $( '.fl-node-' + nodeId );
-				const dynamicEditing    = !! $( rowNode ).data('dynamic-editing');
-				const isTemplateEditing = $( rowNode ).closest('.fl-builder-content-editing').is('.fl-builder-template');
-				const rootNode          = $( rowNode ).closest( '[data-template-url]' );
-				let   rootNodeEditing   = false;
-				let   badges            = [];
-
-				if ( isTemplateEditing && rootNode ) {
-					rootNodeEditing = !! rootNode.data('dynamic-editing');
-				}
-
-				if ( global ) {
-					badges = ( dynamicEditing || rootNodeEditing ) ? [ FLBuilderStrings.componentBadge ] : [ FLBuilderStrings.global ];
-				}
-
-				FLBuilderSettingsForms.render( {
-					id        : 'row',
-					global    : global,
-					dynamicEditing : dynamicEditing,
-					rootNodeEditing: rootNodeEditing,
-					nodeId    : nodeId,
-					className : 'fl-builder-row-settings',
-					attrs     : 'data-node="' + nodeId + '"',
-					buttons   : ! global && ! FLBuilderConfig.lite && ! FLBuilderConfig.simpleUi ? ['save-as'] : [],
-					badges    : badges,
-					settings  : FLBuilderSettingsConfig.nodes[ nodeId ],
-					preview	  : {
-						type: 'row'
-					}
-				}, function() {
-					$( '#fl-field-width select', window.parent.document ).on( 'change', FLBuilder._rowWidthChanged );
-					$( '#fl-field-content_width select', window.parent.document ).on( 'change', FLBuilder._rowWidthChanged );
-					$( '#fl-field-aspect_ratio input', window.parent.document ).on( 'input', FLBuilder._rowToggleContentAlignment );
-				} );
-			}
 		},
 
 		/**
@@ -4057,9 +4281,9 @@
 		_highlightEmptyCols: function()
 		{
 			var notGlobal = FLBuilderConfig.userTemplateType ? '' : ':not(.fl-node-global)',
-				cols 	  = $(FLBuilder._contentClass + ' .fl-col' + notGlobal),
-				modules   = $( FLBuilder._contentClass + ' .fl-module[data-accepts]:not([data-has-children-wrapper])' + notGlobal ),
-				wrappers  = $( FLBuilder._contentClass + ' [data-children-wrapper]' );
+				cols 	  = $(FLBuilder._sortableRootClass + ' .fl-col' + notGlobal),
+				modules   = $( FLBuilder._sortableRootClass + ' .fl-module[data-accepts]:not([data-has-children-wrapper])' + notGlobal ),
+				wrappers  = $( FLBuilder._sortableRootClass + '[data-children-wrapper],' + FLBuilder._sortableRootClass + ' [data-children-wrapper]' );
 
 			cols.removeClass('fl-col-highlight').find('.fl-col-content').css( 'min-height', '' );
 			modules.removeClass('fl-module-highlight');
@@ -4106,20 +4330,21 @@
 			}
 
 			// Highlight rows.
-			$( FLBuilder._contentClass + ' > .fl-row' ).addClass( 'fl-row-highlight' );
+			$( FLBuilder._sortableRootClass + ' > .fl-row' ).addClass( 'fl-row-highlight' );
 
 			// Highlight columns.
 			if ( ! target || ! target.closest( '.fl-row-overlay' ).length ) {
-				$( FLBuilder._contentClass + ' .fl-col' + notGlobal ).each( function() {
+				$( FLBuilder._sortableRootClass + ' .fl-col' + notGlobal ).each( function() {
 					if ( ! $( this ).closest( '.fl-builder-shortcode-mask-wrap' ).length ) {
 						$( this ).addClass( 'fl-col-highlight' );
 					}
 				} );
 			}
 
-			// Highlight container modules.
-			var containerSelector = FLBuilder._contentClass + ' .fl-module[data-accepts]';
-			var childContainerSelector = FLBuilder._contentClass + ' [data-children-wrapper]';
+			// Highlight container modules and top-level non-container modules.
+			var containerSelector = FLBuilder._sortableRootClass + ' .fl-module[data-accepts]:not([data-popover]), ' +
+				FLBuilder._sortableRootClass + ' .fl-module[data-top-level="true"]:not([data-accepts]):not([data-popover])';
+			var childContainerSelector = FLBuilder._sortableRootClass + ' [data-children-wrapper]';
 			$( containerSelector + ', ' + childContainerSelector ).each( function() {
 				if ( ! $( this ).closest( '.fl-builder-shortcode-mask-wrap' ).length ) {
 					$( this ).addClass( 'fl-module-highlight' );
@@ -4141,7 +4366,7 @@
 		_removeEmptyRowAndColHighlights: function() {
 			$( '.fl-row-highlight' ).removeClass('fl-row-highlight');
 			$( '.fl-col-highlight' ).removeClass('fl-col-highlight');
-			$( '.fl-module-highlight[data-accepts]' ).css('padding', '');
+			$( '.fl-module-highlight[data-accepts], .fl-module-highlight[data-top-level="true"]' ).css('padding', '');
 			$( '.fl-module-highlight' ).removeClass('fl-module-highlight');
 			$( '.fl-sortable-fixed-width' ).css( 'max-width', '' ).removeClass( 'fl-sortable-fixed-width' );
 		},
@@ -4159,7 +4384,7 @@
 		{
 			var notGlobalRow = 'row' == FLBuilderConfig.userTemplateType ? '' : '.fl-row:not(.fl-node-global) ',
 				notGlobalCol = 'column' == FLBuilderConfig.userTemplateType ? '' : '.fl-col:not(.fl-node-global) ',
-				content      = $( FLBuilder._contentClass ),
+				content      = $( FLBuilder._sortableRootClass ),
 				notNested    = content.find( notGlobalRow + '.fl-col-group:not(.fl-col-group-nested) > ' + notGlobalCol + '> .fl-col-content' ),
 				nested       = content.find( notGlobalRow + '.fl-col-group-nested ' + notGlobalCol + '.fl-col-content' ),
 				col          = null,
@@ -4224,8 +4449,11 @@
 		_colDragInit: function( e )
 		{
 			var handle = $( e.target ),
+				content = $( FLBuilder._contentClass ),
+				overlay = handle.closest( '.fl-block-overlay' ),
+				nodeId = overlay.data( 'node' ),
 				helper = $( '.fl-col-sortable-proxy-item', window.parent.document ),
-				col    = handle.closest( '.fl-col' );
+				col = content.find( '.fl-block-overlay-active[data-node="' + nodeId + '"]' );
 
 			if ( handle.closest( '.fl-block-move-menu' ).length ) {
 				return;
@@ -4428,40 +4656,6 @@
 		},
 
 		/**
-		 * Shows the settings lightbox and loads the column settings
-		 * when the column settings button is clicked.
-		 *
-		 * @since 1.1.9
-		 * @access private
-		 * @method _colSettingsClicked
-		 * @param {Object} e The event object.
-		 */
-		_colSettingsClicked: function(e)
-		{
-			var button = $( this ),
-				col    = button.closest('.fl-col'),
-				id     = col.attr( 'data-node' ),
-				global = button.closest( '.fl-block-overlay-global' ).length > 0;
-
-			if ( FLBuilder._colResizing ) {
-				return;
-			}
-			if ( global && ! FLBuilderConfig.userCanEditGlobalTemplates ) {
-				return;
-			}
-
-			// If we clicked the edit parent button
-			if ( button.hasClass( 'fl-block-col-edit-parent' ) ) {
-				id = col.parents( '.fl-col' ).attr( 'data-node' )
-			}
-
-			const actions = FL.Builder.data.getLayoutActions()
-			actions.displaySettings( id )
-
-			e.stopPropagation();
-		},
-
-		/**
 		 * Copy settings of a column.
 		 *
 		 * @since 2.6
@@ -4473,7 +4667,7 @@
 			let nodeId = menuEl.data('target-node');
 
 			if ( ! nodeId ) {
-				nodeId = menuEl.closest('.fl-col').data('node');
+				nodeId = menuEl.closest('.fl-col-overlay').data('node');
 			}
 
 			// bind copy to the el
@@ -4493,7 +4687,7 @@
 			let nodeId = menuEl.data('target-node');
 
 			if ( ! nodeId ) {
-				nodeId = menuEl.closest('.fl-col').data('node');
+				nodeId = menuEl.closest('.fl-col-overlay').data('node');
 			}
 
 			const success  = FLBuilderSettingsCopyPaste._importFromClipboard('column', nodeId);
@@ -4549,66 +4743,6 @@
 				setTimeout(() => {
 					menuEl.text(menuText)
 				}, 1000);
-			}
-		},
-
-		/**
-		 * Show Column Settings Form
-		 *
-		 * @since 2.?
-		 * @access private
-		 * @method _showColSettings
-		 */
-		_showColSettings: function( nodeId, global, isNodeTemplate ) {
-
-			if ( global && isNodeTemplate && 'row' !== FLBuilderConfig.userTemplateType ) {
-				FLBuilderDynamicGlobal.handleGlobalNodeDisplay( { nodeId, nodeType: 'col' } );
-			}
-			else {
-				const colNode           = $( '.fl-col[data-node="' + nodeId + '"]' );
-				const isColTemplate       = !! $( colNode ).data( 'template-url' );
-				const isColDynamicEditing = !! $( colNode ).data( 'dynamic-editing' );
-				const isTemplateEditing = $( colNode ).closest( '.fl-builder-content-editing' ).is( '.fl-builder-template' );
-				const rootNode          = $( colNode ).closest( '[data-template-url]' );
-				let   rootNodeEditing   = false;
-				let   badges            = [];
-
-				if ( isTemplateEditing && rootNode ) {
-					rootNodeEditing = !! rootNode.data( 'dynamic-editing' );
-				}
-
-				let   isDynamicEditing = false;
-				if ( isTemplateEditing && global ) {
-					badges = [ FLBuilderStrings.global ];
-					if ( ! isColTemplate ) {
-						isDynamicEditing = true;
-						badges = [ FLBuilderStrings.componentBadge ];
-					} else if ( isColDynamicEditing ) {
-						isDynamicEditing = true;
-						badges = [ FLBuilderStrings.componentBadge ];
-					}
-				}
-
-				FLBuilderSettingsForms.render( {
-					id        : 'col',
-					global    : global,
-					dynamicEditing: isDynamicEditing,
-					rootNodeEditing : rootNodeEditing,
-					nodeId    : nodeId,
-					className : 'fl-builder-col-settings',
-					attrs     : 'data-node="' + nodeId + '"',
-					buttons   : ! global && ! FLBuilderConfig.lite && ! FLBuilderConfig.simpleUi ? ['save-as'] : [],
-					badges    : badges,
-					settings  : FLBuilderSettingsConfig.nodes[ nodeId ],
-					preview   : {
-						type: 'col'
-					}
-				}, function() {
-					var col = $('.fl-col.fl-node-' + nodeId )
-					if ( col.siblings( '.fl-col' ).length === 0  ) {
-						$( '#fl-field-equal_height, #fl-field-content_alignment', window.parent.document ).hide();
-					}
-				} );
 			}
 		},
 
@@ -4965,12 +5099,15 @@
 		{
 			// Setup resize vars.
 			var handle 		   = $( ui.helper ),
+				overlay 	   = handle.closest( '.fl-block-overlay' ),
+				nodeId 		   = overlay.attr( 'data-node' ),
+				thisCol		   = $( `.fl-node-${ nodeId }` ).closest( '.fl-col' ),
 				direction 	   = '',
 				resizeParent   = handle.hasClass( 'fl-block-col-resize-parent' ),
-				parentCol      = resizeParent ? handle.closest( '.fl-col' ).parents( '.fl-col' ) : null,
-				group		   = resizeParent ? parentCol.parents( '.fl-col-group' ) : handle.closest( '.fl-col-group' ),
+				parentCol      = resizeParent ? thisCol.parents( '.fl-col' ) : null,
+				group		   = resizeParent ? parentCol.parents( '.fl-col-group' ) : thisCol.closest( '.fl-col-group' ),
 				cols 		   = group.find( '> .fl-col' ),
-				col 		   = resizeParent ? parentCol : handle.closest( '.fl-col' ),
+				col 		   = resizeParent ? parentCol : thisCol,
 				colId		   = col.attr( 'data-node' ),
 				colSetting	   = $( '[data-node=' + colId + '] #fl-field-size input', window.parent.document ),
 				sibling 	   = null,
@@ -5119,6 +5256,7 @@
 
 				// Build the overlay overflow menu if needed.
 				FLBuilder._buildOverlayOverflowMenu( overlay );
+				FLBuilder._repositionOverlays();
 			} )
 
 			// Trigger the col-resize-drag hook.
@@ -5295,8 +5433,11 @@
 		_moduleDragInit: function( e )
 		{
 			var handle = $( e.target ),
+				content = $( FLBuilder._contentClass ),
+				overlay = handle.closest( '.fl-block-overlay' ),
+				nodeId = overlay.data( 'node' ),
 				helper = $( '.fl-module-sortable-proxy-item', window.parent.document ),
-				module = handle.closest( '.fl-module' );
+				module = content.find( '.fl-block-overlay-active[data-node="' + nodeId + '"]' );
 
 			if ( handle.closest( '.fl-block-move-menu' ).length ) {
 				return;
@@ -5384,10 +5525,28 @@
 		 */
 		_moduleDragStop: function(e, ui)
 		{
+			var dropCarrier = { intercepted: false, e: e, ui: ui };
+			FLBuilder.triggerHook( 'willDropModule', dropCarrier );
+			if ( dropCarrier.intercepted ) {
+				FLBuilder._blockDragStop( e, ui );
+				// ui.item is the throwaway .fl-builder-block proxy on content-panel drops
+				// (safe to remove). For in-layout module drags ui.item wraps the real
+				// module DOM — DS is responsible for only setting intercepted=true on
+				// proxy drops, but defense-in-depth: gate the remove on the same class.
+				if ( ui.item.hasClass( 'fl-builder-block' ) ) {
+					ui.item.remove();
+				}
+				FLBuilder._resizeLayout();
+				FLBuilder._initDropTargets();
+				FLBuilder.triggerHook( 'didDropModule' );
+				return;
+			}
+
 			FLBuilder._blockDragStop( e, ui );
 
 			var module	 = $( '.fl-node-dragging' ).removeClass( 'fl-node-dragging' ),
 				accepts  = module.attr( 'data-accepts' ),
+				topLevel = module.attr( 'data-top-level' ),
 				item     = ui.item,
 				parent   = ui.item.parent(),
 				node     = null,
@@ -5406,6 +5565,7 @@
 				if ( parent.hasClass( 'fl-sortable-disabled' ) ) {
 					item.remove();
 					FLBuilder._showPanel();
+					FLBuilder._setupEmptyLayout();
 					return;
 				}
 				// A new module was dropped into a row position.
@@ -5475,7 +5635,7 @@
 					node     = item.closest( '.fl-row, .fl-module' );
 					position = item.closest( '.fl-builder-content' ).children( '.fl-row, .fl-module' ).not( module ).index( node );
 					position = item.closest( '.fl-drop-target-last' ).length ? position + 1 : position;
-					if ( accepts ) {
+					if ( accepts || topLevel ) {
 						FLBuilder._moveNode( 0, module.attr( 'data-node' ), position );
 						module.show();
 					} else {
@@ -5489,7 +5649,7 @@
 					position = item.closest( '.fl-row-content ').find( ' > .fl-col-group, > .fl-module' ).not( module ).index( node );
 					position = item.closest( '.fl-drop-target-last' ).length ? position + 1 : position;
 					parentId = item.closest( '.fl-row' ).attr( 'data-node' );
-					if ( accepts ) {
+					if ( accepts || topLevel ) {
 						FLBuilder._moveNode( parentId, module.attr( 'data-node' ), position );
 						module.show();
 					} else {
@@ -5585,6 +5745,12 @@
 				nodeId = module.attr('data-node'),
 				parentId = module.parents('[data-node]').attr('data-node'),
 				acceptsChildren = module.attr('data-accepts');
+
+			FLBuilder.triggerHook( 'beforeDeleteModule', {
+				nodeId: nodeId,
+				parentId: parentId,
+				moduleType: module.attr( 'data-type' ),
+			} );
 
 			const actions = FL.Builder.data.getLayoutActions()
 			actions.deleteNode( nodeId )
@@ -5692,96 +5858,6 @@
 		},
 
 		/**
-		 * Shows the settings lightbox and loads the module settings
-		 * when the module settings button is clicked.
-		 *
-		 * @since 1.0
-		 * @access private
-		 * @method _moduleSettingsClicked
-		 * @param {Object} e The event object.
-		 */
-		_moduleSettingsClicked: function(e)
-		{
-			const overlayButton  = $(this);
-			const nodeId         = overlayButton.closest( '.fl-module' ).attr( 'data-node' );
-			const module         = overlayButton.closest( '.fl-module' );
-			const parentId       = module.data( 'parent' );
-			const type           = module.data( 'type' );
-			const global         = !! module.data( 'global' );
-			const dynamic        = !! module.data( 'dynamic-editing' );
-			const settings       = $( `.fl-builder-settings[data-node="${ nodeId }"]` );
-			const editingNode    = $( module ).closest( '.fl-builder-content-editing' );
-
-			e.stopPropagation();
-
-			if ( FLBuilder._colResizing ) {
-				return;
-			}
-			if ( global && ! FLBuilderConfig.userCanEditGlobalTemplates ) {
-				return;
-			}
-
-			if ( FLBuilderConfig.postType === 'fl-builder-template' ) {
-				const templateNode = overlayButton.closest( '[data-template-url]' );
-
-				if ( editingNode.is( '.fl-builder-module-template' ) ) {
-					// Check if this template a Box module. 
-					if ( 'box' === editingNode.children().first().data( 'type' ) ) {
-						FLBuilder._showModuleSettingsOfTemplateNode( templateNode, module );
-					} else {
-						FLBuilder._showModuleSettings( { type,	nodeId, parent: parentId, global } );
-					}
-				} else {
-					FLBuilder._showModuleSettingsOfTemplateNode( templateNode, module );
-				}
-
-			} else if ( ! global && ! settings.length ) {
-				FLBuilder._showModuleSettings( { type,	nodeId, parent: parentId, global } );
-			} else {
-				FLBuilder.showNodeSettings( { nodeId: nodeId } );
-			}
-
-		},
-
-		/**
-		 * Shows the settings lightbox of a module that's nested within a template.
-		 * 
-		 * @since 2.10
-		 * @access private
-		 * @method _showModuleSettingsOfTemplateNode
-		 * @param {Object} templateNode The root template node object.
-		 * @param {Object} module The module object.
-		 */
-		_showModuleSettingsOfTemplateNode: function( templateNode, module ) {
-			
-			if ( FLBuilderConfig.postType !== 'fl-builder-template' ) {
-				return;
-			}
-
-			if ( ! templateNode || ! module ) {
-				return;
-			}
-
-			if ( module.data( 'template-url' ) ) {
-				
-				FLBuilder.showNodeSettings( { 
-					nodeId : module.data( 'node' )
-				} );
-
-			} else {
-
-				FLBuilder._showModuleSettings( {
-					nodeId   : module.data( 'node' ),
-					parentId : module.data( 'parent' ),
-					type     : module.data( 'type' ),
-					global   : templateNode.hasClass( 'fl-node-global' ),
-					dynamic  : templateNode.data( 'dynamic-editing' ),
-				} );
-
-			}
-		},
-
-		/**
 		 * Copy settings of a module.
 		 *
 		 * @since 2.6
@@ -5793,7 +5869,7 @@
 			let nodeId = menuEl.data('target-node');
 
 			if ( ! nodeId ) {
-				nodeId = menuEl.closest('.fl-module').data('node');
+				nodeId = menuEl.closest('.fl-module-overlay').data('node');
 			}
 
 			const module = $( '.fl-node-' + nodeId );
@@ -5816,7 +5892,7 @@
 			let nodeId = menuEl.data('target-node');
 
 			if ( ! nodeId ) {
-				nodeId = menuEl.closest('.fl-module').data('node');
+				nodeId = menuEl.closest('.fl-module-overlay').data('node');
 			}
 
 			const module = $( '.fl-node-' + nodeId );
@@ -5881,129 +5957,6 @@
 			}
 		},
 
-		/**
-		 * Shows the lightbox and loads the settings for a module.
-		 *
-		 * @since 1.0
-		 * @access private
-		 * @method _showModuleSettings
-		 * @param {Object} data
-		 * @param {Function} callback
-		 */
-		_showModuleSettings: function( data, callback )
-		{
-			if ( ! FLBuilderSettingsConfig.modules ) {
-				return;
-			}
-
-			var config   = FLBuilderSettingsConfig.modules[ data.type ],
-				settings = data.settings ? data.settings : FLBuilderSettingsConfig.nodes[ data.nodeId ],
-				head 	 = $( 'head', window.parent.document ),
-				module   = $( '.fl-module[data-node="' + data.nodeId + '"]' ),
-				layout   = null;
-
-			let   dynamicFields    = data.dynamicFields;
-			let   showFullSettings = true;
-			let   badges           = [];
-
-			const isTemplateEditing = FLBuilderConfig.postType === 'fl-builder-template';
-			const rootNode          = $( module ).closest( '[data-template-url]' );
-			const isModuleTemplate       = !! $( module ).data( 'template-url' );
-			const isModuleDynamicEditing = !! $(module).data( 'dynamic-editing' );
-			const rootNodeEditing   = isTemplateEditing && rootNode.length;
-			const isRootNodeDynamic = !! rootNode.data( 'dynamic-editing' );
-
-			let isDynamicEditing   = isModuleDynamicEditing;
-			let openGlobalTemplate = false;
-
-			if ( data.global ) {
-				if ( isTemplateEditing ) {
-					badges = [ FLBuilderStrings.global ];
-					if ( isRootNodeDynamic && ( ! isModuleTemplate || isModuleDynamicEditing ) ) {
-						isDynamicEditing = true;
-						badges = [ FLBuilderStrings.componentBadge ];
-					} else if ( data.isNewModule && data.dynamic ) {
-						isDynamicEditing = true;
-						badges = [ FLBuilderStrings.componentBadge ];
-					}
-				} else if ( isDynamicEditing ) {
-					showFullSettings = true;
-				} else {
-					showFullSettings = false;
-					openGlobalTemplate = ! FLBuilderConfig.userTemplateType && module.attr( 'data-template-node' ) && module.attr( 'data-template-url' )
-				}
-			}
-
-			if ( showFullSettings ) {
-
-				// Add settings CSS and JS.
-				if ( -1 === $.inArray( data.type, FLBuilder._loadedModuleAssets ) ) {
-					if ( '' !== config.assets.css ) {
-						head.append( config.assets.css );
-					}
-					if ( '' !== config.assets.js ) {
-						head.append( config.assets.js );
-					}
-					FLBuilder._loadedModuleAssets.push( data.type );
-				}
-
-				// Render the form.
-				FLBuilderSettingsForms.render( {
-					type	  : 'module',
-					global    : data.global,
-					dynamicEditing: isDynamicEditing,
-					dynamicFields : dynamicFields,
-					rootNodeEditing: rootNodeEditing,
-					notice    : data.notice,
-					id        : data.type,
-					nodeId    : data.nodeId,
-					className : 'fl-builder-module-settings fl-builder-' + data.type + '-settings',
-					attrs     : 'data-node="' + data.nodeId + '" data-parent="' + data.parentId + '" data-type="' + data.type + '"',
-					buttons   : ! data.global && ! FLBuilderConfig.lite && ! FLBuilderConfig.simpleUi ? ['save-as'] : [],
-					badges    : badges,
-					settings  : settings,
-					legacy    : data.legacy,
-					helper    : FLBuilder._moduleHelpers[ data.type ],
-					rules     : FLBuilder._moduleHelpers[ data.type ] ? FLBuilder._moduleHelpers[ data.type ].rules : null,
-					messages  : FLBuilder._moduleHelpers[ data.type ] ? FLBuilder._moduleHelpers[ data.type ].messages : null,
-					hide      : ( ! FLBuilderConfig.userCanEditGlobalTemplates && data.global ) ? true : false,
-					lightbox  : data.lightbox ? data.lightbox : null,
-					preview   : {
-						type     : 'module',
-						layout   : data.layout,
-						callback : function() {
-							FLBuilder._initModuleMarginPlaceholders();
-							FLBuilder.triggerHook( 'didAddModule', {
-								nodeId: data.nodeId,
-								moduleType: settings ? settings.type : data.type,
-								settings: settings,
-								newNodes: data.newNodes,
-								updatedNodes: data.updatedNodes,
-							} );
-						}
-					}
-				}, callback );
-
-			} else if ( openGlobalTemplate ) {
-				
-				if ( FLBuilderConfig.userCanEditGlobalTemplates ) {
-					win = window.parent.open( module.attr( 'data-template-url' ) );
-					win.FLBuilderGlobalNodeId = data.nodeId;
-				}
-
-			} else if ( ! FLBuilderConfig.userTemplateType && ! data.isNewModule ) {
-
-				const globalData = {
-					nodeType: 'module',
-					dynamicFields,
-					...data,
-				};
-
-				FLBuilderDynamicGlobal.handleGlobalNodeDisplay( globalData );
-
-			}
-
-		},
 		/**
 		 * Validates the module settings and saves them if
 		 * the form is valid.
@@ -6163,12 +6116,10 @@
 				submit: function(){ return true; },
 				preview: function(){},
 				getForm: function() {
-					if ( ! this.form ) {
-						this.form = $( 'form.fl-builder-settings:visible', window.parent.document ).get(0)
-					}
+					this.form = $( 'form.fl-builder-settings:visible', window.parent.document ).get(0)
 					return this.form
 				},
-				getSettings: function() { return FLBuilder._getSettings( $( this.form ) ) },
+				getSettings: function() { return FLBuilder._getSettings( $( this.getForm() ) ) },
 				getNodeID: function() { return this.getForm().dataset.node },
 				getNode: function() {
 					if ( ! this.node ) {
@@ -6211,6 +6162,8 @@
 			var sides = [ 'top', 'right', 'bottom', 'left' ];
 
 			if ( ! form.length ) {
+				return;
+			} else if ( node.closest( '[popover]' ).length ) {
 				return;
 			} else if ( ! node.closest( '.fl-module[data-accepts]' ).length ) {
 				return;
@@ -6299,7 +6252,7 @@
 				}
 			}, function() {
 				var form = $( '.fl-builder-settings:visible' );
-				var cats = FLBuilderConfig.nodeCategoies;
+				var cats = FLBuilderConfig.nodeCategories;
 				const select         = form.find('#fl-field-categories').find('select');
 				const desc           = select.parent().find( '.fl-field-description' ).hide();
 
@@ -6478,6 +6431,7 @@
 				if ( parent.hasClass( 'fl-sortable-disabled' ) ) {
 					item.remove();
 					FLBuilder._showPanel();
+					FLBuilder._setupEmptyLayout();
 					return;
 				}
 				// A column was dropped into a row position.
@@ -6527,6 +6481,7 @@
 				if ( parent.hasClass( 'fl-sortable-disabled' ) ) {
 					item.remove();
 					FLBuilder._showPanel();
+					FLBuilder._setupEmptyLayout();
 					return;
 				}
 				// Dropped into a row position.
@@ -6559,7 +6514,7 @@
 					parentId = parent.attr( 'data-node' );
 				}
 				// Dropped into a container module WITH a wrapper.
-				else if ( parent.hasClass( 'fl-module-content' ) || parent.hasClass( 'fl-loop-item' ) ) {
+				else if ( parent.hasClass( 'fl-module-content' ) || parent.attr( 'data-children-wrapper' ) ) {
 					position = parent.find( '> .fl-module, .fl-builder-block' ).index( item );
 					parentId = item.closest( '.fl-module' ).attr( 'data-node' );
 				}
@@ -6720,6 +6675,7 @@
 				FLBuilder._initColorPickers();
 				FLBuilder._initGradientPickers();
 				FLBuilder._initIconFields();
+				FLBuilder._initIconClassesFields();
 				FLBuilder._initPhotoFields();
 				FLBuilder._initSelectFields();
 				FLBuilder._initEditorFields();
@@ -7092,7 +7048,7 @@
 			}
 
 			form.validate({
-				ignore: '.fl-ignore-validation',
+				ignore: '.fl-ignore-validation, .fl-ds-field-control input, .fl-ds-field-control textarea, .fl-ds-field-control select',
 				rules: rules,
 				messages: messages,
 				errorPlacement: FLBuilder._settingsErrorPlacement
@@ -7488,6 +7444,7 @@
 				FLBuilder.ajax( {
 					action          : 'verify_settings',
 					settings        : settings,
+					node_id         : nodeId,
 				}, function( response ) {
 					console.log(response)
 					if ( true === response ) {
@@ -7631,7 +7588,7 @@
 				}
 
 				// Do a validation check of the main form to see if we should save.
-				if ( valid && ! form.validate({ignore: '.fl-ignore-validation'}).form() ) {
+				if ( valid && ! form.validate({ignore: '.fl-ignore-validation, .fl-ds-field-control input, .fl-ds-field-control textarea, .fl-ds-field-control select'}).form() ) {
 					valid = false;
 				}
 
@@ -8079,6 +8036,27 @@
 				var errorBtn = settings.find( '.fl-builder-settings-error' );
 				var hasError = false;
 
+				// Strip annotations caused by shortcode syntax — scan forward
+				// from the annotation row to the end of the CSS block for a `[`.
+				var filtered = annot.filter( function( a ) {
+					var session = editor.getSession();
+					var len     = session.getLength();
+					for ( var r = a.row; r < Math.min( a.row + 20, len ); r++ ) {
+						var ln = session.getLine( r );
+						if ( ln && /\[/.test( ln ) ) {
+							return false;
+						}
+						if ( r > a.row && ln && ln.indexOf( '}' ) > -1 ) {
+							break;
+						}
+					}
+					return true;
+				} );
+				if ( filtered.length < annot.length ) {
+					editor.getSession().setAnnotations( filtered );
+					annot = filtered;
+				}
+
 				for ( var i = 0; i < annot.length; i++ ) {
 					if ( annot[ i ].text.indexOf( 'DOCTYPE' ) > -1 ) {
 						continue;
@@ -8384,7 +8362,7 @@
 		 * @since 2.9
 		 * @access private
 		 * @method _updateRepeaterFormState
-		 * @param HTMLElement table - A table element with multiple fields
+		 * @param HTMLElement table - A table element with mulitple fields
 		 */
 		_updateRepeaterFormState( table ) {
 			const { getSnapshot, setCurrentForm } = FL.Builder.settingsForms.state
@@ -9597,6 +9575,195 @@
 			wrap.addClass('fl-icon-empty');
 		},
 
+		/**
+		 * Initializes all icon "extra classes" chip inputs in a settings form
+		 * and sets up the shared outside-click handler that closes suggestions.
+		 *
+		 * @since 2.10
+		 * @access private
+		 * @method _initIconClassesFields
+		 */
+		_initIconClassesFields: function()
+		{
+			var $doc = $( window.parent.document );
+
+			$( '.fl-builder-settings:visible .fl-icon-classes-field', window.parent.document )
+				.each( FLBuilder._initIconClassesField );
+
+			// Single namespaced document listener — closes any open suggestions on outside click.
+			$doc.off( 'mousedown.fl-icon-classes' ).on( 'mousedown.fl-icon-classes', function( e ) {
+				var $target = $( e.target );
+				if ( ! $target.closest( '.fl-icon-classes-field' ).length ) {
+					$( '.fl-icon-classes-suggestions--open', window.parent.document )
+						.removeClass( 'fl-icon-classes-suggestions--open' )
+						.empty();
+				}
+			} );
+		},
+
+		/**
+		 * Initializes a single icon "extra classes" chip input — chips, typing,
+		 * suggestions dropdown, keyboard navigation.
+		 *
+		 * @since 2.10
+		 * @access private
+		 * @method _initIconClassesField
+		 */
+		_initIconClassesField: function()
+		{
+			var field         = $( this ),
+				input         = field.find( '.fl-icon-classes-input' ),
+				tagsContainer = field.find( '.fl-icon-classes-tags' ),
+				suggestionsEl = field.find( '.fl-icon-classes-suggestions' ),
+				hiddenInput   = field.find( '.fl-icon-classes-value' ),
+				suggestions   = field.data( 'suggestions' ) || [],
+				activeIndex   = -1;
+
+			function getClasses() {
+				var val = hiddenInput.val().trim();
+				return val.length > 0 ? val.split( /\s+/ ) : [];
+			}
+
+			function syncValue() {
+				var tags = [];
+				tagsContainer.find( '.fl-icon-classes-tag-text' ).each( function() {
+					tags.push( $( this ).text() );
+				} );
+				hiddenInput.val( tags.join( ' ' ) ).trigger( 'change' );
+			}
+
+			function addTag( className ) {
+				className = className.trim().toLowerCase();
+				if ( ! className || getClasses().indexOf( className ) !== -1 ) {
+					return;
+				}
+				var tag = $(
+					'<span class="fl-icon-classes-tag">' +
+						'<span class="fl-icon-classes-tag-text">' + $( '<span>' ).text( className ).html() + '</span>' +
+						'<button type="button" class="fl-icon-classes-tag-remove" aria-label="Remove">&times;</button>' +
+					'</span>'
+				);
+				input.before( tag );
+				input.val( '' );
+				syncValue();
+				closeSuggestions();
+			}
+
+			function removeTag( tagEl ) {
+				tagEl.remove();
+				syncValue();
+			}
+
+			function showSuggestions( filter ) {
+				var html            = '',
+					currentClasses  = getClasses(),
+					hasResults      = false;
+
+				for ( var g = 0; g < suggestions.length; g++ ) {
+					var group          = suggestions[ g ],
+						groupHtml      = '',
+						groupHasVisible = false;
+
+					for ( var i = 0; i < group.items.length; i++ ) {
+						var item          = group.items[ i ],
+							isAdded       = currentClasses.indexOf( item ) !== -1,
+							matchesFilter = ! filter || item.indexOf( filter.toLowerCase() ) !== -1;
+
+						if ( matchesFilter ) {
+							var addedClass = isAdded ? ' fl-icon-classes-suggestion-item--added' : '';
+							groupHtml += '<div class="fl-icon-classes-suggestion-item' + addedClass + '" data-value="' + item + '">' + item + '</div>';
+							groupHasVisible = true;
+						}
+					}
+
+					if ( groupHasVisible ) {
+						html += '<div class="fl-icon-classes-suggestion-group">' + group.group + '</div>';
+						html += groupHtml;
+						hasResults = true;
+					}
+				}
+
+				if ( hasResults ) {
+					suggestionsEl.html( html ).addClass( 'fl-icon-classes-suggestions--open' );
+					activeIndex = -1;
+				} else {
+					closeSuggestions();
+				}
+			}
+
+			function closeSuggestions() {
+				suggestionsEl.removeClass( 'fl-icon-classes-suggestions--open' ).empty();
+				activeIndex = -1;
+			}
+
+			function setActiveItem( index ) {
+				var items = suggestionsEl.find( '.fl-icon-classes-suggestion-item:not(.fl-icon-classes-suggestion-item--added)' );
+				items.removeClass( 'fl-icon-classes-suggestion-item--active' );
+				if ( index >= 0 && index < items.length ) {
+					activeIndex = index;
+					items.eq( index ).addClass( 'fl-icon-classes-suggestion-item--active' );
+				} else {
+					activeIndex = -1;
+				}
+			}
+
+			tagsContainer.on( 'click', function( e ) {
+				if ( $( e.target ).closest( '.fl-icon-classes-tag-remove' ).length === 0 ) {
+					input.focus();
+				}
+			} );
+
+			tagsContainer.on( 'click', '.fl-icon-classes-tag-remove', function() {
+				removeTag( $( this ).closest( '.fl-icon-classes-tag' ) );
+			} );
+
+			input.on( 'focus', function() {
+				showSuggestions( input.val() );
+			} );
+
+			input.on( 'input', function() {
+				showSuggestions( input.val() );
+			} );
+
+			input.on( 'keydown', function( e ) {
+				var items = suggestionsEl.find( '.fl-icon-classes-suggestion-item:not(.fl-icon-classes-suggestion-item--added)' );
+
+				if ( e.keyCode === 40 ) {
+					e.preventDefault();
+					setActiveItem( Math.min( activeIndex + 1, items.length - 1 ) );
+				} else if ( e.keyCode === 38 ) {
+					e.preventDefault();
+					setActiveItem( Math.max( activeIndex - 1, -1 ) );
+				} else if ( e.keyCode === 13 ) {
+					e.preventDefault();
+					if ( activeIndex >= 0 && items.eq( activeIndex ).length ) {
+						addTag( items.eq( activeIndex ).data( 'value' ) );
+					} else if ( input.val().trim() ) {
+						addTag( input.val() );
+					}
+				} else if ( e.keyCode === 32 ) {
+					var val = input.val().trim();
+					if ( val.length > 0 ) {
+						e.preventDefault();
+						addTag( val );
+					}
+				} else if ( e.keyCode === 8 && input.val() === '' ) {
+					var lastTag = tagsContainer.find( '.fl-icon-classes-tag' ).last();
+					if ( lastTag.length ) {
+						removeTag( lastTag );
+					}
+				} else if ( e.keyCode === 27 ) {
+					closeSuggestions();
+				}
+			} );
+
+			suggestionsEl.on( 'mousedown', '.fl-icon-classes-suggestion-item:not(.fl-icon-classes-suggestion-item--added)', function( e ) {
+				e.preventDefault();
+				addTag( $( this ).data( 'value' ) );
+				input.focus();
+			} );
+		},
+
 		/* Settings Form Fields
 		----------------------------------------------------------*/
 
@@ -9653,7 +9820,6 @@
 			var form = $( '.fl-builder-settings:visible' );
 			var link = input.siblings( 'a' );
 			var helper = FLBuilder._moduleHelpers[ type ];
-			var config = FLBuilderSettingsConfig.forms[ type ];
 
 			// Trigger refresh preview
 			FLBuilder.preview?.preview()
@@ -9677,6 +9843,16 @@
 						}
 
 						FLBuilder._initFormFieldSettingsPreview();
+						// Initialize custom attribute field types			
+						if ( type === 'custom_attributes' ) {
+							FLBuilder._initCustomAttributeFields( subform );
+							// Remove target and selector fields for row and column nodes
+							const instance = subform.closest( '.fl-lightbox-wrap' ).data( 'parent' );
+							const node = $( 'form[data-instance-id="' + instance + '"]' ).data( 'form-id' );
+							if ( [ 'row', 'col', 'box', 'loop' ].includes( node ) ) {
+								subform.find( '#fl-field-target, #fl-field-selector' ).remove();
+							}
+						}
 					}
 				},
 			}, callback );
@@ -10099,6 +10275,10 @@
 								return false;
 							}
 							head.append(linkElement);
+						} else if ( FLBuilderStrings.wpFonts === group ) {
+							// WP Font Library fonts have @font-face emitted server-side in
+							// builder mode, so no fetch is needed — just apply the preview.
+							jQuery(this).css('font-family', '"' + highlighted_item + '"' );
 						}
 					}
 				}, '.select2-results__option.select2-results__option--highlighted');
@@ -10125,6 +10305,14 @@
 						valid = true
 					}
 				});
+
+				if ( fonts.wp ) {
+					Object.keys(fonts.wp).forEach(function(name){
+						if ( name === value.family ) {
+							valid = true
+						}
+					});
+				}
 
 				if ( ! valid && 'Default' !== value.family ) {
 					value = {
@@ -10179,6 +10367,16 @@
 					fragment.appendChild(group);
 				}
 
+				if (fonts.wp && Object.keys(fonts.wp).length) {
+					const wpGroup = document.createElement('optgroup');
+					wpGroup.label = FLBuilderStrings.wpFonts || 'WordPress Fonts';
+					wpGroup.className = 'wp-fonts';
+					Object.keys(fonts.wp).forEach(name => {
+						wpGroup.appendChild(createOption(name, name));
+					});
+					fragment.appendChild(wpGroup);
+				}
+
 				const systemGroup = document.createElement('optgroup');
 				systemGroup.label = 'System';
 				Object.keys(fonts.system).forEach(name => {
@@ -10204,7 +10402,7 @@
 		 * Renders the correct weights list for a respective font.
 		 *
 		 * @since  1.6.3
-		 * @access private
+		 * @acces  private
 		 * @method _getFontWeights
 		 * @param  {Object} currentFont The font field element.
 		 */
@@ -10232,7 +10430,9 @@
 			}
 
 
-			if ( 'undefined' != typeof FLBuilderFontFamilies.system[ font ] ) {
+			if ( 'undefined' != typeof FLBuilderFontFamilies.wp && 'undefined' != typeof FLBuilderFontFamilies.wp[ font ] ) {
+				weights = FLBuilderFontFamilies.wp[ font ].weights;
+			} else if ( 'undefined' != typeof FLBuilderFontFamilies.system[ font ] ) {
 				weights = FLBuilderFontFamilies.system[ font ].weights;
 			} else if ( 'undefined' != typeof FLBuilderFontFamilies.google[ font ] ) {
 				weights = FLBuilderFontFamilies.google[ font ];
@@ -11055,6 +11255,39 @@
 		},
 
 
+		/* Custom Attributes Fields
+		----------------------------------------------------------*/
+
+		/**
+		 * Initializes all custom attributes fields in a settings form.
+		 *
+		 * @since 2.11
+		 * @method _initCustomAttributeFields
+		 * @access private
+		 * @param {Object} form The settings subform jQuery object.
+		 */
+		_initCustomAttributeFields: function( form ) {
+			this._validateCustomAttributeField( form.find( 'input[name="key"]' ), '^[a-z]{1}[a-z0-9_.:\\-]*' );
+			this._validateCustomAttributeField( form.find( 'input[name="selector"]' ), '[a-zA-Z0-9_\\-\\*\\s\\.>]+' );
+		},
+
+		/**
+		 * Validates the custom attribute field by checking for invalid characters.
+		 *
+		 * @since 2.11
+		 * @method _validateCustomAttributeField
+		 * @access private
+		 * @param {Object} field The key field jQuery object.
+		 * @param {String} pattern The pattern to use for sanitization.
+		 */
+		_validateCustomAttributeField: function( field, pattern ) {
+			field.attr('pattern', pattern );
+			field.on( 'input', function( event ) {
+				event.target.reportValidity();
+			} );
+		},
+
+
 		/* AJAX
 		----------------------------------------------------------*/
 
@@ -11102,24 +11335,17 @@
 			// Append the builder namespace to the action.
 			data.fl_action = data.action;
 
-			// Prevent ModSecurity false positives if our fix is enabled.
-			if ( 'undefined' != typeof data.settings ) {
-				data.settings = FLBuilder._ajaxModSecFix( $.extend( true, {}, data.settings ) );
-				data.settings = FLBuilder._inputVarsCheck( data.settings );
-			}
-			if ( 'undefined' != typeof data.node_settings ) {
-				data.node_settings = FLBuilder._ajaxModSecFix( $.extend( true, {}, data.node_settings ) );
-				data.node_settings = FLBuilder._inputVarsCheck( data.node_settings );
-			}
-
-			if ( 'undefined' != typeof data.node_preview ) {
-				data.node_preview = FLBuilder._ajaxModSecFix( $.extend( true, {}, data.node_preview ) );
-				data.node_preview = FLBuilder._inputVarsCheck( data.node_preview );
-			}
-
-			if ( 'error' === data.settings || 'error' === data.node_settings || 'error' === data.node_preview ) {
-				return 0;
-			}
+			// JSON-encode settings objects to a single POST var to avoid max_input_vars limits.
+			// On ModSec sites, also base64-encode the JSON string to avoid false positives.
+			var _settingsKeys = [ 'settings', 'node_settings', 'node_preview', 'global_settings', 'data' ];
+			_settingsKeys.forEach( function( key ) {
+				if ( data[ key ] && 'object' === typeof data[ key ] ) {
+					data[ key ] = JSON.stringify( data[ key ] );
+					if ( FLBuilderConfig.modSecFix ) {
+						data[ key ] = FLBuilder._ajaxModSecFix( data[ key ] );
+					}
+				}
+			} );
 
 			// Store the data in a single variable to avoid conflicts.
 			data = { fl_builder_data: data };

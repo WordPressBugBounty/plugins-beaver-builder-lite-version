@@ -154,15 +154,16 @@ $row_settings = array(
 							),
 						),
 						'content_alignment' => array(
-							'type'    => 'select',
-							'label'   => __( 'Vertical Alignment', 'fl-builder' ),
-							'default' => 'center',
-							'options' => array(
+							'type'       => 'select',
+							'label'      => __( 'Vertical Alignment', 'fl-builder' ),
+							'default'    => 'center',
+							'responsive' => true,
+							'options'    => array(
 								'top'    => __( 'Top', 'fl-builder' ),
 								'center' => __( 'Center', 'fl-builder' ),
 								'bottom' => __( 'Bottom', 'fl-builder' ),
 							),
-							'preview' => array(
+							'preview'    => array(
 								'type' => 'none',
 							),
 						),
@@ -177,6 +178,7 @@ $row_settings = array(
 							'label'       => __( 'Text Color', 'fl-builder' ),
 							'show_reset'  => true,
 							'show_alpha'  => true,
+							'responsive'  => true,
 							'preview'     => array(
 								'type'     => 'css',
 								'selector' => '.fl-row-content-wrap *',
@@ -189,6 +191,7 @@ $row_settings = array(
 							'label'       => __( 'Link Color', 'fl-builder' ),
 							'show_reset'  => true,
 							'show_alpha'  => true,
+							'responsive'  => true,
 							'preview'     => array(
 								'type'     => 'css',
 								'selector' => '> .fl-row-content-wrap a',
@@ -201,6 +204,7 @@ $row_settings = array(
 							'label'       => __( 'Link Hover Color', 'fl-builder' ),
 							'show_reset'  => true,
 							'show_alpha'  => true,
+							'responsive'  => true,
 							'preview'     => array(
 								'type' => 'none',
 							),
@@ -211,6 +215,7 @@ $row_settings = array(
 							'label'       => __( 'Heading Color', 'fl-builder' ),
 							'show_reset'  => true,
 							'show_alpha'  => true,
+							'responsive'  => true,
 							'preview'     => array(
 								'type'     => 'css',
 								'selector' => '.fl-row-content-wrap :is(h1, h2, h3, h4, h5, h6)',
@@ -743,15 +748,16 @@ $row_settings = array(
 					'title'  => __( 'Background Overlay', 'fl-builder' ),
 					'fields' => array(
 						'bg_overlay_type'     => array(
-							'type'    => 'select',
-							'label'   => __( 'Overlay Type', 'fl-builder' ),
-							'default' => 'color',
-							'options' => array(
+							'type'       => 'select',
+							'label'      => __( 'Overlay Type', 'fl-builder' ),
+							'default'    => 'color',
+							'responsive' => true,
+							'options'    => array(
 								'none'     => __( 'None', 'fl-builder' ),
 								'color'    => __( 'Color', 'fl-builder' ),
 								'gradient' => __( 'Gradient', 'fl-builder' ),
 							),
-							'toggle'  => array(
+							'toggle'     => array(
 								'color'    => array(
 									'fields' => array( 'bg_overlay_color' ),
 								),
@@ -759,7 +765,7 @@ $row_settings = array(
 									'fields' => array( 'bg_overlay_gradient' ),
 								),
 							),
-							'preview' => array(
+							'preview'    => array(
 								'type' => 'none',
 							),
 						),
@@ -769,17 +775,17 @@ $row_settings = array(
 							'label'       => __( 'Overlay Color', 'fl-builder' ),
 							'show_reset'  => true,
 							'show_alpha'  => true,
+							'responsive'  => true,
 							'preview'     => array(
-								'type' => 'none',
+								'type' => 'refresh',
 							),
 						),
 						'bg_overlay_gradient' => array(
-							'type'    => 'gradient',
-							'label'   => __( 'Overlay Gradient', 'fl-builder' ),
-							'preview' => array(
-								'type'     => 'css',
-								'selector' => '> .fl-row-content-wrap:after',
-								'property' => 'background-image',
+							'type'       => 'gradient',
+							'label'      => __( 'Overlay Gradient', 'fl-builder' ),
+							'responsive' => true,
+							'preview'    => array(
+								'type' => 'refresh',
 							),
 						),
 					),
@@ -792,6 +798,7 @@ $row_settings = array(
 							'label'       => __( 'Color', 'fl-builder' ),
 							'show_reset'  => true,
 							'show_alpha'  => true,
+							'responsive'  => true,
 							'preview'     => array(
 								'type' => 'refresh',
 							),
@@ -845,7 +852,7 @@ $row_settings = array(
 		'advanced' => array(
 			'title'    => __( 'Advanced', 'fl-builder' ),
 			'sections' => array(
-				'margins'       => array(
+				'margins'           => array(
 					'title'  => __( 'Spacing', 'fl-builder' ),
 					'fields' => array(
 						'margin'  => array(
@@ -921,7 +928,7 @@ $row_settings = array(
 						),
 					),
 				),
-				'visibility'    => array(
+				'visibility'        => array(
 					'title'  => __( 'Visibility', 'fl-builder' ),
 					'fields' => array(
 						'responsive_display'         => array(
@@ -963,7 +970,7 @@ $row_settings = array(
 						),
 					),
 				),
-				'animation'     => array(
+				'animation'         => array(
 					'title'  => __( 'Animation', 'fl-builder' ),
 					'fields' => array(
 						'animation' => array(
@@ -976,12 +983,15 @@ $row_settings = array(
 						),
 					),
 				),
-				'css_selectors' => array(
+				'css_selectors'     => array(
 					'title'  => __( 'HTML Element', 'fl-builder' ),
 					'fields' => array(
 						'container_element' => array(
 							'type'     => 'select',
 							'label'    => __( 'Container Element', 'fl-builder' ),
+							/**
+							 * Default HTML element used as the row container when none is explicitly set.
+							 */
 							'default'  => apply_filters( 'fl_builder_row_container_element_default', 'div' ),
 							'sanitize' => array( 'FLBuilderUtils::esc_tags', apply_filters( 'fl_builder_row_container_element_default', 'div' ) ),
 							/**
@@ -1029,7 +1039,20 @@ $row_settings = array(
 						),
 					),
 				),
-				'export_import' => array(
+				'custom_attributes' => array(
+					'title'  => __( 'Custom Attributes', 'fl-builder' ),
+					'fields' => array(
+						'custom_attributes' => array(
+							'type'         => 'form',
+							'label'        => __( 'Attribute', 'fl-builder' ),
+							'form'         => 'custom_attributes',
+							'help'         => __( 'Adds custom attributes to the row', 'fl-builder' ),
+							'preview_text' => 'key',
+							'multiple'     => true,
+						),
+					),
+				),
+				'export_import'     => array(
 					'title'     => __( 'Export/Import', 'fl-builder' ),
 					'collapsed' => true,
 					'fields'    => array(

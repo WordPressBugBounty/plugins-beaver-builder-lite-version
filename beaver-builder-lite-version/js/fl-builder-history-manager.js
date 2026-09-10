@@ -199,6 +199,7 @@
 		 */
 		getModuleName: function( type ) {
 			var modules = FLBuilderConfig.contentItems.module
+			var unlisted = FLBuilderConfig.unlistedModules || []
 			var i = 0
 
 			if ( 'widget' === type ) {
@@ -211,6 +212,12 @@
 				}
 				if ( type === modules[ i ].slug ) {
 					return modules[ i ].name
+				}
+			}
+
+			for ( i = 0; i < unlisted.length; i++ ) {
+				if ( type === unlisted[ i ].slug ) {
+					return unlisted[ i ].name
 				}
 			}
 

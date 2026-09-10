@@ -14,7 +14,7 @@ final class FLBuilderNotifications {
 	public static function init() {
 		add_action( 'init', array( 'FLBuilderNotifications', 'set_schedule' ) );
 		add_action( 'fl_builder_notifications_event', array( 'FLBuilderNotifications', 'fetch_notifications' ) );
-		FLBuilderAJAX::add_action( 'fl_builder_notifications', array( 'FLBuilderNotifications', 'notications_ajax' ), array( 'read' ) );
+		FLBuilderAJAX::add_action( 'fl_builder_notifications', array( 'FLBuilderNotifications', 'notifications_ajax' ), array( 'read' ) );
 	}
 
 	/**
@@ -36,6 +36,9 @@ final class FLBuilderNotifications {
 	 */
 	public static function fetch_notifications_trigger( $transient ) {
 		if ( ! did_action( 'fl_fetch_notifications' ) ) {
+			/**
+			 * Fires to trigger fetching of admin notifications from the remote server.
+			 */
 			do_action( 'fl_fetch_notifications' );
 		}
 		return $transient;
@@ -46,7 +49,7 @@ final class FLBuilderNotifications {
 	 *
 	 * @since 2.1
 	 */
-	public static function notications_ajax( $read ) {
+	public static function notifications_ajax( $read ) {
 
 		if ( $read ) {
 			self::update_state( true );
@@ -60,9 +63,20 @@ final class FLBuilderNotifications {
 	 * Check if notification enabled.
 	 *
 	 */
-	public static function is_notications_enabled() {
+	public static function is_notifications_enabled() {
 
 		return get_option( '_fl_builder_notifications_enabled', true ) ? true : false;
+	}
+
+	/**
+	 * Backwards-compat alias for the misspelled method name.
+	 *
+	 * @deprecated 2.11 Use FLBuilderNotifications::is_notifications_enabled()
+	 * @return bool
+	 */
+	public static function is_notications_enabled() {
+		_deprecated_function( __METHOD__, '2.11', 'FLBuilderNotifications::is_notifications_enabled()' );
+		return self::is_notifications_enabled();
 	}
 
 	/**

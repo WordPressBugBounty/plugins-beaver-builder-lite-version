@@ -285,6 +285,9 @@ final class FLUpdater {
 			$info->last_updated  = $response->last_updated;
 			$info->download_link = $response->package;
 			$info->sections      = (array) $response->sections;
+			/**
+			 * Plugin information data array used to populate the plugin details popup.
+			 */
 			return apply_filters( 'fl_plugin_info_data', $info, $response );
 		} else {
 			if ( 'bb-plugin' === $this->settings['slug'] && file_exists( trailingslashit( plugin_dir_path( FL_BUILDER_FILE ) ) . '/changelog.txt' ) ) {
@@ -302,6 +305,9 @@ final class FLUpdater {
 
 			$info->sections              = array();
 			$info->sections['changelog'] = $changelog;
+			/**
+			 * Plugin information data array used to populate the plugin details popup.
+			 */
 			return apply_filters( 'fl_plugin_info_data', $info, $response );
 		}
 
@@ -506,7 +512,7 @@ final class FLUpdater {
 	 * @param array $plugin_data An array of data for this plugin.
 	 * @return string
 	 */
-	static private function get_update_error_message( $plugin_data = null, $settings = false ) {
+	static public function get_update_error_message( $plugin_data = null, $settings = false ) {
 
 		$subscription    = FLUpdater::get_subscription_info();
 		$license         = get_site_option( 'fl_themes_subscription_email' );
@@ -530,54 +536,152 @@ final class FLUpdater {
 				}
 			}
 		} else { // plugins.php
-
-			if ( ! $license ) {
-				$link = sprintf( '<a href="%s" target="_blank" style="color: #fff; text-decoration: underline;">%s &raquo;</a>', admin_url( '/options-general.php?page=fl-builder-settings#license' ), __( 'Enter License Key', 'fl-builder' ) );
-				/* translators: %s: link to license tab */
-				$text = sprintf( __( 'Please enter a valid license key to enable automatic updates. %s', 'fl-builder' ), $link );
-			} else {
-				if ( 'bb-theme-builder/bb-theme-builder.php' === $plugin_data['plugin'] ) {
-					$subscribe_link = FLBuilderModel::get_store_url(
-						'beaver-themer',
-						array(
-							'utm_medium'   => 'bb-theme-builder',
-							'utm_source'   => 'plugins-admin-page',
-							'utm_campaign' => 'subscribe',
-						)
-					);
-				} else {
-					$subscribe_link = FLBuilderModel::get_store_url(
-						'',
-						array(
-							'utm_medium'   => 'bb',
-							'utm_source'   => 'plugins-admin-page',
-							'utm_campaign' => 'subscribe',
-						)
-					);
-				}
-				$link = sprintf( '<a href="%s" target="_blank" style="color: #fff; text-decoration: underline;">%s &raquo;</a>', $subscribe_link, __( 'Subscribe Now', 'fl-builder' ) );
-				/* translators: %s: subscribe link */
-				$text = sprintf( __( 'Please subscribe to enable automatic updates for this plugin. %s', 'fl-builder' ), $link );
+			// Tier-downgrade warning keeps the legacy banner — separate problem from renewal.
+			if ( $check_downloads ) {
+				$message .= '<span style="display:block;padding:10px 20px;margin:10px 0; background: #d54e21; color: #fff;">';
+				$message .= $check_downloads;
+				$message .= '</span>';
+				return $message;
 			}
-
-			if ( isset( $subscription->error ) && '' !== $subscription->error ) {
-				$support_url = FLBuilderModel::get_store_url( 'contact', array(
-					'topic'      => 'General Inquiry',
-					'utm_medium' => 'bb-pro',
-					'utm_source' => 'plugin-updates',
-				) );
-				$url         = sprintf( '<a target="_blank" style="color: #fff; text-decoration: underline;" href="%s">%s</a>', $support_url, __( 'Contact Support for more information.', 'fl-builder' ) );
-				$text       .= sprintf( '<br />The following error was encountered: %s %s', $subscription->error, $url );
-			}
-
-			$message .= '<span style="display:block;padding:10px 20px;margin:10px 0; background: #d54e21; color: #fff;">';
-			$message .= ( $check_downloads ) ? $check_downloads : sprintf( '<strong>%s<strong>', __( 'UPDATE UNAVAILABLE!', 'fl-builder' ) );
-			$message .= '&nbsp;&nbsp;&nbsp;';
-			$message .= ( $check_downloads ) ? '' : $text;
-			$message .= '</span>';
-
+			$message = self::render_renewal_notice( $plugin_data, $subscription, $license );
 		}
 		return $message;
+	}
+
+	/**
+	 * Renders the redesigned renewal notice shown on plugins.php
+	 * when a license is missing or its subscription is inactive.
+	 *
+	 * @since 2.10
+	 * @param array    $plugin_data
+	 * @param stdClass $subscription
+	 * @param string   $license
+	 * @return string
+	 */
+	static private function render_renewal_notice( $plugin_data, $subscription, $license ) {
+		$is_admin     = current_user_can( 'manage_options' );
+		$has_license  = ! empty( $license );
+		$settings_url = admin_url( 'options-general.php?page=fl-builder-settings#license' );
+
+		// Identify the product so the copy and store routing match it.
+		$is_themer = isset( $plugin_data['plugin'] ) && 'bb-theme-builder/bb-theme-builder.php' === $plugin_data['plugin'];
+		$product   = $is_themer ? __( 'Beaver Themer', 'fl-builder' ) : __( 'Beaver Builder', 'fl-builder' );
+
+		// Renewal/subscribe destination — match the existing per-product routing.
+		if ( $is_themer ) {
+			$store_url = FLBuilderModel::get_store_url( 'beaver-themer', array(
+				'utm_medium'   => 'bb-theme-builder',
+				'utm_source'   => 'plugins-admin-page',
+				'utm_campaign' => $has_license ? 'renew' : 'subscribe',
+			) );
+		} else {
+			$store_url = FLBuilderModel::get_store_url( '', array(
+				'utm_medium'   => 'bb',
+				'utm_source'   => 'plugins-admin-page',
+				'utm_campaign' => $has_license ? 'renew' : 'subscribe',
+			) );
+		}
+
+		// Copy and CTA destination vary based on whether a license is on file.
+		// With no key, the action is to enter one, so point at the in-app license
+		// settings page rather than the external store.
+		if ( $has_license ) {
+			// translators: %s: product name (Beaver Builder or Beaver Themer).
+			$headline     = sprintf( __( 'Your %s license expired', 'fl-builder' ), $product );
+			$cta_text     = __( 'Renew License', 'fl-builder' );
+			$cta_url      = $store_url;
+			$cta_external = true;
+		} else {
+			// translators: %s: product name (Beaver Builder or Beaver Themer).
+			$headline     = sprintf( __( "%s isn't licensed on this site", 'fl-builder' ), $product );
+			$cta_text     = __( 'Enter License Key', 'fl-builder' );
+			$cta_url      = $settings_url;
+			$cta_external = false;
+		}
+
+		// Themer typically appears right below the Beaver Builder notice, so keep it
+		// short and skip the shared bullet list rather than repeating it on one screen.
+		if ( $is_themer ) {
+			$lede    = $has_license
+				? __( 'Beaver Themer keeps working. Updates and support are paused until you renew.', 'fl-builder' )
+				: __( 'Beaver Themer keeps working. Updates and support are paused until a license is added.', 'fl-builder' );
+			$bullets = array();
+		} else {
+			$lede    = $has_license
+				? __( 'Beaver Builder will keep running. The updates and support that keep this site stable are paused until the license is renewed.', 'fl-builder' )
+				: __( 'Beaver Builder will keep running. The updates and support that keep this site stable are paused until a license is added.', 'fl-builder' );
+			$bullets = array(
+				__( 'Updates for new WordPress and PHP versions', 'fl-builder' ),
+				__( "Bug fixes that won't break the rest of the site", 'fl-builder' ),
+				__( 'Real-human support when something needs untangling', 'fl-builder' ),
+			);
+		}
+
+		// translators: %s: product name (Beaver Builder or Beaver Themer).
+		$forward_note = sprintf( __( 'Not your license? Contact whoever set up %s to renew it.', 'fl-builder' ), $product );
+
+		// All-span structure: WP wraps this hook's output in a <p>, so we stay inside it
+		// and use display:block spans. Avoids the orphan </p> that browsers turn into an
+		// empty <p></p> — and WP's `.update-message p::before` would stamp a refresh icon
+		// on every such paragraph.
+		// Color palette mirrors the .fl-license-notice-error styles on the license settings
+		// page so the two surfaces feel like the same notice in two contexts.
+		$styles = array(
+			'wrap'         => 'display:block; padding:14px 18px; margin:14px 20px 8px; background:#fef2f0; border:1px solid #f0b8b1; border-radius:8px; box-sizing:border-box;',
+			'headline_row' => 'display:flex; align-items:center; gap:8px; margin:0 0 6px;',
+			'headline_ico' => 'flex:0 0 auto; color:#d63638; font-size:20px; width:20px; height:20px; line-height:1;',
+			'headline'     => 'font-size:15px; font-weight:600; color:#1d2327; line-height:1.3;',
+			'lede'         => 'display:block; color:#8a1708; margin:0 0 10px; line-height:1.5; font-size:13.5px;',
+			'list'         => 'display:block; margin:0 0 12px;',
+			'item'         => 'display:block; padding:3px 0 3px 16px; position:relative; line-height:1.5; color:#8a1708; font-size:13px;',
+			'bullet'       => 'position:absolute; left:0; top:3px; color:#d63638; font-weight:700;',
+			'actions'      => 'display:flex; flex-wrap:wrap; align-items:center; gap:14px;',
+			'button'       => 'display:inline-block; background:#EE521F; color:#fff !important; text-decoration:none; font-weight:600; font-size:13px; padding:7px 16px; border-radius:6px; border:1px solid #d4471a; line-height:1.4;',
+			'link'         => 'font-size:13px; color:#8a1708; text-decoration:underline; font-weight:600;',
+			'nonadmin'     => 'display:block; color:#8a1708; font-size:13px; line-height:1.5; max-width:60ch;',
+			'secondary'    => 'display:block; margin-top:10px; color:#787c82; font-size:12.5px; line-height:1.5;',
+		);
+
+		ob_start();
+		?>
+		<span class="bb-renewal-notice" data-bb-notice="renewal" style="<?php echo esc_attr( $styles['wrap'] ); ?>">
+			<span style="<?php echo esc_attr( $styles['headline_row'] ); ?>">
+				<span class="dashicons dashicons-warning" aria-hidden="true" style="<?php echo esc_attr( $styles['headline_ico'] ); ?>"></span>
+				<span style="<?php echo esc_attr( $styles['headline'] ); ?>"><?php echo esc_html( $headline ); ?></span>
+			</span>
+			<span style="<?php echo esc_attr( $styles['lede'] ); ?>"><?php echo esc_html( $lede ); ?></span>
+			<?php if ( ! empty( $bullets ) ) : ?>
+			<span style="<?php echo esc_attr( $styles['list'] ); ?>">
+				<?php foreach ( $bullets as $bullet ) : ?>
+					<span style="<?php echo esc_attr( $styles['item'] ); ?>">
+						<span style="<?php echo esc_attr( $styles['bullet'] ); ?>">&bull;</span>
+						<?php echo esc_html( $bullet ); ?>
+					</span>
+				<?php endforeach; ?>
+			</span>
+			<?php endif; ?>
+			<span style="<?php echo esc_attr( $styles['actions'] ); ?>">
+				<?php if ( $is_admin ) : ?>
+					<a href="<?php echo esc_url( $cta_url ); ?>"<?php echo $cta_external ? ' target="_blank" rel="noopener"' : ''; ?> style="<?php echo esc_attr( $styles['button'] ); ?>">
+						<?php echo esc_html( $cta_text ); ?>
+					</a>
+					<?php if ( $has_license ) : ?>
+						<a href="<?php echo esc_url( $settings_url ); ?>" style="<?php echo esc_attr( $styles['link'] ); ?>">
+							<?php esc_html_e( 'License settings', 'fl-builder' ); ?>
+						</a>
+					<?php endif; ?>
+				<?php else : ?>
+					<span style="<?php echo esc_attr( $styles['nonadmin'] ); ?>">
+						<?php echo esc_html( $forward_note ); ?>
+					</span>
+				<?php endif; ?>
+			</span>
+			<?php if ( $is_admin ) : ?>
+				<span style="<?php echo esc_attr( $styles['secondary'] ); ?>"><?php echo esc_html( $forward_note ); ?></span>
+			<?php endif; ?>
+		</span>
+		<?php
+		return ob_get_clean();
 	}
 
 	static private function check_downloads( $subscription, $plugin_data, $settings ) {

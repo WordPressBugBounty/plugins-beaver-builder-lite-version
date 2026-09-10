@@ -191,7 +191,7 @@ final class FLBuilderColor {
 		}
 
 		/**
-		 * There should be 2 colours here even if one is blank
+		 * There should be 2 colors here even if one is blank
 		 * SD mode strips the blank one, we need to add it back
 		 * Same goes for stops.
 		 */

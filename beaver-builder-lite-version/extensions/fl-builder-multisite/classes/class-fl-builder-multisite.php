@@ -14,7 +14,9 @@ final class FLBuilderMultisite {
 	 * @return void
 	 */
 	static public function init() {
-		add_action( 'wpmu_new_blog', __CLASS__ . '::install_for_new_blog', 10, 6 );
+		// Priority 20 so this runs after core's own wp_initialize_site() callback at 10,
+		// which is what creates the new site's tables.
+		add_action( 'wp_initialize_site', __CLASS__ . '::install_for_initialized_site', 20, 1 );
 		add_filter( 'wpmu_drop_tables', __CLASS__ . '::uninstall_on_delete_blog' );
 		add_filter( 'fl_builder_activate', __CLASS__ . '::activate' );
 		add_filter( 'fl_builder_uninstall', __CLASS__ . '::uninstall' );
@@ -60,7 +62,24 @@ final class FLBuilderMultisite {
 	}
 
 	/**
+	 * Runs the install for a site that core has just initialized.
+	 *
+	 * Replaces a listener on wpmu_new_blog, deprecated in WP 5.1.
+	 *
+	 * @since 2.11
+	 * @param WP_Site $new_site The site being initialized.
+	 * @return void
+	 */
+	static public function install_for_initialized_site( $new_site ) {
+		self::install_for_new_blog( $new_site->id );
+	}
+
+	/**
 	 * Runs the install for a newly created site.
+	 *
+	 * Only $blog_id is used. The remaining parameters are the signature of the
+	 * deprecated wpmu_new_blog hook this used to be attached to, kept — now
+	 * optional — so existing callers keep working.
 	 *
 	 * @since 1.0
 	 * @param int $blog_id
@@ -71,8 +90,10 @@ final class FLBuilderMultisite {
 	 * @param array $meta
 	 * @return void
 	 */
-	static public function install_for_new_blog( $blog_id, $user_id, $domain, $path, $site_id, $meta ) {
-		global $wpdb;
+	static public function install_for_new_blog( $blog_id, $user_id = 0, $domain = '', $path = '', $site_id = 0, $meta = array() ) {
+		if ( ! function_exists( 'is_plugin_active_for_network' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		}
 
 		if ( is_plugin_active_for_network( FLBuilderModel::plugin_basename() ) ) {
 			switch_to_blog( $blog_id );

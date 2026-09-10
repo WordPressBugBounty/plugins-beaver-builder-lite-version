@@ -453,7 +453,7 @@ class FLThemer_List_WPCLI_Command extends WP_CLI_Command {
 	 * [--location]
 	 * Status to use, publish or draft
 	 *
-	 * [--postion] (Optional)
+	 * [--position] (Optional)
 	 * Position in location array to insert new location
 	 *
 	 * ## EXAMPLES

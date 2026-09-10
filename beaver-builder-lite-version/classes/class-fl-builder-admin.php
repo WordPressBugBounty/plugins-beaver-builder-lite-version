@@ -148,6 +148,9 @@ final class FLBuilderAdmin {
 			}
 		}
 
+		/**
+		 * Fires after the builder's startup sanity checks have completed on admin init.
+		 */
 		do_action( 'fl_builder_after_sanity_checks' );
 	}
 
@@ -201,7 +204,7 @@ final class FLBuilderAdmin {
 	static public function activate_notice() {
 		if ( FL_BUILDER_LITE !== true ) {
 			$hash = '#license';
-			/* translators: %s: link to licence page */
+			/* translators: %s: link to license page */
 			$message = __( 'Beaver Builder activated! <a%s>Click here</a> to enable remote updates.', 'fl-builder' );
 		} else {
 			$hash = '#welcome';

@@ -141,103 +141,281 @@ class FLButtonModule extends FLBuilderModule {
 	}
 
 	/**
-	 * @method get_classname
+	 * Gets the version flag according to the version.
+	 *
+	 * @since 2.11
+	 * @method get_version_flag
+	 * @param string $flag The version flag key to check.
+	 * @return bool
 	 */
-	public function get_classname() {
-		$classname = 'fl-button-wrap';
+	public function get_version_flag( $flag ) {
+		$flags  = array( 'unwrapped', 'semantics' );
+		$modern = array_fill_keys( $flags, true );
+		$legacy = array(
+			1 => array_fill_keys( $flags, false ),
+			2 => array( 'semantics' => false ),
+		);
+		$result = array_merge( $modern, $legacy[ $this->version ] ?? array() );
+		return $result[ $flag ] ?? false;
+	}
 
+	/**
+	 * Gets the wrapper element attributes.
+	 *
+	 * @since 2.11
+	 * @method get_wrapper_attributes
+	 * @return string
+	 */
+	public function get_wrapper_attributes() {
+		$classes = array( 'fl-button-wrap' );
 		if ( ! empty( $this->settings->width ) ) {
-			$classname .= ' fl-button-width-' . $this->settings->width;
+			$classes[] = 'fl-button-width-' . $this->settings->width;
 		}
 		if ( ! empty( $this->settings->align ) ) {
-			$classname .= ' fl-button-' . $this->settings->align;
+			$classes[] = 'fl-button-' . $this->settings->align;
 		}
 		if ( ! empty( $this->settings->icon ) ) {
-			$classname .= ' fl-button-has-icon';
+			$classes[] = 'fl-button-has-icon';
 		}
-
-		return $classname;
+		if ( $this->get_version_flag( 'unwrapped' ) ) {
+			$attributes          = $this->render_attributes( [], false );
+			$attributes['class'] = join( ' ', array_merge( $attributes['class'], $classes ) );
+		} else {
+			$attributes['class'] = FLBuilderUtils::sanitize_html_class( join( ' ', $classes ) );
+		}
+		return FLBuilderModuleUtils::join_html_attributes( $attributes );
 	}
 
 	/**
-	 * Returns the tag to use for the button based on the click action
+	 * Gets the tag to use for the button based on the click action
+	 *
 	 * @since 2.10
+	 * @method get_button_tag
 	 * @return string
 	 */
-	public function get_tag() {
-		if ( isset( $this->settings->click_action ) && 'link' !== $this->settings->click_action ) {
-			if ( $this->version > 2 ) {
-				return 'button type="' . ( isset( $this->settings->button_type ) ? $this->settings->button_type : 'button' ) . '"';
+	public function get_button_tag() {
+		$modern = $this->get_version_flag( 'semantics' );
+		$linked = 'link' === $this->settings->click_action;
+		return $modern && ! $linked ? 'button' : 'a';
+	}
+
+	/**
+	 * Gets the class attribute for the button element.
+	 *
+	 * @since 2.11
+	 * @method get_button_class
+	 * @return string
+	 */
+	public function get_button_class() {
+		$classes   = array( 'fl-button' );
+		$animation = 'enable' === $this->settings->icon_animation;
+		$lightbox  = 'lightbox' === $this->settings->click_action;
+		if ( $animation ) {
+			$classes[] = 'fl-button-icon-animation';
+		}
+		if ( $lightbox ) {
+			$classes[] = 'fl-button-lightbox';
+			$classes[] = ! empty( $this->settings->id ) ? $this->settings->id : 'fl-node-' . $this->node;
+		}
+		return join( ' ', $classes );
+	}
+
+	/**
+	 * Gets the button aria label attribute for accessibility.
+	 *
+	 * @since 2.10
+	 * @method get_button_label
+	 * @return string
+	 */
+	public function get_button_label() {
+		if ( ! empty( $this->settings->text ) ) {
+			return '';
+		}
+		return $this->settings->label_text ?? '';
+	}
+
+	/**
+	 * Gets the button element fallback attributes for non-link buttons to ensure accessibility and proper semantics.
+	 *
+	 * @since 2.11
+	 * @method get_button_semantics
+	 * @param array $attributes Array of existing attributes to append to.
+	 * @return array
+	 */
+	public function get_button_semantics( $attributes ) {
+		$type   = $this->settings->button_type ?? 'button';
+		$linked = 'link' === $this->settings->click_action;
+		$modern = $this->get_version_flag( 'semantics' );
+		if ( ! $linked ) {
+			if ( $modern ) {
+				$attributes['type'] = $type;
 			} else {
-				return 'a role="button" tabindex="0"';
+				$attributes['role']     = 'button';
+				$attributes['tabindex'] = '0';
 			}
 		}
-		return 'a';
+		return $attributes;
 	}
 
 	/**
-	 * Returns just the element name (a or button) for use in closing tags.
-	 * @since 2.10
-	 * @return string
+	 * Gets the button element attributes for the popup action.
+	 *
+	 * @since 2.11
+	 * @method get_button_popup
+	 * @param array $attributes Array of existing attributes to append to.
+	 * @return array
 	 */
-	public function get_tag_name() {
-		if ( isset( $this->settings->click_action ) && 'link' !== $this->settings->click_action && $this->version > 2 ) {
-			return 'button';
-		}
-		return 'a';
+	public function get_button_popup( $attributes ) {
+		$attributes['commandfor'] = do_shortcode( $this->settings->popup );
+		return $attributes;
 	}
 
 	/**
-	 * Returns a link attribute or data attribute based on the click action
-	 * @since 2.10
-	 * @return string
+	 * Gets the button element attributes for the lightbox action.
+	 *
+	 * @since 2.11
+	 * @method get_button_lightbox
+	 * @param array $attributes Array of existing attributes to append to.
+	 * @return array
 	 */
-	public function get_link() {
-		if ( 'a' === $this->get_tag() ) {
-			return 'href="' . esc_url( do_shortcode( $this->settings->link ) ) . '"';
-		} elseif ( 'video' === $this->settings->lightbox_content_type ) {
-			return 'data-mfp-src="' . esc_url( do_shortcode( $this->settings->lightbox_video_link ) ) . '"';
+	public function get_button_lightbox( $attributes ) {
+		$video = 'video' === $this->settings->lightbox_content_type;
+		$link  = $this->settings->lightbox_video_link;
+		if ( $video && ! empty( $link ) ) {
+			$attributes['data-mfp-src'] = esc_url( $link );
 		}
+		$attributes['aria-haspopup'] = 'dialog';
+		return $attributes;
 	}
 
-	public function get_label() {
-		if ( ! empty( $this->settings->text ) ) {
-			return;
+	/**
+	 * Gets the button element attributes for the copy text action.
+	 *
+	 * @since 2.11
+	 * @method get_button_copy
+	 * @param array $attributes Array of existing attributes to append to.
+	 * @return array
+	 */
+	public function get_button_copy( $attributes ) {
+		$mapping = array(
+			'data-copy-text'            => $this->settings->copy_text,
+			'data-copy-success-message' => $this->settings->copy_success_message,
+		);
+		foreach ( $mapping as $key => $value ) {
+			if ( ! empty( $value ) ) {
+				$attributes[ $key ] = $value;
+			}
 		}
-		if ( isset( $this->settings->label_text ) && ! empty( $this->settings->label_text ) ) {
-			return 'aria-label="' . $this->settings->label_text . '"';
+		$attributes['aria-live'] = 'polite';
+		return $attributes;
+	}
+
+	/**
+	 * Gets the button action attributes for the button element.
+	 *
+	 * @since 2.11
+	 * @method get_button_actions
+	 * @param array $attributes Array of existing attributes to append to.
+	 * @return array
+	 */
+	public function get_button_actions( $attributes ) {
+		switch ( $this->settings->click_action ) {
+			case 'link':
+				return FLBuilderModuleUtils::get_link_attributes( $this->settings, 'link', $attributes, false );
+			case 'popup':
+				return $this->get_button_popup( $attributes );
+			case 'lightbox':
+				return $this->get_button_lightbox( $attributes );
+			case 'copy_text':
+				return $this->get_button_copy( $attributes );
+			case 'button':
+			default:
+				return $attributes;
 		}
 	}
 
 	/**
-	 * Returns the link target based on settings
-	 * @since 2.10
+	 * Gets all the button element attributes
+	 *
+	 * @since 2.11
+	 * @method get_button_attributes
 	 * @return string
 	 */
-	public function get_target() {
-		if ( 'a' === $this->get_tag() ) {
-			return 'target="' . esc_attr( $this->settings->link_target ) . '"' . $this->get_rel();
+	public function get_button_attributes() {
+		$attributes = array(
+			'class'      => $this->get_button_class(),
+			'aria-label' => $this->get_button_label(),
+		);
+		$attributes = $this->get_button_semantics( $attributes );
+		$attributes = $this->get_button_actions( $attributes );
+		return FLBuilderModuleUtils::join_html_attributes( $attributes );
+	}
+
+	/**
+	 * Gets the icon attribute for the button element.
+	 *
+	 * @since 2.11
+	 * @method get_icon_attributes
+	 * @return string
+	 */
+	public function get_icon_attributes() {
+		$classes    = array(
+			'fl-button-icon',
+			'fl-button-icon-' . $this->settings->icon_position,
+			esc_attr( FLBuilderModuleUtils::get_icon_classes( $this->settings ) ),
+		);
+		$attributes = array(
+			'class'       => join( ' ', $classes ),
+			'aria-hidden' => 'true',
+		);
+		return FLBuilderModuleUtils::join_html_attributes( $attributes );
+	}
+
+	/**
+	 * Builds the lightbox html output.
+	 *
+	 * @since 2.11
+	 * @method build_lightbox_output
+	 * @return string
+	 */
+	public function build_lightbox_output() {
+		$lightbox = 'lightbox' === $this->settings->click_action;
+		$html     = 'html' === $this->settings->lightbox_content_type;
+		$content  = $this->settings->lightbox_content_html ?? '';
+		if ( $lightbox && $html && $content ) {
+			$selector = ! empty( $this->settings->id ) ? esc_attr( $this->settings->id ) : 'fl-node-' . $this->node;
+			return sprintf( '<div class="%s fl-button-lightbox-content mfp-hide">%s</div>', $selector, $content );
 		}
 		return '';
 	}
 
 	/**
-	 * Returns the link rel based on settings
-	 * @since 1.10.9
+	 * Builds content output for the button element.
+	 *
+	 * @since 2.11
+	 * @method build_content_output
+	 * @return string
 	 */
-	public function get_rel() {
-		$rel = array();
-		if ( '_blank' == $this->settings->link_target ) {
-			$rel[] = 'noopener';
-		}
-		if ( isset( $this->settings->link_nofollow ) && 'yes' == $this->settings->link_nofollow ) {
-			$rel[] = 'nofollow';
-		}
-		$rel = implode( ' ', $rel );
-		if ( $rel ) {
-			$rel = ' rel="' . $rel . '" ';
-		}
-		return $rel;
+	public function build_content_output() {
+		$icon    = ! empty( $this->settings->icon ) ? sprintf( '<i %s></i>', $this->get_icon_attributes() ) : '';
+		$text    = ! empty( $this->settings->text ) ? sprintf( '<span class="fl-button-text">%s</span>', $this->settings->text ) : '';
+		$content = 'after' === $this->settings->icon_position ? $text . $icon : $icon . $text;
+		$notice  = 'a' === $this->get_button_tag() ? FLBuilderModuleUtils::get_link_notice( $this->settings, 'link' ) : '';
+		return $content . $notice;
+	}
+
+	/**
+	 * Builds the button element output.
+	 *
+	 * @since 2.11
+	 * @method build_button_output
+	 * @return string
+	 */
+	public function build_button_output() {
+		$tag        = $this->get_button_tag();
+		$content    = $this->build_content_output();
+		$attributes = $this->get_button_attributes();
+		return sprintf( '<%1$s %2$s>%3$s</%1$s>', $tag, $attributes, $content );
 	}
 
 	public function use_default_border() {
@@ -276,15 +454,15 @@ FLBuilder::register_module('FLButtonModule', array(
 						'connections' => array( 'string' ),
 					),
 					'icon'                 => array(
-						'type'        => 'icon',
-						'label'       => __( 'Icon', 'fl-builder' ),
-						'show_remove' => true,
-						'show'        => array(
+						'type'               => 'icon',
+						'label'              => __( 'Icon', 'fl-builder' ),
+						'show_remove'        => true,
+						'connections'        => array( 'icon' ),
+						'show_extra_classes' => true,
+						'show'               => array(
 							'fields' => array( 'icon_position', 'icon_animation' ),
 						),
-						'preview'     => array(
-							'type' => 'none',
-						),
+						'preview'            => array( 'type' => 'none' ),
 					),
 					'icon_position'        => array(
 						'type'    => 'select',
@@ -294,9 +472,7 @@ FLBuilder::register_module('FLButtonModule', array(
 							'before' => __( 'Before Text', 'fl-builder' ),
 							'after'  => __( 'After Text', 'fl-builder' ),
 						),
-						'preview' => array(
-							'type' => 'none',
-						),
+						'preview' => array( 'type' => 'none' ),
 					),
 					'icon_animation'       => array(
 						'type'    => 'select',
@@ -306,9 +482,7 @@ FLBuilder::register_module('FLButtonModule', array(
 							'disable' => __( 'Always Visible', 'fl-builder' ),
 							'enable'  => __( 'Fade In On Hover', 'fl-builder' ),
 						),
-						'preview' => array(
-							'type' => 'none',
-						),
+						'preview' => array( 'type' => 'none' ),
 					),
 					'click_action'         => array(
 						'type'    => 'select',
@@ -316,27 +490,19 @@ FLBuilder::register_module('FLButtonModule', array(
 						'default' => 'link',
 						'options' => array(
 							'link'      => __( 'Link', 'fl-builder' ),
+							'popup'     => __( 'Popup', 'fl-builder' ),
 							'button'    => __( 'Button', 'fl-builder' ),
 							'lightbox'  => __( 'Lightbox', 'fl-builder' ),
 							'copy_text' => __( 'Copy Text', 'fl-builder' ),
 						),
 						'toggle'  => array(
-							'link'      => array(
-								'fields' => array( 'link' ),
-							),
-							'button'    => array(
-								'fields' => array( 'button' ),
-							),
-							'lightbox'  => array(
-								'sections' => array( 'lightbox' ),
-							),
-							'copy_text' => array(
-								'fields' => array( 'copy_text', 'copy_success_message' ),
-							),
+							'link'      => array( 'fields' => array( 'link' ) ),
+							'popup'     => array( 'fields' => array( 'popup' ) ),
+							'button'    => array( 'fields' => array( 'button' ) ),
+							'lightbox'  => array( 'sections' => array( 'lightbox' ) ),
+							'copy_text' => array( 'fields' => array( 'copy_text', 'copy_success_message' ) ),
 						),
-						'preview' => array(
-							'type' => 'none',
-						),
+						'preview' => array( 'type' => 'none' ),
 					),
 					'link'                 => array(
 						'type'          => 'link',
@@ -345,10 +511,16 @@ FLBuilder::register_module('FLButtonModule', array(
 						'show_target'   => true,
 						'show_nofollow' => true,
 						'show_download' => true,
-						'preview'       => array(
-							'type' => 'none',
-						),
+						'preview'       => array( 'type' => 'none' ),
 						'connections'   => array( 'url' ),
+					),
+					'popup'                => array(
+						'type'        => 'text',
+						'label'       => __( 'Popup ID', 'fl-builder' ),
+						'help'        => __( 'Used to open the popup with Invoker Commands. Be sure the ID is unique and doesn’t contain spaces.', 'fl-builder' ),
+						'default'     => '',
+						'placeholder' => __( 'e.g. my-popup-id', 'fl-builder' ),
+						'preview'     => array( 'type' => 'none' ),
 					),
 					'button'               => array(
 						'type'    => 'code',
@@ -356,28 +528,21 @@ FLBuilder::register_module('FLButtonModule', array(
 						'label'   => __( 'Button Code', 'fl-builder' ),
 						'rows'    => '18',
 						'help'    => __( 'Implement custom button functionality using JavaScript. Your logic will be available to the button\'s click event.', 'fl-builder' ),
-						'preview' => array(
-							'type' => 'none',
-						),
+						'preview' => array( 'type' => 'none' ),
 					),
 					'copy_text'            => array(
 						'type'        => 'text',
 						'label'       => __( 'Text to Copy', 'fl-builder' ),
 						'default'     => '',
 						'min_version' => 3,
-						'preview'     => array(
-							'type' => 'none',
-						),
+						'preview'     => array( 'type' => 'none' ),
 					),
-
 					'copy_success_message' => array(
 						'type'        => 'text',
 						'label'       => __( 'Copy Success Message', 'fl-builder' ),
 						'default'     => __( 'Copied!', 'fl-builder' ),
 						'min_version' => 3,
-						'preview'     => array(
-							'type' => 'none',
-						),
+						'preview'     => array( 'type' => 'none' ),
 					),
 				),
 			),
@@ -392,16 +557,10 @@ FLBuilder::register_module('FLButtonModule', array(
 							'html'  => __( 'HTML', 'fl-builder' ),
 							'video' => __( 'Video', 'fl-builder' ),
 						),
-						'preview' => array(
-							'type' => 'none',
-						),
+						'preview' => array( 'type' => 'none' ),
 						'toggle'  => array(
-							'html'  => array(
-								'fields' => array( 'lightbox_content_html' ),
-							),
-							'video' => array(
-								'fields' => array( 'lightbox_video_link' ),
-							),
+							'html'  => array( 'fields' => array( 'lightbox_content_html' ) ),
+							'video' => array( 'fields' => array( 'lightbox_video_link' ) ),
 						),
 					),
 					'lightbox_content_html' => array(
@@ -409,18 +568,14 @@ FLBuilder::register_module('FLButtonModule', array(
 						'editor'      => 'html',
 						'label'       => '',
 						'rows'        => '19',
-						'preview'     => array(
-							'type' => 'none',
-						),
+						'preview'     => array( 'type' => 'none' ),
 						'connections' => array( 'string' ),
 					),
 					'lightbox_video_link'   => array(
 						'type'        => 'text',
 						'label'       => __( 'Video Link', 'fl-builder' ),
 						'placeholder' => 'https://vimeo.com/122546221',
-						'preview'     => array(
-							'type' => 'none',
-						),
+						'preview'     => array( 'type' => 'none' ),
 						'connections' => array( 'custom_field' ),
 					),
 				),
@@ -443,13 +598,9 @@ FLBuilder::register_module('FLButtonModule', array(
 							'custom' => __( 'Custom', 'fl-builder' ),
 						),
 						'toggle'  => array(
-							'auto'   => array(
-								'fields' => array( 'align' ),
-							),
+							'auto'   => array( 'fields' => array( 'align' ) ),
 							'full'   => array(),
-							'custom' => array(
-								'fields' => array( 'align', 'custom_width' ),
-							),
+							'custom' => array( 'fields' => array( 'align', 'custom_width' ) ),
 						),
 					),
 					'custom_width' => array(
@@ -464,11 +615,7 @@ FLBuilder::register_module('FLButtonModule', array(
 								'step' => 10,
 							),
 						),
-						'units'      => array(
-							'px',
-							'vw',
-							'%',
-						),
+						'units'      => array( 'px', 'vw', '%' ),
 						'preview'    => array(
 							'type'     => 'css',
 							'selector' => '.fl-button:is(a, button)',
@@ -590,17 +737,11 @@ FLBuilder::register_module('FLButtonModule', array(
 							'adv-gradient' => __( 'Advanced Gradient', 'fl-builder' ),
 						),
 						'toggle'  => array(
-							'flat'         => array(
-								'fields' => array( 'button_transition' ),
-							),
-							'adv-gradient' => array(
-								'fields' => array( 'bg_gradient', 'bg_gradient_hover' ),
-							),
+							'flat'         => array( 'fields' => array( 'button_transition' ) ),
+							'adv-gradient' => array( 'fields' => array( 'bg_gradient', 'bg_gradient_hover' ) ),
 						),
 						'hide'    => array(
-							'adv-gradient' => array(
-								'fields' => array( 'bg_color', 'bg_hover_color' ),
-							),
+							'adv-gradient' => array( 'fields' => array( 'bg_color', 'bg_hover_color' ) ),
 						),
 					),
 					'bg_color'          => array(
@@ -611,9 +752,7 @@ FLBuilder::register_module('FLButtonModule', array(
 						'show_reset'  => true,
 						'show_alpha'  => true,
 						'responsive'  => true,
-						'preview'     => array(
-							'type' => 'refresh',
-						),
+						'preview'     => array( 'type' => 'refresh' ),
 					),
 					'bg_hover_color'    => array(
 						'type'        => 'color',
@@ -623,9 +762,7 @@ FLBuilder::register_module('FLButtonModule', array(
 						'show_reset'  => true,
 						'show_alpha'  => true,
 						'responsive'  => true,
-						'preview'     => array(
-							'type' => 'none',
-						),
+						'preview'     => array( 'type' => 'none' ),
 					),
 					'button_transition' => array(
 						'type'       => 'select',
@@ -636,23 +773,17 @@ FLBuilder::register_module('FLButtonModule', array(
 							'enable'  => __( 'Enabled', 'fl-builder' ),
 						),
 						'responsive' => true,
-						'preview'    => array(
-							'type' => 'none',
-						),
+						'preview'    => array( 'type' => 'none' ),
 					),
 					'bg_gradient'       => array(
 						'type'    => 'gradient',
 						'label'   => __( 'Background Gradient', 'fl-builder' ),
-						'preview' => array(
-							'type' => 'refresh',
-						),
+						'preview' => array( 'type' => 'refresh' ),
 					),
 					'bg_gradient_hover' => array(
 						'type'    => 'gradient',
 						'label'   => __( 'Background Hover Gradient', 'fl-builder' ),
-						'preview' => array(
-							'type' => 'none',
-						),
+						'preview' => array( 'type' => 'none' ),
 					),
 				),
 			),
@@ -677,9 +808,7 @@ FLBuilder::register_module('FLButtonModule', array(
 						'show_reset'  => true,
 						'show_alpha'  => true,
 						'responsive'  => true,
-						'preview'     => array(
-							'type' => 'none',
-						),
+						'preview'     => array( 'type' => 'none' ),
 					),
 				),
 			),

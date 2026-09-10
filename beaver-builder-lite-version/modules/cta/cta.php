@@ -368,6 +368,7 @@ FLBuilder::register_module('FLCtaModule', array(
 						'type'        => 'icon',
 						'label'       => __( 'Button Icon', 'fl-builder' ),
 						'show_remove' => true,
+						'connections' => array( 'icon' ),
 						'show'        => array(
 							'fields' => array( 'btn_icon_position', 'btn_icon_animation' ),
 						),

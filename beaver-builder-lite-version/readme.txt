@@ -1,10 +1,10 @@
 === Beaver Builder Page Builder - Drag and Drop Website Builder ===
 Contributors: justinbusa, RobbyMcCullough, billyyoung, hinampaksh, diegoliv, webmandesign, eugenealegiojo, helgatheviking, ozancanakli, brentjettgmailcom, jproffitt71, brainstormforce, ideaboxcreations, laubsterboy, nikolayyordanov, codente, pross, pedromendonca
 Tags: page builder, beaver builder, landing page, front-end builder, drag and drop editor
-Requires at least: 6.6
+Requires at least: 6.8
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.10.3.2
+Stable tag: 2.11.0.4
 License: GPL2+
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -60,6 +60,7 @@ There is a huge colony (_yeah, that's the term for a group of beavers_) of "Beav
 *   Save, export, and reuse full-page layouts, rows, and modules.
 *   Save a Global Color palette.
 *   Create styles that apply globally throughout your Beaver Builder layouts.
+*   Beaver Builder AI.
 
 
 Come by [the Beaver Builder Homepage](https://www.wpbeaverbuilder.com/?utm_medium=bb-lite&utm_source=repo-readme&utm_campaign=repo-homepage-link "Beaver Builder Homepage") to learn more about what our premium features can do for you!

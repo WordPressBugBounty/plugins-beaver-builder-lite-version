@@ -1,0 +1,187 @@
+/* Maintenance Mode — Settings Page */
+
+.fl-maintenance-row {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 16px;
+	margin-bottom: 16px;
+}
+
+.fl-maintenance-row--full {
+	grid-template-columns: 1fr;
+}
+
+.fl-maintenance-card {
+	background: #fff;
+	border: 1px solid #e0e0e0;
+	border-radius: 10px;
+	padding: 20px 24px;
+}
+
+.fl-maintenance-card-header h3 {
+	font-size: 15px;
+	font-weight: 600;
+	color: #1d2327;
+	margin: 0 0 4px;
+}
+
+.fl-maintenance-card-header p {
+	font-size: 13px;
+	color: #787c82;
+	margin: 0 0 12px;
+}
+
+.fl-maintenance-card-title-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	margin-bottom: 4px;
+}
+
+.fl-maintenance-card-title-row h3 {
+	font-size: 15px;
+	font-weight: 600;
+	color: #1d2327;
+	margin: 0;
+}
+
+.fl-maintenance-card-body {
+	margin-top: 16px;
+}
+
+/* Toggle rows (bypass roles, etc.) */
+.fl-maintenance-item {
+	display: flex;
+	align-items: center;
+}
+
+.fl-maintenance-card-body .fl-toggle-switch {
+	flex: 1;
+	padding: 6px 0;
+}
+
+.fl-maintenance-info-btn {
+	padding: 4px;
+	cursor: pointer;
+	display: inline-flex;
+	align-items: center;
+	vertical-align: middle;
+	flex-shrink: 0;
+}
+
+.fl-maintenance-info-btn .dashicons {
+	font-size: 16px;
+	width: 16px;
+	height: 16px;
+	color: #0E5A71;
+	transition: transform 0.2s ease;
+}
+
+.fl-maintenance-info-btn[aria-expanded="true"] .dashicons {
+	transform: rotate(90deg) !important;
+}
+
+.fl-maintenance-info-text {
+	margin: 0 0 6px;
+	padding-left: 52px;
+	color: #787c82;
+	font-size: 13px;
+	line-height: 1.5;
+}
+
+/* Form fields (layout select, datetime inputs) */
+.fl-maintenance-field {
+	margin-bottom: 14px;
+}
+
+.fl-maintenance-field:last-of-type {
+	margin-bottom: 0;
+}
+
+.fl-maintenance-field label {
+	display: block;
+	font-size: 13px;
+	font-weight: 500;
+	color: #1d2327;
+	margin-bottom: 5px;
+}
+
+.fl-maintenance-field .description {
+	font-size: 12px;
+	color: #787c82;
+	margin: 4px 0 6px;
+}
+
+.fl-maintenance-field select {
+	max-width: 400px;
+	width: 100%;
+}
+
+.fl-maintenance-field input[type="datetime-local"] {
+	width: 100%;
+	max-width: 320px;
+	border-radius: 6px;
+	border: 1px solid #c3c4c7;
+	padding: 6px 12px;
+	font-size: 13px;
+	transition: border-color 0.2s ease;
+	box-sizing: border-box;
+}
+
+.fl-maintenance-schedule-row {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 16px;
+}
+
+.fl-maintenance-schedule-row .fl-maintenance-field {
+	margin-bottom: 0;
+}
+
+.fl-maintenance-field input[type="datetime-local"]:focus {
+	border-color: #0E5A71;
+	box-shadow: 0 0 0 1px #0E5A71;
+	outline: none;
+}
+
+
+.fl-maintenance-badge-scheduled {
+	background-color: #1d6fa4;
+	color: #fff;
+}
+
+@media (max-width: 782px) {
+	.fl-maintenance-row {
+		grid-template-columns: 1fr;
+	}
+}
+
+/* Maintenance Mode — Admin Bar */
+
+#wpadminbar #wp-admin-bar-fl-builder-maintenance-mode.fl-maintenance-active > .ab-item,
+#wpadminbar #wp-admin-bar-fl-builder-maintenance-mode.fl-maintenance-active > .ab-item:hover {
+	background-color: #b45309;
+	color: #fff;
+}
+
+#wpadminbar #wp-admin-bar-fl-builder-maintenance-mode.fl-maintenance-scheduled > .ab-item,
+#wpadminbar #wp-admin-bar-fl-builder-maintenance-mode.fl-maintenance-scheduled > .ab-item:hover {
+	background-color: #1d6fa4;
+	color: #fff;
+}
+
+/* Icon — active state uses warning, scheduled uses clock */
+#wpadminbar #wp-admin-bar-fl-builder-maintenance-mode.fl-maintenance-active .ab-icon:before {
+	content: "\f534";
+	font: normal 20px/1 dashicons;
+	color: #fff;
+	vertical-align: middle;
+}
+
+#wpadminbar #wp-admin-bar-fl-builder-maintenance-mode.fl-maintenance-scheduled .ab-icon:before {
+	content: "\f469";
+	font: normal 20px/1 dashicons;
+	color: #fff;
+	vertical-align: middle;
+}

@@ -58,11 +58,11 @@ class FLBuilderBoxModule extends FLBuilderModule {
 			if ( isset( $settings->layout ) && in_array( $settings->layout, [ 'grid', 'z_stack' ] ) ) {
 				$place_content  = 'place_content' . $suffix;
 				$invalid_values = [ 'space-around', 'space-between', 'space-evenly' ];
-				if ( isset( $settings->$place_content ) && isset( $settings->$place_content['vertical'] ) && in_array( $settings->$place_content['vertical'], $invalid_values ) ) {
-					$settings->$place_content['vertical'] = '';
+				if ( isset( $settings->{$place_content} ) && isset( $settings->{$place_content}['vertical'] ) && in_array( $settings->{$place_content}['vertical'], $invalid_values ) ) {
+					$settings->{$place_content}['vertical'] = '';
 				}
-				if ( isset( $settings->$place_content ) && isset( $settings->$place_content['horizontal'] ) && in_array( $settings->$place_content['horizontal'], $invalid_values ) ) {
-					$settings->$place_content['horizontal'] = '';
+				if ( isset( $settings->{$place_content} ) && isset( $settings->{$place_content}['horizontal'] ) && in_array( $settings->{$place_content}['horizontal'], $invalid_values ) ) {
+					$settings->{$place_content}['horizontal'] = '';
 				}
 			}
 		}
@@ -71,64 +71,47 @@ class FLBuilderBoxModule extends FLBuilderModule {
 	}
 
 	/**
-	 * Filter the attributes of the root HTML element.
+	 * Build the link attributes of the root HTML element if a link is set.
 	 *
-	 * @param Array $attrs
-	 * @return Array
+	 * @since 2.11
+	 * @method link_attributes
+	 * @return array
 	 */
-	public function filter_attributes( $attrs = [] ) {
-
-		// Support link field attributes
-		if ( '' !== $this->settings->link ) {
-			if ( 1 === $this->version ) {
-				$attrs['href'] = esc_url( do_shortcode( $this->settings->link ) );
-
-				if ( isset( $this->settings->link_target ) ) {
-					$attrs['target'] = esc_attr( $this->settings->link_target );
-				}
-				$rel = $this->get_rel_attr( 'link' );
-				if ( '' !== $rel ) {
-					$attrs['rel'] = esc_attr( $rel );
-				}
-			} else {
-				$attrs['tabindex'] = [ 0 ];
-				$attrs['role']     = [ 'link' ];
-				$attrs['data-url'] = [ esc_url( do_shortcode( $this->settings->link ) ) ];
-			}
+	public function link_attributes() {
+		$link = $this->settings->link ?? '';
+		// Empty attributes as no link is set
+		if ( empty( $link ) ) {
+			return [];
 		}
-		return $attrs;
-	}
-
-	public function get_rel_attr( $setting_name = 'link' ) {
-		$rel = array();
-		if ( '_blank' == $this->settings->{"{$setting_name}_target"} ) {
-			$rel[] = 'noopener';
+		// First version always renders an anchor tag if a link is present
+		if ( 1 === $this->version ) {
+			return FLBuilderModuleUtils::get_link_attributes( $this->settings, 'link', array(), false );
 		}
-		if ( isset( $this->settings->{"{$setting_name}_nofollow"} ) &&
-			'yes' == $this->settings->{"{$setting_name}_nofollow"}
-		) {
-			$rel[] = 'nofollow';
-		}
-		$rel = implode( ' ', $rel );
-		return $rel;
+		// Newer versions render a div with link attributes and JS click handlers
+		return array(
+			'tabindex'  => '0',
+			'role'      => 'link',
+			'data-link' => esc_url( do_shortcode( $link ) ),
+		);
 	}
 
 	/**
 	 * Render the tag for a non-wrapped module.
+	 *
+	 * @since 2.10
+	 * @method get_tag
+	 * @return string
 	 */
-	public function tag( $tag = 'div' ) {
-
-		// Check advanced container setting
-		if ( '' !== $this->settings->container_element ) {
-			$tag = $this->settings->container_element;
+	public function get_tag() {
+		// Deprecated modules versions always override with an anchor tag if a link is present
+		if ( 1 === $this->version && ! empty( $this->settings->link ) ) {
+			return 'a';
 		}
-
-		// Link support
-		if ( '' !== $this->settings->link && 1 === $this->version ) {
-			$tag = 'a';
+		// Check if the user selected an advanced container setting
+		if ( ! empty( $this->settings->container_element ) ) {
+			return $this->settings->container_element;
 		}
-
-		echo $tag;
+		return 'div';
 	}
 
 	/**
@@ -602,6 +585,7 @@ FLBuilder::register_module( 'FLBuilderBoxModule', [
 							'type'     => 'css',
 							'property' => 'color',
 							'auto'     => true,
+							'selector' => '{node}, {node} h1, {node} h2, {node} h3, {node} h4, {node} h5, {node} h6, {node} h1 a, {node} h2 a, {node} h3 a, {node} h4 a, {node} h5 a, {node} h6 a',
 						],
 					],
 					'bg_type'    => [

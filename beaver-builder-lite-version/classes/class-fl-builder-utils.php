@@ -175,7 +175,7 @@ final class FLBuilderUtils {
 			$video_data['type']     = 'youtube';
 			$video_data['video_id'] = $yt_matches[1];
 
-			parse_str( parse_url( $url, PHP_URL_QUERY ), $yt_params );
+			parse_str( (string) parse_url( $url, PHP_URL_QUERY ), $yt_params );
 			if ( ! empty( $yt_params ) ) {
 
 				// If start time is specified, make sure to convert it into seconds.
@@ -301,6 +301,9 @@ final class FLBuilderUtils {
 	 */
 	public static function img_lazyload( $loading = 'load', $quotes = '"' ) {
 		$lazy = sprintf( 'loading=%s%s%s', $quotes, $loading, $quotes );
+		/**
+		 * The HTML loading attribute string added to img elements, e.g. `loading="lazy"`.
+		 */
 		return apply_filters( 'fl_lazyload', $lazy );
 	}
 
@@ -342,6 +345,9 @@ final class FLBuilderUtils {
 
 	public static function is_modsec_fix_enabled() {
 		$enabled = defined( 'FL_BUILDER_MODSEC_FIX' ) && FL_BUILDER_MODSEC_FIX;
+		/**
+		 * Whether the ModSecurity compatibility fix is enabled.
+		 */
 		return apply_filters( 'fl_is_modsec_fix_enabled', $enabled );
 	}
 
@@ -380,6 +386,9 @@ final class FLBuilderUtils {
 	 * @since 2.7
 	 */
 	public static function wpautop( $content, $module = false ) {
+		/**
+		 * Whether wpautop processing is applied to module text content.
+		 */
 		if ( true === apply_filters( 'fl_enable_wpautop', true, $module ) ) {
 			return wpautop( $content );
 		}
@@ -485,6 +494,9 @@ final class FLBuilderUtils {
 	 * @since 2.8.2
 	 */
 	public static function get_empty_column_width() {
+		/**
+		 * CSS width value returned for columns that have no explicit width set.
+		 */
 		return apply_filters( 'fl_builder_empty_column_width', '0%' );
 	}
 
@@ -526,12 +538,5 @@ final class FLBuilderUtils {
 	 */
 	public static function ctype_xdigit( $text ) {
 		return is_string( $text ) && '' !== $text && ! preg_match( '/[^A-Fa-f0-9]/', $text );
-	}
-
-	static public function __( $text, $domain ) {
-		if ( ! did_action( 'after_setup_theme' ) ) {
-			return $text;
-		}
-		return __( $text, $domain ); //phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText, WordPress.WP.I18n.NonSingularStringLiteralDomain
 	}
 }

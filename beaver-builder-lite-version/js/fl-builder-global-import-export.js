@@ -7,6 +7,8 @@
 	FLBuilderGlobalImportExport = {
 
 		_settingsUploader: null,
+		_snapshots: FLBuilderAdminImportExportConfig.snapshots || {},
+		_maxSnapshots: FLBuilderAdminImportExportConfig.maxSnapshots || 5,
 
 		/**
 		 * Initializes custom exports for the builder.
@@ -20,7 +22,11 @@
 			$('body').on( 'click', '#fl-import-export-form input.export', FLBuilderGlobalImportExport._exportClicked);
 			$('body').on( 'click', '#fl-import-export-form input.import', FLBuilderGlobalImportExport._importClicked);
 			$('body').on( 'click', '#fl-import-export-form input.reset', FLBuilderGlobalImportExport._resetClicked);
+			$('body').on( 'click', '#fl-snapshots-section .snapshot-save', FLBuilderGlobalImportExport._saveSnapshotClicked);
+			$('body').on( 'click', '#fl-snapshots-section .snapshot-restore', FLBuilderGlobalImportExport._restoreSnapshotClicked);
+			$('body').on( 'click', '#fl-snapshots-section .snapshot-delete', FLBuilderGlobalImportExport._deleteSnapshotClicked);
 			FLBuilderGlobalImportExport.bindChecks();
+			FLBuilderGlobalImportExport._renderSnapshotsList();
 		},
 
 		_exportClicked: function() {
@@ -102,11 +108,36 @@
 						return attachment.id;
 					}).join();
 
-					txt = 'Are you sure you want to import settings?';
-
-					if ( confirm( txt ) ) {
-						FLBuilderGlobalImportExport._importSettings(attachment_id);
+					if ( ! confirm( 'Are you sure you want to import settings?' ) ) {
+						return;
 					}
+
+					var self = FLBuilderGlobalImportExport;
+					var nonce = $('#fl-import-export-form').find('#_wpnonce').val();
+					var snapshotCount = Object.keys( self._snapshots ).length;
+
+					if ( confirm( 'Would you like to create a backup snapshot before importing?' ) ) {
+						if ( snapshotCount >= self._maxSnapshots ) {
+							if ( ! confirm( 'You already have ' + self._maxSnapshots + ' snapshots. The oldest snapshot will be deleted to make room. Continue?' ) ) {
+								return;
+							}
+						}
+						self.ajax({
+							action: 'save_settings_snapshot',
+							snapshot_name: 'Pre-Import Backup ' + new Date().toLocaleString(),
+							_wpnonce: nonce,
+						}, function( response ) {
+							if ( response.success ) {
+								self._snapshots = response.data.snapshots;
+								FLBuilderGlobalImportExport._importSettings( attachment_id );
+							} else {
+								alert( 'Failed to create backup snapshot. Import aborted.' );
+							}
+						});
+						return;
+					}
+
+					FLBuilderGlobalImportExport._importSettings( attachment_id );
 				});
 			}
 			FLBuilderGlobalImportExport._settingsUploader.open();
@@ -134,24 +165,199 @@
 			});
 		},
 		_resetClicked: function() {
-			nonce = $('#fl-import-export-form').find('#_wpnonce').val();
-			txt = 'Are you sure you want to reset all settings?';
-			if ( confirm(txt) ) {
-				FLBuilderGlobalImportExport.ajax( {
-					action: 'reset_global_settings',
-					_wpnonce: nonce,
-				}, function ( response ) {
-					switch( response.success ) {
-						case false:
-							alert( 'There was an error :(')
-							break;
-						case true:
-							alert( 'Success!');
-							location.reload();
-							break;
-					};
-				});
+			var nonce = $('#fl-import-export-form').find('#_wpnonce').val();
+			var self = FLBuilderGlobalImportExport;
+			var snapshotCount = Object.keys( self._snapshots ).length;
+
+			if ( ! confirm( 'Are you sure you want to reset all settings?' ) ) {
+				return;
 			}
+
+			if ( confirm( 'Would you like to create a backup snapshot before resetting?' ) ) {
+				if ( snapshotCount >= self._maxSnapshots ) {
+					if ( ! confirm( 'You already have ' + self._maxSnapshots + ' snapshots. The oldest snapshot will be deleted to make room. Continue?' ) ) {
+						return;
+					}
+				}
+				self.ajax({
+					action: 'save_settings_snapshot',
+					snapshot_name: 'Pre-Reset Backup ' + new Date().toLocaleString(),
+					_wpnonce: nonce,
+				}, function( response ) {
+					if ( response.success ) {
+						self._snapshots = response.data.snapshots;
+						self._doReset( nonce );
+					} else {
+						alert( 'Failed to create backup snapshot. Reset aborted.' );
+					}
+				});
+				return;
+			}
+
+			self._doReset( nonce );
+		},
+		_doReset: function( nonce ) {
+			FLBuilderGlobalImportExport.ajax({
+				action: 'reset_global_settings',
+				_wpnonce: nonce,
+			}, function( response ) {
+				if ( response.success ) {
+					alert( 'Success!' );
+					location.reload();
+				} else {
+					alert( 'There was an error :(' );
+				}
+			});
+		},
+		_saveSnapshotClicked: function() {
+			var self  = FLBuilderGlobalImportExport;
+			var nonce = $('#fl-import-export-form').find('#_wpnonce').val();
+			var name  = $('#snapshot-name').val();
+			var count = Object.keys( self._snapshots ).length;
+
+			if ( count >= self._maxSnapshots ) {
+				if ( ! confirm( 'Only ' + self._maxSnapshots + ' snapshots can be saved. The oldest snapshot will be deleted. Continue?' ) ) {
+					return;
+				}
+			}
+
+			self.ajax({
+				action: 'save_settings_snapshot',
+				snapshot_name: name,
+				_wpnonce: nonce,
+			}, function( response ) {
+				if ( response.success ) {
+					self._snapshots = response.data.snapshots;
+					$('#snapshot-name').val('');
+					self._renderSnapshotsList();
+				} else {
+					if ( response.data ) {
+						alert( response.data );
+					} else {
+						alert( 'Failed to save snapshot.' );
+					}
+				}
+			});
+		},
+		_restoreSnapshotClicked: function() {
+			var self          = FLBuilderGlobalImportExport;
+			var nonce         = $('#fl-import-export-form').find('#_wpnonce').val();
+			var snapshotId    = $(this).data('snapshot-id');
+			var snapshotCount = Object.keys( self._snapshots ).length;
+
+			if ( ! confirm( 'Are you sure you want to restore this snapshot? Current settings will be overwritten.' ) ) {
+				return;
+			}
+
+			var doRestore = function() {
+				self.ajax({
+					action: 'restore_settings_snapshot',
+					snapshot_id: snapshotId,
+					_wpnonce: nonce,
+				}, function( response ) {
+					if ( response.success ) {
+						alert( 'Snapshot restored successfully!' );
+						location.reload();
+					} else {
+						if ( response.data ) {
+							alert( response.data );
+						} else {
+							alert( 'Failed to restore snapshot.' );
+						}
+					}
+				});
+			};
+
+			if ( confirm( 'Would you like to create a backup snapshot before restoring?' ) ) {
+				if ( snapshotCount >= self._maxSnapshots ) {
+					if ( ! confirm( 'You already have ' + self._maxSnapshots + ' snapshots. The oldest snapshot will be deleted to make room. Continue?' ) ) {
+						return;
+					}
+				}
+				self.ajax({
+					action: 'save_settings_snapshot',
+					snapshot_name: 'Pre-Restore Backup ' + new Date().toLocaleString(),
+					_wpnonce: nonce,
+				}, function( response ) {
+					if ( response.success ) {
+						self._snapshots = response.data.snapshots;
+						doRestore();
+					} else {
+						alert( 'Failed to create backup snapshot. Restore aborted.' );
+					}
+				});
+				return;
+			}
+
+			doRestore();
+		},
+		_deleteSnapshotClicked: function() {
+			var self       = FLBuilderGlobalImportExport;
+			var nonce      = $('#fl-import-export-form').find('#_wpnonce').val();
+			var snapshotId = $(this).data('snapshot-id');
+
+			if ( ! confirm( 'Are you sure you want to delete this snapshot?' ) ) {
+				return;
+			}
+
+			self.ajax({
+				action: 'delete_settings_snapshot',
+				snapshot_id: snapshotId,
+				_wpnonce: nonce,
+			}, function( response ) {
+				if ( response.success ) {
+					self._snapshots = response.data.snapshots;
+					self._renderSnapshotsList();
+				} else {
+					if ( response.data ) {
+						alert( response.data );
+					} else {
+						alert( 'Failed to delete snapshot.' );
+					}
+				}
+			});
+		},
+		_renderSnapshotsList: function() {
+			var self      = FLBuilderGlobalImportExport;
+			var $list     = $('#fl-snapshots-list');
+			var snapshots = self._snapshots;
+			var keys      = Object.keys( snapshots );
+
+			$list.empty();
+
+			if ( keys.length === 0 ) {
+				$list.html('<p class="description">No snapshots saved.</p>');
+				return;
+			}
+
+			// Sort by created_at descending (newest first).
+			keys.sort(function(a, b) {
+				return snapshots[b].created_at - snapshots[a].created_at;
+			});
+
+			var $table = $('<table class="widefat fl-snapshots-table"><thead><tr>' +
+				'<th>Name</th><th>Date</th><th>Actions</th>' +
+				'</tr></thead><tbody></tbody></table>');
+			var $tbody = $table.find('tbody');
+
+			$.each( keys, function( i, id ) {
+				var snapshot = snapshots[ id ];
+				var date     = new Date( snapshot.created_at * 1000 );
+				var dateStr  = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+
+				var $row = $('<tr>' +
+					'<td><strong>' + $('<span>').text( snapshot.name ).html() + '</strong></td>' +
+					'<td>' + $('<span>').text( dateStr ).html() + '</td>' +
+					'<td>' +
+						'<input type="button" class="button button-primary snapshot-restore" data-snapshot-id="' + id + '" value="Restore" /> ' +
+						'<input type="button" class="button button-primary fl-tools-btn-danger snapshot-delete" data-snapshot-id="' + id + '" value="Delete" />' +
+					'</td>' +
+				'</tr>');
+
+				$tbody.append( $row );
+			});
+
+			$list.append( $table );
 		},
 		/**
 		 * Makes an AJAX request.

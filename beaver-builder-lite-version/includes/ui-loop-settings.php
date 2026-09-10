@@ -200,4 +200,7 @@ do_action( 'fl_builder_loop_settings_before_form', $settings );
 	</div>
 </div>
 <?php
+/**
+ * Fires after the loop settings form is rendered, allowing additional fields to be output.
+ */
 do_action( 'fl_builder_loop_settings_after_form', $settings ); // e.g Add custom FLBuilder::render_settings_field()

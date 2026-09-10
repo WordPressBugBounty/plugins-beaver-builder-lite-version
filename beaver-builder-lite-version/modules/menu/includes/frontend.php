@@ -63,6 +63,9 @@ if ( isset( $settings->menu_search ) && 'show' == $settings->menu_search ) {
 			), $defaults );
 		}
 
+		/**
+		 * Fires before the menu module's navigation HTML is output.
+		 */
 		do_action( 'fl_builder_menu_module_before_render', $defaults, $settings );
 
 		add_filter( 'wp_nav_menu_' . $settings->menu . '_items', array( $module, 'filter_nav_menu_items' ), 10 );
@@ -73,6 +76,9 @@ if ( isset( $settings->menu_search ) && 'show' == $settings->menu_search ) {
 
 		remove_filter( 'wp_nav_menu_' . $settings->menu . '_items', array( $module, 'filter_nav_menu_items' ), 10 );
 
+		/**
+		 * Fires after the menu module's navigation HTML is output.
+		 */
 		do_action( 'fl_builder_menu_module_after_render', $defaults, $settings );
 		echo '</nav>';
 	} else {

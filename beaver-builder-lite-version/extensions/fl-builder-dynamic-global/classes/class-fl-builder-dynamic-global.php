@@ -155,6 +155,34 @@ final class FLBuilderDynamicGlobal {
 			/* translators: %s: Add Settings URL */
 			$config['notice'] = sprintf( __( 'No editable settings are defined for this component. To allow editing, add settings in the main instance. <a href="%s" class="fl-dynamic-node-edit-link">Add Settings &rarr; </a>', 'fl-builder' ), $edit_url );
 
+			// Carried on this branch too, not just the fully-resolved return below.
+			// The form template renders it into the hidden `dynamic_node_settings`
+			// input, and FLBuilder._saveSettings() abandons the save outright when
+			// that input is empty — so a module-owned editor mounted from here could
+			// never persist anything without it.
+			$config['dynamic_node_settings'] = $dynamic_node_settings;
+
+			/**
+			 * Allow a module type to manage its own dynamic-node editing instead of
+			 * BB's standard component form. A module that owns a bespoke editor (e.g.
+			 * a design-system block whose editable surface is not expressed as BB
+			 * dynamic fields) can filter this config to suppress the "no editable
+			 * settings" notice and add a marker instructing the JS to mount its own
+			 * editor. Default returns $config unchanged (BC-safe no-op).
+			 *
+			 * Note: this filter fires only when the node exposes no BB-editable
+			 * sections or query tabs (the empty-settings branch). A module that also
+			 * defines BB dynamic fields never reaches here, so a module owning a
+			 * bespoke editor must not expose BB dynamic fields, or its editor will
+			 * not mount.
+			 *
+			 * @since 2.11
+			 * @param array  $config                The tabs config about to be returned.
+			 * @param object $node                  The dynamic node being edited.
+			 * @param array  $dynamic_node_settings Resolved dynamic-node settings.
+			 */
+			$config = apply_filters( 'fl_builder_dynamic_node_tabs_config', $config, $node, $dynamic_node_settings );
+
 			return $config;
 		}
 
@@ -1167,6 +1195,10 @@ final class FLBuilderDynamicGlobal {
 	 * Get the existing dynamic settings that we will use to
 	 * merge with new settings when saving.
 	 *
+	 * Note: despite the similar name, the `fl_builder_dynamic_node_settings_for_save`
+	 * filter does not fire here — it fires in {@see merge_settings_for_save()}, which
+	 * calls this helper. Look there when tracing that filter.
+	 *
 	 * @since 2.10
 	 * @param object $node
 	 * @return object
@@ -1210,6 +1242,25 @@ final class FLBuilderDynamicGlobal {
 	 */
 	static public function merge_settings_for_save( $node, $settings ) {
 		$save = self::get_dynamic_node_settings_for_save( $node );
+
+		/**
+		 * Allow a module type to serialize its per-instance override blob into a
+		 * single opaque slot on the root node instead of BB's per-field routing.
+		 * Return null (default) to run the standard routing below unchanged.
+		 *
+		 * @since 2.11
+		 * @param mixed  $handled  Null to use default routing; any other value is
+		 *                         stored verbatim under $save->root->{node} and the
+		 *                         per-field loop is skipped.
+		 * @param object $node     The dynamic node being saved.
+		 * @param object $settings Incoming settings payload.
+		 */
+		$handled = apply_filters( 'fl_builder_dynamic_node_settings_for_save', null, $node, $settings );
+		if ( null !== $handled ) {
+			$save->root->{ $node->node }           = $handled;
+			$node->settings->dynamic_node_settings = $save;
+			return $node->settings;
+		}
 
 		// Handle merging settings to save.
 		foreach ( $settings as $key => $value ) {
@@ -1376,7 +1427,7 @@ final class FLBuilderDynamicGlobal {
 		if ( isset( $dynamic->child->{ $node->node } ) ) {
 			foreach ( $dynamic->child->{ $node->node } as $key => $value ) {
 
-				if ( 'connections' === $key && is_array( $node->settings->{ $key } ) ) {
+				if ( 'connections' === $key && isset( $node->settings->{ $key } ) && is_array( $node->settings->{ $key } ) ) {
 					$node->settings->connections = array_merge( $node->settings->connections, (array) $value );
 				} else {
 					$node->settings->{ $key } = $value;
@@ -1456,20 +1507,49 @@ final class FLBuilderDynamicGlobal {
 		$toggles_from_source   = self::get_toggles_from_source( $source_node, $source_dynamic_fields );
 		$merged_dynamic_fields = array_merge( $source_dynamic_fields, $toggles_from_source );
 
-		foreach ( $target_node_settings as $key => $setting ) {
-			/**
-			 * Node label is always merged regardless if it's in dynamic fields or not.
-			 * This is because it can be set in the outline panel.
-			 */
-			$is_node_label      = 'node_label' == $key;
-			$is_dynamic_setting = ( property_exists( $target_node_settings, $key ) && in_array( $key, $merged_dynamic_fields ) );
+		/**
+		 * Allow a module type to apply its own per-instance override merge onto the
+		 * base template settings instead of BB's per-field merge. Return null
+		 * (default) to run the standard per-field merge below unchanged; any other
+		 * value replaces $new_settings and skips the per-field loop.
+		 *
+		 * @since 2.11
+		 * @param object|null $custom_merge         Null for default merge; else the merged
+		 *                                          settings object that replaces $new_settings.
+		 *                                          A non-object return is ignored (default merge
+		 *                                          runs) since $new_settings is used as a live
+		 *                                          settings object downstream.
+		 * @param object      $node                 The dynamic node being rendered.
+		 * @param object      $target_node_settings The stored per-instance override blob.
+		 * @param object      $new_settings         The base template settings (clone).
+		 */
+		$custom_merge = apply_filters( 'fl_builder_dynamic_node_merge_settings', null, $node, $target_node_settings, $new_settings );
 
-			if ( $is_node_label || $is_dynamic_setting ) {
-				$new_settings->{ $key } = $setting;
+		if ( is_object( $custom_merge ) ) {
+			$new_settings = $custom_merge;
+		} else {
+			// The save-side filter stores whatever a module returns verbatim in this
+			// slot, so it is not guaranteed to be an object by the time we read it
+			// back. property_exists() below is fatal on an array, which would take
+			// down every render of the page — normalize instead. A no-op for the
+			// stdClass this slot has always held on BB's own path.
+			$target_node_settings = (object) $target_node_settings;
 
-				// Add photo _src if it exists.
-				if ( isset( $target_node_settings->{ $key . '_src' } ) ) {
-					$new_settings->{ $key . '_src' } = $target_node_settings->{ $key . '_src' };
+			foreach ( $target_node_settings as $key => $setting ) {
+				/**
+				 * Node label is always merged regardless if it's in dynamic fields or not.
+				 * This is because it can be set in the outline panel.
+				 */
+				$is_node_label      = 'node_label' == $key;
+				$is_dynamic_setting = ( property_exists( $target_node_settings, $key ) && in_array( $key, $merged_dynamic_fields ) );
+
+				if ( $is_node_label || $is_dynamic_setting ) {
+					$new_settings->{ $key } = $setting;
+
+					// Add photo _src if it exists.
+					if ( isset( $target_node_settings->{ $key . '_src' } ) ) {
+						$new_settings->{ $key . '_src' } = $target_node_settings->{ $key . '_src' };
+					}
 				}
 			}
 		}

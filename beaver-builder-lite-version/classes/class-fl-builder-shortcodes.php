@@ -30,8 +30,11 @@ final class FLBuilderShortcodes {
 		$builder_active = FLBuilderModel::is_builder_active();
 		$post_type      = isset( $attrs['type'] ) ? $attrs['type'] : get_post_types();
 		$site_id        = isset( $attrs['site'] ) ? absint( $attrs['site'] ) : null;
-		$inline_assets  = apply_filters( 'fl_builder_render_assets_inline', false );
-		$args           = array(
+		/**
+		 * Whether to render layout CSS and JS assets inline within shortcode output.
+		 */
+		$inline_assets = apply_filters( 'fl_builder_render_assets_inline', false );
+		$args          = array(
 			'post_type'      => $post_type,
 			'posts_per_page' => -1,
 			'has_password'   => false,

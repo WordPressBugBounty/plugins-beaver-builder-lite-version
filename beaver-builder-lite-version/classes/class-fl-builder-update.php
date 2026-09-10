@@ -8,6 +8,18 @@
 final class FLBuilderUpdate {
 
 	/**
+	 * Per site option recording the version whose update completed for that site.
+	 *
+	 * Deliberately not _fl_builder_version: that is the network gate, and before
+	 * 2.10.2.1 (#5138) a blog level value of it could exist as a leftover, which
+	 * would make a site that never migrated look done.
+	 *
+	 * @since 2.11
+	 * @var string
+	 */
+	const SITE_VERSION_OPTION = '_fl_builder_site_migrated_version';
+
+	/**
 	 * Initialize hooks.
 	 *
 	 * @since 1.8
@@ -68,6 +80,9 @@ final class FLBuilderUpdate {
 				self::run( $saved_version );
 			}
 
+			/**
+			 * Fires after all builder asset caches have been cleared.
+			 */
 			do_action( 'fl_builder_cache_cleared' );
 
 			update_site_option( '_fl_builder_version', FL_BUILDER_VERSION );
@@ -128,6 +143,10 @@ final class FLBuilderUpdate {
 			self::v_210();
 		}
 
+		if ( version_compare( $saved_version, '2.11', '<' ) ) {
+			self::v_211();
+		}
+
 		// Clear all asset cache.
 		FLBuilderModel::delete_asset_cache_for_all_posts();
 
@@ -143,7 +162,6 @@ final class FLBuilderUpdate {
 	 * @return void
 	 */
 	static private function run_multisite( $saved_version ) {
-		global $blog_id;
 		global $wpdb;
 
 		// Network update to 1.10 or greater.
@@ -151,20 +169,34 @@ final class FLBuilderUpdate {
 			self::v_1_10( true );
 		}
 
-		// Save the original blog id.
-		$original_blog_id = $blog_id;
-
 		// Get all blog ids.
 		$blog_ids = $wpdb->get_col( "SELECT blog_id FROM $wpdb->blogs" );
 
 		// Loop through the blog ids and run the update.
 		foreach ( $blog_ids as $id ) {
 			switch_to_blog( $id );
-			self::run( $saved_version );
-		}
 
-		// Revert to the original blog.
-		switch_to_blog( $original_blog_id );
+			if ( self::site_needs_update() ) {
+				self::run( $saved_version );
+
+				// Record progress per site so an interrupted request resumes here
+				// instead of restarting from the first site. See issue 5443.
+				update_option( self::SITE_VERSION_OPTION, FL_BUILDER_VERSION );
+			}
+
+			restore_current_blog();
+		}
+	}
+
+	/**
+	 * Whether the current site still needs this version's update to run.
+	 *
+	 * @since 2.11
+	 * @access private
+	 * @return bool
+	 */
+	static private function site_needs_update() {
+		return get_option( self::SITE_VERSION_OPTION ) !== FL_BUILDER_VERSION;
 	}
 
 	/**
@@ -676,6 +708,20 @@ final class FLBuilderUpdate {
 		$global_settings->top_level_box_spacing = '0';
 
 		FLBuilderModel::save_global_settings( (array) $global_settings );
+	}
+
+	/**
+	 * Clear oultine settings for existing site to keep backward compatibility.
+	 */
+	static public function v_211() {
+		$settings = get_option( '_fl_builder_styles' );
+		if ( ! is_object( $settings ) ) {
+			return;
+		}
+		foreach ( [ 'outlines_color', 'outlines_style', 'outlines_width', 'outlines_offset' ] as $property ) {
+			$settings->{$property} = '';
+		}
+		update_option( '_fl_builder_styles', $settings );
 	}
 }
 

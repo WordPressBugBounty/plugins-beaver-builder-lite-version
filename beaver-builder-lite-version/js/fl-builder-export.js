@@ -90,6 +90,10 @@
 				posts.append( '<p><label><input type="checkbox" name="fl-builder-export-template[]" value="' + data[ i ].id + '" /> ' + data[ i ].title + '</label></p>' );
 			}
 
+			if ( data.length < 1 ) {
+				posts.append( '<span>Nothing Found</span>' );
+			}
+
 			spinner.removeClass( 'is-active' );
 		}
 	};

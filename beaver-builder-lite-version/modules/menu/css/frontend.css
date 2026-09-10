@@ -41,11 +41,6 @@
 }
 
 /* Submenus */
-.fl-menu .fl-has-submenu:focus,
-.fl-menu .fl-has-submenu .sub-menu:focus,
-.fl-menu .fl-has-submenu-container:focus {
-	outline: 0;
-}
 .fl-menu .fl-has-submenu-container:has(span.fl-menu-toggle) {
 	position: relative;
 }
@@ -57,10 +52,6 @@
 /* Submenu - accordion, expanded */
 .fl-menu .fl-menu-accordion .fl-has-submenu > .sub-menu{
 	display: none;
-}
-.fl-menu .fl-menu-accordion .fl-has-submenu.fl-active .hide-heading > .sub-menu {
-	box-shadow: none;
-	display: block !important;
 }
 
 /* Toggle - General */
@@ -93,12 +84,6 @@
 	color: #333;
 	border-radius: 0;
 	cursor: pointer;
-}
-.fl-menu .fl-menu-mobile-toggle:focus-visible,
-.fl-menu-mobile-close:focus-visible,
-.fl-menu .fl-menu-toggle:focus-visible {
-	outline: 2px auto Highlight;
-	outline: 2px auto -webkit-focus-ring-color;
 }
 .fl-menu .fl-menu-mobile-toggle.text{
 	width: 100%;

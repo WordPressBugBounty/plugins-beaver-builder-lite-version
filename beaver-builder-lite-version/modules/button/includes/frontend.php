@@ -1,54 +1,14 @@
 <?php
 
-$attrs = [
-	'class' => explode( ' ', $module->get_classname() ),
-];
+$modern   = $module->get_version_flag( 'unwrapped' );
+$wrapper  = $module->get_wrapper_attributes();
+$button   = $module->build_button_output();
+$lightbox = $module->build_lightbox_output();
 
-$button_node_id = "fl-node-$id";
-
-if ( isset( $settings->id ) && ! empty( $settings->id ) ) {
-	$button_node_id = esc_attr( $settings->id );
-}
-
-$element_attributes = join( ' ', [ $module->get_tag(), $module->get_link(), $module->get_label(), $module->get_target() ] );
-
-$copy_attrs = '';
-if ( isset( $settings->click_action ) && 'copy_text' === $settings->click_action ) {
-	$copy_attrs .= ' aria-live="polite"';
-
-	if ( ! empty( $settings->copy_text ) ) {
-		$copy_attrs .= ' data-copy-text="' . esc_attr( $settings->copy_text ) . '"';
-	}
-
-	if ( ! empty( $settings->copy_success_message ) ) {
-		$copy_attrs .= ' data-copy-success-message="' . esc_attr( $settings->copy_success_message ) . '"';
-	}
-}
-
-?>
-<div <?php $module->render_attributes( $attrs ); ?>>
-	<?php if ( isset( $settings->click_action ) && 'lightbox' == $settings->click_action ) : ?>
-		<<?php echo $element_attributes; ?> class="fl-button <?php echo $button_node_id; ?> fl-button-lightbox<?php echo ( 'enable' == $settings->icon_animation ) ? ' fl-button-icon-animation' : ''; ?>">
-	<?php else : ?>
-		<<?php echo $element_attributes; ?> <?php echo ( isset( $settings->link_download ) && 'yes' === $settings->link_download ) ? ' download' : ''; ?> class="fl-button<?php echo ( 'enable' == $settings->icon_animation ) ? ' fl-button-icon-animation' : ''; ?>" <?php echo $module->get_rel(); ?> <?php echo $copy_attrs; ?>>
-	<?php endif; ?>
-		<?php
-		if ( ! empty( $settings->icon ) && ( 'before' == $settings->icon_position || ! isset( $settings->icon_position ) ) ) :
-			?>
-		<i class="fl-button-icon fl-button-icon-before <?php echo esc_attr( $settings->icon ); ?>" aria-hidden="true"></i>
-		<?php endif; ?>
-		<?php if ( ! empty( $settings->text ) ) : ?>
-		<span class="fl-button-text"><?php echo $settings->text; ?></span>
-		<?php endif; ?>
-		<?php
-		if ( ! empty( $settings->icon ) && 'after' == $settings->icon_position ) :
-			?>
-		<i class="fl-button-icon fl-button-icon-after <?php echo esc_attr( $settings->icon ); ?>" aria-hidden="true"></i>
-		<?php endif; ?>
-	</<?php echo esc_attr( $module->get_tag_name() ); ?>>
-	<?php if ( 'lightbox' == $settings->click_action && 'html' == $settings->lightbox_content_type && isset( $settings->lightbox_content_html ) ) : ?>
-		<div class="<?php echo $button_node_id; ?> fl-button-lightbox-content mfp-hide">
-			<?php echo $settings->lightbox_content_html; ?>
-		</div>
-	<?php endif; ?>
-</div>
+printf( '<div %s>', $wrapper );
+echo $button;
+if ( $modern ) :
+	echo $lightbox . '</div>';
+else :
+	echo '</div>' . $lightbox;
+endif;

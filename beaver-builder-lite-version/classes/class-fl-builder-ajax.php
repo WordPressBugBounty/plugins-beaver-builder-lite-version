@@ -93,8 +93,9 @@ final class FLBuilderAJAX {
 		self::add_action( 'reset_col_widths', 'FLBuilderModel::reset_col_widths', array( 'group_id' ) );
 		self::add_action( 'resize_row_content', 'FLBuilderModel::resize_row_content', array( 'node', 'width' ) );
 		self::add_action( 'save_settings', 'FLBuilderModel::save_settings', array( 'node_id', 'settings' ) );
-		self::add_action( 'verify_settings', 'FLBuilderModel::verify_settings', array( 'settings' ) );
+		self::add_action( 'verify_settings', 'FLBuilderModel::verify_settings', array( 'settings', 'node_id' ) );
 		self::add_action( 'save_layout_settings', 'FLBuilderModel::save_layout_settings', array( 'settings' ) );
+		self::add_action( 'get_post_permalink', 'FLBuilderLayoutPostSettings::ajax_get_permalink' );
 		self::add_action( 'save_global_settings', 'FLBuilderModel::save_global_settings', array( 'settings' ) );
 		self::add_action( 'save_color_presets', 'FLBuilderModel::save_color_presets', array( 'presets' ) );
 		self::add_action( 'duplicate_post', 'FLBuilderModel::duplicate_post' );

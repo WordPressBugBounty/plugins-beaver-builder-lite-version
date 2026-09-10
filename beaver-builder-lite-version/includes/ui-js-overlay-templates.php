@@ -1,5 +1,5 @@
 <script type="text/html" id="tmpl-fl-row-overlay">
-	<div class="fl-row-overlay fl-block-overlay<# if ( data.dynamic ) { #> fl-block-overlay-dynamic<# } else if ( data.global ) { #> fl-block-overlay-global<# } #>">
+	<div popover="manual" class="fl-row-overlay fl-block-overlay<# if ( data.dynamic ) { #> fl-block-overlay-dynamic<# } else if ( data.global ) { #> fl-block-overlay-global<# } #>">
 		<div class="fl-block-overlay-header">
 			<div class="fl-block-overlay-actions">
 				<# if ( data.global && ! FLBuilderConfig.userCanEditGlobalTemplates ) { #>
@@ -121,7 +121,7 @@
 <!-- #tmpl-fl-row-overlay -->
 
 <script type="text/html" id="tmpl-fl-col-overlay">
-	<div class="fl-col-overlay fl-block-overlay<# if ( data.dynamic || data.parentDynamic ) { #> fl-block-overlay-dynamic<# } else if ( data.global ) { #> fl-block-overlay-global<# } #>">
+	<div popover="manual" class="fl-col-overlay fl-block-overlay<# if ( data.dynamic || data.parentDynamic ) { #> fl-block-overlay-dynamic<# } else if ( data.global ) { #> fl-block-overlay-global<# } #>">
 		<div class="fl-block-overlay-header">
 			<div class="fl-block-overlay-actions">
 				<# if ( data.global && ! FLBuilderConfig.userCanEditGlobalTemplates ) { #>
@@ -380,7 +380,7 @@
 <!-- #tmpl-fl-col-overlay -->
 
 <script type="text/html" id="tmpl-fl-module-overlay">
-	<div class="fl-module-overlay fl-block-overlay<# if ( data.dynamic || data.parentDynamic ) { #> fl-block-overlay-dynamic<# } else if ( data.global ) { #> fl-block-overlay-global<# } #>">
+	<div popover="manual" data-type="{{data.moduleType}}" class="fl-module-overlay fl-block-overlay<# if ( data.dynamic || data.parentDynamic ) { #> fl-block-overlay-dynamic<# } else if ( data.global ) { #> fl-block-overlay-global<# } #>">
 		<div class="fl-block-overlay-header">
 			<div class="fl-block-overlay-actions">
 				<# if ( data.global && ! FLBuilderConfig.userCanEditGlobalTemplates ) { #>

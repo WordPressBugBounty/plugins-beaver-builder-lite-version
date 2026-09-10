@@ -845,10 +845,10 @@
         init: function() {
 
             if ( this.userCanResize() ) {
-                var $layoutContent = $( FLBuilder._contentClass );
+                var $body = $( 'body' );
 
-				$layoutContent.on( 'mouseenter touchstart', '.fl-row, .fl-block-overlay', this.onDragHandleHover.bind(this) );
-                $layoutContent.on( 'mousedown touchstart', '.fl-block-row-resize', this.onDragHandleDown.bind(this) );
+				$body.on( 'mouseenter touchstart', '.fl-block-row-resize', this.onDragHandleHover.bind(this) );
+                $body.on( 'mousedown touchstart', '.fl-block-row-resize', this.onDragHandleDown.bind(this) );
             }
         },
 
@@ -872,15 +872,17 @@
 			};
 
             var $this = this,
-			    originalWidth,
             	$handle = $(e.target),
-				row = $handle.closest('.fl-row'),
-				node = row.data('node'),
-				form = $( '.fl-builder-row-settings[data-node=' + node + ']', window.parent.document ),
+				overlay = $handle.closest('.fl-block-overlay'),
+                nodeId = overlay.attr( 'data-node' ),
+                node = $( `.fl-node-${ nodeId }` ),
+                row = node.closest( '.fl-row' ),
+                rowId = row.attr( 'data-node' ),
+				form = $( '.fl-builder-row-settings[data-node=' + rowId + ']', window.parent.document ),
 				unitField = form.find( '[name=max_content_width_unit]' ),
 				unit = 'px';
 
-			$this.onSettingsReady(node, function(settings){
+			$this.onSettingsReady(rowId, function(settings){
 
 				// Get unit.
 				if (unitField.length) {
@@ -893,7 +895,8 @@
 				$this.$rowContent = $this.$row.find('.fl-row-content');
 
 	            $this.row = {
-	                node: node,
+                    overlay: overlay,
+	                nodeId: rowId,
 	                form: form,
 					unit: unit,
 	                isFixedWidth: $this.$row.hasClass('fl-row-fixed-width'),
@@ -958,7 +961,7 @@
         * @return void
         */
         dragInit: function(e) {
-            this.$row.find('.fl-block-row-resize').draggable( {
+            this.row.overlay.find('.fl-block-row-resize').draggable( {
 				axis 	: 'x',
 				start 	: this.dragStart.bind(this),
 				drag	: this.dragging.bind(this),
@@ -1071,7 +1074,8 @@
             // Dispatch update to store
             requestAnimationFrame( () => {
                 const actions = FL.Builder.data.getLayoutActions()
-                actions.resizeRowContent( this.row.node, this.drag.calculatedWidth, false )
+                actions.resizeRowContent( this.row.nodeId, this.drag.calculatedWidth, false )
+                FLBuilder._repositionOverlays();
             } )
         },
 
@@ -1090,7 +1094,7 @@
 
             // Dispatch update to store
             const actions = FL.Builder.data.getLayoutActions()
-            actions.resizeRowContent( this.row.node, this.drag.calculatedWidth )
+            actions.resizeRowContent( this.row.nodeId, this.drag.calculatedWidth )
 
             FLBuilder._bindOverlayEvents();
             $( 'body' ).add( 'body', window.parent.document ).removeClass( 'fl-builder-row-resizing' );
@@ -1105,7 +1109,7 @@
 			setTimeout( function() { FLBuilder._colResizing = false; }, 50 );
 
 			FLBuilder.triggerHook( 'didResizeRow', {
-				rowId	 : this.row.node,
+				rowId	 : this.row.nodeId,
 				rowWidth : this.drag.calculatedWidth
 			} );
         },

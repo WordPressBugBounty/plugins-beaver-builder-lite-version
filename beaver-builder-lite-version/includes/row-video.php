@@ -1,5 +1,8 @@
 <?php // @codingStandardsIgnoreFile
 
+/**
+ * Array of CSS classes added to the row background video wrapper element.
+ */
 $bg_video_wrapper_classes = implode( ' ', apply_filters( 'fl_row_bg_video_wrapper_class', array( 'fl-bg-video' ), $row ) );
 
 if ( 'wordpress' == $row->settings->bg_video_source ) :

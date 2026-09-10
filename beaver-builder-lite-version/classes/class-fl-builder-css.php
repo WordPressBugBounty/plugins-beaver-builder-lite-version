@@ -169,7 +169,7 @@ final class FLBuilderCSS {
 				$setting = isset( $settings->{$name} ) ? $settings->{$name} : null;
 			}
 
-			// Allow staticly-defined substitute values
+			// Allow statically-defined substitute values
 			if ( $substitute_vals && in_array( $setting, array_keys( $substitute_vals ) ) ) {
 				$setting = $substitute_vals[ $setting ];
 			}
@@ -380,6 +380,14 @@ final class FLBuilderCSS {
 		$props    = array();
 		$settings = FLBuilderModel::get_global_settings();
 		$pattern  = '%s, %s';
+
+		// Treat a font_family that is no longer registered (e.g. a WP Font Library
+		// font that has since been deleted) as Default so we don't emit dead
+		// font-family / font-weight rules against the page.
+		if ( isset( $setting['font_family'] ) && 'Default' !== $setting['font_family'] && ! FLBuilderFonts::is_known_family( $setting['font_family'] ) ) {
+			unset( $setting['font_family'], $setting['font_weight'], $setting['font_style'] );
+		}
+
 		if ( isset( $setting['font_family'] ) && 'Default' !== $setting['font_family'] ) {
 			$fallback = FLBuilderFonts::get_font_fallback( $setting['font_family'] );
 			if ( preg_match( '#[0-9\s]#', $setting['font_family'] ) ) {
@@ -390,8 +398,7 @@ final class FLBuilderCSS {
 		if ( isset( $setting['font_weight'] ) && 'i' == substr( $setting['font_weight'], -1 ) ) {
 			$props['font-weight'] = substr( $setting['font_weight'], 0, -1 );
 			$props['font-style']  = 'italic';
-		}
-		if ( isset( $setting['font_weight'] ) && 'default' !== $setting['font_weight'] && 'italic' !== $setting['font_weight'] ) {
+		} elseif ( isset( $setting['font_weight'] ) && 'default' !== $setting['font_weight'] && 'italic' !== $setting['font_weight'] ) {
 			$props['font-weight'] = $setting['font_weight'];
 		}
 		if ( isset( $setting['font_size'] ) && ! empty( $setting['font_size']['length'] ) ) {
@@ -561,7 +568,9 @@ final class FLBuilderCSS {
 					break;
 
 				case 'image':
-					if ( stristr( $value, 'gradient(' ) ) {
+					$css_keywords = array( 'none', 'inherit', 'initial', 'unset', 'revert' );
+
+					if ( stristr( $value, 'gradient(' ) || in_array( $value, $css_keywords, true ) ) {
 						$css .= "\t$name: $value;\n";
 					} else {
 						$css .= "\t$name: url($value);\n";
@@ -600,7 +609,7 @@ final class FLBuilderCSS {
 	static public function property_type( $name ) {
 		if ( strstr( $name, 'image' ) ) {
 			return 'image';
-		} elseif ( strstr( $name, 'color' ) ) {
+		} elseif ( strstr( $name, 'color' ) || strstr( $name, 'background' ) ) {
 			return 'color';
 		}
 		// Support SVG color properties
@@ -875,16 +884,29 @@ final class FLBuilderCSS {
 						case 'gap':
 							$props[ "{$key}-{$css_property}" ] = "{$field_name}_{$key}";
 							break;
+						case 'inset':
+							$props[ "{$key}" ] = "{$field_name}_{$key}";
+							break;
 						default:
 							$props[ "{$css_property}-{$key}" ] = "{$field_name}_{$key}";
 					}
+				}
+
+				if ( isset( $settings->{"{$field_name}_unit"} ) ) {
+					$unit = $settings->{"{$field_name}_unit"};
+				} elseif ( isset( $field['default_unit'] ) ) {
+					$unit = $field['default_unit'];
+				} elseif ( isset( $field['units'] ) && isset( $field['units'][0] ) ) {
+					$unit = $field['units'][0];
+				} else {
+					$unit = '';
 				}
 
 				FLBuilderCSS::dimension_field_rule( [
 					'settings'     => $settings,
 					'setting_name' => $field_name,
 					'selector'     => $selector,
-					'unit'         => $settings->{"{$field_name}_unit"},
+					'unit'         => $unit,
 					'props'        => $props,
 					'enabled'      => $enabled,
 				] );

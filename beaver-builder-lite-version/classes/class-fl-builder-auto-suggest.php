@@ -37,6 +37,9 @@ final class FLBuilderAutoSuggest {
 			}
 
 			if ( isset( $data ) ) {
+				/**
+				 * Auto-suggest results array before it is returned to the browser.
+				 */
 				$data = apply_filters( 'fl_builder_auto_suggest_lookup', $data, $_REQUEST['fl_as_action'] );
 				return $data;
 			}
@@ -141,6 +144,9 @@ final class FLBuilderAutoSuggest {
 			);
 		}
 
+		/**
+		 * Array of post results for the posts auto-suggest field.
+		 */
 		return apply_filters( 'fl_builder_auto_suggest_posts_lookup', $data );
 	}
 

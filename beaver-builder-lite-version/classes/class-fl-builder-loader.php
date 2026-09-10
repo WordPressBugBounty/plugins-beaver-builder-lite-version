@@ -48,7 +48,7 @@ if ( ! class_exists( 'FLBuilderLoader' ) ) {
 		 * @return void
 		 */
 		static private function define_constants() {
-			define( 'FL_BUILDER_VERSION', '2.10.3.2' );
+			define( 'FL_BUILDER_VERSION', '2.11.0.4' );
 			define( 'FL_BUILDER_FILE', trailingslashit( dirname( __DIR__, 1 ) ) . 'fl-builder.php' );
 			define( 'FL_BUILDER_DIR', plugin_dir_path( FL_BUILDER_FILE ) );
 			define( 'FL_BUILDER_URL', esc_url( plugins_url( '/', FL_BUILDER_FILE ) ) );
@@ -98,8 +98,11 @@ if ( ! class_exists( 'FLBuilderLoader' ) ) {
 			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-model.php';
 			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-admin-advanced.php';
 			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-module.php';
+			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-module-type.php';
 			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-module-data-repeater.php';
 			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-module-deprecations.php';
+			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-custom-attributes.php';
+			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-module-utils.php';
 			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-photo.php';
 			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-revisions.php';
 			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-services.php';
@@ -122,6 +125,7 @@ if ( ! class_exists( 'FLBuilderLoader' ) ) {
 			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-font-awesome.php';
 			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-global-import-export.php';
 			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-node-code-settings.php';
+			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-layout-post-settings.php';
 			require_once FL_BUILDER_DIR . 'classes/class-fl-controls.php';
 			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-enqueue.php';
 			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-config.php';
@@ -145,6 +149,8 @@ if ( ! class_exists( 'FLBuilderLoader' ) ) {
 
 			/* notices */
 			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-admin-notices.php';
+			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-translations.php';
+			FLBuilderTranslations::init();
 		}
 
 		/**

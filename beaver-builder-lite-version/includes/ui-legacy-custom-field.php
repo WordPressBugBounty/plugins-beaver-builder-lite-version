@@ -65,10 +65,24 @@
 			}
 		}
 
+		/** This action is documented in includes/ui-legacy-field.php */
 		do_action( 'fl_builder_before_control', $name, $value, $field, $settings );
+		/** This action is documented in includes/ui-legacy-field.php */
 		do_action( 'fl_builder_before_control_' . $field['type'], $name, $value, $field, $settings );
+		/**
+		 * Fires to render a custom legacy settings field control.
+		 * The dynamic portion of the hook name, `$field['type']`, is the field type.
+		 *
+		 * @since 1.0
+		 * @param string $name     Field name.
+		 * @param mixed  $value    Current field value.
+		 * @param array  $field    Field configuration array.
+		 * @param object $settings Module or row settings object.
+		 */
 		do_action( 'fl_builder_control_' . $field['type'], $name, $value, $field, $settings );
+		/** This action is documented in includes/ui-legacy-field.php */
 		do_action( 'fl_builder_after_control_' . $field['type'], $name, $value, $field, $settings );
+		/** This action is documented in includes/ui-legacy-field.php */
 		do_action( 'fl_builder_after_control', $name, $value, $field, $settings );
 
 		if ( $responsive ) {

@@ -34,27 +34,12 @@ class FLIconModule extends FLBuilderModule {
 			unset( $settings->r_align );
 			unset( $settings->r_custom_align );
 		}
+		// Migrate extra classes from standalone field to icon sub-field.
+		if ( isset( $settings->extra ) && ! isset( $settings->icon_extra ) ) {
+			$settings->icon_extra = $settings->extra;
+			unset( $settings->extra );
+		}
 		return $settings;
-	}
-
-	/**
-	 * Returns link rel based on settings.
-	 * @since 2.2
-	 * @return string
-	 */
-	public function get_rel() {
-		$rel = array();
-		if ( '_blank' == $this->settings->link_target ) {
-			$rel[] = 'noopener';
-		}
-		if ( isset( $this->settings->link_nofollow ) && 'yes' == $this->settings->link_nofollow ) {
-			$rel[] = 'nofollow';
-		}
-		$rel = implode( ' ', $rel );
-		if ( $rel ) {
-			$rel = ' rel="' . $rel . '" ';
-		}
-		return $rel;
 	}
 }
 
@@ -69,14 +54,16 @@ FLBuilder::register_module('FLIconModule', array(
 				'title'  => '', // Section Title
 				'fields' => array( // Section Fields
 					'icon'    => array(
-						'type'    => 'icon',
-						'label'   => __( 'Icon', 'fl-builder' ),
-						'default' => 'dashicons dashicons-before dashicons-wordpress-alt',
-						'preview' => array(
+						'type'               => 'icon',
+						'label'              => __( 'Icon', 'fl-builder' ),
+						'default'            => 'dashicons dashicons-before dashicons-wordpress-alt',
+						'connections'        => array( 'icon' ),
+						'show_extra_classes' => true,
+						'fa_pro'             => FLBuilder::fa5_pro_enabled(),
+						'preview'            => array(
 							'type' => 'none',
 						),
 					),
-
 					'link'    => array(
 						'type'          => 'link',
 						'label'         => __( 'Link', 'fl-builder' ),
@@ -150,6 +137,7 @@ FLBuilder::register_module('FLIconModule', array(
 						'label'       => __( 'Color', 'fl-builder' ),
 						'show_reset'  => true,
 						'show_alpha'  => true,
+						'responsive'  => true,
 						'preview'     => array(
 							'type'      => 'css',
 							'selector'  => '.fl-icon i, .fl-icon i::before',
@@ -163,6 +151,7 @@ FLBuilder::register_module('FLIconModule', array(
 						'label'       => __( 'Hover Color', 'fl-builder' ),
 						'show_reset'  => true,
 						'show_alpha'  => true,
+						'responsive'  => true,
 						'preview'     => array(
 							'type'      => 'css',
 							'selector'  => '.fl-icon i:hover, .fl-icon i:hover::before',
@@ -204,6 +193,7 @@ FLBuilder::register_module('FLIconModule', array(
 						'label'       => __( 'Background Color', 'fl-builder' ),
 						'show_reset'  => true,
 						'show_alpha'  => true,
+						'responsive'  => true,
 					),
 					'bg_hover_color' => array(
 						'type'        => 'color',
@@ -211,6 +201,7 @@ FLBuilder::register_module('FLIconModule', array(
 						'label'       => __( 'Background Hover Color', 'fl-builder' ),
 						'show_reset'  => true,
 						'show_alpha'  => true,
+						'responsive'  => true,
 						'preview'     => array(
 							'type' => 'none',
 						),
@@ -230,11 +221,12 @@ FLBuilder::register_module('FLIconModule', array(
 				'title'  => __( 'Text', 'fl-builder' ),
 				'fields' => array(
 					'text_spacing'    => array(
-						'type'    => 'unit',
-						'label'   => __( 'Text Spacing', 'fl-builder' ),
-						'slider'  => true,
-						'units'   => array( 'px' ),
-						'preview' => array(
+						'type'       => 'unit',
+						'label'      => __( 'Text Spacing', 'fl-builder' ),
+						'slider'     => true,
+						'units'      => array( 'px' ),
+						'responsive' => true,
+						'preview'    => array(
 							'type'      => 'css',
 							'selector'  => '.fl-icon-text',
 							'property'  => 'padding-left',
@@ -248,6 +240,7 @@ FLBuilder::register_module('FLIconModule', array(
 						'label'       => __( 'Text Color', 'fl-builder' ),
 						'show_reset'  => true,
 						'show_alpha'  => true,
+						'responsive'  => true,
 						'preview'     => array(
 							'type'      => 'css',
 							'selector'  => '.fl-icon-wrap .fl-icon-text, .fl-icon-wrap .fl-icon-text *, .fl-icon-wrap .fl-icon-text-link',

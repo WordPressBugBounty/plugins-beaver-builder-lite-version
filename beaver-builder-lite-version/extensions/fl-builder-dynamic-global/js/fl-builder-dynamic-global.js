@@ -340,7 +340,16 @@
 		handleGlobalNodeDisplay: function( nodeData ) {
 			const { nodeId, nodeType, isNewModule, showTemplate, global, dynamic, dynamicFields } = nodeData;
 
-			if ( nodeType === 'module' && nodeData.type !== 'box' && ! dynamicFields && FLBuilderConfig.postType !== 'fl-builder-template' ) {
+			// A module type can own its own instance editor, in which case having no
+			// BB dynamic fields is expected rather than a reason to show the empty
+			// notice — its editable surface just isn't expressed as BB fields. Skip
+			// the notice for those and let the server decide, so the module's
+			// fl_builder_dynamic_node_tabs_config filter can mount its editor.
+			// Modules that don't opt in are unaffected: the flag defaults to false,
+			// so the condition below evaluates exactly as it did before.
+			const moduleConfig = ( FLBuilderSettingsConfig.modules || {} )[ nodeData.type ] || {};
+
+			if ( nodeType === 'module' && nodeData.type !== 'box' && ! dynamicFields && ! moduleConfig.ownsInstanceEditor && FLBuilderConfig.postType !== 'fl-builder-template' ) {
 				const notice = FLBuilderStrings.dynamicNodeEmpty.replace( 'TEMPLATE_URL', nodeData.templateUrl );
 
 				FLBuilder._showModuleSettings( {
@@ -368,8 +377,6 @@
 					return;
 				}
 
-				FLBuilderDynamicGlobal._loadScripts( config );
-
 				// Merge video attachment data into the settings config.
 				if ( config.attachments ) {
 					FLBuilderSettingsConfig.attachments = Object.assign(
@@ -379,6 +386,8 @@
 				}
 
 				if ( config.dynamicEditing && ! config.isEmpty ) {
+
+					FLBuilderDynamicGlobal._loadScripts( config );
 
 					if ( nodeData.layout ) {
 						FLBuilder._renderLayout( nodeData.layout );
@@ -438,6 +447,10 @@
 				settings            : config.settings,
 				notice              : config.notice,
 				dynamicNodeSettings : JSON.stringify( config.dynamic_node_settings ),
+				// Forwarded so a module-owned deferred tab can read the editor
+				// payload its PHP filter attached (see the
+				// `fl_builder_dynamic_node_tabs_config` filter).
+				componentEditor     : config.componentEditor,
 				type                : 'dynamic',
 				className           : `fl-builder-dynamic-${ nodeData.nodeType }-settings`,
 				attrs               : 'data-node="' + nodeData.nodeId + '"',
@@ -458,15 +471,22 @@
 		/**
 		 * Loads script assets of modules used by the component. 
 		 * 
-		 * @since TBD
+		 * @since 2.11
 		 * @access private
 		 * @method _loadScripts
 		 */
 		_loadScripts: function( config ) {
+			// `dynamic_node_settings` is only set on the fully-resolved config; every
+			// early return in get_dynamic_node_tabs() omits it — including the
+			// empty-sections branch a module-owned editor is mounted from.
+			if ( ! config.dynamic_node_settings ) {
+				return;
+			}
+
 			const modules = config.dynamic_node_settings.modules || {};
 			const head    = $( 'head', window.parent.document );
 
-			if ( modules.length === 0 ) {
+			if ( 0 === Object.keys( modules ).length ) {
 				return;
 			}
 

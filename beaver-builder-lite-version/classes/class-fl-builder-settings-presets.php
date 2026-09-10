@@ -13,6 +13,9 @@ class FLBuilderSettingsPresets {
 		 * @see fl_register_presets
 		 */
 		add_action( 'init', function () {
+			/**
+			 * Fires to allow registering custom settings presets for builder modules.
+			 */
 			do_action( 'fl_register_presets' );
 		});
 	}

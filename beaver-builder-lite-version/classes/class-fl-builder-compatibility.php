@@ -15,6 +15,7 @@ final class FLBuilderCompatibility {
 		add_action( 'fl_builder_photo_cropped', array( __CLASS__, 'tinypng_support' ), 10, 2 );
 		add_action( 'plugins_loaded', array( __CLASS__, 'wc_memberships_support' ), 11 );
 		add_action( 'plugins_loaded', array( __CLASS__, 'admin_ssl_upload_fix' ), 11 );
+		add_action( 'plugins_loaded', __CLASS__ . '::custom_attributes' );
 		add_action( 'plugins_loaded', __CLASS__ . '::popup_builder' );
 		add_action( 'added_post_meta', array( __CLASS__, 'template_meta_add' ), 10, 4 );
 		add_action( 'fl_builder_insert_layout_render', array( __CLASS__, 'insert_layout_render_search' ), 10, 3 );
@@ -52,7 +53,7 @@ final class FLBuilderCompatibility {
 		add_action( 'pre_get_posts', array( __CLASS__, 'use_tribe_events_per_page' ) );
 		add_action( 'fl_builder_menu_module_before_render', array( __CLASS__, 'fix_menu_module_before_render' ) );
 		add_action( 'fl_builder_menu_module_after_render', array( __CLASS__, 'fix_menu_module_after_render' ) );
-		add_action( 'wp_before_admin_bar_render', array( __CLASS__, 'fix_dulicate_page' ), 11 );
+		add_action( 'wp_before_admin_bar_render', array( __CLASS__, 'fix_duplicate_page' ), 11 );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'fix_3cx_live_chat' ) );
 		add_action( 'rest_api_init', array( __CLASS__, 'fix_rest_content' ) );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'fix_signify_theme_media' ), 11 );
@@ -114,6 +115,25 @@ final class FLBuilderCompatibility {
 		add_filter( 'wpforms_forms_anti_spam_v3_is_honeypot_enabled', array( __CLASS__, 'wp_forms_spam_field' ), 10, 2 );
 	}
 
+	/**
+	 * Informs the admin if the bb-custom-attributes community plugin is present.
+	 * @since 2.11
+	 */
+	public static function custom_attributes() {
+		if ( is_plugin_active( 'bb-custom-attributes/bb-custom-attributes.php' ) ) {
+			if ( ! class_exists( 'FLBuilderAdminNotices' ) ) {
+				require_once FL_BUILDER_DIR . 'classes/class-fl-builder-admin-notices.php';
+			}
+			$args = array(
+				'content' => __( 'We have detected that you have the BB Custom Attributes plugin active. This plugin adds features that are now in Beaver Builder.', 'fl-builder' ),
+				'id'      => 'custom-attributes',
+				'class'   => 'notice-info',
+				'delay'   => false,
+				'only'    => false,
+			);
+			FLBuilderAdminNotices::register_notice( $args );
+		}
+	}
 	/**
 	 * @since 2.4
 	 */
@@ -1147,12 +1167,24 @@ final class FLBuilderCompatibility {
 	 * Disable duplicate page plugin link in adminbar for BB layouts
 	 * @since 2.5
 	 */
-	public static function fix_dulicate_page() {
+	public static function fix_duplicate_page() {
 		global $wp_admin_bar, $post;
 		if ( ! is_admin() && $post instanceof WP_Post && get_post_meta( $post->ID, '_fl_builder_enabled', true ) ) {
 			$wp_admin_bar->remove_node( 'duplicate_this' );
 		}
 	}
+
+	/**
+	 * Backwards-compat alias for the misspelled method name.
+	 *
+	 * @deprecated 2.11 Use FLBuilderCompatibility::fix_duplicate_page()
+	 * @return void
+	 */
+	public static function fix_dulicate_page() {
+		_deprecated_function( __METHOD__, '2.11', 'FLBuilderCompatibility::fix_duplicate_page()' );
+		self::fix_duplicate_page();
+	}
+
 	/**
 	 * Disable duplicate page plugin link in admin pages list for BB layouts
 	 * @since 2.5

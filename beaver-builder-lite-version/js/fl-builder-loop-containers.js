@@ -32,7 +32,10 @@
 
 		updateLoopForChild: ( nodeId ) => {
 			const loop = LoopContainers.getLoopContainer( nodeId )
-			if ( loop ) {
+			const node = $( `.fl-node-${ nodeId }` );
+			const isPopup = node.closest('.fl-module-popup').length > 0;
+
+			if ( loop && ! isPopup ) {
 				FLBuilder._updateNode( loop.attr( 'data-node' ) )
 			}
 		},
@@ -44,7 +47,6 @@
 		moduleTemplateAdded: ( e, { nodes } ) => {
 			$.each( nodes, function( nodeId ) {
 				setTimeout(function() {
-					const currentNode = $( `.fl-node-${ nodeId }` );
 					const moduleCount = $( `.fl-module.fl-node-${ nodeId }` ).length;
 					if ( moduleCount == 1 ) {
 						LoopContainers.updateLoopForChild( nodeId )

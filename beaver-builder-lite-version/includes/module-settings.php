@@ -5,7 +5,7 @@ $global_settings = FLBuilderModel::get_global_settings();
 FLBuilder::register_settings_form('module_advanced', array(
 	'title'    => __( 'Advanced', 'fl-builder' ),
 	'sections' => array(
-		'margins'       => array(
+		'margins'           => array(
 			'title'  => __( 'Spacing', 'fl-builder' ),
 			'fields' => array(
 				'margin' => array(
@@ -43,7 +43,7 @@ FLBuilder::register_settings_form('module_advanced', array(
 				),
 			),
 		),
-		'visibility'    => array(
+		'visibility'        => array(
 			'title'  => __( 'Visibility', 'fl-builder' ),
 			'fields' => array(
 				'responsive_display'         => array(
@@ -85,7 +85,7 @@ FLBuilder::register_settings_form('module_advanced', array(
 				),
 			),
 		),
-		'animation'     => array(
+		'animation'         => array(
 			'title'  => __( 'Animation', 'fl-builder' ),
 			'fields' => array(
 				'animation' => array(
@@ -98,7 +98,7 @@ FLBuilder::register_settings_form('module_advanced', array(
 				),
 			),
 		),
-		'css_selectors' => array(
+		'css_selectors'     => array(
 			'title'  => __( 'HTML Element', 'fl-builder' ),
 			'fields' => array(
 				'container_element' => array(
@@ -151,7 +151,20 @@ FLBuilder::register_settings_form('module_advanced', array(
 				),
 			),
 		),
-		'export_import' => array(
+		'custom_attributes' => array(
+			'title'  => __( 'Custom Attributes', 'fl-builder' ),
+			'fields' => array(
+				'custom_attributes' => array(
+					'type'         => 'form',
+					'label'        => __( 'Attribute', 'fl-builder' ),
+					'form'         => 'custom_attributes',
+					'help'         => __( 'Adds custom attributes to the module', 'fl-builder' ),
+					'preview_text' => 'key',
+					'multiple'     => true,
+				),
+			),
+		),
+		'export_import'     => array(
 			'title'     => __( 'Export/Import', 'fl-builder' ),
 			'collapsed' => true,
 			'fields'    => array(

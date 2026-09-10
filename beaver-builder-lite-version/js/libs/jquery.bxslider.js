@@ -20,7 +20,7 @@
     mode: 'horizontal',
     slideSelector: '',
     infiniteLoop: true,
-    hideControlOnEnd: false,
+    hideControlOnEnd: true,
     speed: 500,
     easing: null,
     slideMargin: 0,
@@ -346,7 +346,7 @@
       // if pager is requested, make the appropriate pager link active
       if (slider.settings.pager) { updatePagerActive(slider.settings.startSlide); }
       // check for any updates to the controls (like hideControlOnEnd updates)
-      if (slider.settings.controls) { updateDirectionControls(); }
+      if (slider.settings.controls || ( slider.settings.nextSelector && slider.settings.prevSelector )) { updateDirectionControls(); }
       // if touchEnabled is true, setup the touch events
       if ('ontouchstart' in window) { initTouch(); }
       // if keyboardEnabled is true, setup the keyboard events
@@ -891,6 +891,7 @@
       // declare that the transition is complete
       slider.working = false;
       slider.viewport.closest('.fl-module').find('a, button').not('.bx-start, .bx-stop').removeClass('disabled');
+      updateDirectionControls();
       // onSlideAfter callback
       slider.settings.onSlideAfter.call(el, slider.children.eq(slider.active.index), slider.oldIndex, slider.active.index);
     };
@@ -921,23 +922,29 @@
      * Updates the direction controls (checks if either should be hidden)
      */
     var updateDirectionControls = function() {
-      if (getPagerQty() === 1) {
-        slider.controls.prev.addClass('disabled');
-        slider.controls.next.addClass('disabled');
-      } else if (!slider.settings.infiniteLoop && slider.settings.hideControlOnEnd) {
-        // if first slide
-        if (slider.active.index === 0) {
-          slider.controls.prev.addClass('disabled');
-          slider.controls.next.removeClass('disabled');
-        // if last slide
-        } else if (slider.active.index === getPagerQty() - 1) {
-          slider.controls.next.addClass('disabled');
-          slider.controls.prev.removeClass('disabled');
-        // if any slide in the middle
-        } else {
-          slider.controls.prev.removeClass('disabled');
-          slider.controls.next.removeClass('disabled');
-        }
+      const infinite = slider.settings.infiniteLoop;
+      const single = getPagerQty() === 1;
+      const start = slider.active.index === 0;
+      const end = slider.active.index === getPagerQty() - 1;
+      const forward = !single && (infinite || !end);
+      const backward = !single && (infinite || !start);
+      const next = slider.settings.nextSelector ? $(slider.settings.nextSelector) : slider.controls.next || $();
+      const prev = slider.settings.prevSelector ? $(slider.settings.prevSelector) : slider.controls.prev || $();
+      if (!forward && next.is(':focus')) { prev.focus(); }
+      if (!backward && prev.is(':focus')) { next.focus(); }
+      toggleDirectionControls(next, forward);
+      toggleDirectionControls(prev, backward);
+    };
+
+    /**
+     * Toggles direction controls
+     */
+    var toggleDirectionControls = function( element, active ) {
+      element.toggleClass('disabled', !active);
+      if (element.prop('tagName') === 'A') {
+        element.attr({ 'aria-disabled': !active, 'tabindex': active ? 0 : -1 });
+      } else if (element.prop('tagName') === 'BUTTON') {
+        element.attr('disabled', !active);
       }
     };
 
@@ -1358,14 +1365,14 @@
       moveBy = 0,
       position = {left: 0, top: 0},
       lastChild = null,
-      lastShowingIndex, eq, value, requestEl;
-      // store the old index
-      slider.oldIndex = slider.active.index;
-      //set new index
-      slider.active.index = setSlideIndex(slideIndex);
+      lastShowingIndex, eq, value, requestEl,
+      newIndex = setSlideIndex(slideIndex);
 
       // if plugin is currently in motion, ignore request
-      if (slider.working || slider.active.index === slider.oldIndex) { return; }
+      if (slider.working || newIndex === slider.active.index) { return; }
+      // store the old index and set new index
+      slider.oldIndex = slider.active.index;
+      slider.active.index = newIndex;
       // declare that plugin is in motion
       slider.working = true;
       slider.viewport.closest('.fl-module').find('a, button').not('.bx-start, .bx-stop').addClass('disabled');
@@ -1395,8 +1402,6 @@
       slider.active.last = slider.active.index >= getPagerQty() - 1;
       // update the pager with active class
       if (slider.settings.pager || slider.settings.pagerCustom) { updatePagerActive(slider.active.index); }
-      // // check for direction control update
-      if (slider.settings.controls) { updateDirectionControls(); }
       // if slider is set to mode: "fade"
       if (slider.settings.mode === 'fade') {
         // if adaptiveHeight is true and next height is different from current height, animate to the new height

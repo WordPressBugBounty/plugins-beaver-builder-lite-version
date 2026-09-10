@@ -556,6 +556,9 @@ final class FLBuilderLoop {
 		// Generic Rule for Homepage / Search
 		$flpaged_rules[ $paged_regex . '/?([0-9]{1,})/?$' ] = 'index.php?&flpaged=$matches[1]';
 
+		/**
+		 * Array of custom rewrite rules added for loop pagination.
+		 */
 		$flpaged_rules = apply_filters( 'fl_builder_loop_rewrite_rules', $flpaged_rules );
 
 		foreach ( $flpaged_rules as $regex => $redirect ) {

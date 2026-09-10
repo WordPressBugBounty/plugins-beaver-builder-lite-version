@@ -14,6 +14,15 @@ final class FLBuilderFonts {
 	 */
 	private static $fonts = array();
 
+	/**
+	 * An array of WP Font Library fonts / weights collected per request.
+	 * Kept separate from $fonts so the Google enqueue logic does not pick them up.
+	 *
+	 * @since 2.10.5
+	 * @var array
+	 */
+	private static $wp_fonts = array();
+
 	private static $enqueued_google_fonts_done = false;
 
 	public static $preload_fa5 = array();
@@ -26,9 +35,57 @@ final class FLBuilderFonts {
 		add_filter( 'the_content', __CLASS__ . '::combine_google_fonts', 11 );
 		add_action( 'wp_enqueue_scripts', __CLASS__ . '::combine_google_fonts', 10000 );
 		add_action( 'wp_enqueue_scripts', __CLASS__ . '::enqueue_google_fonts', 9999 );
+		add_action( 'wp_enqueue_scripts', __CLASS__ . '::enqueue_wp_fonts', 9999 );
 		add_filter( 'wp_resource_hints', __CLASS__ . '::resource_hints', 10, 2 );
 		add_action( 'wp_head', array( __CLASS__, 'preload' ), 5 );
 		add_action( 'fl_builder_cache_cleared', array( __CLASS__, 'clear_transient' ), 11 );
+		add_action( 'save_post_wp_font_family', __CLASS__ . '::on_wp_font_changed' );
+		add_action( 'save_post_wp_font_face', __CLASS__ . '::on_wp_font_changed' );
+		add_action( 'deleted_post', __CLASS__ . '::on_post_deleted', 10, 2 );
+	}
+
+	/**
+	 * Resets the WP Font Library registry cache. Hooked to font CPT mutations
+	 * so a font upload, edit, or delete is reflected next page render.
+	 *
+	 * @since 2.10.5
+	 * @return void
+	 */
+	static public function clear_wp_fonts_cache() {
+		FLBuilderFontFamilies::clear_wp_library_cache();
+	}
+
+	/**
+	 * Invalidates BB's per-request WP font cache AND the on-disk layout CSS/JS
+	 * asset cache when a Font Library mutation happens. Without the asset
+	 * cache clear, layouts continue to serve stale CSS referencing a font the
+	 * user has just deleted or replaced.
+	 *
+	 * @since 2.10.5
+	 * @return void
+	 */
+	static public function on_wp_font_changed() {
+		self::clear_wp_fonts_cache();
+		if ( class_exists( 'FLBuilderModel' ) ) {
+			FLBuilderModel::delete_asset_cache_for_all_posts();
+		}
+	}
+
+	/**
+	 * Routes deleted_post into the font-change handler only when the deleted
+	 * post is a Font Library family or face. Avoids running the asset cache
+	 * sweep on every unrelated post deletion.
+	 *
+	 * @since 2.10.5
+	 * @param  int     $post_id
+	 * @param  WP_Post $post
+	 * @return void
+	 */
+	static public function on_post_deleted( $post_id, $post ) {
+		if ( ! $post || ! in_array( $post->post_type, array( 'wp_font_family', 'wp_font_face' ), true ) ) {
+			return;
+		}
+		self::on_wp_font_changed();
 	}
 
 	static public function clear_transient() {
@@ -73,7 +130,7 @@ final class FLBuilderFonts {
 	}
 
 	/**
-	 * Renders the JavasCript variable for font settings dropdowns.
+	 * Renders the JavaScript variable for font settings dropdowns.
 	 *
 	 * @since  1.6.3
 	 * @return void
@@ -91,8 +148,12 @@ final class FLBuilderFonts {
 		 * @see fl_builder_font_families_google
 		 */
 		$google = json_encode( apply_filters( 'fl_builder_font_families_google', self::prepare_google_fonts( FLBuilderFontFamilies::google() ) ) );
+		/**
+		 * @see fl_builder_font_families_wp
+		 */
+		$wp = json_encode( apply_filters( 'fl_builder_font_families_wp', FLBuilderFontFamilies::wp_library() ) );
 
-		echo 'var FLBuilderFontFamilies = { default: ' . $default . ', system: ' . $system . ', google: ' . $google . ' };';
+		echo 'var FLBuilderFontFamilies = { default: ' . $default . ', system: ' . $system . ', google: ' . $google . ', wp: ' . $wp . ' };';
 	}
 
 	static public function prepare_google_fonts( $fonts ) {
@@ -116,11 +177,12 @@ final class FLBuilderFonts {
 	static public function display_select_font( $font ) {
 		$system_fonts = apply_filters( 'fl_builder_font_families_system', FLBuilderFontFamilies::$system );
 		$google_fonts = apply_filters( 'fl_builder_font_families_google', FLBuilderFontFamilies::google() );
+		$wp_fonts     = apply_filters( 'fl_builder_font_families_wp', FLBuilderFontFamilies::wp_library() );
 		$recent_fonts = get_option( 'fl_builder_recent_fonts', array() );
 
 		// Check if font is valid
 		foreach ( $recent_fonts as $name => $variants ) {
-			if ( ! array_key_exists( $name, $google_fonts ) && ! array_key_exists( $name, $system_fonts ) ) {
+			if ( ! array_key_exists( $name, $google_fonts ) && ! array_key_exists( $name, $system_fonts ) && ! array_key_exists( $name, $wp_fonts ) ) {
 				unset( $recent_fonts[ $name ] );
 			}
 		}
@@ -134,6 +196,13 @@ final class FLBuilderFonts {
 					continue;
 				}
 				echo '<option value="' . $name . '">' . $name . '</option>';
+			}
+		}
+
+		if ( ! empty( $wp_fonts ) ) {
+			echo '<optgroup label="' . esc_attr__( 'WordPress Fonts', 'fl-builder' ) . '">';
+			foreach ( $wp_fonts as $name => $data ) {
+				echo '<option value="' . esc_attr( $name ) . '" ' . selected( $name, $font, false ) . '>' . esc_html( $name ) . '</option>';
 			}
 		}
 
@@ -164,15 +233,24 @@ final class FLBuilderFonts {
 		} else {
 			$system_fonts = apply_filters( 'fl_builder_font_families_system', FLBuilderFontFamilies::$system );
 			$google_fonts = apply_filters( 'fl_builder_font_families_google', FLBuilderFontFamilies::google() );
+			$wp_fonts     = apply_filters( 'fl_builder_font_families_wp', FLBuilderFontFamilies::wp_library() );
 
-			if ( array_key_exists( $font, $system_fonts ) ) {
+			if ( array_key_exists( $font, $wp_fonts ) ) {
+				foreach ( $wp_fonts[ $font ]['weights'] as $variant ) {
+					echo '<option value="' . $variant . '" ' . selected( $variant, $weight, false ) . '>' . FLBuilderFonts::get_weight_string( $variant ) . '</option>';
+				}
+			} elseif ( array_key_exists( $font, $system_fonts ) ) {
 				foreach ( $system_fonts[ $font ]['weights'] as $variant ) {
 					echo '<option value="' . $variant . '" ' . selected( $variant, $weight, false ) . '>' . FLBuilderFonts::get_weight_string( $variant ) . '</option>';
 				}
-			} else {
+			} elseif ( isset( $google_fonts[ $font ] ) ) {
 				foreach ( $google_fonts[ $font ] as $variant ) {
 					echo '<option value="' . $variant . '" ' . selected( $variant, $weight, false ) . '>' . FLBuilderFonts::get_weight_string( $variant ) . '</option>';
 				}
+			} else {
+				// Stale reference (e.g. a deleted WP font still saved into a layout).
+				// Emit only Default so the dropdown is usable; JS reset will follow.
+				echo '<option value="default" selected="selected">' . __( 'Default', 'fl-builder' ) . '</option>';
 			}
 		}
 	}
@@ -243,11 +321,16 @@ final class FLBuilderFonts {
 	static public function font_css( $font ) {
 
 		$system_fonts = apply_filters( 'fl_builder_font_families_system', FLBuilderFontFamilies::$system );
+		$wp_fonts     = apply_filters( 'fl_builder_font_families_wp', FLBuilderFontFamilies::wp_library() );
 		$google       = FLBuilderFontFamilies::get_google_fallback( $font['family'] );
 
 		$css = '';
 
-		if ( array_key_exists( $font['family'], $system_fonts ) ) {
+		if ( array_key_exists( $font['family'], $wp_fonts ) ) {
+
+			$css .= 'font-family: "' . $font['family'] . '", ' . $wp_fonts[ $font['family'] ]['fallback'] . ';';
+
+		} elseif ( array_key_exists( $font['family'], $system_fonts ) ) {
 
 			$css .= 'font-family: "' . $font['family'] . '",' . $system_fonts[ $font['family'] ]['fallback'] . ';';
 
@@ -279,8 +362,9 @@ final class FLBuilderFonts {
 	 * @return void
 	 */
 	static public function add_fonts_for_global_css( $settings ) {
-		$google = FLBuilderFontFamilies::google();
-		$fields = array(
+		$google   = FLBuilderFontFamilies::google();
+		$wp_fonts = FLBuilderFontFamilies::wp_library();
+		$fields   = array(
 			'text_typography',
 			'h1_typography',
 			'h2_typography',
@@ -299,8 +383,8 @@ final class FLBuilderFonts {
 			$font   = $settings->{ $field }['font_family'];
 			$weight = isset( $settings->{ $field }['font_weight'] ) && '' !== $settings->{ $field }['font_weight'] ? $settings->{ $field }['font_weight'] : '400';
 
-			// handle google italics.
-			if ( isset( $google[ $font ] ) ) {
+			// handle google italics — skip for WP Font Library fonts, which use separate italic faces.
+			if ( ! isset( $wp_fonts[ $font ] ) && isset( $google[ $font ] ) ) {
 				$selected_weight = $weight;
 				$italic          = ( isset( $settings->{ $field }['font_style'] ) ) ? $settings->{ $field }['font_style'] : '';
 
@@ -337,8 +421,9 @@ final class FLBuilderFonts {
 		$fields = FLBuilderModel::get_settings_form_fields( $module->form );
 
 		// needed for italics.
-		$google = FLBuilderFontFamilies::google();
-		$bold   = false;
+		$google   = FLBuilderFontFamilies::google();
+		$wp_fonts = FLBuilderFontFamilies::wp_library();
+		$bold     = false;
 
 		if ( $module instanceof FLRichTextModule || $module instanceof FLListModule ) {
 			$bold = true;
@@ -348,13 +433,24 @@ final class FLBuilderFonts {
 
 			if ( 'font' == $field['type'] && isset( $module->settings->$name ) ) {
 				self::add_font( $module->settings->$name );
-			} elseif ( 'typography' == $field['type'] && ! empty( $module->settings->$name ) && isset( $module->settings->{ $name }['font_family'] ) ) {
-				$fname  = $module->settings->{ $name }['font_family'];
-				$weight = isset( $module->settings->{ $name }['font_weight'] ) && '' !== $module->settings->{ $name }['font_weight'] ? $module->settings->{ $name }['font_weight'] : '400';
-				// handle google italics.
-				if ( isset( $google[ $fname ] ) ) {
+			} elseif ( 'typography' == $field['type'] && ! empty( $module->settings->$name ) ) {
+
+				// Compound settings are normally stored as arrays, but corrupted or
+				// externally-written layout data can store them as objects. Coerce to
+				// an array (as add_fonts_for_nested_module_form already does) so the
+				// access below never fatals on a stdClass. See issue #5305.
+				$typo = (array) $module->settings->$name;
+
+				if ( ! isset( $typo['font_family'] ) ) {
+					continue;
+				}
+
+				$fname  = $typo['font_family'];
+				$weight = isset( $typo['font_weight'] ) && '' !== $typo['font_weight'] ? $typo['font_weight'] : '400';
+				// handle google italics — skip for WP Font Library fonts, which use separate italic faces.
+				if ( ! isset( $wp_fonts[ $fname ] ) && isset( $google[ $fname ] ) ) {
 					$selected_weight = $weight;
-					$italic          = ( isset( $module->settings->{ $name }['font_style'] ) ) ? $module->settings->{ $name }['font_style'] : '';
+					$italic          = ( isset( $typo['font_style'] ) ) ? $typo['font_style'] : '';
 					if ( ! $italic && count( $google[ $fname ] ) === 1 && 'italic' === $google[ $fname ][0] ) {
 						$italic = 'italic';
 					}
@@ -366,12 +462,12 @@ final class FLBuilderFonts {
 					}
 				}
 
-				if ( 'Molle' === $module->settings->{ $name }['font_family'] ) {
+				if ( 'Molle' === $fname ) {
 					$weight = 'i';
 				}
 
 				self::add_font( array(
-					'family' => $module->settings->{ $name }['font_family'],
+					'family' => $fname,
 					'weight' => $weight,
 				), $bold );
 			} elseif ( isset( $field['form'] ) ) {
@@ -392,7 +488,9 @@ final class FLBuilderFonts {
 	 * @return void
 	 */
 	static private function add_fonts_for_nested_module_form( $module, $form, $setting ) {
-		$fields = FLBuilderModel::get_settings_form_fields( $form );
+		$fields   = FLBuilderModel::get_settings_form_fields( $form );
+		$google   = FLBuilderFontFamilies::google();
+		$wp_fonts = FLBuilderFontFamilies::wp_library();
 
 		foreach ( $fields as $name => $field ) {
 			if ( 'font' == $field['type'] && isset( $module->settings->$setting ) ) {
@@ -402,6 +500,36 @@ final class FLBuilderFonts {
 					} elseif ( $name == $key && ! empty( $val ) ) {
 						self::add_font( (array) $val );
 					}
+				}
+			} elseif ( 'typography' == $field['type'] && isset( $module->settings->$setting ) ) {
+				foreach ( $module->settings->$setting as $val ) {
+					if ( ! isset( $val->$name ) || empty( $val->$name ) ) {
+						continue;
+					}
+					$typo = (array) $val->$name;
+					if ( empty( $typo['font_family'] ) || 'Default' === $typo['font_family'] ) {
+						continue;
+					}
+					$fname  = $typo['font_family'];
+					$weight = isset( $typo['font_weight'] ) && '' !== $typo['font_weight'] ? $typo['font_weight'] : '400';
+					// Skip google italic massaging for WP Font Library fonts (separate italic faces).
+					if ( ! isset( $wp_fonts[ $fname ] ) && isset( $google[ $fname ] ) ) {
+						$selected_weight = $weight;
+						$italic          = isset( $typo['font_style'] ) ? $typo['font_style'] : '';
+						if ( ! $italic && count( $google[ $fname ] ) === 1 && 'italic' === $google[ $fname ][0] ) {
+							$italic = 'italic';
+						}
+						if ( in_array( $selected_weight . 'i', $google[ $fname ] ) && 'italic' == $italic ) {
+							$weight = $selected_weight . 'i';
+						}
+						if ( ( '400' == $selected_weight || 'regular' == $selected_weight ) && 'italic' == $italic && in_array( 'italic', $google[ $fname ] ) ) {
+							$weight = '400i';
+						}
+					}
+					self::add_font( array(
+						'family' => $fname,
+						'weight' => $weight,
+					) );
 				}
 			}
 		}
@@ -442,6 +570,9 @@ final class FLBuilderFonts {
 
 			$google_url = substr( $google_url, 0, -1 );
 
+			/**
+			 * Whether Google Fonts stylesheets should be enqueued.
+			 */
 			if ( true === apply_filters( 'fl_enable_google_fonts_enqueue', true ) ) {
 				wp_enqueue_style( 'fl-builder-google-fonts-' . md5( $google_url ), $google_url, array() );
 			}
@@ -464,28 +595,29 @@ final class FLBuilderFonts {
 
 		if ( is_array( $font ) && isset( $font['family'] ) && isset( $font['weight'] ) && 'Default' != $font['family'] ) {
 
+			/**
+			 * Array of system font family definitions used when determining the font source.
+			 */
 			$system_fonts = apply_filters( 'fl_builder_font_families_system', FLBuilderFontFamilies::$system );
 
-			// check if is a Google Font
-			if ( ! array_key_exists( $font['family'], $system_fonts ) ) {
+			/**
+			 * Array of WP Font Library font family definitions used when determining the font source.
+			 */
+			$wp_fonts = apply_filters( 'fl_builder_font_families_wp', FLBuilderFontFamilies::wp_library() );
 
-				// check if font family is already added
-				if ( array_key_exists( $font['family'], self::$fonts ) ) {
-
-					// check if the weight is already added
-					if ( ! in_array( $font['weight'], self::$fonts[ $font['family'] ] ) ) {
-						self::$fonts[ $font['family'] ][] = $font['weight'];
-					}
-				} else {
-					// adds a new font and weight
-					self::$fonts[ $font['family'] ] = array( $font['weight'] );
-
+			// WP Font Library wins over Google on name collision: the user explicitly uploaded the font.
+			if ( array_key_exists( $font['family'], $wp_fonts ) ) {
+				self::add_wp_font_weight( $font['family'], $font['weight'], $bold );
+			} elseif ( ! array_key_exists( $font['family'], $system_fonts ) ) {
+				$google_fonts = apply_filters( 'fl_builder_font_families_google', FLBuilderFontFamilies::google() );
+				// Only enqueue a Google stylesheet for fonts BB actually knows about.
+				// Unknown families (e.g. a deleted WP font still referenced by a saved layout)
+				// would otherwise trigger a wasted 404 against fonts.googleapis.com.
+				if ( array_key_exists( $font['family'], $google_fonts ) ) {
+					self::add_google_font_weight( $font['family'], $font['weight'], $bold );
 				}
-				if ( $bold ) {
-					self::$fonts[ $font['family'] ][] = ( strstr( $font['weight'], 'i' ) ) ? '700i' : '700';
-				}
-				self::$fonts[ $font['family'] ] = array_unique( self::$fonts[ $font['family'] ] );
 			}
+
 			if ( ! isset( $recent_fonts_db[ $font['family'] ] ) ) {
 				$recent_fonts[ $font['family'] ] = $font['weight'];
 			}
@@ -496,6 +628,223 @@ final class FLBuilderFonts {
 		if ( isset( $_GET['fl_builder'] ) && ! empty( $recent ) && serialize( $recent ) !== serialize( $recent_fonts_db ) ) {
 			FLBuilderUtils::update_option( 'fl_builder_recent_fonts', array_slice( $recent, -11 ), true );
 		}
+	}
+
+	/**
+	 * Routes a font/weight pair into the Google enqueue bucket.
+	 *
+	 * @since 2.10.5
+	 * @access private
+	 * @param  string $family
+	 * @param  string $weight
+	 * @param  bool   $bold
+	 * @return void
+	 */
+	static private function add_google_font_weight( $family, $weight, $bold ) {
+		if ( ! array_key_exists( $family, self::$fonts ) ) {
+			self::$fonts[ $family ] = array( $weight );
+		} elseif ( ! in_array( $weight, self::$fonts[ $family ] ) ) {
+			self::$fonts[ $family ][] = $weight;
+		}
+		if ( $bold ) {
+			self::$fonts[ $family ][] = ( strstr( $weight, 'i' ) ) ? '700i' : '700';
+		}
+		self::$fonts[ $family ] = array_unique( self::$fonts[ $family ] );
+	}
+
+	/**
+	 * Routes a font/weight pair into the WP Font Library enqueue bucket.
+	 *
+	 * @since 2.10.5
+	 * @access private
+	 * @param  string $family
+	 * @param  string $weight
+	 * @param  bool   $bold
+	 * @return void
+	 */
+	static private function add_wp_font_weight( $family, $weight, $bold ) {
+		if ( ! isset( self::$wp_fonts[ $family ] ) ) {
+			self::$wp_fonts[ $family ] = array();
+		}
+		if ( ! in_array( $weight, self::$wp_fonts[ $family ], true ) ) {
+			self::$wp_fonts[ $family ][] = $weight;
+		}
+		if ( $bold ) {
+			$bold_weight = ( strstr( $weight, 'i' ) ) ? '700i' : '700';
+			if ( ! in_array( $bold_weight, self::$wp_fonts[ $family ], true ) ) {
+				self::$wp_fonts[ $family ][] = $bold_weight;
+			}
+		}
+	}
+
+	/**
+	 * Emits @font-face CSS for WP Font Library fonts referenced by the page.
+	 *
+	 * Only faces matching the weights actually in use are included. Output
+	 * is delegated to core's wp_print_font_faces(), which wraps the rules
+	 * in <style class="wp-fonts-local">. Resets the per-request bucket
+	 * after emission so a second call in the same request is a no-op.
+	 *
+	 * @since 2.10.5
+	 * @return void
+	 */
+	static public function enqueue_wp_fonts() {
+		$builder_active = class_exists( 'FLBuilderModel' ) && FLBuilderModel::is_builder_active();
+
+		if ( ! $builder_active && empty( self::$wp_fonts ) ) {
+			return;
+		}
+		if ( ! function_exists( 'wp_print_font_faces' ) ) {
+			self::$wp_fonts = array();
+			return;
+		}
+
+		$library = FLBuilderFontFamilies::wp_library();
+		$payload = $builder_active
+			? self::build_wp_font_payload_all( $library )
+			: self::build_wp_font_payload_used( $library, self::$wp_fonts );
+
+		if ( ! empty( $payload ) ) {
+			wp_print_font_faces( $payload );
+		}
+
+		self::$wp_fonts = array();
+	}
+
+	/**
+	 * Builds a wp_print_font_faces() payload covering every family in the library.
+	 * Used in builder mode so the dropdown and module preview can render any
+	 * uploaded font, not just the ones currently saved into the layout.
+	 *
+	 * @since 2.10.5
+	 * @access private
+	 * @param  array $library
+	 * @return array
+	 */
+	static private function build_wp_font_payload_all( $library ) {
+		$payload = array();
+		foreach ( $library as $family => $data ) {
+			if ( empty( $data['faces'] ) ) {
+				continue;
+			}
+			$payload[ $family ] = array_map( array( __CLASS__, 'face_to_kebab_case' ), $data['faces'] );
+		}
+		return $payload;
+	}
+
+	/**
+	 * Builds a wp_print_font_faces() payload limited to faces actually
+	 * referenced by the page being rendered.
+	 *
+	 * @since 2.10.5
+	 * @access private
+	 * @param  array $library
+	 * @param  array $used Per-family used-weight lists.
+	 * @return array
+	 */
+	static private function build_wp_font_payload_used( $library, $used ) {
+		$payload = array();
+		foreach ( $used as $family => $used_weights ) {
+			if ( ! isset( $library[ $family ]['faces'] ) ) {
+				continue;
+			}
+			$faces = self::filter_wp_faces( $library[ $family ]['faces'], $used_weights );
+			if ( ! empty( $faces ) ) {
+				$payload[ $family ] = array_map( array( __CLASS__, 'face_to_kebab_case' ), $faces );
+			}
+		}
+		return $payload;
+	}
+
+	/**
+	 * Keeps only the faces whose weight is referenced by the page.
+	 *
+	 * @since 2.10.5
+	 * @access private
+	 * @param  array $faces        Theme.json face definitions for a family.
+	 * @param  array $used_weights BB-format weight strings (e.g. '400', '700i').
+	 * @return array
+	 */
+	static private function filter_wp_faces( $faces, $used_weights ) {
+		$kept = array();
+		foreach ( $faces as $face ) {
+			$face_weight = isset( $face['fontWeight'] ) ? (string) $face['fontWeight'] : '400';
+			$face_italic = isset( $face['fontStyle'] ) && 'italic' === $face['fontStyle'];
+			foreach ( FLBuilderFontFamilies::expand_weight_range( $face_weight ) as $discrete ) {
+				$needle = $face_italic ? $discrete . 'i' : $discrete;
+				if ( in_array( $needle, $used_weights, true ) ) {
+					$kept[] = $face;
+					continue 2;
+				}
+			}
+		}
+		return $kept;
+	}
+
+	/**
+	 * Converts a theme.json face definition (camelCase keys) into the
+	 * kebab-case shape expected by wp_print_font_faces().
+	 *
+	 * @since 2.10.5
+	 * @access private
+	 * @param  array $face
+	 * @return array
+	 */
+	static public function face_to_kebab_case( $face ) {
+		$out = array();
+		foreach ( $face as $key => $value ) {
+			$kebab         = strtolower( preg_replace( '/([a-z0-9])([A-Z])/', '$1-$2', $key ) );
+			$out[ $kebab ] = $value;
+		}
+		return $out;
+	}
+
+	/**
+	 * Returns true if the family is registered in any of the BB font sources
+	 * (system, WP Font Library, or Google). Used to short-circuit CSS emission
+	 * and dropdown surfaces when a saved layout references a deleted font.
+	 *
+	 * @since 2.10.5
+	 * @param  string $family
+	 * @return bool
+	 */
+	static public function is_known_family( $family ) {
+		if ( '' === $family || 'Default' === $family ) {
+			return false;
+		}
+		$system = apply_filters( 'fl_builder_font_families_system', FLBuilderFontFamilies::$system );
+		if ( array_key_exists( $family, $system ) ) {
+			return true;
+		}
+		$wp = apply_filters( 'fl_builder_font_families_wp', FLBuilderFontFamilies::wp_library() );
+		if ( array_key_exists( $family, $wp ) ) {
+			return true;
+		}
+		$google = apply_filters( 'fl_builder_font_families_google', FLBuilderFontFamilies::google() );
+		return array_key_exists( $family, $google );
+	}
+
+	/**
+	 * Filters the `fl_builder_recent_fonts` option down to families still
+	 * present in one of the live font sources. Keeps deleted WP Font Library
+	 * fonts (and any other dangling references) out of the Recently Used
+	 * dropdown without mutating the stored option.
+	 *
+	 * @since 2.10.5
+	 * @param  array $recent
+	 * @return array
+	 */
+	static public function filter_recent_fonts( $recent ) {
+		if ( ! is_array( $recent ) || empty( $recent ) ) {
+			return array();
+		}
+		$filtered = array();
+		foreach ( $recent as $name => $variants ) {
+			if ( 'Default' === $name || self::is_known_family( $name ) ) {
+				$filtered[ $name ] = $variants;
+			}
+		}
+		return $filtered;
 	}
 
 	/**
@@ -634,9 +983,18 @@ final class FLBuilderFonts {
 	 */
 	static public function get_font_fallback( $font_family ) {
 		$fallback = 'sans-serif';
-		$default  = apply_filters( 'fl_builder_font_families_default', FLBuilderFontFamilies::$default );
-		$system   = apply_filters( 'fl_builder_font_families_system', FLBuilderFontFamilies::$system );
-		$google   = apply_filters( 'fl_builder_font_families_google', FLBuilderFontFamilies::google() );
+		/**
+		 * Array of default font family definitions used for font fallback lookup.
+		 */
+		$default = apply_filters( 'fl_builder_font_families_default', FLBuilderFontFamilies::$default );
+		/**
+		 * Array of system font family definitions.
+		 */
+		$system = apply_filters( 'fl_builder_font_families_system', FLBuilderFontFamilies::$system );
+		/**
+		 * Array of available Google Font family definitions.
+		 */
+		$google = apply_filters( 'fl_builder_font_families_google', FLBuilderFontFamilies::google() );
 		foreach ( $default as $font => $data ) {
 			if ( $font_family == $font && isset( $data['fallback'] ) ) {
 				$fallback = $data['fallback'];
@@ -673,6 +1031,13 @@ final class FLBuilderFontFamilies {
 	static private $_google_json  = array();
 	static private $_google_fonts = false;
 	static private $_google_run   = 0;
+
+	/**
+	 * Cache for WP Font Library fonts. Null = not yet built, array = built (may be empty).
+	 *
+	 * @since 2.10.5
+	 */
+	static private $_wp_fonts = null;
 
 	/**
 	 * Array with a list of default font weights.
@@ -863,5 +1228,169 @@ final class FLBuilderFontFamilies {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Returns user-uploaded fonts from the WordPress Font Library (WP 6.5+).
+	 *
+	 * Reads the 'custom' origin from wp_get_global_settings(), so theme-declared
+	 * fonts are excluded. The result is cached per request; cache is busted on
+	 * wp_font_family / wp_font_face mutations via FLBuilderFonts::clear_wp_fonts_cache.
+	 *
+	 * @since 2.10.5
+	 * @return array Keyed by family name. Each entry has 'weights' (sorted, deduped),
+	 *               'fallback' (CSS fallback chain string), and 'faces' (raw theme.json
+	 *               face definitions for downstream enqueue).
+	 */
+	static public function wp_library() {
+		if ( null !== self::$_wp_fonts ) {
+			return self::$_wp_fonts;
+		}
+		if ( ! function_exists( 'wp_print_font_faces' ) || ! post_type_exists( 'wp_font_family' ) ) {
+			self::$_wp_fonts = array();
+			return self::$_wp_fonts;
+		}
+		$settings        = wp_get_global_settings( array( 'typography', 'fontFamilies' ) );
+		self::$_wp_fonts = self::parse_wp_library( is_array( $settings ) ? $settings : array() );
+		return self::$_wp_fonts;
+	}
+
+	/**
+	 * Parses the typography.fontFamilies settings shape into BB's font registry shape.
+	 *
+	 * Exposed for direct testing without WP global state. Reads only the 'custom'
+	 * origin so theme-declared families don't double up.
+	 *
+	 * @since 2.10.5
+	 * @param  array $settings The 'fontFamilies' settings node, keyed by origin.
+	 * @return array
+	 */
+	static public function parse_wp_library( $settings ) {
+		$custom = isset( $settings['custom'] ) && is_array( $settings['custom'] ) ? $settings['custom'] : array();
+		$fonts  = array();
+		foreach ( $custom as $family ) {
+			if ( empty( $family['fontFace'] ) || ! is_array( $family['fontFace'] ) ) {
+				continue;
+			}
+			$family_name = self::parse_wp_family_name( $family );
+			if ( '' === $family_name ) {
+				continue;
+			}
+			$fonts[ $family_name ] = array(
+				'weights'  => self::collect_wp_weights( $family['fontFace'] ),
+				'fallback' => self::parse_wp_fallback( $family ),
+				'faces'    => $family['fontFace'],
+			);
+		}
+		return $fonts;
+	}
+
+	/**
+	 * Extracts the display name for a WP Font Library family.
+	 *
+	 * Prefers the explicit `name`; falls back to the first comma-separated
+	 * token of `fontFamily` (mirrors WP_Font_Face_Resolver).
+	 *
+	 * @since 2.10.5
+	 * @access private
+	 * @param  array $family
+	 * @return string
+	 */
+	static private function parse_wp_family_name( $family ) {
+		if ( ! empty( $family['name'] ) ) {
+			return trim( (string) $family['name'] );
+		}
+		if ( empty( $family['fontFamily'] ) ) {
+			return '';
+		}
+		$tokens = explode( ',', $family['fontFamily'] );
+		return trim( $tokens[0], " \"'" );
+	}
+
+	/**
+	 * Parses the CSS fallback chain from a family's fontFamily declaration.
+	 *
+	 * @since 2.10.5
+	 * @access private
+	 * @param  array $family
+	 * @return string
+	 */
+	static private function parse_wp_fallback( $family ) {
+		if ( empty( $family['fontFamily'] ) || false === strpos( $family['fontFamily'], ',' ) ) {
+			return 'sans-serif';
+		}
+		$tokens = explode( ',', $family['fontFamily'] );
+		array_shift( $tokens );
+		$fallback = trim( implode( ', ', array_map( 'trim', $tokens ) ), ", \t\n\r" );
+		return '' === $fallback ? 'sans-serif' : $fallback;
+	}
+
+	/**
+	 * Collects discrete weight strings from a family's faces.
+	 *
+	 * Variable-font ranges ("100 900") are expanded into 100-step values.
+	 * Italic faces get an 'i' suffix to match BB's existing weight convention.
+	 *
+	 * @since 2.10.5
+	 * @access private
+	 * @param  array $faces
+	 * @return array
+	 */
+	static private function collect_wp_weights( $faces ) {
+		$weights = array();
+		foreach ( $faces as $face ) {
+			$weight = isset( $face['fontWeight'] ) ? (string) $face['fontWeight'] : '400';
+			$italic = isset( $face['fontStyle'] ) && 'italic' === $face['fontStyle'];
+			foreach ( self::expand_weight_range( $weight ) as $w ) {
+				$weights[] = $italic ? $w . 'i' : $w;
+			}
+		}
+		$weights = array_values( array_unique( $weights ) );
+		sort( $weights );
+		return $weights;
+	}
+
+	/**
+	 * Expands a CSS font-weight value into discrete weight strings.
+	 *
+	 * Single values pass through ("400" → ["400"]). Variable-font ranges
+	 * produce a 100-step sequence inclusive of endpoints ("100 900" →
+	 * ["100","200",...,"900"]). Non-numeric input is returned untouched so
+	 * unusual values still surface in the UI rather than disappearing.
+	 *
+	 * @since 2.10.5
+	 * @param  string|int $weight
+	 * @return array
+	 */
+	static public function expand_weight_range( $weight ) {
+		$weight = trim( (string) $weight );
+		if ( '' === $weight ) {
+			return array();
+		}
+		if ( false === strpos( $weight, ' ' ) ) {
+			return array( $weight );
+		}
+		$parts = preg_split( '/\s+/', $weight, 2 );
+		if ( ! is_numeric( $parts[0] ) || ! is_numeric( $parts[1] ) ) {
+			return array( $weight );
+		}
+		$min   = (int) $parts[0];
+		$max   = (int) $parts[1];
+		$start = (int) ( ceil( $min / 100 ) * 100 );
+		$out   = array();
+		for ( $w = $start; $w <= $max; $w += 100 ) {
+			$out[] = (string) $w;
+		}
+		return empty( $out ) ? array( (string) $min ) : $out;
+	}
+
+	/**
+	 * Resets the WP Font Library registry cache.
+	 *
+	 * @since 2.10.5
+	 * @return void
+	 */
+	static public function clear_wp_library_cache() {
+		self::$_wp_fonts = null;
 	}
 }

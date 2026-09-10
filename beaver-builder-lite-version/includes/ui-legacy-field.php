@@ -12,12 +12,50 @@ if ( isset( $field['class'] ) ) {
 }
 
 ob_start();
+/**
+ * Fires before any legacy settings field control is rendered.
+ *
+ * @since 1.0
+ * @param string $name     Field name.
+ * @param mixed  $value    Current field value.
+ * @param array  $field    Field configuration array.
+ * @param object $settings Module or row settings object.
+ */
 do_action( 'fl_builder_before_control', $name, $value, $field, $settings );
+/**
+ * Fires before a specific legacy settings field control type is rendered.
+ * The dynamic portion of the hook name, `$field['type']`, is the field type (e.g. text, select, color).
+ *
+ * @since 1.0
+ * @param string $name     Field name.
+ * @param mixed  $value    Current field value.
+ * @param array  $field    Field configuration array.
+ * @param object $settings Module or row settings object.
+ */
 do_action( 'fl_builder_before_control_' . $field['type'], $name, $value, $field, $settings );
 $field['html_before'] = ob_get_clean();
 
 ob_start();
+/**
+ * Fires after a specific legacy settings field control type is rendered.
+ * The dynamic portion of the hook name, `$field['type']`, is the field type (e.g. text, select, color).
+ *
+ * @since 1.0
+ * @param string $name     Field name.
+ * @param mixed  $value    Current field value.
+ * @param array  $field    Field configuration array.
+ * @param object $settings Module or row settings object.
+ */
 do_action( 'fl_builder_after_control_' . $field['type'], $name, $value, $field, $settings );
+/**
+ * Fires after any legacy settings field control is rendered.
+ *
+ * @since 1.0
+ * @param string $name     Field name.
+ * @param mixed  $value    Current field value.
+ * @param array  $field    Field configuration array.
+ * @param object $settings Module or row settings object.
+ */
 do_action( 'fl_builder_after_control', $name, $value, $field, $settings );
 $field['html_after'] = ob_get_clean();
 

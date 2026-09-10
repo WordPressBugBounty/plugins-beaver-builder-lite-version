@@ -25,9 +25,6 @@ final class FLBuilderImport {
 
 		require_once FL_BUILDER_DIR . 'classes/class-fl-builder-importer.php';
 
-		// Remove the WordPress importer.
-		remove_action( 'admin_init', 'wordpress_importer_init' );
-
 		// Add our importer.
 		add_action( 'admin_init', 'FLBuilderImport::load' );
 	}
@@ -37,12 +34,27 @@ final class FLBuilderImport {
 	 * @return void
 	 */
 	static public function load() {
-		load_plugin_textdomain( 'wordpress-importer', false, 'wordpress-importer/languages' );
 
-		$GLOBALS['wp_import'] = new FLBuilderImporter();
+		$bb_import = new FLBuilderImporter();
 
-		register_importer( 'wordpress', 'WordPress', __( 'Import <strong>posts, pages, comments, custom fields, categories, and tags</strong> from a WordPress export file.', 'fl-builder' ), array( $GLOBALS['wp_import'], 'dispatch' ) );
+		register_importer( 'bb_import', 'Beaver Builder', __( 'Import <strong>Beaver Builder layouts and content</strong> as well as normal posts, pages, comments, custom fields, categories, and tags from a WordPress export file.', 'fl-builder' ), array( $bb_import, 'dispatch' ) );
+	}
+
+	/**
+	 * Returns 0 for fl-builder-template posts so WP_Import always creates
+	 * a new post instead of skipping it as a duplicate.
+	 *
+	 * @param int   $post_exists Post ID of the existing match, or 0.
+	 * @param array $post        The post data being imported.
+	 * @return int
+	 */
+	static public function allow_template_reimport( $post_exists, $post ) {
+		if ( isset( $post['post_type'] ) && 'fl-builder-template' === $post['post_type'] ) {
+			return 0;
+		}
+		return $post_exists;
 	}
 }
 
 add_action( 'plugins_loaded', 'FLBuilderImport::init' );
+add_filter( 'wp_import_existing_post', 'FLBuilderImport::allow_template_reimport', 10, 2 );

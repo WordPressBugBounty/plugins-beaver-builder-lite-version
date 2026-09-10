@@ -162,6 +162,9 @@ class FLMenuModule extends FLBuilderModule {
 
 		if ( ! empty( $this->core_menus ) ) {
 			if ( empty( $settings->menu ) || ! in_array( $settings->menu, $this->core_menus ) ) {
+				/**
+				 * Default WordPress menu slug used by the menu module when no menu has been explicitly selected.
+				 */
 				$settings->menu = apply_filters( 'fl_builder_menu_module_core_menu', $this->core_menus[0], $settings );
 			}
 		}
@@ -227,6 +230,9 @@ class FLMenuModule extends FLBuilderModule {
 
 			ob_start();
 			if ( in_array( $toggle, array( 'hamburger', 'hamburger-label' ) ) ) {
+				/**
+				 * SVG markup for the hamburger icon used in the mobile menu toggle button.
+				 */
 				$menu_icon = apply_filters( 'fl_builder_mobile_menu_icon', file_get_contents( FL_BUILDER_DIR . 'img/svg/hamburger-menu.svg' ) );
 				echo '<button class="fl-menu-mobile-toggle ' . $toggle . ' fl-content-ui-button" ' . $aria_attributes . '>';
 				echo '<span class="fl-menu-icon svg-container">';
@@ -244,6 +250,9 @@ class FLMenuModule extends FLBuilderModule {
 				echo '<button class="fl-menu-mobile-toggle fl-content-ui-button text"><span class="fl-menu-mobile-toggle-label" ' . $aria_attributes . '">' . esc_attr( $menu_title ) . '</span></button>';
 
 			}
+			/**
+			 * HTML output of the mobile menu toggle button.
+			 */
 			echo apply_filters( 'fl_builder_menu_toggle_button', ob_get_clean(), $this );
 		}
 	}
@@ -360,7 +369,7 @@ class FLMenuModule extends FLBuilderModule {
 			$items = $this->render_menu_woo_cart( $items );
 		}
 
-		if ( isset( $settings->menu_search ) && 'show' == $settings->menu_search && ! FL_BUILDER_LITE ) {
+		if ( isset( $settings->menu_search ) && 'show' == $settings->menu_search && true !== FL_BUILDER_LITE ) {
 			$items = $this->render_menu_search( $items );
 		}
 
@@ -407,7 +416,7 @@ class FLMenuModule extends FLBuilderModule {
 		$settings = $this->menu_search_settings();
 
 		ob_start();
-		FLBuilder::render_module_html( 'search', $settings, $this->get_search_version() );
+		FLBuilder::render_module_html( 'search', $settings, $this->get_search_version(), $this->node );
 		$search_content = ob_get_clean();
 
 		$items .= "<li class='menu-item fl-menu-search-item'>$search_content</li>";
@@ -423,8 +432,9 @@ class FLMenuModule extends FLBuilderModule {
 	public function menu_search_settings() {
 		$settings = array(
 			'layout'     => 'button',
+			'label'      => 3 > $this->version ? 'hide' : $this->settings->search_label,
+			'btn_action' => 3 > $this->version ? 'fullscreen' : 'reveal',
 			'btn_text'   => sprintf( '<span class="sr-only">%s</span>', __( 'Search', 'fl-builder' ) ),
-			'btn_action' => 'reveal',
 		);
 
 		foreach ( $this->settings as $key => $value ) {
@@ -449,6 +459,8 @@ class FLMenuModule extends FLBuilderModule {
 		switch ( $this->version ) {
 			case 1:
 				return 1;
+			case 2:
+				return 2;
 			default:
 				return null;
 		}
@@ -517,7 +529,7 @@ class FLMenuModule extends FLBuilderModule {
 			$icon         = '';
 
 			if ( isset( $settings->cart_icon ) && ! empty( $settings->cart_icon ) ) {
-				$icon = '<i class="fl-menu-cart-icon ' . $settings->cart_icon . '" role="img" aria-label="' . __( 'Cart', 'fl-builder' ) . '"></i>';
+				$icon = '<i class="fl-menu-cart-icon ' . esc_attr( FLBuilderModuleUtils::get_icon_classes( $settings, 'cart_' ) ) . '" role="img" aria-label="' . __( 'Cart', 'fl-builder' ) . '"></i>';
 			}
 
 			if ( in_array( $display_type, array( 'total', 'count-total' ) ) ) {
@@ -650,6 +662,11 @@ FLBuilder::register_module('FLMenuModule', array(
 								'fields' => array( 'submenu_click_toggle', 'collapse' ),
 							),
 						),
+						'set'     => array(
+							'accordion' => array(
+								'menu_search' => 'hide',
+							),
+						),
 					),
 					'submenu_hover_toggle' => array(
 						'type'    => 'select',
@@ -716,7 +733,7 @@ FLBuilder::register_module('FLMenuModule', array(
 				'fields' => array(
 					'menu_search'     => array(
 						'type'    => 'select',
-						'label'   => __( 'Search Menu', 'fl-builder' ),
+						'label'   => __( 'Menu', 'fl-builder' ),
 						'default' => 'hide',
 						'options' => array(
 							'show' => __( 'Show', 'fl-builder' ),
@@ -724,8 +741,27 @@ FLBuilder::register_module('FLMenuModule', array(
 						),
 						'toggle'  => array(
 							'show' => array(
-								'fields'   => array( 'search_btn_icon' ),
+								'fields'   => array( 'search_label', 'search_btn_icon' ),
 								'sections' => array( 'search_style' ),
+							),
+						),
+					),
+					'search_action'   => array(
+						'type'    => 'hidden',
+						'label'   => __( 'Search Action', 'fl-builder' ),
+						'default' => 'reveal',
+					),
+					'search_label'    => array(
+						'type'    => 'select',
+						'label'   => __( 'Label', 'fl-builder' ),
+						'default' => 'show',
+						'options' => array(
+							'show' => __( 'Show', 'fl-builder' ),
+							'hide' => __( 'Hide', 'fl-builder' ),
+						),
+						'toggle'  => array(
+							'show' => array(
+								'fields' => array( 'search_label_padding', 'search_label_color', 'search_label_typography' ),
 							),
 						),
 					),
@@ -734,6 +770,7 @@ FLBuilder::register_module('FLMenuModule', array(
 						'default'     => 'fas fa-search',
 						'label'       => __( 'Icon', 'fl-builder' ),
 						'show_remove' => true,
+						'connections' => array( 'icon' ),
 					),
 				),
 			),
@@ -883,9 +920,11 @@ FLBuilder::register_module('FLMenuModule', array(
 						),
 					),
 					'cart_icon'               => array(
-						'type'        => 'icon',
-						'label'       => __( 'Cart Icon', 'fl-builder' ),
-						'show_remove' => true,
+						'type'               => 'icon',
+						'label'              => __( 'Cart Icon', 'fl-builder' ),
+						'show_remove'        => true,
+						'show_extra_classes' => true,
+						'connections'        => array( 'icon' ),
 					),
 					'show_menu_cart_checkout' => array(
 						'type'    => 'select',
@@ -1361,7 +1400,7 @@ FLBuilder::register_module('FLMenuModule', array(
 						'slider'     => true,
 						'preview'    => array(
 							'type'     => 'css',
-							'selector' => '.fl-menu-search-item .fl-button:is(a, button), .fl-menu-search-item a.fl-button:visited',
+							'selector' => '{node} .fl-menu-search-item .fl-button:is(a, button), {node} .fl-menu-search-item a.fl-button:visited',
 							'property' => 'font-size',
 						),
 					),
@@ -1375,7 +1414,7 @@ FLBuilder::register_module('FLMenuModule', array(
 						'preview'     => array(
 							'type'      => 'css',
 							'property'  => 'color',
-							'selector'  => 'i.fl-button-icon.fas:before',
+							'selector'  => '{node} i.fl-button-icon.fas:before',
 							'important' => true,
 						),
 					),
@@ -1402,8 +1441,21 @@ FLBuilder::register_module('FLMenuModule', array(
 						),
 						'preview'  => array(
 							'type'     => 'css',
-							'selector' => '.fl-menu-search-item .fl-search-form-input-wrap',
+							'selector' => '{node} .fl-menu-search-item .fl-search-form-input-wrap',
 							'property' => 'width',
+						),
+					),
+					'search_form_padding'         => array(
+						'type'       => 'dimension',
+						'label'      => __( 'Form Padding', 'fl-builder' ),
+						'default'    => '10',
+						'responsive' => true,
+						'slider'     => true,
+						'units'      => array( 'px' ),
+						'preview'    => array(
+							'type'     => 'css',
+							'selector' => '{node} .fl-menu-search-item .fl-search-form-input-wrap',
+							'property' => 'padding',
 						),
 					),
 					'search_form_bg_color'        => array(
@@ -1414,7 +1466,7 @@ FLBuilder::register_module('FLMenuModule', array(
 						'connections' => array( 'color' ),
 						'preview'     => array(
 							'type'     => 'css',
-							'selector' => '.fl-menu-search-item .fl-search-form-input-wrap',
+							'selector' => '{node} .fl-menu-search-item .fl-search-form-input-wrap',
 							'property' => 'background-color',
 						),
 					),
@@ -1434,7 +1486,7 @@ FLBuilder::register_module('FLMenuModule', array(
 						'label'   => __( 'Form Border', 'fl-builder' ),
 						'preview' => array(
 							'type'      => 'css',
-							'selector'  => '.fl-menu-search-item .fl-search-form-input-wrap',
+							'selector'  => '{node} .fl-menu-search-item .fl-search-form-input-wrap',
 							'important' => true,
 						),
 					),
@@ -1445,17 +1497,124 @@ FLBuilder::register_module('FLMenuModule', array(
 							'type' => 'none',
 						),
 					),
-					'search_form_padding'         => array(
+					'search_label_padding'        => array(
 						'type'       => 'dimension',
-						'label'      => __( 'Form Padding', 'fl-builder' ),
-						'default'    => '10',
+						'label'      => __( 'Label Padding', 'fl-builder' ),
 						'responsive' => true,
 						'slider'     => true,
 						'units'      => array( 'px' ),
 						'preview'    => array(
 							'type'     => 'css',
-							'selector' => '.fl-menu-search-item .fl-search-form-input-wrap',
+							'selector' => '{node} .fl-menu-search-item .fl-search-form-label',
 							'property' => 'padding',
+						),
+					),
+					'search_label_color'          => array(
+						'type'        => 'color',
+						'label'       => __( 'Label Color', 'fl-builder' ),
+						'show_reset'  => true,
+						'show_alpha'  => true,
+						'connections' => array( 'color' ),
+						'preview'     => array(
+							'type'     => 'css',
+							'selector' => '{node} .fl-menu-search-item .fl-search-form-label',
+							'property' => 'color',
+						),
+					),
+					'search_label_typography'     => array(
+						'type'       => 'typography',
+						'label'      => __( 'Label Typography', 'fl-builder' ),
+						'responsive' => true,
+						'preview'    => array(
+							'type'     => 'css',
+							'selector' => '{node} .fl-menu-search-item .fl-search-form-label',
+						),
+					),
+					'input_padding'               => array(
+						'type'       => 'dimension',
+						'label'      => __( 'Input Padding', 'fl-builder' ),
+						'default'    => '12',
+						'responsive' => true,
+						'slider'     => true,
+						'units'      => array( 'px' ),
+						'preview'    => array(
+							'type'     => 'css',
+							'selector' => '{node} .fl-menu-search-item .fl-search-text',
+							'property' => 'padding',
+						),
+					),
+					'input_typography'            => array(
+						'type'       => 'typography',
+						'label'      => __( 'Input Typography', 'fl-builder' ),
+						'responsive' => true,
+						'preview'    => array(
+							'type'      => 'css',
+							'selector'  => '{node} .fl-menu-search-item .fl-search-text',
+							'important' => true,
+						),
+					),
+					'input_color'                 => array(
+						'type'        => 'color',
+						'label'       => __( 'Input Color', 'fl-builder' ),
+						'show_reset'  => true,
+						'show_alpha'  => true,
+						'connections' => array( 'color' ),
+						'preview'     => array(
+							'type'     => 'css',
+							'selector' => '{node} .fl-menu-search-item .fl-search-text, {node}.fl-menu-search-item .fl-search-text::placeholder',
+							'property' => 'color',
+						),
+					),
+					'input_hover_color'           => array(
+						'type'        => 'color',
+						'label'       => __( 'Input Hover Color', 'fl-builder' ),
+						'show_reset'  => true,
+						'show_alpha'  => true,
+						'connections' => array( 'color' ),
+						'preview'     => array(
+							'type'     => 'css',
+							'selector' => '{node} .fl-menu-search-item .fl-search-text:hover, {node} .fl-menu-search-item .fl-search-text:focus, {node} .fl-menu-search-item .fl-search-text:hover::placeholder, {node} .fl-menu-search-item .fl-search-text:focus::placeholder',
+							'property' => 'color',
+						),
+					),
+					'input_bg_color'              => array(
+						'type'        => 'color',
+						'label'       => __( 'Input Background Color', 'fl-builder' ),
+						'show_reset'  => true,
+						'show_alpha'  => true,
+						'connections' => array( 'color' ),
+						'preview'     => array(
+							'type'     => 'css',
+							'selector' => '{node} .fl-menu-search-item .fl-search-text',
+							'property' => 'background-color',
+						),
+					),
+					'input_bg_hover_color'        => array(
+						'type'        => 'color',
+						'label'       => __( 'Input Background Hover Color', 'fl-builder' ),
+						'show_reset'  => true,
+						'show_alpha'  => true,
+						'connections' => array( 'color' ),
+						'preview'     => array(
+							'type'     => 'css',
+							'selector' => '{node} .fl-menu-search-item .fl-search-text:hover, {node} .fl-menu-search-item .fl-search-text:focus',
+							'property' => 'background-color',
+						),
+					),
+					'input_border'                => array(
+						'type'    => 'border',
+						'label'   => __( 'Input Border', 'fl-builder' ),
+						'preview' => array(
+							'type'      => 'css',
+							'selector'  => '{node} .fl-menu-search-item .fl-search-text',
+							'important' => true,
+						),
+					),
+					'input_border_hover'          => array(
+						'type'    => 'border',
+						'label'   => __( 'Input Border Hover', 'fl-builder' ),
+						'preview' => array(
+							'type' => 'none',
 						),
 					),
 				),
@@ -1547,9 +1706,6 @@ class FL_Menu_Module_Walker extends Walker_Nav_Menu {
 		$indent = ( $depth ) ? str_repeat( "\t", $depth ) : '';
 		$args   = (object) $args;
 
-		$class_names     = '';
-		$aria_attributes = 'aria-haspopup="menu" aria-expanded="false" aria-controls="sub-menu-' . $this->parent_id . '"';
-
 		$classes = empty( $item->classes ) ? array() : (array) $item->classes;
 		$submenu = $args->has_children ? ' fl-has-submenu' : '';
 		$toggle  = strpos( $args->menu_class, 'fl-toggle-none' ) === false ? true : false;
@@ -1558,33 +1714,70 @@ class FL_Menu_Module_Walker extends Walker_Nav_Menu {
 		$class_names = join( ' ', apply_filters( 'nav_menu_css_class', array_filter( $classes ), $item, $args, $depth ) );
 		$class_names = ' class="' . esc_attr( $class_names ) . $submenu . '"';
 
+		/**
+		 * The `id` attribute value for a menu item's `<li>` element.
+		 */
 		$item_id = apply_filters( 'fl_builder_menu_item_id', 'menu-item-' . $item->ID, $item, $depth );
 		$output .= $indent . '<li id="' . $item_id . '"' . $class_names . '>';
 
-		$attributes  = ! empty( $item->attr_title ) ? ' title="' . esc_attr( $item->attr_title ) . '"' : '';
-		$attributes .= ! empty( $item->target ) ? ' target="' . esc_attr( $item->target ) . '"' : '';
-		$attributes .= ! empty( $item->xfn ) ? ' rel="' . esc_attr( $item->xfn ) . '"' : '';
-		$attributes .= ! empty( $item->url ) ? ' href="' . esc_url( $item->url ) . '"' : '';
-		$attributes .= in_array( 'current-menu-item', $classes ) ? ' aria-current="page"' : '';
-		$attributes .= $args->has_children && ! $toggle && ! $hidden ? ' ' . $aria_attributes : '';
-
-		$item_output  = $args->has_children ? '<div class="fl-has-submenu-container">' : '';
-		$item_output .= $args->before;
-		$item_output .= '<a ' . $attributes . '>';
-		$item_output .= $args->link_before . apply_filters( 'the_title', $item->title, $item->ID ) . $args->link_after;
-		$item_output .= '</a>';
-
-		if ( $args->has_children && $toggle && ! $hidden ) {
-			$tag          = 1 === $this->version ? 'span' : 'button';
-			$attributes   = 1 === $this->version ? 'role="button" tabindex="0"' : 'type="button"';
-			$attributes  .= ' aria-label="' . esc_attr( $item->title ) . ' submenu toggle" ' . $aria_attributes;
-			$item_output .= '<' . $tag . ' ' . $attributes . ' class="fl-menu-toggle fl-content-ui-button"></' . $tag . '>';
+		$aria['aria-control'] = 'sub-menu-' . $this->parent_id;
+		if ( false === strpos( $args->menu_class, 'fl-menu-expanded' ) ) {
+			$aria['aria-expanded'] = 'false';
+		}
+		$attributes = array();
+		if ( ! empty( $item->attr_title ) ) {
+			$attributes['title'] = $item->attr_title;
+		}
+		if ( ! empty( $item->target ) ) {
+			$attributes['target'] = $item->target;
+		}
+		if ( ! empty( $item->xfn ) ) {
+			$attributes['rel'] = $item->xfn;
+		}
+		if ( ! empty( $item->url ) ) {
+			$attributes['href'] = esc_url( $item->url );
+		} else {
+			$attributes['tabindex'] = '0';
+		}
+		if ( in_array( 'current-menu-item', $classes, true ) ) {
+			$attributes['aria-current'] = 'page';
+		}
+		if ( $args->has_children && ! $toggle && ! $hidden ) {
+			$attributes = array_merge( $attributes, $aria );
 		}
 
-		$item_output .= $args->after;
-		$item_output .= $args->has_children ? '</div>' : '';
+		$item_output = [];
+		if ( $args->has_children ) {
+			$item_output[] = '<div class="fl-has-submenu-container">';
+		}
+		$item_output[] = $args->before;
+		$item_output[] = '<a ' . FLBuilderModuleUtils::join_html_attributes( $attributes ) . '>';
+		$item_output[] = $args->link_before . apply_filters( 'the_title', $item->title, $item->ID ) . $args->link_after;
+		$item_output[] = '</a>';
 
-		$output .= apply_filters( 'walker_nav_menu_start_el', $item_output, $item, $depth, $args );
+		if ( $args->has_children && $toggle && ! $hidden ) {
+			$attributes = array(
+				'class'      => 'fl-menu-toggle fl-content-ui-button',
+				'aria-label' => $item->title . ' submenu toggle',
+			);
+			if ( 1 === $this->version ) {
+				$tag                    = 'span';
+				$attributes['role']     = 'button';
+				$attributes['tabindex'] = '0';
+			} else {
+				$tag                = 'button';
+				$attributes['type'] = 'button';
+			}
+			$attributes    = array_merge( $attributes, $aria );
+			$item_output[] = '<' . $tag . ' ' . FLBuilderModuleUtils::join_html_attributes( $attributes ) . '></' . $tag . '>';
+		}
+
+		$item_output[] = $args->after;
+		if ( $args->has_children ) {
+			$item_output[] = '</div>';
+		}
+
+		$output .= apply_filters( 'walker_nav_menu_start_el', join( '', $item_output ), $item, $depth, $args );
 	}
 
 	public function end_el( &$output, $item, $depth = 0, $args = array() ) {
@@ -1619,8 +1812,3 @@ class FL_Menu_Module_Walker extends Walker_Nav_Menu {
 		return parent::display_element( $element, $children_elements, $max_depth, $depth, $args, $output );
 	}
 }
-
-FLBuilder::register_module_deprecations( 'menu', [
-	// Register module version (v1) to deprecate old HTML markup & the photo module within the search module.
-	'v1' => [],
-] );

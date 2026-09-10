@@ -26,6 +26,7 @@ final class FLBuilderWPBlocks {
 
 		// Actions
 		add_action( 'enqueue_block_editor_assets', __CLASS__ . '::enqueue_block_editor_assets' );
+		add_action( 'init', __CLASS__ . '::register_block_style', 20 );
 
 		// Filters
 		add_filter( 'excerpt_allowed_blocks', __CLASS__ . '::excerpt_allowed_blocks' );
@@ -54,13 +55,6 @@ final class FLBuilderWPBlocks {
 		$post_type_name   = $post_type_object->labels->singular_name;
 		$min              = ( ! FLBuilder::is_debug() ) ? '.min' : '';
 
-		wp_enqueue_style(
-			'fl-builder-wp-editor',
-			FLBuilder::plugin_url() . 'css/build/wp-editor.bundle' . $min . '.css',
-			array(),
-			FL_BUILDER_VERSION
-		);
-
 		wp_enqueue_script(
 			'fl-builder-wp-editor',
 			FLBuilder::plugin_url() . 'js/build/wp-editor.bundle' . $min . '.js',
@@ -74,6 +68,9 @@ final class FLBuilderWPBlocks {
 				'enabled'      => FLBuilderModel::is_builder_enabled( $post->ID ),
 				'nonce'        => wp_create_nonce( 'fl_ajax_update' ),
 				'unrestricted' => FLBuilderUserAccess::current_user_can( 'unrestricted_editing' ),
+				/**
+				 * Whether to render the builder's admin edit UI button in the block editor toolbar.
+				 */
 				'showui'       => apply_filters( 'fl_builder_render_admin_edit_ui', true ),
 				'pagenow'      => $pagenow,
 			),
@@ -103,6 +100,30 @@ final class FLBuilderWPBlocks {
 				'version' => $wp_version,
 			),
 		) );
+	}
+
+	/**
+	 * Registers the block stylesheet via wp_enqueue_block_style() so it is
+	 * injected into the block editor iframe (required for apiVersion: 3 blocks).
+	 *
+	 * @since 2.10
+	 * @return void
+	 */
+	static public function register_block_style() {
+		if ( ! function_exists( 'wp_enqueue_block_style' ) ) {
+			return;
+		}
+
+		$min = ( ! FLBuilder::is_debug() ) ? '.min' : '';
+
+		wp_enqueue_block_style(
+			'fl-builder/layout',
+			array(
+				'handle' => 'fl-builder-wp-editor',
+				'src'    => FLBuilder::plugin_url() . 'css/build/wp-editor.bundle' . $min . '.css',
+				'ver'    => FL_BUILDER_VERSION,
+			)
+		);
 	}
 
 	/**

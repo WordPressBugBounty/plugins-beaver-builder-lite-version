@@ -1,19 +1,14 @@
 <?php
 
-$text_class = 'fl-icon-text';
-
+$text_class = array( 'fl-icon-text' );
 if ( empty( $settings->link ) ) {
-	$text_class .= ' fl-icon-text-wrap';
+	$text_class[] = 'fl-icon-text-wrap';
 }
 if ( empty( $settings->text ) ) {
-	$text_class .= ' fl-icon-text-empty';
+	$text_class[] = 'fl-icon-text-empty';
 }
 
-$text_link_class = 'fl-icon-text-link';
-
-if ( ! empty( $settings->link ) ) {
-	$text_link_class .= ' fl-icon-text-wrap';
-}
+$text_link_class = empty( $settings->link ) ? 'fl-icon-text-link' : 'fl-icon-text-link fl-icon-text-wrap';
 
 ?>
 <?php if ( ! isset( $settings->exclude_wrapper ) || ( isset( $settings->exclude_wrapper ) && ! $settings->exclude_wrapper ) ) : ?>
@@ -21,27 +16,37 @@ if ( ! empty( $settings->link ) ) {
 <?php endif; ?>
 	<span class="fl-icon">
 		<?php if ( ! empty( $settings->link ) ) : ?>
-			<?php if ( ! empty( $settings->text ) ) : ?>
-			<a href="<?php echo esc_url( do_shortcode( $settings->link ) ); ?>" target="<?php echo esc_attr( $settings->link_target ); ?>" <?php echo ( isset( $settings->link_download ) && 'yes' === $settings->link_download ) ? ' download' : ''; ?> tabindex="-1" aria-hidden="true" aria-labelledby="fl-icon-text-<?php echo ( isset( $module->node ) ? $module->node : esc_attr( $settings->id ) ); ?>"<?php echo $module->get_rel(); ?>>
+			<?php
+			if ( ! empty( $settings->text ) ) :
+				$options = array(
+					'tabindex'    => '-1',
+					'aria-hidden' => 'true',
+				);
+				?>
+			<a <?php echo FLBuilderModuleUtils::get_link_attributes( $settings, 'link', $options ); ?>>
 			<?php else : ?>
-			<a href="<?php echo esc_url( do_shortcode( $settings->link ) ); ?>"<?php echo ( isset( $settings->link_download ) && 'yes' === $settings->link_download ) ? ' download' : ''; ?> target="<?php echo esc_attr( $settings->link_target ); ?>"<?php echo $module->get_rel(); ?>>
+			<a <?php echo FLBuilderModuleUtils::get_link_attributes( $settings, 'link' ); ?>>
 			<?php endif; ?>
 		<?php endif; ?>
-		<i class="<?php echo esc_attr( $settings->icon ); ?>" aria-hidden="true"></i>
+		<i class="<?php echo esc_attr( FLBuilderModuleUtils::get_icon_classes( $settings ) ); ?>" aria-hidden="true"></i>
 		<?php if ( isset( $settings->sr_text ) && '' !== $settings->sr_text ) : ?>
 		<span class="sr-only"><?php echo $settings->sr_text; ?></span>
+		<?php endif; ?>
+		<?php if ( empty( $settings->text ) ) : ?>
+			<?php echo FLBuilderModuleUtils::get_link_notice( $settings, 'link' ); ?>
 		<?php endif; ?>
 		<?php if ( ! empty( $settings->link ) ) : ?>
 		</a>
 		<?php endif; ?>
 	</span>
 	<?php if ( ! empty( $settings->text ) ) : ?>
-		<div id="fl-icon-text-<?php echo ( isset( $module->node ) ? $module->node : esc_attr( $settings->id ) ); ?>" class="<?php echo $text_class; ?>">
+		<div id="fl-icon-text-<?php echo ( isset( $module->node ) ? $module->node : esc_attr( $settings->id ) ); ?>" class="<?php echo join( ' ', $text_class ); ?>">
 			<?php if ( ! empty( $settings->link ) ) : ?>
-			<a href="<?php echo esc_url( do_shortcode( $settings->link ) ); ?>" target="<?php echo esc_attr( $settings->link_target ); ?>" <?php echo ( isset( $settings->link_download ) && 'yes' === $settings->link_download ) ? ' download' : ''; ?> class="<?php echo $text_link_class; ?>"<?php echo $module->get_rel(); ?>>
+			<a <?php echo FLBuilderModuleUtils::get_link_attributes( $settings, 'link', [ 'class' => $text_link_class ] ); ?>>
 			<?php endif; ?>
 			<?php echo $settings->text; ?>
 			<?php if ( ! empty( $settings->link ) ) : ?>
+				<?php echo FLBuilderModuleUtils::get_link_notice( $settings, 'link' ); ?>
 			</a>
 			<?php endif; ?>
 		</div>

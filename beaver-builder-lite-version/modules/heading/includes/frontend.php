@@ -10,10 +10,11 @@ $attrs = [
 ?>
 <<?php echo esc_attr( $settings->tag ); ?> <?php $module->render_attributes( $attrs ); ?>>
 	<?php if ( ! empty( $settings->link ) ) : ?>
-	<a href="<?php echo esc_url( do_shortcode( $settings->link ) ); ?>" title="<?php echo esc_attr( wp_strip_all_tags( $settings->heading ) ); ?>" <?php echo ( isset( $settings->link_download ) && 'yes' === $settings->link_download ) ? ' download' : ''; ?> target="<?php echo esc_attr( $settings->link_target ); ?>" <?php echo $module->get_rel(); ?>>
+	<a <?php echo FLBuilderModuleUtils::get_link_attributes( $settings, 'link' ); ?>>
 	<?php endif; ?>
 		<?php echo $settings->heading; ?>
 	<?php if ( ! empty( $settings->link ) ) : ?>
+		<?php echo FLBuilderModuleUtils::get_link_notice( $settings, 'link' ); ?>
 	</a>
 	<?php endif; ?>
 </<?php echo esc_attr( $settings->tag ); ?>>

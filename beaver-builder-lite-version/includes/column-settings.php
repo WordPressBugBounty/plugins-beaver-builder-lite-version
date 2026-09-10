@@ -143,7 +143,7 @@ FLBuilder::register_settings_form('col', array(
 						'bg_type'    => array(
 							'type'    => 'select',
 							'label'   => __( 'Type', 'fl-builder' ),
-							'default' => 'color',
+							'default' => 'none',
 							'options' => array(
 								'none'     => _x( 'None', 'Background type.', 'fl-builder' ),
 								'color'    => _x( 'Color', 'Background type.', 'fl-builder' ),
@@ -422,7 +422,7 @@ FLBuilder::register_settings_form('col', array(
 		'advanced' => array(
 			'title'    => __( 'Advanced', 'fl-builder' ),
 			'sections' => array(
-				'margins'       => array(
+				'margins'           => array(
 					'title'  => __( 'Spacing', 'fl-builder' ),
 					'fields' => array(
 						'margin'  => array(
@@ -508,7 +508,7 @@ FLBuilder::register_settings_form('col', array(
 						),
 					),
 				),
-				'visibility'    => array(
+				'visibility'        => array(
 					'title'  => __( 'Visibility', 'fl-builder' ),
 					'fields' => array(
 						'responsive_display'         => array(
@@ -565,7 +565,7 @@ FLBuilder::register_settings_form('col', array(
 						),
 					),
 				),
-				'animation'     => array(
+				'animation'         => array(
 					'title'  => __( 'Animation', 'fl-builder' ),
 					'fields' => array(
 						'animation' => array(
@@ -578,7 +578,7 @@ FLBuilder::register_settings_form('col', array(
 						),
 					),
 				),
-				'css_selectors' => array(
+				'css_selectors'     => array(
 					'title'  => __( 'HTML Element', 'fl-builder' ),
 					'fields' => array(
 						'container_element' => array(
@@ -631,7 +631,20 @@ FLBuilder::register_settings_form('col', array(
 						),
 					),
 				),
-				'export_import' => array(
+				'custom_attributes' => array(
+					'title'  => __( 'Custom Attributes', 'fl-builder' ),
+					'fields' => array(
+						'custom_attributes' => array(
+							'type'         => 'form',
+							'label'        => __( 'Attribute', 'fl-builder' ),
+							'form'         => 'custom_attributes',
+							'help'         => __( 'Adds custom attributes to the column', 'fl-builder' ),
+							'preview_text' => 'key',
+							'multiple'     => true,
+						),
+					),
+				),
+				'export_import'     => array(
 					'title'     => __( 'Export/Import', 'fl-builder' ),
 					'collapsed' => true,
 					'fields'    => array(

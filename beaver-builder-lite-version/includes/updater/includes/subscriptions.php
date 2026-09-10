@@ -1,4 +1,3 @@
-<hr />
 <?php
 // first check we have a download for the current version.
 $plugin_data = get_plugin_data( FL_BUILDER_FILE );
@@ -56,36 +55,55 @@ if ( ! $themer && defined( 'FL_THEME_BUILDER_VERSION' ) ) {
 }
 
 ?>
-<h3><?php _e( 'Available Downloads', 'fl-builder' ); ?></h3>
-<p><?php _e( 'The following downloads are currently available for remote update with the subscription(s) associated with this license.', 'fl-builder' ); ?></p>
-<ul class='subscription-downloads'>
-	<?php
-	$downloads = apply_filters( 'fl_builder_subscription_downloads', $subscription->downloads );
-	foreach ( $downloads as $download ) {
-		echo '<li>' . $download . '</li>';
-	}
-	do_action( 'fl_builder_after_subscription_downloads' );
-	?>
-</ul>
+<div class="fl-downloads-card">
+	<div class="fl-downloads-header">
+		<h3><?php _e( 'Available Downloads', 'fl-builder' ); ?></h3>
+		<p><?php _e( 'Products available with your current license.', 'fl-builder' ); ?></p>
+	</div>
+	<div class="fl-downloads-list">
+		<?php
+		/**
+		 * Filters the array of subscription download items shown in the account downloads section.
+		 *
+		 * @since 1.0
+		 * @param array $downloads Array of download name strings from the subscription.
+		 */
+		$downloads = apply_filters( 'fl_builder_subscription_downloads', $subscription->downloads );
+		foreach ( $downloads as $download ) {
+			echo '<div class="fl-download-card">' . $download . '</div>';
+		}
+		/**
+		 * Fires after the subscription downloads list is rendered.
+		 *
+		 * @since 1.0
+		 */
+		do_action( 'fl_builder_after_subscription_downloads' );
+		?>
+	</div>
+</div>
 
 <?php if ( ! $themer ) : ?>
-	<div class="themer">
-	<h3><?php _e( 'Take Beaver Builder Even Further', 'fl-builder' ); ?></h3>
-	<h4>
-		<strong>Beaver Themer</strong> - <a target="_blank" href="
-		<?php
-		echo FLBuilderModel::get_store_url( 'beaver-themer', array(
-			'utm_medium'   => 'bb-pro',
-			'utm_source'   => 'license-settings-page',
-			'utm_campaign' => 'themer-upsell',
-		) );
-		?>
-		">Click here </a> to learn more about this Add-on</h4>
-		<ul>
-			<li><span class="dashicons dashicons-saved"></span>Create custom headers and footer layouts that override your theme.</li>
-			<li><span class="dashicons dashicons-saved"></span>Design unique page layouts for index, archive, search, single posts and 404 pages.</li>
-			<li><span class="dashicons dashicons-saved"></span>Customize WooCommerce Shop, Checkout, Cart and My Account pages.</li>
-			<li><span class="dashicons dashicons-saved"></span>Create layout "parts" to insert above or below headers, footers, or the content area.</li>
+	<div class="fl-themer-upsell">
+		<div class="fl-themer-upsell-header">
+			<h3><?php _e( 'Take Beaver Builder Even Further', 'fl-builder' ); ?></h3>
+			<p><?php _e( 'Unlock the full power of Beaver Builder with Beaver Themer.', 'fl-builder' ); ?></p>
+		</div>
+		<ul class="fl-themer-upsell-features">
+			<li><span class="dashicons dashicons-yes-alt"></span><?php _e( 'Create custom headers and footer layouts that override your theme.', 'fl-builder' ); ?></li>
+			<li><span class="dashicons dashicons-yes-alt"></span><?php _e( 'Design unique page layouts for index, archive, search, single posts and 404 pages.', 'fl-builder' ); ?></li>
+			<li><span class="dashicons dashicons-yes-alt"></span><?php _e( 'Customize WooCommerce Shop, Checkout, Cart and My Account pages.', 'fl-builder' ); ?></li>
+			<li><span class="dashicons dashicons-yes-alt"></span><?php _e( 'Create layout "parts" to insert above or below headers, footers, or the content area.', 'fl-builder' ); ?></li>
 		</ul>
+		<?php
+		$themer_upsell_url = FLBuilderModel::get_store_url(
+			'beaver-themer',
+			array(
+				'utm_medium'   => 'bb-pro',
+				'utm_source'   => 'license-settings-page',
+				'utm_campaign' => 'themer-upsell',
+			)
+		);
+		?>
+		<a class="fl-themer-upsell-btn" target="_blank" href="<?php echo $themer_upsell_url; ?>"><?php _e( 'Learn More About Beaver Themer', 'fl-builder' ); ?> <span class="dashicons dashicons-external"></span></a>
 	</div>
 <?php endif; ?>

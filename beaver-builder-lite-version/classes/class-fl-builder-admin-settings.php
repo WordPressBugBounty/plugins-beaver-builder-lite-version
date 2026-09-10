@@ -43,6 +43,15 @@ final class FLBuilderAdminSettings {
 	static public function init() {
 		add_action( 'init', __CLASS__ . '::init_hooks', 11 );
 		add_action( 'wp_ajax_fl_welcome_submit', array( 'FLBuilderAdminSettings', 'welcome_submit' ) );
+		add_action( 'wp_ajax_fl_module_toggle', array( __CLASS__, 'ajax_module_toggle' ) );
+		add_action( 'wp_ajax_fl_block_toggle', array( __CLASS__, 'ajax_block_toggle' ) );
+		add_action( 'wp_ajax_fl_post_type_toggle', array( __CLASS__, 'ajax_post_type_toggle' ) );
+		add_action( 'wp_ajax_fl_icon_set_toggle', array( __CLASS__, 'ajax_icon_set_toggle' ) );
+		add_action( 'wp_ajax_fl_fa_pro_toggle', array( __CLASS__, 'ajax_fa_pro_toggle' ) );
+		add_action( 'wp_ajax_fl_debug_toggle', array( __CLASS__, 'ajax_debug_toggle' ) );
+		add_action( 'wp_ajax_fl_release_channel', array( __CLASS__, 'ajax_release_channel' ) );
+		add_action( 'wp_ajax_fl_clear_cache', array( __CLASS__, 'ajax_clear_cache' ) );
+		add_action( 'wp_ajax_fl_user_access_save', array( __CLASS__, 'ajax_user_access_save' ) );
 		// register global settings
 		self::register_settings();
 	}
@@ -100,6 +109,296 @@ final class FLBuilderAdminSettings {
 			);
 			wp_send_json_error( $args );
 		}
+	}
+
+	/**
+	 * AJAX handler to toggle a single module on or off.
+	 *
+	 * @since 2.11
+	 */
+	static public function ajax_module_toggle() {
+		if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( $_POST['_wpnonce'], 'modules' ) ) {
+			wp_send_json_error();
+		}
+
+		if ( ! current_user_can( FLBuilderAdmin::admin_settings_capability() ) ) {
+			wp_send_json_error();
+		}
+
+		$module  = sanitize_text_field( $_POST['module'] );
+		$enabled = 'true' === $_POST['enabled'];
+
+		// Validate module against known modules.
+		if ( 'all' !== $module && ! array_key_exists( $module, FLBuilderModel::$modules ) ) {
+			wp_send_json_error();
+		}
+
+		$current = FLBuilderModel::get_admin_settings_option( '_fl_builder_enabled_modules', true );
+
+		if ( ! $current ) {
+			$current = FLBuilderModel::get_default_enabled_modules();
+		}
+
+		// Handle "all" toggle
+		if ( 'all' === $module ) {
+			if ( $enabled ) {
+				$current   = array_keys( FLBuilderModel::$modules );
+				$current[] = 'all';
+			} else {
+				// Disable all — keep at least one to avoid error
+				$current = array();
+			}
+		} else {
+			// Remove "all" from array since we're toggling individually
+			$current = array_diff( $current, array( 'all' ) );
+
+			if ( $enabled && ! in_array( $module, $current ) ) {
+				$current[] = $module;
+			} elseif ( ! $enabled ) {
+				$current = array_diff( $current, array( $module ) );
+			}
+
+			// Check if all modules are now enabled — re-add "all"
+			$all_modules = array_keys( FLBuilderModel::$modules );
+			if ( ! array_diff( $all_modules, $current ) ) {
+				$current[] = 'all';
+			}
+		}
+
+		if ( empty( $current ) ) {
+			wp_send_json_error( array( 'message' => __( 'You must have at least one module enabled.', 'fl-builder' ) ) );
+		}
+
+		$current = array_values( $current );
+		FLBuilderModel::update_admin_settings_option( '_fl_builder_enabled_modules', $current, true );
+
+		wp_send_json_success();
+	}
+
+	/**
+	 * AJAX handler for toggling a block on or off.
+	 *
+	 * @since 2.11
+	 * @return void
+	 */
+	static public function ajax_block_toggle() {
+		if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( $_POST['_wpnonce'], 'blocks' ) ) {
+			wp_send_json_error();
+		}
+
+		if ( ! current_user_can( FLBuilderAdmin::admin_settings_capability() ) ) {
+			wp_send_json_error();
+		}
+
+		$block   = sanitize_text_field( $_POST['module'] );
+		$enabled = 'true' === $_POST['enabled'];
+
+		// Validate block against known block editor modules.
+		if ( 'all' !== $block && ! array_key_exists( $block, FLBuilderModuleBlocks::get_block_editor_modules() ) ) {
+			wp_send_json_error();
+		}
+
+		$current = FLBuilderModel::get_admin_settings_option( '_fl_builder_enabled_blocks', true );
+
+		if ( ! $current ) {
+			$current = array_merge( array_keys( FLBuilderModuleBlocks::get_block_editor_modules() ), array( 'all' ) );
+		}
+
+		// Handle "all" toggle
+		if ( 'all' === $block ) {
+			if ( $enabled ) {
+				$current   = array_keys( FLBuilderModuleBlocks::get_block_editor_modules() );
+				$current[] = 'all';
+			} else {
+				$current = array();
+			}
+		} else {
+			// Remove "all" from array since we're toggling individually
+			$current = array_diff( $current, array( 'all' ) );
+
+			if ( $enabled && ! in_array( $block, $current ) ) {
+				$current[] = $block;
+			} elseif ( ! $enabled ) {
+				$current = array_diff( $current, array( $block ) );
+			}
+
+			// Check if all blocks are now enabled — re-add "all"
+			$all_blocks = array_keys( FLBuilderModuleBlocks::get_block_editor_modules() );
+			if ( ! array_diff( $all_blocks, $current ) ) {
+				$current[] = 'all';
+			}
+		}
+
+		$current = array_values( $current );
+		FLBuilderModel::update_admin_settings_option( '_fl_builder_enabled_blocks', $current, true );
+
+		wp_send_json_success();
+	}
+
+	/**
+	 * AJAX handler for toggling a post type on or off.
+	 *
+	 * @since 2.11
+	 * @return void
+	 */
+	static public function ajax_post_type_toggle() {
+		if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( $_POST['_wpnonce'], 'post-types' ) ) {
+			wp_send_json_error();
+		}
+
+		if ( ! current_user_can( FLBuilderAdmin::admin_settings_capability() ) ) {
+			wp_send_json_error();
+		}
+
+		$post_type = sanitize_text_field( $_POST['module'] );
+		$enabled   = 'true' === $_POST['enabled'];
+
+		// Validate post type exists.
+		if ( ! post_type_exists( $post_type ) ) {
+			wp_send_json_error();
+		}
+
+		$current = FLBuilderModel::get_admin_settings_option( '_fl_builder_post_types', true );
+
+		if ( ! $current || ! is_array( $current ) ) {
+			$current = array( 'page', 'post' );
+		}
+
+		if ( $enabled && ! in_array( $post_type, $current ) ) {
+			$current[] = $post_type;
+		} elseif ( ! $enabled ) {
+			$current = array_diff( $current, array( $post_type ) );
+		}
+
+		$current = array_values( $current );
+		FLBuilderModel::update_admin_settings_option( '_fl_builder_post_types', $current, true, true );
+
+		wp_send_json_success();
+	}
+
+	/**
+	 * AJAX handler for toggling an icon set on or off.
+	 *
+	 * @since 2.11
+	 * @return void
+	 */
+	static public function ajax_icon_set_toggle() {
+		if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( $_POST['_wpnonce'], 'icons' ) ) {
+			wp_send_json_error();
+		}
+
+		if ( ! current_user_can( FLBuilderAdmin::admin_settings_capability() ) ) {
+			wp_send_json_error();
+		}
+
+		$icon_set = sanitize_text_field( $_POST['icon_set'] );
+		$enabled  = 'true' === $_POST['enabled'];
+
+		// Validate icon set against registered sets.
+		$valid_sets = array_keys( FLBuilderIcons::get_sets() );
+		if ( ! in_array( $icon_set, $valid_sets, true ) ) {
+			wp_send_json_error();
+		}
+
+		$current = FLBuilderModel::get_enabled_icons();
+
+		if ( $enabled && ! in_array( $icon_set, $current ) ) {
+			$current[] = $icon_set;
+		} elseif ( ! $enabled ) {
+			$current = array_diff( $current, array( $icon_set ) );
+		}
+
+		$current = array_values( $current );
+		self::update_enabled_icons( $current );
+
+		wp_send_json_success();
+	}
+
+	/**
+	 * AJAX handler for toggling Font Awesome Pro on or off.
+	 *
+	 * @since 2.11
+	 * @return void
+	 */
+	static public function ajax_fa_pro_toggle() {
+		if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( $_POST['_wpnonce'], 'icons' ) ) {
+			wp_send_json_error();
+		}
+
+		if ( ! current_user_can( FLBuilderAdmin::admin_settings_capability() ) ) {
+			wp_send_json_error();
+		}
+
+		$enabled = 'true' === $_POST['enabled'];
+		FLBuilderUtils::update_option( '_fl_builder_enable_fa_pro', $enabled, true );
+		do_action( 'fl_builder_fa_pro_save', $enabled );
+
+		wp_send_json_success();
+	}
+
+	/**
+	 * AJAX handler for toggling debug mode on or off.
+	 *
+	 * @since 2.11
+	 * @return void
+	 */
+	static public function ajax_debug_toggle() {
+		if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( $_POST['_wpnonce'], 'debug' ) ) {
+			wp_send_json_error();
+		}
+
+		if ( ! current_user_can( FLBuilderAdmin::admin_settings_capability() ) ) {
+			wp_send_json_error();
+		}
+
+		$enabled   = 'true' === $_POST['enabled'];
+		$is_active = get_transient( 'fl_debug_mode' );
+
+		if ( $enabled && ! $is_active ) {
+			set_transient( 'fl_debug_mode', wp_generate_password( 32, false ), 172800 );
+			update_option( 'fl_debug_mode', true );
+		} elseif ( ! $enabled && $is_active ) {
+			delete_transient( 'fl_debug_mode' );
+			update_option( 'fl_debug_mode', false );
+		}
+
+		$data = array( 'debug_active' => $enabled );
+
+		if ( $enabled ) {
+			$token      = get_transient( 'fl_debug_mode' );
+			$expire_opt = get_option( '_transient_timeout_fl_debug_mode' );
+			$datetime1  = new \DateTime( 'now' );
+			$datetime2  = new \DateTime( gmdate( 'Y-m-d H:i:s', $expire_opt ) );
+			$interval   = $datetime1->diff( $datetime2 );
+
+			$data['debug_url']    = add_query_arg( array( 'fldebug' => $token ), site_url() );
+			$data['debug_expiry'] = $interval->format( '%d days %h hours %i minutes' );
+		}
+
+		wp_send_json_success( $data );
+	}
+
+	/**
+	 * AJAX handler for changing the release channel.
+	 *
+	 * @since 2.11
+	 * @return void
+	 */
+	static public function ajax_release_channel() {
+		if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( $_POST['_wpnonce'], 'beta' ) ) {
+			wp_send_json_error();
+		}
+
+		if ( ! current_user_can( FLBuilderAdmin::admin_settings_capability() ) ) {
+			wp_send_json_error();
+		}
+
+		$channel = isset( $_POST['channel'] ) ? sanitize_text_field( $_POST['channel'] ) : 'stable';
+
+		FLBuilderUtils::update_option( 'fl_beta_updates', in_array( $channel, array( 'beta', 'alpha' ), true ), true );
+		FLBuilderUtils::update_option( 'fl_alpha_updates', 'alpha' === $channel, true );
+
+		wp_send_json_success( array( 'channel' => $channel ) );
 	}
 
 	/**
@@ -588,6 +887,9 @@ final class FLBuilderAdminSettings {
 			// Enable pro?
 			$enable_fa_pro = isset( $_POST['fl-enable-fa-pro'] ) ? true : false;
 			FLBuilderUtils::update_option( '_fl_builder_enable_fa_pro', $enable_fa_pro, true );
+			/**
+			 * Fires after Font Awesome Pro settings are saved in the admin.
+			 */
 			do_action( 'fl_builder_fa_pro_save', $enable_fa_pro );
 			// Update KIT url
 			$kit_url = isset( $_POST['fl-fa-pro-kit'] ) ? $_POST['fl-fa-pro-kit'] : '';
@@ -780,6 +1082,48 @@ final class FLBuilderAdminSettings {
 	}
 
 	/**
+	 * AJAX handler for saving a single user access capability.
+	 *
+	 * @since 2.11
+	 * @return void
+	 */
+	static public function ajax_user_access_save() {
+		if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( $_POST['_wpnonce'], 'user-access' ) ) {
+			wp_send_json_error();
+		}
+
+		if ( ! current_user_can( FLBuilderAdmin::admin_settings_capability() ) ) {
+			wp_send_json_error();
+		}
+
+		$capability = sanitize_text_field( $_POST['capability'] );
+		$roles      = isset( $_POST['roles'] ) ? array_map( 'sanitize_text_field', $_POST['roles'] ) : array();
+
+		// Validate capability against registered settings.
+		$registered = FLBuilderUserAccess::get_registered_settings();
+		if ( ! array_key_exists( $capability, $registered ) ) {
+			wp_send_json_error();
+		}
+
+		// Validate roles against known roles.
+		$all_roles = FLBuilderUserAccess::get_all_roles();
+		$settings  = FLBuilderModel::get_admin_settings_option( '_fl_builder_user_access', true );
+
+		if ( ! is_array( $settings ) ) {
+			$settings = array();
+		}
+
+		$settings[ $capability ] = array();
+		foreach ( $all_roles as $role_key => $role_name ) {
+			$settings[ $capability ][ $role_key ] = in_array( $role_key, $roles, true );
+		}
+
+		FLBuilderModel::update_admin_settings_option( '_fl_builder_user_access', $settings, false, true );
+
+		wp_send_json_success();
+	}
+
+	/**
 	 * Clears the builder cache.
 	 *
 	 * @since 1.5.3
@@ -811,6 +1155,39 @@ final class FLBuilderAdminSettings {
 	}
 
 	/**
+	 * AJAX handler for clearing the cache.
+	 *
+	 * @since 2.11
+	 * @return void
+	 */
+	static public function ajax_clear_cache() {
+		if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( $_POST['_wpnonce'], 'cache' ) ) {
+			wp_send_json_error();
+		}
+
+		if ( ! FLBuilderAdmin::current_user_can_access_settings() ) {
+			wp_send_json_error();
+		}
+
+		if ( is_network_admin() ) {
+			self::clear_cache_for_all_sites();
+		} else {
+			// Clear builder cache.
+			FLBuilderModel::delete_asset_cache_for_all_posts();
+
+			// Clear theme cache.
+			if ( class_exists( 'FLCustomizer' ) && method_exists( 'FLCustomizer', 'clear_all_css_cache' ) ) {
+				FLCustomizer::clear_all_css_cache();
+			}
+		}
+
+		/** @see fl_builder_cache_cleared */
+		do_action( 'fl_builder_cache_cleared' );
+
+		wp_send_json_success();
+	}
+
+	/**
 	 * Enable/disable debug
 	 *
 	 * @since 1.10.7
@@ -824,7 +1201,7 @@ final class FLBuilderAdminSettings {
 			$debugmode = get_transient( 'fl_debug_mode' );
 
 			if ( ! $debugmode ) {
-				set_transient( 'fl_debug_mode', md5( rand() ), 172800 ); // 48 hours 172800
+				set_transient( 'fl_debug_mode', wp_generate_password( 32, false ), 172800 ); // 48 hours 172800
 				update_option( 'fl_debug_mode', true );
 			} else {
 				delete_transient( 'fl_debug_mode' );
@@ -953,17 +1330,10 @@ final class FLBuilderAdminSettings {
 			return;
 		} elseif ( isset( $_POST['fl-beta-nonce'] ) && wp_verify_nonce( $_POST['fl-beta-nonce'], 'beta' ) ) {
 
-			if ( isset( $_POST['beta-checkbox'] ) ) {
-				FLBuilderUtils::update_option( 'fl_beta_updates', true, true );
-			} else {
-				FLBuilderUtils::update_option( 'fl_beta_updates', false, true );
-			}
+			$channel = isset( $_POST['release-channel'] ) ? sanitize_text_field( $_POST['release-channel'] ) : 'stable';
 
-			if ( isset( $_POST['alpha-checkbox'] ) ) {
-				FLBuilderUtils::update_option( 'fl_alpha_updates', true, true );
-			} else {
-				FLBuilderUtils::update_option( 'fl_alpha_updates', false, true );
-			}
+			FLBuilderUtils::update_option( 'fl_beta_updates', in_array( $channel, array( 'beta', 'alpha' ), true ), true );
+			FLBuilderUtils::update_option( 'fl_alpha_updates', 'alpha' === $channel, true );
 		}
 	}
 

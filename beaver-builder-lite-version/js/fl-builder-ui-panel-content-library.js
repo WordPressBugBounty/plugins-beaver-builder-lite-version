@@ -209,9 +209,6 @@
         hide: function() {
             this.isShowing = false;
             this.$el.removeClass('is-showing');
-            if ( this.activeView !== this.defaultView ) {
-                this.renderView( this.defaultView );
-            }
             if (_.isObject(this.categorySelector)) {
                 this.categorySelector.close();
             }
@@ -680,7 +677,7 @@
         templateName: 'fl-content-panel-category-selector',
 
         /**
-        * Template function retrieved by wp.template()
+        * Template function retreived by wp.template()
         */
         template: null,
 
@@ -922,12 +919,6 @@
             this.$searchInput.on('keyup', this.onSearchTermChanged.bind(this) );
             this.$searchPanel = this.$el.find('.fl-builder--search-results-panel');
 
-            this.$el.on('mousedown', () => {
-                if ( $('.fl-builder-workspace-panel').length && FLBuilder.PinnedUI.getPinnedSide() === 'right' ) {
-                    FL.Builder.togglePanel('outline');
-                }
-            });
-
             FLBuilder.addHook('showContentPanel', this.show.bind( this ));
             FLBuilder.addHook('showModules', this.show.bind( this, 'modules' ));
             FLBuilder.addHook('showRows', this.show.bind( this, 'rows' ));
@@ -1002,6 +993,12 @@
 
             FLBuilder.triggerHook('willShowContentPanel');
 
+            // Clear any visible registered panels
+            if ( 'Builder' in FL && 'data' in FL.Builder ) {
+                const actions = FL.Builder.data.getSystemActions()
+                actions.hideCurrentPanel()
+            }
+
             if (typeof tabName !== 'undefined') {
                 this.showTab(tabName);
             }
@@ -1017,12 +1014,6 @@
             this.isShowing = true;
             $(this).trigger('onShow');
             FLBuilder.triggerHook('didShowContentPanel');
-
-            // Clear any visible registered panels
-            if ( 'Builder' in FL && 'data' in FL.Builder ) {
-                const actions = FL.Builder.data.getSystemActions()
-                actions.hideCurrentPanel()
-            }
         },
 
         /**
@@ -1095,6 +1086,13 @@
         onTabItemClick: function(e) {
             var el = $(e.target),
                 name = el.data('tab');
+
+            // Close any active workspace panel (outline, chat, etc.)
+            if ( 'Builder' in FL && 'data' in FL.Builder ) {
+                const actions = FL.Builder.data.getSystemActions()
+                actions.hideCurrentPanel()
+            }
+
             this.showTab(name);
         },
 

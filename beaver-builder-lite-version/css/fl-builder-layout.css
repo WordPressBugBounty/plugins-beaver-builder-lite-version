@@ -22,8 +22,8 @@
 .fl-col-group:after,
 .fl-col:before,
 .fl-col:after,
-.fl-module:not([data-accepts]):before,
-.fl-module:not([data-accepts]):after,
+.fl-module:not([data-accepts], .fl-ds-block):before,
+.fl-module:not([data-accepts], .fl-ds-block):after,
 .fl-module-content:before,
 .fl-module-content:after {
 	display: table;
@@ -33,7 +33,7 @@
 .fl-row-content:after,
 .fl-col-group:after,
 .fl-col:after,
-.fl-module:not([data-accepts]):after,
+.fl-module:not([data-accepts], .fl-ds-block):after,
 .fl-module-content:after {
 	clear: both;
 }

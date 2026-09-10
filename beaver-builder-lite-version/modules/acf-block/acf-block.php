@@ -42,6 +42,9 @@ class FLACFBlockModule extends FLBuilderModule {
 	 * @return bool
 	 */
 	static public function is_disabled() {
+		/**
+		 * Whether ACF block support is disabled in the builder.
+		 */
 		return apply_filters( 'fl_disable_acf_blocks', false );
 	}
 

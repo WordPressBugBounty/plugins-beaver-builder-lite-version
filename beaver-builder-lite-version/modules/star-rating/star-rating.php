@@ -76,6 +76,7 @@ $settings = array(
 						'label'       => __( 'Star Icon', 'fl-builder' ),
 						'show_remove' => true,
 						'preview'     => array( 'type' => 'none' ),
+						'connections' => array( 'icon' ),
 					),
 					'unicode' => array(
 						'type'    => 'hidden',

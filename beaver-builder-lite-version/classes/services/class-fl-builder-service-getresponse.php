@@ -210,7 +210,7 @@ final class FLBuilderServiceGetResponse extends FLBuilderService {
 					$name  = $names[0];
 				}
 
-				$cyle_day = isset( $settings->cycle_day ) ? $settings->cycle_day : 0;
+				$cycle_day = isset( $settings->cycle_day ) ? $settings->cycle_day : 0;
 
 				$data = array(
 					'email'      => $email,
@@ -218,7 +218,7 @@ final class FLBuilderServiceGetResponse extends FLBuilderService {
 					'campaign'   => array(
 						'campaignId' => $settings->list_id,
 					),
-					'dayOfCycle' => $cyle_day,
+					'dayOfCycle' => $cycle_day,
 				);
 
 				// Check if email exists

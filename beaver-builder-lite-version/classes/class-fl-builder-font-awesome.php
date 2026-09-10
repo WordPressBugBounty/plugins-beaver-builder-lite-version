@@ -143,6 +143,9 @@ final class FLBuilderFontAwesome {
 	 * Register this plugin for official FA support.
 	 */
 	public static function register_plugin() {
+		/**
+		 * Arguments passed when registering the plugin with the Font Awesome official API.
+		 */
 		$args = apply_filters( 'fl_builder_font_awesome_register_args', array(
 			'name'       => __( 'Beaver Builder', 'fl-builder' ),
 			'technology' => 'webfont',
@@ -226,7 +229,7 @@ final class FLBuilderFontAwesome {
 	 * Latest supported version.
 	 */
 	public static function latest_supported() {
-		return '5.15.4';
+		return '7.2.0';
 	}
 
 	public static function get_kit_icons() {

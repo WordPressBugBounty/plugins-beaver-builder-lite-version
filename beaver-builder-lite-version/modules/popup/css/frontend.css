@@ -1,0 +1,60 @@
+.fl-popup:popover-open,
+dialog[open].fl-popup {
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+    margin: auto;
+}
+
+.fl-popup-content {
+    flex: 1;
+}
+
+.fl-popup-close,
+.fl-popup-close:hover,
+.fl-popup-close:focus,
+.fl-popup-nav,
+.fl-popup-nav:hover,
+.fl-popup-nav:focus {
+    background: transparent;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+    height: fit-content;
+    cursor: pointer;
+    padding: 0;
+    z-index: 999999;
+}
+
+.fl-popup-close svg {
+    stroke: currentColor;
+    stroke-width: 1.5px;
+    stroke-linecap: round;
+}
+
+.fl-popup .fl-popup-nav {
+    position: absolute;
+    top: 50%;
+}
+
+.fl-popup-nav:disabled {
+    opacity: 0.2;
+    cursor: not-allowed;
+}
+
+.fl-popup-nav svg {
+    width: 60%;
+    height: 60%;
+}
+
+.fl-popup-nav-prev {
+    left: 20px;
+    transform: translate(-100%, -50%);
+}
+
+.fl-popup-nav-next {
+    right: 20px;
+    transform: translate(100%, -50%);
+}

@@ -39,6 +39,7 @@
 	padding: 12px 24px;
 	text-decoration: none;
 	text-shadow: none;
+	cursor: pointer;
 }
 .fl-builder-content .fl-button:hover {
 	text-decoration: none;

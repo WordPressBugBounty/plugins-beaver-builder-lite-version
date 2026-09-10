@@ -12,7 +12,11 @@ FLBuilderAdminSettingsStrings = {
 	selected: '<?php esc_attr_e( 'Selected', 'fl-builder' ); ?>',
 	selectAll: '<?php esc_attr_e( 'Select All', 'fl-builder' ); ?>',
 	selectFile: '<?php esc_attr_e( 'Select File', 'fl-builder' ); ?>',
-	uninstall: '<?php esc_attr_e( 'Please type "uninstall" in the box below to confirm that you really want to uninstall the page builder and all of its data.', 'fl-builder' ); ?>'
+	uninstall: '<?php esc_attr_e( 'Please type "uninstall" in the box below to confirm that you really want to uninstall the page builder and all of its data.', 'fl-builder' ); ?>',
+	confirmBeta: '<?php echo esc_js( __( 'Are you sure you want to enable Beta releases?', 'fl-builder' ) ); ?>',
+	confirmAlpha: '<?php echo esc_js( __( 'Are you sure you want to enable Alpha releases?', 'fl-builder' ) ); ?>',
+	clearing: '<?php echo esc_js( __( 'Clearing...', 'fl-builder' ) ); ?>',
+	cacheCleared: '<?php echo esc_js( __( 'Cache Cleared', 'fl-builder' ) ); ?>'
 };
 
 </script>

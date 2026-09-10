@@ -94,6 +94,12 @@ class FLButtonGroupModule extends FLBuilderModule {
 	 */
 	public function filter_settings( $settings, $helper ) {
 
+		// The Layout default was previously the misspelled 'horizotal', which produced an
+		// unmatched 'fl-button-group-layout-horizotal' class. Map saved values to 'horizontal'.
+		if ( isset( $settings->layout ) && 'horizotal' === $settings->layout ) {
+			$settings->layout = 'horizontal';
+		}
+
 		// Convert 'space_between' Unit field to 'button_spacing' Dimension field.
 		// @since 2.4.1
 		if ( isset( $settings->space_between ) ) {
@@ -256,7 +262,7 @@ FLBuilder::register_module('FLButtonGroupModule', array(
 					'layout'         => array(
 						'type'    => 'select',
 						'label'   => __( 'Layout', 'fl-builder' ),
-						'default' => 'horizotal',
+						'default' => 'horizontal',
 						'options' => array(
 							'horizontal' => __( 'Horizontal', 'fl-builder' ),
 							'vertical'   => __( 'Vertical', 'fl-builder' ),
@@ -277,17 +283,18 @@ FLBuilder::register_module('FLButtonGroupModule', array(
 						),
 					),
 					'custom_width'   => array(
-						'type'    => 'unit',
-						'label'   => __( 'Custom Width', 'fl-builder' ),
-						'default' => '200',
-						'slider'  => array(
+						'type'       => 'unit',
+						'label'      => __( 'Custom Width', 'fl-builder' ),
+						'default'    => '200',
+						'responsive' => true,
+						'slider'     => array(
 							'px' => array(
 								'min'  => 0,
 								'max'  => 1000,
 								'step' => 10,
 							),
 						),
-						'units'   => array(
+						'units'      => array(
 							'px',
 							'vw',
 							'%',
@@ -344,6 +351,7 @@ FLBuilder::register_module('FLButtonGroupModule', array(
 						'default'     => '',
 						'show_reset'  => true,
 						'show_alpha'  => true,
+						'responsive'  => true,
 					),
 					'text_hover_color' => array(
 						'type'        => 'color',
@@ -352,6 +360,7 @@ FLBuilder::register_module('FLButtonGroupModule', array(
 						'default'     => '',
 						'show_reset'  => true,
 						'show_alpha'  => true,
+						'responsive'  => true,
 					),
 					'typography'       => array(
 						'type'       => 'typography',
@@ -396,6 +405,7 @@ FLBuilder::register_module('FLButtonGroupModule', array(
 						'default'     => '',
 						'show_reset'  => true,
 						'show_alpha'  => true,
+						'responsive'  => true,
 						'preview'     => array(
 							'type' => 'refresh',
 						),
@@ -407,6 +417,7 @@ FLBuilder::register_module('FLButtonGroupModule', array(
 						'default'     => '',
 						'show_reset'  => true,
 						'show_alpha'  => true,
+						'responsive'  => true,
 						'preview'     => array(
 							'type'     => 'css',
 							'selector' => '.fl-button-group-buttons .fl-button:is(a, button):hover',
@@ -414,14 +425,15 @@ FLBuilder::register_module('FLButtonGroupModule', array(
 						),
 					),
 					'button_transition' => array(
-						'type'    => 'select',
-						'label'   => __( 'Background Animation', 'fl-builder' ),
-						'default' => 'disable',
-						'options' => array(
+						'type'       => 'select',
+						'label'      => __( 'Background Animation', 'fl-builder' ),
+						'default'    => 'disable',
+						'options'    => array(
 							'disable' => __( 'Disabled', 'fl-builder' ),
 							'enable'  => __( 'Enabled', 'fl-builder' ),
 						),
-						'preview' => array(
+						'responsive' => true,
+						'preview'    => array(
 							'type' => 'none',
 						),
 					),
@@ -459,6 +471,7 @@ FLBuilder::register_module('FLButtonGroupModule', array(
 						'default'     => '',
 						'show_reset'  => true,
 						'show_alpha'  => true,
+						'responsive'  => true,
 						'preview'     => array(
 							'type' => 'none',
 						),
@@ -492,13 +505,15 @@ FLBuilder::register_settings_form('buttons_form', array(
 							'connections' => array( 'string' ),
 						),
 						'icon'           => array(
-							'type'        => 'icon',
-							'label'       => __( 'Icon', 'fl-builder' ),
-							'show_remove' => true,
-							'show'        => array(
+							'type'               => 'icon',
+							'label'              => __( 'Icon', 'fl-builder' ),
+							'show_remove'        => true,
+							'show_extra_classes' => true,
+							'connections'        => array( 'icon' ),
+							'show'               => array(
 								'fields' => array( 'icon_position', 'icon_animation' ),
 							),
-							'preview'     => array(
+							'preview'            => array(
 								'type' => 'none',
 							),
 						),
@@ -644,6 +659,7 @@ FLBuilder::register_settings_form('buttons_form', array(
 							'connections' => array( 'color' ),
 							'label'       => __( 'Text Color', 'fl-builder' ),
 							'default'     => '',
+							'responsive'  => true,
 							'show_reset'  => true,
 							'show_alpha'  => true,
 						),
@@ -652,6 +668,7 @@ FLBuilder::register_settings_form('buttons_form', array(
 							'connections' => array( 'color' ),
 							'label'       => __( 'Text Hover Color', 'fl-builder' ),
 							'default'     => '',
+							'responsive'  => true,
 							'show_reset'  => true,
 							'show_alpha'  => true,
 						),
@@ -695,6 +712,7 @@ FLBuilder::register_settings_form('buttons_form', array(
 							'default'     => '',
 							'show_reset'  => true,
 							'show_alpha'  => true,
+							'responsive'  => true,
 							'preview'     => array(
 								'type' => 'none',
 							),
@@ -706,20 +724,22 @@ FLBuilder::register_settings_form('buttons_form', array(
 							'default'     => '',
 							'show_reset'  => true,
 							'show_alpha'  => true,
+							'responsive'  => true,
 							'preview'     => array(
 								'type' => 'none',
 							),
 						),
 						'button_item_button_transition' => array(
-							'type'    => 'select',
-							'label'   => __( 'Background Animation', 'fl-builder' ),
-							'default' => '',
-							'options' => array(
+							'type'       => 'select',
+							'label'      => __( 'Background Animation', 'fl-builder' ),
+							'default'    => '',
+							'options'    => array(
 								''        => __( 'Default', 'fl-builder' ),
 								'disable' => __( 'Disabled', 'fl-builder' ),
 								'enable'  => __( 'Enabled', 'fl-builder' ),
 							),
-							'preview' => array(
+							'responsive' => true,
+							'preview'    => array(
 								'type' => 'none',
 							),
 						),
@@ -757,6 +777,7 @@ FLBuilder::register_settings_form('buttons_form', array(
 							'default'     => '',
 							'show_reset'  => true,
 							'show_alpha'  => true,
+							'responsive'  => true,
 							'preview'     => array(
 								'type' => 'none',
 							),

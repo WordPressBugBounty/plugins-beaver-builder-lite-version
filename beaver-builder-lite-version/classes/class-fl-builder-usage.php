@@ -112,16 +112,11 @@ final class FLBuilderUsage {
 		);
 
 		echo '<div class="notice notice-info">';
-
 		echo '<div class="fl-usage">';
-
-		echo '<p>';
-
-		printf( '%s %s', $message, $btn );
-
-		echo '</p>';
-
-		printf( '</div>%s</div>', FLBuilderUsage::data_demo() );
+		printf( '<span class="fl-usage-message">%s</span>%s', $message, $btn );
+		echo '</div>';
+		echo FLBuilderUsage::data_demo();
+		echo '</div>';
 	}
 
 	/**

@@ -890,7 +890,7 @@
   -o-animation-duration: 0s;
 }
 
-.fl-lightbox *:not(i, svg, use, path, rect, circle, ellipse, g, line, .fl-control, .dashicons, .ace-tm [class^=ace_]) {
+.fl-lightbox *:not(i, svg, use, path, rect, circle, ellipse, g, line, .fl-control, .dashicons, [class^=fl-ds-editor] *, [class^=cm-] *, .ace-tm [class^=ace_]) {
   color: #333;
   font-family: var(--fl-builder-font-family);
   font-size: 12px;
@@ -1366,6 +1366,11 @@ body.fl-builder-edit:not(.fl-builder-template-edit) [data-dynamic-editing="1"] .
 
 body.fl-builder-ui-skin--dark .fl-responsive-preview-mask {
   background: #2c333a;
+}
+
+body.fl-builder-workspace-panel-is-pushing .fl-responsive-preview,
+body.fl-builder-workspace-panel-is-pushing .fl-responsive-preview-mask {
+  margin-right: var(--fl-builder-panel-width);
 }
 
 .fl-responsive-preview {
@@ -4292,7 +4297,8 @@ button.fl-builder-button.fl-builder-bar-title-caret:focus {
   margin-top: 4px;
 }
 
-.fl-row .fl-row-drop-target .fl-builder-drop-zone {
+.fl-row .fl-row-drop-target .fl-builder-drop-zone,
+.fl-module > .fl-row-drop-target .fl-builder-drop-zone {
   bottom: 0;
   left: 4px;
   margin: 0;
@@ -4335,8 +4341,36 @@ button.fl-builder-button.fl-builder-bar-title-caret:focus {
   display: block;
 }
 
-.fl-builder-dragging .fl-module[data-accepts] {
+.fl-builder-dragging .fl-module[data-accepts]:not(.fl-popup),
+.fl-builder-dragging .fl-module[data-top-level=true]:not([data-accepts]):not(.fl-popup) {
   position: relative;
+}
+
+/* Top-level non-container modules (e.g. design system blocks) have no valid
+   sortable target in their body, so the helper falls into a "no match" gap
+   between the top and bottom drop targets and the placeholder appears to
+   vanish during drag. Enlarge each drop target's HIT AREA to cover its half
+   of the module body so the helper always lands in one of the two; the
+   visible blue bar is repositioned to the module edge to keep the visual
+   identical to a container module. */
+.fl-builder-dragging .fl-module[data-top-level=true]:not([data-accepts]):not(.fl-popup) > .fl-row-drop-target:not(.fl-row-drop-target-last) {
+  height: calc(50% + 28px);
+}
+
+.fl-builder-dragging .fl-module[data-top-level=true]:not([data-accepts]):not(.fl-popup) > .fl-row-drop-target-last {
+  top: 50%;
+  height: calc(50% + 28px);
+  margin-top: 0;
+}
+
+.fl-module[data-top-level=true]:not([data-accepts]) > .fl-row-drop-target:not(.fl-row-drop-target-last) .fl-builder-drop-zone {
+  bottom: auto;
+  height: 24px;
+}
+
+.fl-module[data-top-level=true]:not([data-accepts]) > .fl-row-drop-target-last .fl-builder-drop-zone {
+  top: auto;
+  height: 24px;
 }
 
 /* Nodes */
@@ -4354,7 +4388,7 @@ button.fl-builder-button.fl-builder-bar-title-caret:focus {
 
 /* Action Overlays
 ------------------------------------------------------ */
-.fl-block-overlay {
+.fl-block-overlay[popover] {
   --overlay-text: white;
   --overlay-tint: var(--fl-builder-highlight-color);
   --overlay-tint-hover: var(--fl-builder-highlight-color-hover);
@@ -4362,6 +4396,13 @@ button.fl-builder-button.fl-builder-bar-title-caret:focus {
   --radius: var(--fl-builder-radius);
   border-radius: var(--radius);
   min-width: 45px; /* Prevent super small overlays */
+  pointer-events: none;
+  /* Popover resets */
+  background: transparent;
+  border: none;
+  margin: 0;
+  padding: 0;
+  overflow: visible !important;
 }
 
 .fl-block-overlay,
@@ -4375,10 +4416,6 @@ button.fl-builder-button.fl-builder-bar-title-caret:focus {
 
 .fl-block-overlay .fl-block-has-rules svg {
   display: block;
-}
-
-.fl-block-overlay-active {
-  position: relative;
 }
 
 .fl-block-overlay-header {
@@ -4516,16 +4553,12 @@ button.fl-builder-button.fl-builder-bar-title-caret:focus {
   outline-style: solid !important;
   outline-color: var(--overlay-tint) !important;
   outline-offset: -2px;
-  bottom: 0;
   -moz-box-sizing: border-box !important;
   -webkit-box-sizing: border-box !important;
   box-sizing: border-box !important;
   cursor: pointer;
   color: var(--overlay-text);
-  left: 0;
   position: absolute;
-  top: calc(0px - var(--action-size));
-  right: 0;
   z-index: 100006;
 }
 
@@ -4533,12 +4566,6 @@ button.fl-builder-button.fl-builder-bar-title-caret:focus {
 .fl-row-overlay.fl-row-menu-active.fl-block-overlay.fl-block-overlay-global,
 .fl-row-overlay.fl-row-menu-active.fl-block-overlay.fl-block-overlay-dynamic {
   z-index: 100007;
-}
-
-.fl-row-full-width .fl-row-overlay {
-  left: 0;
-  right: 0;
-  bottom: 0;
 }
 
 .fl-row-overlay-header-bottom {
@@ -4551,38 +4578,15 @@ button.fl-builder-button.fl-builder-bar-title-caret:focus {
   bottom: 0;
 }
 
-.fl-block-overlay-active .fl-row-content-wrap {
-  position: relative;
-}
-
-.fl-block-overlay-active .fl-row-content {
-  position: relative;
-  z-index: 100007 !important;
-}
-
-/* Row Resizing */
-.fl-builder-row-resizing .fl-col.fl-block-overlay-active,
-.fl-builder-row-resizing .fl-module.fl-block-overlay-active {
-  position: static;
-}
-
-.fl-builder-row-resizing .fl-module-overlay {
-  width: auto !important;
-}
-
 /* Column Overlays */
 .fl-col-overlay {
   outline-width: var(--fl-builder-highlight-width) !important;
   outline-offset: var(--fl-builder-highlight-offset);
   outline-style: solid !important;
   outline-color: var(--overlay-tint) !important;
-  bottom: 0;
   cursor: pointer;
   color: var(--overlay-text);
-  left: 0;
   position: absolute;
-  right: 0;
-  top: 0;
   z-index: 100008;
 }
 
@@ -4598,21 +4602,9 @@ button.fl-builder-button.fl-builder-bar-title-caret:focus {
   outline-color: var(--overlay-tint) !important;
   cursor: pointer;
   color: var(--overlay-text);
-  left: 0;
   min-height: 32px;
   position: absolute;
-  right: 0;
-  top: 0;
-  bottom: 0;
   height: 100%; /* strangely you need this for grid containers */
-  z-index: 100007;
-}
-
-.fl-node-selected .fl-module-overlay {
-  z-index: 100006;
-}
-
-.fl-module:has(.fl-block-overlay-active) {
   z-index: 100007;
 }
 
@@ -4625,12 +4617,8 @@ button.fl-builder-button.fl-builder-bar-title-caret:focus {
   padding-top: 15px;
 }
 
-.fl-col-bg-overlay .fl-block-overlay-active.fl-module {
-  z-index: 100008;
-}
-
 /* Global Overlays */
-.fl-block-overlay-global {
+.fl-block-overlay.fl-block-overlay-global {
   --overlay-tint: var(--fl-builder-global-accent-color);
 }
 
@@ -4642,24 +4630,24 @@ button.fl-builder-button.fl-builder-bar-title-caret:focus {
   vertical-align: top;
 }
 
-.fl-block-overlay-global .fl-block-overlay-actions > *:hover {
+.fl-block-overlay.fl-block-overlay-global .fl-block-overlay-actions > *:hover {
   background-color: var(--fl-builder-global-accent-color-hover);
 }
 
-.fl-block-overlay-global .fl-builder-has-submenu > ul.fl-builder-submenu li a:hover {
+.fl-block-overlay.fl-block-overlay-global .fl-builder-has-submenu > ul.fl-builder-submenu li a:hover {
   background-color: var(--fl-builder-global-accent-color-hover);
 }
 
 /* Dynamic Global Overlays */
-.fl-block-overlay-dynamic {
+.fl-block-overlay.fl-block-overlay-dynamic {
   --overlay-tint: var(--fl-builder-dynamic-accent-color);
 }
 
-.fl-block-overlay-dynamic .fl-block-overlay-actions > *:hover {
+.fl-block-overlay.fl-block-overlay-dynamic .fl-block-overlay-actions > *:hover {
   background-color: var(--fl-builder-dynamic-accent-color-hover);
 }
 
-.fl-block-overlay-dynamic .fl-builder-has-submenu > ul.fl-builder-submenu li a:hover {
+.fl-block-overlay.fl-block-overlay-dynamic .fl-builder-has-submenu > ul.fl-builder-submenu li a:hover {
   background-color: var(--fl-builder-dynamic-accent-color-hover);
 }
 
@@ -4689,18 +4677,21 @@ button.fl-builder-button.fl-builder-bar-title-caret:focus {
 }
 
 /* Muted Overlays */
-.fl-block-overlay-muted .fl-row-overlay {
+.fl-block-overlay-muted .fl-row-overlay,
+.fl-block-overlay-muted .fl-root-module-overlay {
   --overlay-tint: #555D66;
   background-color: transparent;
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
 }
 
-.fl-block-overlay-muted .fl-row-overlay .fl-block-has-rules {
+.fl-block-overlay-muted .fl-row-overlay .fl-block-has-rules,
+.fl-block-overlay-muted .fl-root-module-overlay .fl-block-has-rules {
   color: var(--overlay-tint) !important;
 }
 
-.fl-block-overlay-muted .fl-row-overlay .fl-block-col-resize {
+.fl-block-overlay-muted .fl-row-overlay .fl-block-col-resize,
+.fl-block-overlay-muted .fl-root-module-overlay .fl-block-col-resize {
   display: none;
 }
 
@@ -4835,9 +4826,8 @@ button.fl-builder-button.fl-builder-bar-title-caret:focus {
 .fl-builder-has-submenu > ul.fl-builder-submenu li a {
   display: flex;
   align-items: center;
-  min-height: 30px;
   overflow: hidden;
-  padding: 6px 12px;
+  padding: 8px 12px;
   white-space: nowrap;
 }
 
@@ -6366,7 +6356,7 @@ body > span.select2-container.select2-container--open {
 ------------------------------------------------------ */
 .fl-builder-tour-actions .fl-builder-actions-title {
   font-size: 14px !important;
-  line-height: 19px;
+  line-height: 19px !important;
 }
 
 .fl-builder-tour-mask {
@@ -7066,7 +7056,7 @@ Rules to ensure compatibility with v2.0.
 
 .fl-lightbox .ui-resizable-w,
 .fl-builder-panel .ui-resizable-w {
-  left: -3px;
+  left: -6px;
 }
 
 .fl-lightbox .ui-resizable-ne,

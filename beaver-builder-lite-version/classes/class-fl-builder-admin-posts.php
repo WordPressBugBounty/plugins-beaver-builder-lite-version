@@ -339,6 +339,9 @@ final class FLBuilderAdminPosts {
 				$title                 = false !== get_transient( 'fl_debug_mode' ) ? sprintf( ' title="%s Revision(s)"', count( wp_get_post_revisions( $post ) ) ) : '';
 				$dot                   = '&nbsp;<span style="color:' . ( $enabled ? '#6bc373' : '#d9d9d9' ) . '; font-size:18px;">&bull;</span>';
 				$actions['fl-builder'] = '<a' . $title . ' href="' . FLBuilderModel::get_edit_url() . '">' . FLBuilderModel::get_branding() . $dot . '</a>';
+				/**
+				 * Whether the "Duplicate Layout" link is shown in admin post list row actions.
+				 */
 				if ( $enabled && true === apply_filters( 'fl_builder_duplicate_enabled', true ) ) {
 					$url = add_query_arg( array(
 						'post_type'        => $post->post_type,

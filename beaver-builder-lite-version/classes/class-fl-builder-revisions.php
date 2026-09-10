@@ -51,6 +51,9 @@ final class FLBuilderRevisions {
 		global $wp_version;
 
 		$revisions = wp_get_post_revisions( $post_id, array(
+			/**
+			 * Number of post revisions to show in the builder revisions panel.
+			 */
 			'numberposts' => apply_filters( 'fl_builder_revisions_number', 25 ),
 		) );
 

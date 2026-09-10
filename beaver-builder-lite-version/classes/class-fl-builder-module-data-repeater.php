@@ -95,12 +95,18 @@ final class FLBuilderModuleDataRepeater {
 			case 'main_query':
 				$this->initial_post = $post;
 				$this->query        = FLBuilderLoop::query( $this->settings );
+				/**
+				 * Fires before the data repeater iterates over a post query result.
+				 */
 				do_action( 'fl_builder_module_data_repeater_before_posts', $this );
 				break;
 			case 'taxonomy_query':
 				$this->query = FLBuilderLoop::query( $this->settings );
 				break;
 			default:
+				/**
+				 * Custom query object used by the data repeater when the data source is not a built-in query type.
+				 */
 				$this->query = apply_filters( 'fl_builder_module_data_repeater_query', $this->query, $this->settings );
 				break;
 		}
@@ -240,6 +246,9 @@ final class FLBuilderModuleDataRepeater {
 			case 'main_query':
 				wp_reset_postdata();
 				setup_postdata( $this->initial_post );
+				/**
+				 * Fires after the data repeater has finished iterating over a post query result.
+				 */
 				do_action( 'fl_builder_module_data_repeater_after_posts', $this );
 				break;
 			case 'taxonomy_query':

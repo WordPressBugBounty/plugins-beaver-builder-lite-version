@@ -22,14 +22,15 @@
 				submenuBg = form.find( 'input[name=submenu_bg_color]' ),
 				submenuShadow = form.find( 'select[name=drop_shadow]' ),
 				submenuSpacing = form.find( '#fl-field-submenu_spacing input' ),
-				submenuLinkSpacing = form.find( '#fl-field-submenu_link_spacing input' );
-				submenuBorderSelect = form.find( '#fl-field-submenu_border select' );
-				submenuBorderInput = form.find( '#fl-field-submenu_border input' );
-				submenuTypographySelect = form.find( '#fl-field-submenu_typography select' );
-				submenuTypographyInput = form.find( '#fl-field-submenu_typography input' );
-				searchStyleSelect = form.find( '#fl-builder-settings-section-search_style select' );
-				searchStyleInput = form.find( '#fl-builder-settings-section-search_style input' );
-				layout = form.find( 'select[name=menu_layout]' );
+				submenuLinkSpacing = form.find( '#fl-field-submenu_link_spacing input' ),
+				submenuBorderSelect = form.find( '#fl-field-submenu_border select' ),
+				submenuBorderInput = form.find( '#fl-field-submenu_border input' ),
+				submenuTypographySelect = form.find( '#fl-field-submenu_typography select' ),
+				submenuTypographyInput = form.find( '#fl-field-submenu_typography input' ),
+				searchStyleSelect = form.find( '#fl-builder-settings-section-search_style select' ),
+				searchStyleInput = form.find( '#fl-builder-settings-section-search_style input' ),
+				searchAction = form.find( 'input[name=search_action]' ),
+				layout = form.find( 'select[name=menu_layout]' ),
 				mobileToggle = form.find( 'select[name=mobile_toggle]' );
 
 			submenuLinkColor.on( 'change', this._previewSubmenu );
@@ -49,6 +50,8 @@
 			this._removeWooSections();
 			if ( FLBuilderConfig.lite ) {
 				$('#fl-builder-settings-section-search').remove();
+			} else if ( searchAction.val() === 'fullscreen' ) {
+				$('#fl-field-search_label').remove();
 			}
 		},
 
@@ -93,10 +96,8 @@
 				return;
 			}
 
-			var form = node.find( '.fl-menu-search-item .fl-search-form-input-wrap' );
-
 			node.addClass( 'fl-search-menu-preview' )
-			form.fadeIn(200);
+			node.find( '.fl-menu-search-item .fl-search-form-input-wrap' ).fadeIn(200);
 			FLBuilder._moduleHelpers.menu._closeSubmenuPreview();
 		},
 
@@ -114,10 +115,8 @@
 				return;
 			}
 
-			var form  = node.find('.fl-menu-search-item .fl-search-form-input-wrap');
-
 			$( '.fl-search-menu-preview' ).removeClass( 'fl-search-menu-preview' );
-			form.fadeOut(200);
+			node.find('.fl-menu-search-item .fl-search-form-input-wrap').fadeOut(200);
 		},
 
 		_mobileToggle: function() {

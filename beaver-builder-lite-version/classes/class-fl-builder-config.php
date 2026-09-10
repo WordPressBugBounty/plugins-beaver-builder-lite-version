@@ -8,101 +8,109 @@ class FLBuilderConfig {
 	static public function get() {
 		global $post;
 
-		$post_id   = is_object( $post ) ? $post->ID : null;
-		$simple_ui = ! FLBuilderUserAccess::current_user_can( 'unrestricted_editing' );
+		$post_id             = is_object( $post ) ? $post->ID : null;
+		$simple_ui           = ! FLBuilderUserAccess::current_user_can( 'unrestricted_editing' );
+		$default_presets_tab = get_option( '_fl_builder_default_presets_tab' );
 
 		$config = [
-			'adminUrl'                   => admin_url(),
-			'ajaxNonce'                  => wp_create_nonce( 'fl_ajax_update' ),
-			'builderEnabled'             => get_post_meta( $post_id, '_fl_builder_enabled', true ) ? true : false,
-			'colorPresets'               => FLBuilderModel::get_color_presets(),
-			'customImageSizeTitles'      => apply_filters( 'image_size_names_choose', array() ),
-			'debug'                      => FLBuilder::is_debug(),
-			'enabledTemplates'           => 'core',
-			'global'                     => FLBuilderModel::get_global_settings(),
-			'help'                       => FLBuilderModel::get_help_button_settings(),
-			'homeUrl'                    => home_url(),
-			'enqueueMethod'              => FLBuilderModel::get_asset_enqueue_method(),
-			'isRtl'                      => is_rtl(),
-			'isUserTemplate'             => false,
-			'lite'                       => true === FL_BUILDER_LITE,
-			'modSecFix'                  => FLBuilderUtils::is_modsec_fix_enabled(),
-			'MaxInputVars'               => FL_Debug::safe_ini_get( 'max_input_vars' ),
-			'moduleGroups'               => FLBuilderModel::get_module_groups(),
-			'nestedColumns'              => ( ! defined( 'FL_BUILDER_NESTED_COLUMNS' ) || FL_BUILDER_NESTED_COLUMNS ),
-			'newUser'                    => FLBuilderModel::is_new_user(),
-			'pluginUrl'                  => FLBuilder::plugin_url(),
-			'relativePluginUrl'          => FLBuilderModel::get_relative_plugin_url(),
-			'postId'                     => $post_id,
-			'postStatus'                 => get_post_status(),
-			'postType'                   => get_post_type(),
-			'recentFonts'                => get_option( 'fl_builder_recent_fonts', array() ),
-			'services'                   => FLBuilderServices::get_services_data(),
-			'safemode'                   => isset( $_GET['safemode'] ) ? true : false,
-			'simpleUi'                   => $simple_ui ? true : false,
-			'upgradeUrl'                 => FLBuilderModel::get_upgrade_url( array(
+			'adminUrl'                      => admin_url(),
+			'ajaxNonce'                     => wp_create_nonce( 'fl_ajax_update' ),
+			'builderEnabled'                => get_post_meta( $post_id, '_fl_builder_enabled', true ) ? true : false,
+			'colorPresets'                  => FLBuilderModel::get_color_presets(),
+			'customImageSizeTitles'         => apply_filters( 'image_size_names_choose', array() ),
+			'debug'                         => FLBuilder::is_debug(),
+			'enabledTemplates'              => 'core',
+			'global'                        => FLBuilderModel::get_global_settings(),
+			'help'                          => FLBuilderModel::get_help_button_settings(),
+			'homeUrl'                       => home_url(),
+			'enqueueMethod'                 => FLBuilderModel::get_asset_enqueue_method(),
+			'isRtl'                         => is_rtl(),
+			'isUserTemplate'                => false,
+			'lite'                          => true === FL_BUILDER_LITE,
+			'modSecFix'                     => FLBuilderUtils::is_modsec_fix_enabled(),
+			'MaxInputVars'                  => FL_Debug::safe_ini_get( 'max_input_vars' ),
+			'moduleGroups'                  => FLBuilderModel::get_module_groups(),
+			'nestedColumns'                 => ( ! defined( 'FL_BUILDER_NESTED_COLUMNS' ) || FL_BUILDER_NESTED_COLUMNS ),
+			'newUser'                       => FLBuilderModel::is_new_user(),
+			'pluginUrl'                     => FLBuilder::plugin_url(),
+			'relativePluginUrl'             => FLBuilderModel::get_relative_plugin_url(),
+			'postId'                        => $post_id,
+			'postStatus'                    => get_post_status(),
+			'postType'                      => get_post_type(),
+			'recentFonts'                   => FLBuilderFonts::filter_recent_fonts( get_option( 'fl_builder_recent_fonts', array() ) ),
+			'services'                      => FLBuilderServices::get_services_data(),
+			'safemode'                      => isset( $_GET['safemode'] ) ? true : false,
+			'simpleUi'                      => $simple_ui ? true : false,
+			'upgradeUrl'                    => FLBuilderModel::get_upgrade_url( array(
 				'utm_medium'   => ( true === FL_BUILDER_LITE ? 'bb-lite' : 'bb-demo' ),
 				'utm_source'   => 'builder-ui',
 				'utm_campaign' => ( true === FL_BUILDER_LITE ? 'top-panel-cta' : 'demo-cta' ),
 			) ),
-			'userCanEditGlobalTemplates' => FLBuilderUserAccess::current_user_can( 'global_node_editing' ),
-			'userCanPublish'             => current_user_can( 'publish_posts' ),
-			'userSettings'               => FLBuilderUserSettings::get(),
-			'userTemplateType'           => FLBuilderModel::get_user_template_type(),
-			'userTemplateIsLeafModule'   => FLBuilderModel::is_post_leaf_module_template(),
-			'brandingIcon'               => FLBuilderModel::get_branding_icon(),
-			'url'                        => get_permalink(),
-			'editUrl'                    => FLBuilderModel::get_edit_url(),
-			'loginUrl'                   => wp_login_url( FLBuilderModel::get_edit_url() ),
-			'shortlink'                  => add_query_arg( 'fl_builder', '', FLBuilderUtils::get_safe_url( $post_id ) ),
-			'previewUrl'                 => add_query_arg( 'fl_builder_preview', '', get_permalink() ),
-			'layoutHasDraftedChanges'    => FLBuilderModel::layout_has_drafted_changes(),
-			'panelData'                  => FLBuilderUIContentPanel::get_panel_data(),
-			'contentItems'               => FLBuilderUIContentPanel::get_content_elements(),
-			'deprecations'               => FLBuilderModuleDeprecations::get_all_deprecations(),
-			'inlineModuleAliases'        => FLBuilderModel::get_inline_module_aliases(),
-			'mainMenu'                   => FLBuilder::get_main_menu_data(),
-			'keyboardShortcuts'          => FLBuilder::get_keyboard_shortcuts(),
-			'isCustomizer'               => is_customize_preview(),
-			'showToolbar'                => is_customize_preview() ? false : true,
-			'isBBExtension'              => defined( 'FL_ASSISTANT_BB_EXTENSION' ) && true === FL_ASSISTANT_BB_EXTENSION,
+			'userCanEditGlobalTemplates'    => FLBuilderUserAccess::current_user_can( 'global_node_editing' ),
+			'userCanPublish'                => current_user_can( 'publish_posts' ),
+			'userSettings'                  => FLBuilderUserSettings::get(),
+			'userTemplateType'              => FLBuilderModel::get_user_template_type(),
+			'userTemplateIsLeafModule'      => FLBuilderModel::is_post_leaf_module_template(),
+			'brandingIcon'                  => FLBuilderModel::get_branding_icon(),
+			'url'                           => get_permalink(),
+			'editUrl'                       => FLBuilderModel::get_edit_url(),
+			'loginUrl'                      => wp_login_url( FLBuilderModel::get_edit_url() ),
+			'shortlink'                     => add_query_arg( 'fl_builder', '', FLBuilderUtils::get_safe_url( $post_id ) ),
+			'previewUrl'                    => add_query_arg( 'fl_builder_preview', '', get_permalink() ),
+			'layoutHasDraftedChanges'       => FLBuilderModel::layout_has_drafted_changes(),
+			'panelData'                     => FLBuilderUIContentPanel::get_panel_data(),
+			'contentItems'                  => FLBuilderUIContentPanel::get_content_elements(),
+			'unlistedModules'               => FLBuilderModel::get_unlisted_modules(),
+			'deprecations'                  => FLBuilderModuleDeprecations::get_all_deprecations(),
+			'inlineModuleAliases'           => FLBuilderModel::get_inline_module_aliases(),
+			'mainMenu'                      => FLBuilder::get_main_menu_data(),
+			'keyboardShortcuts'             => FLBuilder::get_keyboard_shortcuts(),
+			'isCustomizer'                  => is_customize_preview(),
+			'showToolbar'                   => is_customize_preview() ? false : true,
+			'isBBExtension'                 => defined( 'FL_ASSISTANT_BB_EXTENSION' ) && true === FL_ASSISTANT_BB_EXTENSION,
 			/**
 			 * Disable outline panel
 			 * @since 2.5
 			 * @see fl_builder_outline_panel_enabled
 			 */
-			'showOutlinePanel'           => apply_filters( 'fl_builder_outline_panel_enabled', true ),
-			'unrestricted'               => FLBuilderUserAccess::current_user_can( 'unrestricted_editing' ),
-			'shouldRefreshOnPublish'     => FLBuilder::should_refresh_on_publish(),
-			'googleFontsUrl'             => apply_filters( 'fl_builder_google_fonts_domain', 'https://fonts.googleapis.com/' ) . 'css?family=',
-			'wp_editor'                  => FLBuilder::get_wp_editor(),
-			'rowResize'                  => FLBuilderModel::get_row_resize_settings(),
-			'notifications'              => FLBuilderNotifications::get_notifications(),
-			'notificationsEnabled'       => ( 1 == get_option( '_fl_builder_notifications_enabled' ) ) ? true : false,
-			'isWhiteLabeled'             => FLBuilderModel::is_white_labeled(),
-			'inlineEnabled'              => FLBuilderModel::is_inline_enabled(),
-			'CheckCodeErrors'            => FLBuilderModel::is_codechecking_enabled(),
-			'AceEditorSettings'          => FLBuilderModel::ace_editor_settings(),
-			'optionSets'                 => apply_filters( 'fl_builder_shared_option_sets', array() ),
-			'presets'                    => FLBuilderSettingsPresets::get_presets(),
-			'FontWeights'                => FLBuilderFonts::get_font_weight_strings(),
+			'showOutlinePanel'              => apply_filters( 'fl_builder_outline_panel_enabled', true ),
+			'unrestricted'                  => FLBuilderUserAccess::current_user_can( 'unrestricted_editing' ),
+			'shouldRefreshOnPublish'        => FLBuilder::should_refresh_on_publish(),
+			/**
+			 * Base URL for Google Fonts API requests used to load font previews and selections.
+			 */
+			'googleFontsUrl'                => apply_filters( 'fl_builder_google_fonts_domain', 'https://fonts.googleapis.com/' ) . 'css?family=',
+			'wp_editor'                     => FLBuilder::get_wp_editor(),
+			'rowResize'                     => FLBuilderModel::get_row_resize_settings(),
+			'notifications'                 => FLBuilderNotifications::get_notifications(),
+			'notificationsEnabled'          => ( 1 == get_option( '_fl_builder_notifications_enabled' ) ) ? true : false,
+			'isWhiteLabeled'                => FLBuilderModel::is_white_labeled(),
+			'inlineEnabled'                 => FLBuilderModel::is_inline_enabled(),
+			'CheckCodeErrors'               => FLBuilderModel::is_codechecking_enabled(),
+			'AceEditorSettings'             => FLBuilderModel::ace_editor_settings(),
+			/**
+			 * Array of shared option sets available across settings fields in the builder.
+			 */
+			'optionSets'                    => apply_filters( 'fl_builder_shared_option_sets', array() ),
+			'presets'                       => FLBuilderSettingsPresets::get_presets(),
+			'FontWeights'                   => FLBuilderFonts::get_font_weight_strings(),
 			/**
 			 * Enable/disable usage stats collection
 			 * @see fl_builder_usage_enabled
 			 */
-			'statsEnabled'               => get_site_option( 'fl_builder_usage_enabled', false ),
+			'statsEnabled'                  => get_site_option( 'fl_builder_usage_enabled', false ),
 			/**
 			 * @see fl_remember_settings_tabs_enabled
 			 */
-			'rememberTab'                => apply_filters( 'fl_remember_settings_tabs_enabled', true ),
+			'rememberTab'                   => apply_filters( 'fl_remember_settings_tabs_enabled', true ),
 			/**
 			 * @see fl_select2_enabled
 			 */
-			'select2Enabled'             => apply_filters( 'fl_select2_enabled', true ),
+			'select2Enabled'                => apply_filters( 'fl_select2_enabled', true ),
 			/**
 			 * @see fl_media_modal_types
 			 */
-			'uploadTypes'                => apply_filters( 'fl_media_modal_types', array(
+			'uploadTypes'                   => apply_filters( 'fl_media_modal_types', array(
 				'image'      => 'image',
 				'video'      => 'video',
 				'videoTypes' => 'mp4,m4v,webm',
@@ -110,9 +118,10 @@ class FLBuilderConfig {
 			/**
 			 * @see fl_builder_recent_icons
 			 */
-			'recentIcons'                => apply_filters( 'fl_builder_recent_icons', get_option( 'fl_plugin_recent_icons', array() ) ),
-			'themerLayoutsUrl'           => admin_url( '/edit.php?post_type=fl-theme-layout' ),
-			'userCaps'                   => array(
+			'recentIcons'                   => apply_filters( 'fl_builder_recent_icons', get_option( 'fl_plugin_recent_icons', array() ) ),
+			'themerLayoutsUrl'              => admin_url( '/edit.php?post_type=fl-theme-layout' ),
+			'themerLayoutType'              => FLThemeBuilderLayoutData::current_post_layout_type(),
+			'userCaps'                      => array(
 				'unfiltered_html'        => FLBuilderModel::user_has_unfiltered_html(),
 				'canUpload'              => current_user_can( 'upload_files' ),
 				'global_unfiltered_html' => defined( 'DISALLOW_UNFILTERED_HTML' ) && DISALLOW_UNFILTERED_HTML ? true : false,
@@ -120,16 +129,16 @@ class FLBuilderConfig {
 			/**
 			 * @see fl_node_labels_enabled
 			 */
-			'node_labels_disabled'       => apply_filters( 'fl_node_labels_disabled', false ),
+			'node_labels_disabled'          => apply_filters( 'fl_node_labels_disabled', false ),
 			/**
 			 * @see fl_node_labels_separator
 			 */
-			'node_labels_separator'      => apply_filters( 'fl_node_labels_separator', ' - ' ),
+			'node_labels_separator'         => apply_filters( 'fl_node_labels_separator', ' - ' ),
 			/**
 			 * CSS to ignore during responsive preview
 			 * @see fl_builder_responsive_ignore
 			 */
-			'responsiveIgnore'           => apply_filters( 'fl_builder_responsive_ignore', array(
+			'responsiveIgnore'              => apply_filters( 'fl_builder_responsive_ignore', array(
 				'fl-builder-preview',
 				'fl-theme-builder',
 				'/wp-includes/',
@@ -138,12 +147,12 @@ class FLBuilderConfig {
 				'ace-tm',
 				'ace_editor.css',
 			)),
-			'wooActive'                  => class_exists( 'WooCommerce' ) ? true : false,
-			'uploadPath'                 => ( get_option( 'upload_path' ) && get_option( 'upload_path' ) != 'wp-content/uploads' ) ? true : false,
-			'uploadUrl'                  => admin_url( 'options-media.php' ),
-			'iframeEnabled'              => FLBuilderUIIFrame::is_enabled(),
-			'nodeCategoies'              => FLBuilderUISettingsForms::get_node_categories(),
-			'responsiveFields'           => array(
+			'wooActive'                     => class_exists( 'WooCommerce' ) ? true : false,
+			'uploadPath'                    => ( get_option( 'upload_path' ) && get_option( 'upload_path' ) != 'wp-content/uploads' ) ? true : false,
+			'uploadUrl'                     => admin_url( 'options-media.php' ),
+			'iframeEnabled'                 => FLBuilderUIIFrame::is_enabled(),
+			'nodeCategories'                => FLBuilderUISettingsForms::get_node_categories(),
+			'responsiveFields'              => array(
 				'align',
 				'border',
 				'color',
@@ -164,14 +173,21 @@ class FLBuilderConfig {
 				'size',
 				'background',
 			),
-			'collapseSectionsDefault'    => apply_filters( 'fl_builder_ui_collapse_sections', false ),
+			/**
+			 * Whether settings form sections should be collapsed by default in the builder UI.
+			 */
+			'collapseSectionsDefault'       => apply_filters( 'fl_builder_ui_collapse_sections', false ),
 			/**
 			 * @see fl_builder_default_image_select_size
 			 */
-			'defaultImageSize'           => apply_filters( 'fl_builder_default_image_select_size', 'full' ),
-			'useExperimentalColorPicker' => true,
+			'defaultImageSize'              => apply_filters( 'fl_builder_default_image_select_size', 'full' ),
+			'useExperimentalColorPicker'    => true,
+			'defaultPresetTabInColorPicker' => '1' === $default_presets_tab || 1 === $default_presets_tab,
 		];
 
+		/**
+		 * Full JS config array passed to the builder frontend, containing all settings and feature flags.
+		 */
 		return apply_filters( 'fl_builder_ui_js_config', $config );
 	}
 
@@ -237,8 +253,9 @@ class FLBuilderConfig {
 			/* translators: %s: form field label */
 			'editFormField'                  => esc_attr_x( 'Edit %s', '%s stands for form field label.', 'fl-builder' ),
 			'editGlobalSettings'             => esc_attr__( 'Global Settings', 'fl-builder' ),
-			'editLayoutSettings'             => esc_attr__( 'Layout CSS / Javascript', 'fl-builder' ),
+			'editLayoutSettings'             => esc_attr__( 'Layout Settings', 'fl-builder' ),
 			'emptyMessage'                   => esc_attr__( 'Drop a row layout or module to get started!', 'fl-builder' ),
+			'emptyPopupMessage'              => esc_attr__( 'Drop a Popup module to get started!', 'fl-builder' ),
 			'enterValidDay'                  => esc_attr__( 'Error! Please enter a valid day.', 'fl-builder' ),
 			'enterValidMonth'                => esc_attr__( 'Error! Please enter a valid month.', 'fl-builder' ),
 			'enterValidYear'                 => esc_attr__( 'Error! Please enter a valid year.', 'fl-builder' ),
@@ -278,6 +295,7 @@ class FLBuilderConfig {
 			'photosSelectedNum'              => esc_attr__( '%d Photos Selected', 'fl-builder' ),
 			'placeholder'                    => esc_attr__( 'Paste color here...', 'fl-builder' ),
 			'placeholderSelect2'             => esc_attr__( 'Pick a font...', 'fl-builder' ),
+			'wpFonts'                        => esc_attr__( 'WordPress Fonts', 'fl-builder' ),
 			'pleaseWait'                     => esc_attr__( 'Please Wait...', 'fl-builder' ),
 			/* translators: %s: preset color code */
 			'presetAdded'                    => esc_attr_x( '%s added to presets!', '%s is the preset hex color code.', 'fl-builder' ),
@@ -310,6 +328,7 @@ class FLBuilderConfig {
 			'subscriptionModuleTagsError'    => esc_attr__( 'Please enter at least one tag before saving.', 'fl-builder' ),
 			'takeHelpTour'                   => esc_attr__( 'Take a Tour', 'fl-builder' ),
 			'templateAppend'                 => esc_attr__( 'Append New Layout', 'fl-builder' ),
+			'templatePrepend'                => esc_attr__( 'Prepend New Layout', 'fl-builder' ),
 			'templateReplace'                => esc_attr__( 'Replace Existing Layout', 'fl-builder' ),
 			'templateSaved'                  => esc_attr__( 'Template Saved!', 'fl-builder' ),
 			'testimonialsTransitionWarn'     => esc_attr__( 'Transition value should be lower than Delay value.', 'fl-builder' ),
@@ -451,6 +470,9 @@ class FLBuilderConfig {
 			),
 		];
 
+		/**
+		 * Array of translated UI strings passed to the builder JavaScript config.
+		 */
 		return apply_filters( 'fl_builder_ui_js_strings', $strings );
 	}
 

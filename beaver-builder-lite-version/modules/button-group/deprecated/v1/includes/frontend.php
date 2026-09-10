@@ -27,7 +27,7 @@
 				'custom_width'          => isset( $settings->items[ $i ]->custom_width ) ? $settings->items[ $i ]->custom_width : '200',
 				'padding'               => isset( $settings->items[ $i ]->padding ) ? $settings->items[ $i ]->padding : '',
 				'text_color'            => isset( $settings->items[ $i ]->button_item_text_color ) ? $settings->items[ $i ]->button_item_text_color : '',
-				'text_hover_coler'      => isset( $settings->items[ $i ]->button_item_text_hover_color ) ? $settings->items[ $i ]->button_item_text_hover_color : '',
+				'text_hover_color'      => isset( $settings->items[ $i ]->button_item_text_hover_color ) ? $settings->items[ $i ]->button_item_text_hover_color : '',
 				'typography'            => isset( $settings->items[ $i ]->button_item_typography ) ? $settings->items[ $i ]->button_item_typography : '',
 				'bg_color'              => isset( $settings->items[ $i ]->button_item_bg_color ) ? $settings->items[ $i ]->button_item_bg_color : '',
 				'bg_hover_color'        => isset( $settings->items[ $i ]->button_item_bg_hover_color ) ? $settings->items[ $i ]->button_item_bg_hover_color : '',

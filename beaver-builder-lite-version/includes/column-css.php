@@ -2,8 +2,8 @@
 .fl-node-<?php echo $col->node; ?> {
 	color: <?php echo FLBuilderColor::hex_or_rgb( $col->settings->text_color ); ?>;
 }
-.fl-builder-content .fl-node-<?php echo $col->node; ?> *:not(span):not(input):not(textarea):not(select):not(a):not(h1):not(h2):not(h3):not(h4):not(h5):not(h6):not(.fl-menu-mobile-toggle) {
-	color: <?php echo FLBuilderColor::hex_or_rgb( $col->settings->text_color ); ?>;
+:where(.fl-builder-content .fl-node-<?php echo $col->node; ?> *:not(span):not(input):not(textarea):not(select):not(a):not(.fl-menu-mobile-toggle)) {
+	color: inherit;
 }
 <?php endif; ?>
 

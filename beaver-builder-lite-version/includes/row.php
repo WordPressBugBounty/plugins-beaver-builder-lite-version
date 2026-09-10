@@ -2,7 +2,16 @@
 <<?php echo $container_element; ?><?php FLBuilder::render_row_attributes( $row ); ?>>
 	<div class="fl-row-content-wrap">
 		<?php FLBuilder::render_row_bg( $row ); ?>
-		<?php do_action( 'fl_builder_render_node_layers', $row ); ?>
+		<?php
+		/**
+		 * Fires inside a row's content wrap, before the row content columns.
+		 * Used to render node overlay layers (e.g. video backgrounds, parallax layers).
+		 *
+		 * @since 2.2
+		 * @param object $row The row node object.
+		 */
+		do_action( 'fl_builder_render_node_layers', $row );
+		?>
 		<div class="<?php FLBuilder::render_row_content_class( $row ); ?>">
 		<?php
 		// $groups received as a magic variable from template loading.

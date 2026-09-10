@@ -5,7 +5,8 @@ $enabled_blocks = FLBuilderModuleBlocks::get_enabled_block_editor_modules();
 
 ?>
 <div id="fl-blocks-form" class="fl-settings-form">
-	<h3 class="fl-settings-form-header"><?php _e( 'Enabled Blocks', 'fl-builder' ); ?></h3>
+	<h3 class="fl-settings-form-header"><?php _e( 'Blocks', 'fl-builder' ); ?></h3>
+	<p><?php _e( 'Enable or disable blocks available in the block editor.', 'fl-builder' ); ?></p>
 
 	<form id="blocks-form" action="<?php FLBuilderAdminSettings::render_form_action( 'blocks' ); ?>" method="post">
 
@@ -18,25 +19,45 @@ $enabled_blocks = FLBuilderModuleBlocks::get_enabled_block_editor_modules();
 
 		<div class="fl-settings-form-content">
 
-			<p><?php _e( 'Check or uncheck modules to enable or disable them in the block editor.', 'fl-builder' ); ?></p>
+			<p><?php _e( 'Toggle blocks below to enable or disable them in the block editor.', 'fl-builder' ); ?></p>
 
-			<label>
-				<?php $checked = in_array( 'all', $enabled_blocks ) ? 'checked' : ''; ?>
+			<?php $checked = in_array( 'all', $enabled_blocks ) ? 'checked' : ''; ?>
+			<label class="fl-toggle-switch fl-modules-all-toggle">
 				<input class="fl-module-all-cb" type="checkbox" name="fl-blocks[]" value="all" <?php echo $checked; ?> />
-				<?php _ex( 'All', 'Plugin setup page: Blocks.', 'fl-builder' ); ?>
+				<span><?php _ex( 'All', 'Plugin setup page: Blocks.', 'fl-builder' ); ?></span>
 			</label>
 
-			<?php foreach ( $categories as $title => $modules ) : ?>
-				<h3><?php echo $title; ?></h3>
+			<?php
+			foreach ( $categories as $title => $modules ) :
+				$all_in_group = true;
+				foreach ( $modules as $m ) {
+					if ( ! in_array( $m->slug, $enabled_blocks ) ) {
+						$all_in_group = false;
+						break;
+					}
+				}
+				$group_checked = ( in_array( 'all', $enabled_blocks ) || $all_in_group ) ? 'checked' : '';
+				?>
+			<div class="fl-toggle-group">
+				<h3 class="fl-toggle-group-header">
+					<label class="fl-toggle-switch">
+						<input type="checkbox" class="fl-group-toggle-cb" <?php echo $group_checked; ?> />
+						<span><?php echo $title; ?> <span class="fl-toggle-group-count"><?php echo count( $modules ); ?></span></span>
+					</label>
+					<span class="dashicons dashicons-arrow-down-alt2"></span>
+				</h3>
+				<div class="fl-toggle-group-content">
 				<?php foreach ( $modules as $module ) : ?>
+					<?php $checked = in_array( $module->slug, $enabled_blocks ) ? 'checked' : ''; ?>
 					<p>
-						<label>
-							<?php $checked = in_array( $module->slug, $enabled_blocks ) ? 'checked' : ''; ?>
-							<input class="fl-module-cb" type="checkbox" name="fl-blocks[]" value="<?php echo $module->slug; ?>"  <?php echo $checked; ?> />
-							<?php echo $module->name; ?>
+						<label class="fl-toggle-switch">
+							<input class="fl-module-cb" type="checkbox" name="fl-blocks[]" value="<?php echo $module->slug; ?>" <?php echo $checked; ?> />
+							<span><?php echo $module->name; ?></span>
 						</label>
 					</p>
 				<?php endforeach; ?>
+				</div>
+			</div>
 			<?php endforeach; ?>
 
 		</div>

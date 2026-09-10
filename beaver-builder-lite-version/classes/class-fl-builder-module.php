@@ -115,12 +115,29 @@ class FLBuilderModule {
 	public $partial_refresh = false;
 
 	/**
+	 * Whether this module renders its own editor for a dynamic-editing
+	 * (component) instance instead of using BB's standard component form.
+	 *
+	 * Only has an effect on a module used as a dynamic-editing component. Set it
+	 * when the module's editable surface is not expressed as BB dynamic fields —
+	 * BB then skips the "no editable settings" notice for this module type and
+	 * asks the server, so the module's `fl_builder_dynamic_node_tabs_config`
+	 * filter gets a chance to mount its own editor. A module that sets this but
+	 * does not filter that hook gets a form with neither tabs nor a notice, so
+	 * the two go together.
+	 *
+	 * @since 2.11
+	 * @var boolean $owns_instance_editor
+	 */
+	public $owns_instance_editor = false;
+
+	/**
 	 * Whether shortcodes in this module's rendered output should be processed
 	 * by the layout's do_shortcode pass. Modules that render third-party content
 	 * (widgets, blocks) can echo untrusted user data and set this to false so
 	 * that data cannot inject shortcodes.
 	 *
-	 * @since 2.10.2.4
+	 * @since 2.11
 	 * @var boolean $renders_shortcodes
 	 */
 	public $renders_shortcodes = true;
@@ -183,12 +200,57 @@ class FLBuilderModule {
 	public $parents = 'all';
 
 	/**
+	 * Whether this module can be placed at the top level of the
+	 * layout (alongside rows) without being wrapped in a row/column.
+	 * This is additive — top-level modules still work inside columns too.
+	 *
+	 * @var bool $top_level
+	 */
+	public $top_level = false;
+
+	/**
 	 * An array of module keys and settings to use as a template
 	 * for modules that accept children.
 	 *
 	 * @var array $template
 	 */
 	public $template = [];
+
+	/**
+	 * Optional namespace for module types registered via FLBuilderModuleType.
+	 * Used to group and identify modules from different sources (e.g., 'ds').
+	 *
+	 * @var string|null $namespace
+	 */
+	public $namespace = null;
+
+	/**
+	 * Whether this module instance was created via clone (FLBuilderModuleType).
+	 *
+	 * @var bool $clone_instance
+	 */
+	public $clone_instance = false;
+
+	/**
+	 * Optional HTML render callback for module types registered via FLBuilderModuleType.
+	 *
+	 * @var callable|null $render
+	 */
+	public $render = null;
+
+	/**
+	 * Optional CSS render callback for module types registered via FLBuilderModuleType.
+	 *
+	 * @var callable|null $css_callback
+	 */
+	public $css_callback = null;
+
+	/**
+	 * Optional JS render callback for module types registered via FLBuilderModuleType.
+	 *
+	 * @var callable|null $js_callback
+	 */
+	public $js_callback = null;
 
 	/**
 	 * The version for this module instance. Used internally to
@@ -263,18 +325,22 @@ class FLBuilderModule {
 	 * @since 1.0
 	 */
 	public function __construct( $params ) {
-		$class_info               = new ReflectionClass( $this );
-		$class_path               = $class_info->getFileName();
-		$dir_path                 = dirname( $class_path );
-		$this->slug               = isset( $params['slug'] ) ? $params['slug'] : basename( $class_path, '.php' );
-		$this->enabled            = isset( $params['enabled'] ) ? $params['enabled'] : true;
-		$this->editor_export      = isset( $params['editor_export'] ) ? $params['editor_export'] : true;
-		$this->partial_refresh    = isset( $params['partial_refresh'] ) ? $params['partial_refresh'] : false;
+		$class_info            = new ReflectionClass( $this );
+		$class_path            = $class_info->getFileName();
+		$dir_path              = dirname( $class_path );
+		$this->slug            = isset( $params['slug'] ) ? $params['slug'] : basename( $class_path, '.php' );
+		$this->enabled         = isset( $params['enabled'] ) ? $params['enabled'] : true;
+		$this->editor_export   = isset( $params['editor_export'] ) ? $params['editor_export'] : true;
+		$this->partial_refresh = isset( $params['partial_refresh'] ) ? $params['partial_refresh'] : false;
+
+		$this->owns_instance_editor = isset( $params['owns_instance_editor'] ) ? $params['owns_instance_editor'] : false;
+
 		$this->renders_shortcodes = isset( $params['renders_shortcodes'] ) ? $params['renders_shortcodes'] : true;
 		$this->include_wrapper    = isset( $params['include_wrapper'] ) ? $params['include_wrapper'] : true;
 		$this->element_setting    = isset( $params['element_setting'] ) ? $params['element_setting'] : true;
 		$this->accepts            = isset( $params['accepts'] ) ? $params['accepts'] : [];
 		$this->parents            = isset( $params['parents'] ) ? $params['parents'] : 'all';
+		$this->top_level          = isset( $params['top_level'] ) ? $params['top_level'] : false;
 		$this->template           = isset( $params['template'] ) ? $params['template'] : [];
 		$this->block_editor       = isset( $params['block_editor'] ) ? $params['block_editor'] : false;
 		$this->auto_style         = isset( $params['auto_style'] ) ? $params['auto_style'] : false;
@@ -309,9 +375,12 @@ class FLBuilderModule {
 		// Icon requires dir be defined before calling get_icon()
 		$this->icon = isset( $params['icon'] ) ? $this->get_icon( $params['icon'] ) : $this->get_icon();
 
+		/**
+		 * Display details for a module including its name, description, category, and icon.
+		 */
 		$details = apply_filters( 'fl_builder_module_details', array(
 			'name'        => $params['name'],
-			'description' => $params['description'],
+			'description' => $params['description'] ?? '',
 			'category'    => $this->normalize_category_name( $params['category'] ),
 			'group'       => isset( $params['group'] ) ? $params['group'] : false,
 			'icon'        => $this->icon,
@@ -607,35 +676,6 @@ class FLBuilderModule {
 	 * @return array
 	 */
 	public function filter_attributes( $attrs = [] ) {
-		return $this->accessibility_attributes( $attrs );
-	}
-
-	/**
-	 * Add accessibility attributes if not set & applicable.
-	 *
-	 * @since 2.10
-	 * @access private
-	 * @param array $attrs
-	 * @return array
-	 */
-	private function accessibility_attributes( $attrs = [] ) {
-		$applicable = array(
-			'content-slider',
-			'post-carousel',
-			'testimonials',
-			'post-slider',
-			'slideshow',
-		);
-		if ( in_array( $this->slug, $applicable ) ) {
-			if ( 'section' !== $this->settings->container_element ) {
-				$attrs['role'] = 'region';
-			}
-			if ( isset( $attrs['aria-label'] ) ) {
-				$attrs['aria-roledescription'] = $this->name;
-			} else {
-				$attrs['aria-label'] = $this->name;
-			}
-		}
 		return $attrs;
 	}
 
@@ -643,10 +683,11 @@ class FLBuilderModule {
 	 * Renders the root element attributes for this module.
 	 *
 	 * @param array $attrs
-	 * @return void
+	 * @param bool $echo
+	 * @return void|array
 	 */
-	public function render_attributes( $attrs = [] ) {
-		echo FLBuilder::render_module_attributes( $this, $attrs );
+	public function render_attributes( $attrs = [], $echo = true ) {
+		return FLBuilder::render_module_attributes( $this, $attrs, $echo );
 	}
 
 	/**
@@ -656,6 +697,17 @@ class FLBuilderModule {
 	 */
 	public function accepts_children() {
 		return ! empty( $this->accepts );
+	}
+
+	/**
+	 * Check if this module can be placed at the top level of the
+	 * layout (alongside rows). Container modules can always be
+	 * top-level; non-container modules need `top_level = true`.
+	 *
+	 * @return bool
+	 */
+	public function can_be_top_level() {
+		return $this->top_level || $this->accepts_children();
 	}
 
 	/**

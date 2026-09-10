@@ -125,7 +125,13 @@ class FLNumbersModule extends FLBuilderModule {
 			'locale'       => $locale,
 		) );
 
-		echo '<div class="fl-number-string">' . $prefix . '<span class="fl-number-int" ' . $number_data . '>' . $nojs . '</span>' . $suffix . '</div>';
+		// v1: no span wrappers for prefix/suffix
+		if ( 1 === $this->version ) {
+			echo '<div class="fl-number-string">' . $prefix . '<span class="fl-number-int" ' . $number_data . '>' . $nojs . '</span>' . $suffix . '</div>';
+		} else {
+			// v2+: span wrappers for prefix/suffix
+			echo '<div class="fl-number-string"><span class="fl-number-prefix">' . $prefix . '</span><span class="fl-number-int" ' . $number_data . '>' . $nojs . '</span><span class="fl-number-suffix">' . $suffix . '</span></div>';
+		}
 	}
 
 	public function render_circle_bar() {

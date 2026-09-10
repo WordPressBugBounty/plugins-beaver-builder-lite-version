@@ -1095,6 +1095,21 @@ div.fl-field-unit-select {
   color: unset !important;
 }
 
+#fl-field-responsive_display .fl-button-group-field-option[data-selected="0"] i {
+  position: relative;
+}
+#fl-field-responsive_display .fl-button-group-field-option[data-selected="0"] i::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: -15%;
+  width: 130%;
+  height: 1.5px;
+  background: currentColor;
+  transform: rotate(-45deg);
+  pointer-events: none;
+}
+
 .fl-button-group-field-option:hover i {
   color: #333;
 }
@@ -1537,6 +1552,183 @@ fl-compound-field, .fl-compound-field {
 
 .fl-icon-field .fl-icon-remove {
   margin: 0 0 0 8px;
+}
+
+/* Icon Extra Classes (chip/tag input)
+------------------------------------------------------ */
+.fl-icon-compound-field-section-extra .fl-compound-field-section-toggle {
+  position: relative;
+}
+
+.fl-icon-compound-field-section-extra .fl-compound-field-section-toggle .fl-help-tooltip {
+  margin-left: 4px;
+  position: static;
+}
+
+.fl-icon-compound-field-section-extra .fl-compound-field-section-toggle .fl-help-tooltip-text {
+  left: 0;
+  top: 100%;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.fl-icon-classes-field {
+  position: relative;
+}
+
+.fl-icon-classes-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+  padding: 4px 6px;
+  background: #fff !important;
+  border-color: transparent !important;
+  border-style: solid;
+  border-width: 2px;
+  border-radius: 4px !important;
+  box-shadow: var(--fl-builder-input-shadow);
+  cursor: text;
+  overflow: auto;
+  min-height: var(--fl-builder-target-size);
+  box-sizing: border-box;
+}
+
+.fl-builder-ui-skin--dark .fl-icon-classes-tags {
+  background: #121a23 !important;
+}
+
+.fl-icon-classes-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #666;
+  font-size: 13px;
+  background: #f4f4f4;
+  border: 1px solid #bbb;
+  border-top-color: #ccc;
+  padding: 2px 7px 2px 10px;
+  border-radius: 12px;
+  box-shadow: 0 1px 1px #e9e9e9;
+  white-space: nowrap;
+  cursor: default;
+}
+
+.fl-builder-ui-skin--dark .fl-icon-classes-tag {
+  color: #aaa;
+  background: linear-gradient(to bottom, #2e3540, #232a34);
+  border-color: #3a3f47;
+  border-top-color: #444b55;
+  box-shadow: none;
+}
+
+.fl-icon-classes-tag-remove {
+  background: none;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  padding: 0 2px;
+  font-size: 14px;
+  font-weight: bold;
+  line-height: 1;
+  transition: color 0.1s ease-in;
+}
+
+.fl-icon-classes-tag-remove:hover {
+  color: #555;
+}
+
+.fl-builder-ui-skin--dark .fl-icon-classes-tag-remove {
+  color: #666;
+}
+
+.fl-builder-ui-skin--dark .fl-icon-classes-tag-remove:hover {
+  color: #aaa;
+}
+
+.fl-icon-classes-input {
+  flex: 1;
+  min-width: 100px;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  padding: 2px 4px !important;
+  font-size: 13px;
+  color: inherit;
+}
+
+.fl-icon-classes-suggestions {
+  display: none;
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-top: 2px;
+  max-height: 220px;
+  overflow-y: auto;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.fl-builder-ui-skin--dark .fl-icon-classes-suggestions {
+  background: #121a23;
+  border-color: #353c43;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
+}
+
+.fl-icon-classes-suggestions.fl-icon-classes-suggestions--open {
+  display: block;
+}
+
+.fl-icon-classes-suggestion-group {
+  padding: 6px 10px 2px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #999;
+}
+
+.fl-icon-classes-suggestion-item {
+  margin: 0;
+  padding: 5px 12px;
+  background-color: transparent;
+  border-top: 1px solid #fff;
+  border-right: 1px solid #fff;
+  border-bottom: 1px solid #d9d9d9;
+  border-left: 1px solid #fff;
+  cursor: pointer;
+  border-radius: 5px;
+  font-size: 13px;
+}
+
+.fl-icon-classes-suggestion-item:hover,
+.fl-icon-classes-suggestion-item.fl-icon-classes-suggestion-item--active {
+  background: #e5e5e5;
+  border-color: transparent;
+  color: #333;
+}
+
+.fl-builder-ui-skin--dark .fl-icon-classes-suggestion-item {
+  border-bottom-color: #2a3040;
+  border-top-color: #121a23;
+  border-left-color: #121a23;
+  border-right-color: #121a23;
+}
+
+.fl-builder-ui-skin--dark .fl-icon-classes-suggestion-item:hover,
+.fl-builder-ui-skin--dark .fl-icon-classes-suggestion-item.fl-icon-classes-suggestion-item--active {
+  background: #2e3540;
+  border-color: transparent;
+  color: #fff;
+}
+
+.fl-icon-classes-suggestion-item--added {
+  opacity: 0.4;
+  pointer-events: none;
 }
 
 /* Text Editors

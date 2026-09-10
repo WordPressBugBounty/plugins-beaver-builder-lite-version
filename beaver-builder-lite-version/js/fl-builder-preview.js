@@ -517,12 +517,14 @@
 				node = element.closest( '[data-node]' ),
 				ignore = [ 'color', 'background-color', 'border-color', 'line-height', 'font-weight' ];
 
-			if ( 'width' === property ) {
-				value = 'auto';
-			} else if ( -1 === $.inArray( property, ignore ) && node.length ) {
-				this._disableStyles();
-				value = element.eq( element.length - 1 ).css( property );
-				this._enableStyles();
+			if ( -1 === $.inArray( property, ignore ) ) {
+				if ( node.length ) {
+					this._disableStyles();
+					value = element.eq( element.length - 1 ).css( property );
+					this._enableStyles();
+				} else {
+					value = 'initial';
+				}
 			}
 
 			return value;
@@ -815,7 +817,7 @@
 		 * @return {String}
 		 */
 		_getNodeIdForPreview: function( nodeId ) {
-			var node = $( '.fl-node-' + nodeId );
+			var node = $( '.fl-node-' + nodeId + ':not(.fl-popup)');
 
 			if ( 1 < node.length ) {
 				var parent = node.parents( '[data-node]' ).eq(0);
@@ -923,6 +925,12 @@
 
 			// Fire the preview rendered event.
 			$( FLBuilder._contentClass, this.layoutDoc ).trigger( 'fl-builder.preview-rendered' );
+
+			FLBuilder.triggerHook( 'renderPreviewComplete', {
+				nodeType: this.type,
+				moduleType: 'module' === this.type ? this.elements.node.data( 'type' ) : null,
+				nodeId: this.nodeId,
+			} );
 		},
 
 		/**
@@ -3063,6 +3071,9 @@
 				property = 'border-' + dimension + '-width';
 			} else if ( 'gap' === property ) {
 				property = dimension + '-' + property;
+			} else if ( 'inset' === property ) {
+				property = dimension;
+				value = '' === value ? 'auto' : value;
 			} else {
 				property = property + '-' + dimension;
 			}
@@ -3100,7 +3111,13 @@
 				value = parseFloat( value ) + ( unit ? unit : 'px' );
 			} else if ( input.attr( 'placeholder' ) ) {
 				unit = this._getPreviewCSSUnit( preview, field, e );
-				value = parseFloat( input.attr( 'placeholder' ) ) + ( unit ? unit : 'px' );
+				placeholder = input.attr( 'placeholder' );
+				parsed = parseFloat( placeholder );
+				if ( isNaN( parsed ) ) {
+					value = placeholder; // Handle keywords such as auto
+				} else {
+					value = parsed + ( unit ? unit : 'px' );
+				}
 			}
 
 			return value;

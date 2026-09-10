@@ -7,6 +7,11 @@
 	top: 0;
 	left: 0;
 	z-index: 99999;
+	/* Reset browser popover defaults */
+	border: none;
+	background: none;
+	padding: 0;
+	overflow: visible;
 }
 
 #tiptip_holder.tip_top {

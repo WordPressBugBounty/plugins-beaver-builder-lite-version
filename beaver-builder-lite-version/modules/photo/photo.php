@@ -58,6 +58,9 @@ class FLPhotoModule extends FLBuilderModule {
 	 * @method enqueue_scripts
 	 */
 	public function enqueue_scripts() {
+		/**
+		 * Whether to use a custom lightbox instead of the builder's built-in lightbox in the Photo module.
+		 */
 		$override_lightbox = apply_filters( 'fl_builder_override_lightbox', false );
 
 		if ( $this->settings && 'lightbox' == $this->settings->link_type ) {
@@ -99,6 +102,9 @@ class FLPhotoModule extends FLBuilderModule {
 
 		if ( fl_builder_filesystem()->file_exists( $cropped_path['path'] ) ) {
 			fl_builder_filesystem()->unlink( $cropped_path['path'] );
+			/**
+			 * Fires after a builder-generated cropped image file has been deleted.
+			 */
 			do_action( 'fl_builder_cropped_image_deleted', $cropped_path );
 		}
 	}
@@ -259,6 +265,9 @@ class FLPhotoModule extends FLBuilderModule {
 			}
 		}
 
+		/**
+		 * Array of CSS classes added to the photo module wrapper element.
+		 */
 		return implode( ' ', apply_filters( 'fl_builder_photo_classes', $classes, $this->settings, $this->node ) );
 	}
 
@@ -322,7 +331,11 @@ class FLPhotoModule extends FLBuilderModule {
 			$link = '';
 		}
 
-		return esc_url( do_shortcode( apply_filters( 'fl_builder_photo_link', $link, $this->settings ) ) );
+		/**
+		 * URL used as the photo link href.
+		 */
+		$this->settings->link_url = apply_filters( 'fl_builder_photo_link', $link, $this->settings );
+		return $this->settings->link_url;
 	}
 
 	/**
@@ -471,6 +484,9 @@ class FLPhotoModule extends FLBuilderModule {
 	 */
 	public static function _get_file_path( $url_path ) {
 		$home_url = trailingslashit( preg_replace( '/\/?(\?.*$)/', '', home_url() ) );
+		/**
+		 * Filesystem path derived from a photo URL, used when cropping images.
+		 */
 		return apply_filters( 'fl_builder_photo_crop_path', str_ireplace( $home_url, ABSPATH, $url_path ), $url_path );
 	}
 
@@ -543,6 +559,9 @@ class FLPhotoModule extends FLBuilderModule {
 		} elseif ( ! empty( $this->settings->photo_src ) ) {
 			$url = $this->settings->photo_src;
 		} else {
+			/**
+			 * URL of the placeholder image shown when no photo has been selected.
+			 */
 			$url = apply_filters( 'fl_builder_photo_noimage', FLBuilder::plugin_url() . 'img/pixel.png' );
 		}
 
@@ -566,25 +585,6 @@ class FLPhotoModule extends FLBuilderModule {
 
 		// Pull from the demo main site.
 		return FL_BUILDER_DEMO_CACHE_URL . $info['filename'];
-	}
-
-	/**
-	 * Returns link rel
-	 * @since 2.0.6
-	 */
-	public function get_rel() {
-		$rel = array();
-		if ( '_blank' == $this->settings->link_url_target ) {
-			$rel[] = 'noopener';
-		}
-		if ( isset( $this->settings->link_url_nofollow ) && 'yes' == $this->settings->link_url_nofollow ) {
-			$rel[] = 'nofollow';
-		}
-		$rel = implode( ' ', $rel );
-		if ( $rel ) {
-			$rel = ' rel="' . $rel . '" ';
-		}
-		return $rel;
 	}
 
 	public function filter_classes( $classes = [] ) {

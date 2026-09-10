@@ -34,7 +34,10 @@ final class FLBuilderWPBlocksLayout {
 		global $pagenow;
 
 		if ( in_array( $pagenow, array( 'post.php', 'post-new.php' ) ) ) {
-			$post_id      = isset( $_GET['post'] ) ? absint( $_GET['post'] ) : null;
+			$post_id = isset( $_GET['post'] ) ? absint( $_GET['post'] ) : null;
+			/**
+			 * Whether to render the builder's admin edit UI button in the block editor toolbar.
+			 */
 			$render_ui    = apply_filters( 'fl_builder_render_admin_edit_ui', true );
 			$post_types   = FLBuilderModel::get_post_types();
 			$screen       = get_current_screen();

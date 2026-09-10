@@ -178,9 +178,11 @@ class FLBuilderUIContentPanel {
 	 * @return array
 	 */
 	private static function get_rows_tab_data() {
+		$is_module = FLBuilderModel::is_post_user_template( 'module' );
+		$is_popup  = FLThemeBuilderLayoutData::current_post_is( 'popup' );
 
 		$data = array(
-			'should_display' => ! FLBuilderModel::is_post_user_template( 'module' ),
+			'should_display' => ! $is_module && ! $is_popup,
 			'views'          => array(),
 		);
 

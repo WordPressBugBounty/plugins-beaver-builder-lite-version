@@ -2,15 +2,39 @@
 /**
  * Button texts
  */
-$discard     = apply_filters( 'fl_builder_ui_bar_discard', __( 'Discard', 'fl-builder' ) );
+$discard = apply_filters( 'fl_builder_ui_bar_discard', __( 'Discard', 'fl-builder' ) );
+/**
+ * Tooltip text for the Discard button in the builder toolbar.
+ */
 $discard_alt = apply_filters( 'fl_builder_ui_bar_discard_alt', __( 'Discard changes and exit', 'fl-builder' ) );
-$draft       = apply_filters( 'fl_builder_ui_bar_draft', __( 'Save Draft', 'fl-builder' ) );
-$draft_alt   = apply_filters( 'fl_builder_ui_bar_draft_alt', __( 'Keep changes drafted and exit', 'fl-builder' ) );
-$review      = apply_filters( 'fl_builder_ui_bar_review', __( 'Submit for Review', 'fl-builder' ) );
-$review_alt  = apply_filters( 'fl_builder_ui_bar_review_alt', __( 'Submit changes for review and exit', 'fl-builder' ) );
-$publish     = apply_filters( 'fl_builder_ui_bar_publish', __( 'Publish', 'fl-builder' ) );
+/**
+ * Label for the Save Draft button in the builder toolbar.
+ */
+$draft = apply_filters( 'fl_builder_ui_bar_draft', __( 'Save Draft', 'fl-builder' ) );
+/**
+ * Tooltip text for the Save Draft button in the builder toolbar.
+ */
+$draft_alt = apply_filters( 'fl_builder_ui_bar_draft_alt', __( 'Keep changes drafted and exit', 'fl-builder' ) );
+/**
+ * Label for the Submit for Review button in the builder toolbar.
+ */
+$review = apply_filters( 'fl_builder_ui_bar_review', __( 'Submit for Review', 'fl-builder' ) );
+/**
+ * Tooltip text for the Submit for Review button in the builder toolbar.
+ */
+$review_alt = apply_filters( 'fl_builder_ui_bar_review_alt', __( 'Submit changes for review and exit', 'fl-builder' ) );
+/**
+ * Label for the Publish button in the builder toolbar.
+ */
+$publish = apply_filters( 'fl_builder_ui_bar_publish', __( 'Publish', 'fl-builder' ) );
+/**
+ * Tooltip text for the Publish button in the builder toolbar.
+ */
 $publish_alt = apply_filters( 'fl_builder_ui_bar_publish_alt', __( 'Publish changes and exit', 'fl-builder' ) );
-$cancel      = apply_filters( 'fl_builder_ui_bar_cancel', __( 'Cancel', 'fl-builder' ) );
+/**
+ * Label for the Cancel button in the builder toolbar.
+ */
+$cancel = apply_filters( 'fl_builder_ui_bar_cancel', __( 'Cancel', 'fl-builder' ) );
 ?>
 <div class="fl-builder-bar">
 	<div class="fl-builder-bar-content">

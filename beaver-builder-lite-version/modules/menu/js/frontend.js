@@ -61,7 +61,7 @@
 			// Trigger focus on the first menu item if the user is tabbing from the mobile toggle button
 			else if ( ! event.shiftKey && $( event.currentTarget ).hasClass( 'fl-menu-mobile-toggle' ) && $( event.currentTarget ).hasClass( 'fl-active' )  ) {
 				event.preventDefault();
-				$( this.wrapperClass ).find( '.menu-item:first a:first' ).trigger( 'focus' );
+				$( this.wrapperClass ).find( '.menu-item' ).first().find( 'a' ).first().trigger( 'focus' );
 			}
 		}, this ) );
 
@@ -69,7 +69,7 @@
 		$( this.wrapperClass ).on( 'focusout', $.proxy( function ( event ) {
 			if ( $( this.wrapperClass + ' nav' ).has( $( event.relatedTarget ) ).length === 0 ) {
 				if ( this.type === 'accordion' ) {
-					this._toggleSubmenu( $( event.target ).parents( '.fl-has-submenu:last' ), false );
+					this._toggleSubmenu( $( event.target ).parents( '.fl-has-submenu' ).last(), false );
 				}
 				else {
 					this._clickOrHover( true );
@@ -218,7 +218,7 @@
 		 * @return void
 		 */
 		_menuOnFocus: function(){
-			$( this.wrapperClass ).on( 'focus', 'a, .fl-menu-toggle', $.proxy( function( event ) {
+			$( this.wrapperClass ).on( 'focus', 'a:not(.fl-button), .fl-menu-toggle', $.proxy( function( event ) {
 				const focusedMenuItem = $( event.currentTarget ).closest( '.menu-item' );
 				const blurredMenuItem = $( event.relatedTarget ).closest( '.menu-item' );
 				// In case the blurred & focused items are siblings
@@ -260,8 +260,12 @@
 				const mobileToggle = $( this.wrapperClass ).find( '.fl-menu-mobile-toggle' );
 				// In case there is a focused menu item
 				if ( menuItem.length || $( event.target ).hasClass( 'fl-menu-mobile-close' ) ) {
+					// Close the search form if it is open
+					if ( menuItem.hasClass( 'fl-menu-search-item' ) && $( this.wrapperClass ).find('.fl-search-form-input-wrap').is( ':visible' ) ) {
+						$( this.wrapperClass ).find('.fl-menu-search-item .fl-button:is(a, button:not([type="submit"]))').trigger( 'focus' );
+					}
 					// Close all the submenus of the focused menu item
-					if ( menuItem.hasClass( 'fl-has-submenu' ) && menuItem.find( '.sub-menu:first' ).is( ':visible' ) ) {
+					else if ( menuItem.hasClass( 'fl-has-submenu' ) && menuItem.find( '.sub-menu' ).first().is( ':visible' ) ) {
 						this._toggleSubmenu( menuItem, false );
 					}
 					else {
@@ -275,7 +279,7 @@
 						// Close the parent submenu and shift focus to its link
 						else if ( parentMenuItem.length !== 0 ) {
 							this._toggleSubmenu( parentMenuItem, false );
-							parentMenuItem.find( 'a:first' ).trigger( 'focus' );
+							parentMenuItem.find( 'a' ).first().trigger( 'focus' );
 						}
 					}
 				}
@@ -294,8 +298,8 @@
 		 * @return void
 		 */
 		_menuOnClick: function(){
-			// Fallback for span elements with role="button" to be clickable
-			$( this.wrapperClass ).on( 'keydown', 'span.fl-menu-toggle', $.proxy( function( event ) {
+			// Fallback for span elements and fake links to interact with the keyboard
+			$( this.wrapperClass ).on( 'keydown', 'a:not(.fl-button, [href]), span.fl-menu-toggle', $.proxy( function( event ) {
 				if ( event.key === 'Enter' || event.key === ' ' ) {
 					event.preventDefault();
 					$( event.currentTarget ).trigger( 'click' );
@@ -307,8 +311,8 @@
 				// Links only open & do not toggle submenus if there is either a submenu icon or an accordion layout
 				if ( $( event.currentTarget ).is( 'a' ) && ( this.submenuIcon !== 'none' || this.type === 'accordion' ) ) return;
 				const menuItem = $( event.currentTarget ).closest( '.menu-item, .fl-menu-logo' );
-				const menuLink = menuItem.find( 'a:first' ).attr( 'href' );
-				const submenuHidden = menuItem.find( '.sub-menu:first' ).is( ':hidden' );
+				const menuLink = menuItem.find( 'a' ).first().attr( 'href' );
+				const submenuHidden = menuItem.find( '.sub-menu' ).first().is( ':hidden' );
 				if ( typeof menuLink === 'undefined' || menuLink === '#' || submenuHidden ) {
 					event.preventDefault();
 				}
@@ -332,14 +336,14 @@
 				menuItem.addClass( togglingClass );
 				menuItem.find( toggleElement ).first().attr( 'aria-expanded', true );
 				if ( this._isMenuToggle() || this.type === 'accordion' ) {
-					menuItem.find( '.sub-menu:first:hidden' ).slideDown();
+					menuItem.find( '.sub-menu' ).first().filter( ':hidden' ).slideDown();
 				}
 			}
 			else {
 				menuItem.parent().find( '.menu-item' ).removeClass( togglingClass );
 				menuItem.parent().find( '.fl-has-submenu' ).not( hiddenMenu ).find( toggleElement ).attr( 'aria-expanded', false );
 				if ( this._isMenuToggle() || this.type === 'accordion' ) {
-					menuItem.find( '.sub-menu:visible' ).slideUp();
+					menuItem.find( '.sub-menu' ).filter( ':visible' ).slideUp();
 				}
 			}
 		},
@@ -361,7 +365,7 @@
 			$( selector ).find( '.fl-has-submenu' ).not( hiddenMenu ).each( function() {
 				if( clear || ! $ ( this ).hasClass( className ) ){
 					if ( clear ) $( this ).removeClass( className );
-					$( this ).find( toggleElement + ':first' ).attr( 'aria-expanded', false );
+					$( this ).find( toggleElement ).first().attr( 'aria-expanded', false );
 					if ( className === 'fl-active' ) {
 						$( this ).find( '.sub-menu' ).fadeOut();
 					} else if ( className === 'focus' ) {
@@ -825,44 +829,33 @@
 		 * @method _toggleMenuSearch
 		 */
 		_toggleMenuSearch: function(){
-			var wrapper = $( this.wrapperClass ).find('.fl-menu-search-item'),
-				button  = wrapper.find('.fl-button:is(a, button)'),
-				form    = wrapper.find('.fl-search-form-input-wrap'),
-				self    = this;
-
-			button.attr( 'tabindex', 0 );
-			button.attr( 'aria-label', 'Search' );
-			button.on('click', function(e){
-				e.preventDefault();
-
-				if(form.is(':visible')) {
-					form.stop().fadeOut(200);
-				}
-				else {
-					form.stop().fadeIn(200);
-					$('body').on('click.fl-menu-search', $.proxy(self._hideMenuSearch, self));
-					form.find('.fl-search-text').focus();
+			const form   = $( this.wrapperClass ).find('.fl-menu-search-item .fl-search-form-input-wrap'); 
+			const button = $( this.wrapperClass ).find('.fl-menu-search-item .fl-button:is(a, button:not([type="submit"]))');
+			form.on('submit', () => form.stop().fadeToggle('fast'));
+			// Close the search form when focus is lost
+			form.on('focusout', (event) => {
+				if (form.is(':visible') && form.has($(event.relatedTarget)).length === 0) {
+					button.trigger('click');
 				}
 			});
-		},
-
-		/**
-		 * Hides the nav search form.
-		 *
-		 * @since  2.5
-		 * @method _hideMenuSearch
-		 */
-		_hideMenuSearch: function(e){
-			var form = $( this.wrapperClass ).find('.fl-search-form-input-wrap');
-
-			if(e !== undefined) {
-				if($(e.target).closest('.fl-menu-search-item').length > 0) {
-					return;
+			button.attr('aria-expanded', false);
+			// Close other open submenus when focusing on the search button
+			button.on('focus', (event) => {
+				const parentMenus = $(event.relatedTarget).parents('.menu-item.fl-has-submenu');
+				if (event.relatedTarget && parentMenus.length) {
+					this._toggleSubmenu(parentMenus, false);
 				}
-			}
-
-			form.stop().fadeOut(200);
-			$('body').off('click.fl-menu-search');
+			});
+			button.on('click', (event) => {
+				// Prevent toggling when clicking with mouse while the form is already open
+				if (event.detail && event.type === 'click' && form.is(':visible')) return;
+				form.stop().fadeToggle('fast', () => {
+					button.attr('aria-expanded', form.is(':visible'));
+					if(form.is(':visible')) {
+						form.find('.fl-search-text').focus();
+					}
+				});
+			});
 		},
 
 		/**

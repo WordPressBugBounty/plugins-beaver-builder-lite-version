@@ -96,6 +96,9 @@ class FLBuilderUIIFrame {
 	 * Check if the iframe UI is enabled on this site.
 	 */
 	static public function is_enabled() {
+		/**
+		 * Whether the builder uses the iframe-based UI.
+		 */
 		return apply_filters( 'fl_builder_iframe_ui_enabled', true );
 	}
 

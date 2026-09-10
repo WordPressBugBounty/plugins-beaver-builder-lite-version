@@ -25,7 +25,7 @@ final class FLBuilderServiceMailrelay extends FLBuilderService {
 	private $api_url = '/ccm/admin/api/version/2/&type=json';
 
 	/**
-	 * Request data from the thir party API.
+	 * Request data from the third party API.
 	 *
 	 * @since 1.5.4
 	 * @param string $base_url Base URL where API is available

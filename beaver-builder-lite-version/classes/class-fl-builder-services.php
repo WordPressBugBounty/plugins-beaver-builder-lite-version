@@ -164,7 +164,10 @@ final class FLBuilderServices {
 	 * @return array An array of services and related data.
 	 */
 	static public function get_services_data( $type = null ) {
-		$services      = array();
+		$services = array();
+		/**
+		 * Array of email marketing service definitions available in the Subscribe Form module.
+		 */
 		$services_data = apply_filters( 'fl_builder_subscribe_form_services', self::$services_data );
 
 		// Return all services.

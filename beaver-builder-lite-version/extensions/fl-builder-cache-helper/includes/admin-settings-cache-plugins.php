@@ -4,43 +4,41 @@ $settings = \FLCacheClear\Plugin::get_settings();
 $plugins  = \FLCacheClear\Plugin::get_plugins();
 ?>
 
-	<h3 class="fl-settings-form-header"><?php _e( 'Cache Clearing Tool', 'fl-builder' ); ?></h3>
-	<form id="cache-plugins-form" action="<?php FLBuilderAdminSettings::render_form_action( 'tools' ); ?>" method="post">
-
-		<div class="fl-settings-form-content">
-			<p><?php _e( 'This tool applies to caches created by the following:', 'fl-builder' ); ?></p>
-			<?php echo $plugins; ?>
+	<div class="fl-tools-card">
+		<div class="fl-tools-card-header">
+			<h3><?php _e( 'Cache Clearing Tool', 'fl-builder' ); ?></h3>
 			<p>
-				<?php /* translators: %s: branded builder name */ ?>
-				<?php printf( __( 'Enable the following setting to clear the caches created by any of these caching plugins. If enabled, cache clearing occurs when layouts and templates are saved and when WordPress finishes updating plugins and themes. This setting also defines the DONOTCACHEPAGE constant, which is respected by most cache plugins, to keep the page from being cached when the %s editor is active.', 'fl-builder' ), FLBuilderModel::get_branding() ); ?>
+			<?php
+			/* translators: %s: page builder name */
+			printf( __( 'Automatically clear third-party caches when layouts are saved and prevent page caching while the %s editor is active.', 'fl-builder' ), FLBuilderModel::get_branding() );
+			?>
 			</p>
-			<p>
-				<label>
-					<input type="checkbox" name="fl-cache-plugins-enabled" value="1" <?php checked( $settings['enabled'], 1 ); ?> />
-					<span><?php _e( 'Enable the Cache Clearing Tool', 'fl-builder' ); ?></span>
+		</div>
+		<div class="fl-tools-card-body">
+			<label class="fl-toggle-switch">
+				<input type="checkbox" class="fl-cache-plugins-toggle" value="1" <?php checked( $settings['enabled'], 1 ); ?> />
+				<span><?php _e( 'Enable the Cache Clearing Tool', 'fl-builder' ); ?></span>
+			</label>
+
+			<div class="fl-tools-sub-option" <?php echo empty( $settings['enabled'] ) ? 'style="display:none"' : ''; ?>>
+				<label class="fl-toggle-switch">
+					<input type="checkbox" class="fl-cache-varnish-toggle" value="1" <?php checked( $settings['varnish'], 1 ); ?> />
+					<span><?php _e( 'Enable proxy cache clearing (Varnish / Litespeed)', 'fl-builder' ); ?></span>
 				</label>
-			</p>
-
-			<?php if ( $settings['enabled'] ) : ?>
-			<div class="fl-cache-plugins-settings">
-
-				<p>
-					<?php _e( 'Some hosts use a proxy cache like Varnish or Litespeed. The following setting attempts to invalidate the cache using a remote request. If you are unsure what this does, leave it disabled.', 'fl-builder' ); ?>
-				</p>
-				<p>
-					<label>
-						<input type="checkbox" name="fl-cache-varnish-enabled" value="1" <?php checked( $settings['varnish'], 1 ); ?> />
-						<span><?php _e( 'Enable proxy cache clearing', 'fl-builder' ); ?></span>
-					</label>
-				</p>
 			</div>
 
-		<?php endif; ?>
+			<details class="fl-tools-details-info">
+				<summary class="fl-tools-detail-small"><?php _e( 'More info', 'fl-builder' ); ?></summary>
+				<p>
+					<?php /* translators: %s: branded builder name */ ?>
+					<?php printf( __( 'If enabled, cache clearing occurs when layouts and templates are saved and when WordPress finishes updating plugins and themes. This setting also defines the DONOTCACHEPAGE constant, which is respected by most cache plugins, to keep the page from being cached when the %s editor is active.', 'fl-builder' ), FLBuilderModel::get_branding() ); ?>
+				</p>
+			</details>
 
+			<details class="fl-cache-plugins-list">
+				<summary class="fl-tools-detail-small"><?php _e( 'Supported caches', 'fl-builder' ); ?></summary>
+				<?php echo $plugins; ?>
+			</details>
 		</div>
-		<p class="submit">
-			<input type="submit" name="update" class="button-primary" value="<?php esc_attr_e( 'Save Cache Clearing Tool Settings', 'fl-builder' ); ?>" />
-			<?php wp_nonce_field( 'cache-plugins', 'fl-cache-plugins-nonce' ); ?>
-		</p>
-	</form>
-	<hr>
+		<?php wp_nonce_field( 'cache-plugins', 'fl-cache-plugins-nonce' ); ?>
+	</div>

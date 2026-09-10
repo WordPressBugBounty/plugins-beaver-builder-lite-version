@@ -12,7 +12,7 @@ final class FLBuilderAdminAdvanced {
 	 * @since 2.6
 	 */
 	public static function get_groups() {
-		return array(
+		$groups = array(
 			'ui'       => array(
 				'label' => __( 'Builder UI', 'fl-builder' ),
 			),
@@ -26,6 +26,10 @@ final class FLBuilderAdminAdvanced {
 				'label' => __( 'Frontend', 'fl-builder' ),
 			),
 		);
+		/**
+		 * @see fl_builder_advanced_get_groups
+		 */
+		return apply_filters( 'fl_builder_advanced_get_groups', $groups );
 	}
 
 	/**
@@ -37,7 +41,7 @@ final class FLBuilderAdminAdvanced {
 			'iframe_ui'              => array(
 				'label'       => self::__( 'Responsive iFrame UI', 'fl-builder' ),
 				'default'     => 1,
-				'enabled'     => get_transient( 'fl_debug_mode' ),
+				'enabled'     => get_transient( 'fl_debug_mode' ) || ! get_option( '_fl_builder_iframe_ui', 1 ),
 				'callback'    => array( __CLASS__, 'disable_iframe_ui' ),
 				'group'       => 'ui',
 				'description' => self::__( 'The iFrame UI provides accurate responsive editing. Disable it if you are having issues with third-party or legacy add-ons.', 'fl-builder' ),
@@ -203,13 +207,6 @@ final class FLBuilderAdminAdvanced {
 				'group'       => 'ui',
 				'description' => self::__( 'Show custom labels for Nodes.', 'fl-builder' ),
 			),
-			'shortcodes_enabled'     => array(
-				'label'    => self::__( 'Render shortcodes in CSS/JS', 'fl-builder' ),
-				'default'  => 0,
-				'callback' => array( __CLASS__, 'shortcodes_enabled' ),
-				'group'    => 'ui',
-				'link'     => 'https://docs.wpbeaverbuilder.com/beaver-builder/advanced-builder-techniques/shortcodes/use-shortcodes-in-tools-menu-css-or-js/',
-			),
 			'acf_blocks_enabled'     => array(
 				'label'       => self::__( 'ACF Blocks', 'fl-builder' ),
 				'default'     => 1,
@@ -243,11 +240,20 @@ final class FLBuilderAdminAdvanced {
 				'group'       => 'frontend',
 				'description' => self::__( 'Forces modules to render their wrapper divs, even if they have been removed in a recent update.', 'fl-builder' ),
 			),
+			'default_presets_tab'    => array(
+				'label'       => self::__( 'Color Picker: Default to Presets Tab', 'fl-builder' ),
+				'default'     => 0,
+				'group'       => 'ui',
+				'description' => self::__( 'When enabled, the color picker will open with the Presets tab selected by default.', 'fl-builder' ),
+			),
 		);
 		if ( ! self::is_plugins_loaded_action() && FLBuilderModel::is_white_labeled() ) {
 			unset( $settings['notifications_enabled'] );
 		}
-		return $settings;
+		/**
+		 * @see fl_builder_advanced_get_settings
+		 */
+		return apply_filters( 'fl_builder_advanced_get_settings', $settings );
 	}
 
 	static private function __( $text, $domain ) {
@@ -355,13 +361,6 @@ final class FLBuilderAdminAdvanced {
 		add_filter( 'fl_node_labels_disabled', '__return_true' );
 	}
 
-	static private function shortcodes_enabled() {
-		add_filter( 'fl_enable_shortcode_css_js', '__return_true' );
-		add_filter( 'fl_ace_editor_settings', function ( $args ) {
-			$args['useWorker'] = false;
-			return $args;
-		});
-	}
 
 	static private function disable_acf_blocks() {
 		add_filter( 'fl_disable_acf_blocks', '__return_true' );
@@ -383,8 +382,37 @@ final class FLBuilderAdminAdvanced {
 		add_action( 'after_setup_theme', __CLASS__ . '::register_user_access_settings' );
 		add_action( 'wp_ajax_fl_advanced_submit', array( __CLASS__, 'advanced_submit' ) );
 		add_action( 'plugins_loaded', array( __CLASS__, 'init_hooks' ), 5 );
+		add_action( 'admin_init', array( __CLASS__, 'maybe_register_iframe_deprecated_notice' ) );
+		add_action( 'update_option__fl_builder_current_preset_colors_view', array( __CLASS__, 'sync_user_setting' ), 10, 3 );
 		self::global_styles();
 		self::update();
+	}
+
+	/**
+	 * Register a deprecation notice for sites that have Responsive iFrame UI disabled.
+	 *
+	 * @since 2.11
+	 */
+	static public function maybe_register_iframe_deprecated_notice() {
+		if ( get_option( '_fl_builder_iframe_ui', 1 ) ) {
+			return;
+		}
+		$link    = sprintf(
+			'<a href="%s">%s</a>',
+			esc_url( admin_url( 'options-general.php?page=fl-builder-settings#advanced' ) ),
+			esc_html__( 're-enabling it in Advanced Settings', 'fl-builder' )
+		);
+		$message = sprintf(
+			/* translators: %s: link to Advanced Settings page */
+			__( 'Responsive iFrame UI is disabled on this site. This option is deprecated, will no longer receive fixes, and will be fully removed in the next major release. We strongly recommend %s.', 'fl-builder' ),
+			$link
+		);
+		FLBuilderAdminNotices::register_notice( array(
+			'id'      => 'fl_builder_iframe_ui_deprecated',
+			'class'   => 'notice-warning',
+			'cap'     => 'manage_options',
+			'content' => '<strong>Beaver Builder:</strong> ' . $message,
+		) );
 	}
 
 

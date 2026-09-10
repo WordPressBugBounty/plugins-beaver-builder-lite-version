@@ -24,9 +24,10 @@ class FLBuilderUserSettings {
 	static public function get() {
 		$meta     = get_user_meta( get_current_user_id(), 'fl_builder_user_settings', true );
 		$defaults = array(
-			'skin'     => 'light',
-			'lightbox' => null,
-			'pinned'   => null,
+			'skin'                       => 'light',
+			'lightbox'                   => null,
+			'pinned'                     => null,
+			'current_preset_colors_view' => 'swatch',
 		);
 
 		if ( ! $meta ) {
@@ -132,6 +133,18 @@ class FLBuilderUserSettings {
 		$settings = self::get();
 		$settings = array_merge( $settings, $data );
 
+		return self::update( $settings );
+	}
+
+	/**
+	 * Handle saving the current preset colors view.
+	 *
+	 * @param string $view
+	 * @return array
+	 */
+	static public function save_current_preset_colors_view( $view ) {
+		$settings                               = self::get();
+		$settings['current_preset_colors_view'] = sanitize_text_field( $view );
 		return self::update( $settings );
 	}
 }
