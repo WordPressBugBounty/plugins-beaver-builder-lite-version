@@ -120,7 +120,7 @@ class FLBuilderConfig {
 			 */
 			'recentIcons'                   => apply_filters( 'fl_builder_recent_icons', get_option( 'fl_plugin_recent_icons', array() ) ),
 			'themerLayoutsUrl'              => admin_url( '/edit.php?post_type=fl-theme-layout' ),
-			'themerLayoutType'              => FLThemeBuilderLayoutData::current_post_layout_type(),
+			'themerLayoutType'              => class_exists( 'FLThemeBuilderLayoutData' ) ? FLThemeBuilderLayoutData::current_post_layout_type() : null,
 			'userCaps'                      => array(
 				'unfiltered_html'        => FLBuilderModel::user_has_unfiltered_html(),
 				'canUpload'              => current_user_can( 'upload_files' ),

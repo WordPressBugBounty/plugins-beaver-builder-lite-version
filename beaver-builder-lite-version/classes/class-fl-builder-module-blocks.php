@@ -439,7 +439,7 @@ class FLBuilderModuleBlocks {
 		// Settings Form Config
 		FLBuilderUISettingsForms::enqueue_settings_config();
 
-		if ( class_exists( ' FLThemeBuilderFieldConnections' ) ) {
+		if ( class_exists( 'FLThemeBuilderFieldConnections' ) ) {
 			// Field Connection Scripts
 			FLThemeBuilderFieldConnections::enqueue_scripts();
 		}
@@ -468,7 +468,7 @@ class FLBuilderModuleBlocks {
 
 		FLBuilderUISettingsForms::init_js_config();
 		FLBuilderUISettingsForms::render_js_templates();
-		if ( class_exists( ' FLThemeBuilderFieldConnections' ) ) {
+		if ( class_exists( 'FLThemeBuilderFieldConnections' ) ) {
 			FLThemeBuilderFieldConnections::js_templates();
 		}
 

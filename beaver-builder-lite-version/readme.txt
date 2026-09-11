@@ -4,7 +4,7 @@ Tags: page builder, beaver builder, landing page, front-end builder, drag and dr
 Requires at least: 6.8
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.11.0.4
+Stable tag: 2.11.0.5
 License: GPL2+
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
