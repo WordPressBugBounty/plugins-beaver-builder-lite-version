@@ -162,18 +162,25 @@ final class FLBuilderAutoSuggest {
 
 		$data = array();
 
-		if ( ! empty( $ids ) ) {
+		// Cast to integers so attacker data can never reach the SQL template.
+		// array_map returns integers (array_filter with 'intval' only tested
+		// truthiness and kept the raw strings, which allowed SQL injection via
+		// the ORDER BY FIELD clause).
+		$list = array_filter( array_map( 'absint', explode( ',', $ids ) ) );
 
-			$order        = implode( ',', array_filter( explode( ',', $ids ), 'intval' ) );
-			$list         = explode( ',', $ids );
+		if ( ! empty( $list ) ) {
+
 			$how_many     = count( $list );
 			$placeholders = array_fill( 0, $how_many, '%d' );
 			$format       = implode( ', ', $placeholders );
 
-			$query = "SELECT ID, post_title FROM {$wpdb->posts} WHERE ID IN ($format) ORDER BY FIELD(ID, $order)";
+			// Both the IN list and the ORDER BY FIELD list use %d placeholders;
+			// the integer ids are passed twice as bound values.
+			$query = "SELECT ID, post_title FROM {$wpdb->posts} WHERE ID IN ($format) ORDER BY FIELD(ID, $format)";
+			$args  = array_merge( $list, $list );
 
 			// @codingStandardsIgnoreStart
-			$posts = $wpdb->get_results( $wpdb->prepare( $query, $list ) );
+			$posts = $wpdb->get_results( $wpdb->prepare( $query, $args ) );
 			// @codingStandardsIgnoreEnd
 
 			foreach ( $posts as $post ) {
