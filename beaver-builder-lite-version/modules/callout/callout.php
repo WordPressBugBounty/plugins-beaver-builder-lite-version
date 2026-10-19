@@ -149,7 +149,6 @@ class FLCalloutModule extends FLBuilderModule {
 		}
 
 		if ( ! empty( $this->settings->link ) ) {
-			echo FLBuilderModuleUtils::get_link_notice( $this->settings, 'link' );
 			echo '</a>';
 		}
 
@@ -178,8 +177,7 @@ class FLCalloutModule extends FLBuilderModule {
 
 		if ( 'link' == $this->settings->cta_type ) {
 			$attributes = FLBuilderModuleUtils::get_link_attributes( $this->settings, 'link', [ 'class' => 'fl-callout-cta-link' ] );
-			$notice     = FLBuilderModuleUtils::get_link_notice( $this->settings, 'link' );
-			$html       = '<a ' . $attributes . '>' . $this->settings->cta_text . $notice . '</a>';
+			$html       = '<a ' . $attributes . '>' . $this->settings->cta_text . '</a>';
 		}
 		return $html;
 	}

@@ -7,7 +7,8 @@ FLBuilderCSS::responsive_rule( array(
 		' . $settings->tag . '.fl-node-' . $id . ',
 		' . $settings->tag . '.fl-node-' . $id . ' a',
 	'prop'         => 'color',
-	'enabled'      => ! empty( $settings->color ),
+	// Evaluate per breakpoint so a responsive-only color (e.g. mobile set, desktop blank) still renders.
+	'enabled'      => 'not_empty',
 ) );
 
 FLBuilderCSS::typography_field_rule( array(

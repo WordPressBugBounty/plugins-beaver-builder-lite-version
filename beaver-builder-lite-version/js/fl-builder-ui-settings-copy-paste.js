@@ -181,10 +181,58 @@
 			return settings;
 		},
 
+		/**
+		 * Returns a container of the same kind as the copied value so a merge can
+		 * descend into it. A paste target rarely mirrors the copied shape — a freshly
+		 * added module has fewer repeater rows than the one that was copied, and a
+		 * torn-down settings form has no keys at all.
+		 *
+		 * @param {*} value The copied value being merged in.
+		 * @param {*} current The target's existing value, if any.
+		 * @return {Object|Array}
+		 */
+		_matchingContainer: function (value, current) {
+			const isArray = Array.isArray(value);
+
+			if (null !== current && 'object' === typeof current && Array.isArray(current) === isArray) {
+				return current;
+			}
+
+			return isArray ? [] : {};
+		},
+
+		/**
+		 * Deep merges copied settings into a target object in place. Arrays merge by
+		 * index. An empty copied value leaves the target's existing value alone.
+		 *
+		 * @param {Object|Array} data The copied settings.
+		 * @param {Object|Array} target The object to merge into.
+		 * @return {Object|Array} The target.
+		 */
+		_mergeSettings: function (data, target) {
+			const keys = Object.keys(data);
+
+			for (let i = 0; i < keys.length; i++) {
+				const key   = keys[i];
+				const value = data[key];
+
+				if (null !== value && 'object' === typeof value) {
+					target[key] = FLBuilderSettingsCopyPaste._mergeSettings(
+						value,
+						FLBuilderSettingsCopyPaste._matchingContainer(value, target[key])
+					);
+				} else if ('' !== value) {
+					target[key] = value;
+				}
+			}
+
+			return target;
+		},
+
 		_importSettings: function (type, nodeId, data) {
 			const dataType = data.match(/{type:([_a-z0-9-]+)}/);
 
-			if ('undefined' !== dataType[1] && type === dataType[1]) {
+			if (null !== dataType && type === dataType[1]) {
 				try {
 					const jsonData = JSON.parse(data.replace(/\/\/\/.+\/\/\//, ''));
 
@@ -204,30 +252,18 @@
 						}
 					}
 
-					function traverseObject(data, target) {
-						const keys = Object.keys(data);
-						for (let i = 0; i < keys.length; i++) {
-							if (Array.isArray(data[keys[i]])) {
-								for (let j = 0; j < data[keys[i]].length; j++) {
-									target[keys[i]][j] = traverseObject(data[keys[i]][j], target[keys[i]][j]);
-								}
-							} else if (data[keys[i]] !== null && typeof data[keys[i]] === "object") {
-								target[keys[i]] = traverseObject(data[keys[i]], target[keys[i]]);
-							} else if (data[keys[i]] !== "") {
-								target[keys[i]] = data[keys[i]];
-							}
-						}
-						return target;
-					}
-
 					function mergeObjects() {
 						// get form settings
 						const form = $('.fl-builder-settings[data-node=' + nodeId + ']');
-						// check if the settings have changed
-						if ( FLBuilder.preview && FLBuilder.preview._settingsHaveChanged() ) {
+
+						// Only fold in live form state when the form is actually on screen.
+						// FLBuilder.preview outlives a save that re-rendered the full layout,
+						// and a stale preview reports changes by comparing against a form
+						// that has already been destroyed.
+						if ( form.length && FLBuilder.preview && FLBuilder.preview._settingsHaveChanged() ) {
 							// combine form changed settings with copied data & merge it with existing node
 							const formSettings = FLBuilder._getSettings(form);
-							const combinedSettings = traverseObject(jsonData, formSettings);
+							const combinedSettings = FLBuilderSettingsCopyPaste._mergeSettings(jsonData, formSettings);
 							return $.extend(true, {}, FLBuilderSettingsConfig.nodes[nodeId], combinedSettings);
 						} else {
 							// merge copied data with existing node
@@ -258,7 +294,8 @@
 					FLBuilder._lightbox.close();
 
 					return true;
-				} catch {
+				} catch ( e ) {
+					console.error( 'Beaver Builder: unable to import settings for node ' + nodeId + '.', e );
 					return false;
 				}
 			}

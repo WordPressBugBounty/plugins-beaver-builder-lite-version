@@ -4039,7 +4039,7 @@ Y.namespace('FL').SlideshowOverlay = Y.Base.create('fl-slideshow-overlay', Y.Plu
 		},
 
 		/**
-		 * Sets the initial visibility of the host's boudning box.
+		 * Sets the initial visibility of the host's bounding box.
 		 *
 		 * @attribute visible
 		 * @type Boolean
@@ -5996,7 +5996,7 @@ Y.namespace('FL').SlideshowTransition = Y.Base.create('fl-slideshow-transition',
 	},
 
 	/**
-	 * Starts the transtion using the provided property objects.
+	 * Starts the transition using the provided property objects.
 	 *
 	 * @method _transitionStart
 	 * @param propsIn {Object} The properties to animate in.
@@ -8360,7 +8360,7 @@ Y.namespace('FL').Slideshow = Y.Base.create('fl-slideshow', Y.FL.SlideshowBase, 
 		/**
 		 * The type of transition to use. Possible values are
 		 * none, fade, slideHorizontal and slideVertical. The
-		 * value can also be a common seperated string of transitions
+		 * value can also be a common separated string of transitions
 		 * that will be randomly chosen for each image.
 		 *
 		 * @attribute transition
@@ -8406,7 +8406,7 @@ Y.namespace('FL').Slideshow = Y.Base.create('fl-slideshow', Y.FL.SlideshowBase, 
 
 		/**
 		 * The type of navigation to use. Possible values are
-		 * buttons, thumbs, custon and none.
+		 * buttons, thumbs, custom and none.
 		 *
 		 * @attribute navType
 		 * @type String
@@ -9426,7 +9426,7 @@ Y.namespace('FL').SlideshowBase = Y.Base.create('fl-slideshow-base', Y.Widget, [
 	_loadingImageContainer: null,
 
 	/**
-	 * The intial height of the slideshow. Used to resize
+	 * The initial height of the slideshow. Used to resize
 	 * back to the starting height when exiting stretchy.
 	 *
 	 * @property _initialHeight
@@ -9437,7 +9437,7 @@ Y.namespace('FL').SlideshowBase = Y.Base.create('fl-slideshow-base', Y.Widget, [
 	_initialHeight: null,
 
 	/**
-	 * The intial width of the slideshow. Used to resize
+	 * The initial width of the slideshow. Used to resize
 	 * back to the starting width when exiting stretchy.
 	 *
 	 * @property _initialWidth

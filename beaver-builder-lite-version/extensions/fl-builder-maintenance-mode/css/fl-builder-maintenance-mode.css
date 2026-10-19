@@ -145,6 +145,56 @@
 	outline: none;
 }
 
+/* Preview link: read-only URL that grows to fill, with copy/regenerate buttons. */
+.fl-maintenance-preview-link-row {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+	max-width: 560px;
+}
+
+.fl-maintenance-preview-link-row input[type="text"] {
+	flex: 1 1 auto;
+	min-width: 0;
+	border-radius: 6px;
+	border: 1px solid #c3c4c7;
+	padding: 6px 12px;
+	font-size: 13px;
+	background: #f6f7f7;
+	color: #50575e;
+	box-sizing: border-box;
+}
+
+/* Compact square icon buttons (copy / regenerate). The form-id scope + !important
+   beat the broad admin-settings .button padding rule that otherwise inflates them. */
+#fl-maintenance-mode-form .fl-maintenance-icon-btn {
+	flex: 0 0 auto;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 34px !important;
+	height: 34px !important;
+	min-height: 0 !important;
+	padding: 0 !important;
+	/* Secondary BB admin button style: teal outline, transparent fill. */
+	color: #0E5A71 !important;
+	border-color: #0E5A71 !important;
+	background: transparent;
+}
+
+#fl-maintenance-mode-form .fl-maintenance-icon-btn:hover {
+	color: #0a4353 !important;
+	border-color: #0a4353 !important;
+}
+
+#fl-maintenance-mode-form .fl-maintenance-icon-btn .dashicons {
+	width: 18px;
+	height: 18px;
+	font-size: 18px;
+	line-height: 1;
+	color: inherit;
+}
+
 
 .fl-maintenance-badge-scheduled {
 	background-color: #1d6fa4;

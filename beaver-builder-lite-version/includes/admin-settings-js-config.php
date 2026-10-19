@@ -2,7 +2,8 @@
 
 FLBuilderAdminSettingsConfig = {
 	roles: <?php echo json_encode( FLBuilderUserAccess::get_all_roles() ); ?>,
-	userAccess: <?php echo json_encode( FLBuilderUserAccess::get_saved_settings() ); ?>
+	userAccess: <?php echo json_encode( FLBuilderUserAccess::get_saved_settings() ); ?>,
+	isNetworkAdmin: <?php echo json_encode( is_network_admin() ); ?>
 };
 
 FLBuilderAdminSettingsStrings = {

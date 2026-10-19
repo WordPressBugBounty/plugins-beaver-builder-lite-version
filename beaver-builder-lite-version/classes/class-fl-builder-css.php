@@ -747,16 +747,31 @@ final class FLBuilderCSS {
 	}
 
 	/**
-	 * Check if a preview rule using auto-css is enabled.
+	 * Check whether a CSS rule should render for a given field/breakpoint.
 	 *
-	 * @param array $rule - Either $preview or one of the rule arrays specified in preview
-	 * @param string $field_name - key for the given setting
-	 * @param object $settings - node settings
+	 * The $enabled argument accepts several forms:
+	 *  - bool          gates every breakpoint at once.
+	 *  - callable       called per breakpoint as ( $value, $settings ); truthy enables.
+	 *  - array          match conditions (supports 'nearest_value' against inherited values).
+	 *  - 'not_empty'    per-breakpoint guard: enables only when this breakpoint's own
+	 *                   value is set (via is_empty(), so a literal '0' still renders).
+	 *
+	 * @param bool|callable|array|string $enabled    One of the forms described above.
+	 * @param string                     $field_name Setting key for this breakpoint (e.g. 'color_medium').
+	 * @param object                     $settings   Node settings.
+	 * @param string                     $breakpoint Breakpoint suffix ('', 'large', 'medium', 'responsive').
 	 * @return bool
 	 */
 	static public function is_rule_enabled( $enabled, $field_name, $settings, $breakpoint ) {
 
-		if ( is_callable( $enabled ) ) {
+		if ( 'not_empty' === $enabled ) {
+			// Per-breakpoint guard: enable this breakpoint only when its own value is set.
+			// Lets a responsive-only value (e.g. mobile set, desktop blank) render.
+			// Uses is_empty() rather than empty() so a literal '0' (a valid unit/size value) still renders.
+			// isset() guards breakpoint suffixes (e.g. foo_large) that may not exist on the settings object.
+			return isset( $settings->{$field_name} ) && ! self::is_empty( $settings->{$field_name} );
+
+		} elseif ( is_callable( $enabled ) ) {
 			return call_user_func( $enabled, $settings->{$field_name}, $settings );
 
 		} elseif ( is_bool( $enabled ) ) {

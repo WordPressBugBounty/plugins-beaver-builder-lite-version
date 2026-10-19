@@ -135,7 +135,7 @@ final class FLBuilderAdminSettings {
 
 		$current = FLBuilderModel::get_admin_settings_option( '_fl_builder_enabled_modules', true );
 
-		if ( ! $current ) {
+		if ( ! is_array( $current ) ) {
 			$current = FLBuilderModel::get_default_enabled_modules();
 		}
 
@@ -145,7 +145,7 @@ final class FLBuilderAdminSettings {
 				$current   = array_keys( FLBuilderModel::$modules );
 				$current[] = 'all';
 			} else {
-				// Disable all — keep at least one to avoid error
+				// Disable all modules. An empty array is a valid, explicit state (#5604).
 				$current = array();
 			}
 		} else {
@@ -165,12 +165,8 @@ final class FLBuilderAdminSettings {
 			}
 		}
 
-		if ( empty( $current ) ) {
-			wp_send_json_error( array( 'message' => __( 'You must have at least one module enabled.', 'fl-builder' ) ) );
-		}
-
 		$current = array_values( $current );
-		FLBuilderModel::update_admin_settings_option( '_fl_builder_enabled_modules', $current, true );
+		FLBuilderModel::update_admin_settings_option( '_fl_builder_enabled_modules', $current, true, false, self::is_network_admin_ajax_request() );
 
 		wp_send_json_success();
 	}
@@ -200,8 +196,10 @@ final class FLBuilderAdminSettings {
 
 		$current = FLBuilderModel::get_admin_settings_option( '_fl_builder_enabled_blocks', true );
 
-		if ( ! $current ) {
-			$current = array_merge( array_keys( FLBuilderModuleBlocks::get_block_editor_modules() ), array( 'all' ) );
+		// Unset means no blocks enabled, matching get_enabled_block_editor_modules(),
+		// and a saved empty array is an explicit "all off" that must not reseed (#5604).
+		if ( ! is_array( $current ) ) {
+			$current = array();
 		}
 
 		// Handle "all" toggle
@@ -230,7 +228,7 @@ final class FLBuilderAdminSettings {
 		}
 
 		$current = array_values( $current );
-		FLBuilderModel::update_admin_settings_option( '_fl_builder_enabled_blocks', $current, true );
+		FLBuilderModel::update_admin_settings_option( '_fl_builder_enabled_blocks', $current, true, false, self::is_network_admin_ajax_request() );
 
 		wp_send_json_success();
 	}
@@ -271,7 +269,7 @@ final class FLBuilderAdminSettings {
 		}
 
 		$current = array_values( $current );
-		FLBuilderModel::update_admin_settings_option( '_fl_builder_post_types', $current, true, true );
+		FLBuilderModel::update_admin_settings_option( '_fl_builder_post_types', $current, true, true, self::is_network_admin_ajax_request() );
 
 		wp_send_json_success();
 	}
@@ -309,7 +307,7 @@ final class FLBuilderAdminSettings {
 		}
 
 		$current = array_values( $current );
-		self::update_enabled_icons( $current );
+		self::update_enabled_icons( $current, self::is_network_admin_ajax_request() );
 
 		wp_send_json_success();
 	}
@@ -745,6 +743,33 @@ final class FLBuilderAdminSettings {
 	}
 
 	/**
+	 * Whether an admin-ajax request originated from the Network Admin settings screen.
+	 *
+	 * is_network_admin() is always false inside admin-ajax.php (WP_NETWORK_ADMIN is only
+	 * set by wp-admin/network/admin.php's bootstrap, which ajax requests never go through),
+	 * so callers that need to route a save to the network-wide site option must rely on a
+	 * client-sent flag instead. That flag is only honored when the current user actually
+	 * holds the network-level capability, so a subsite admin can't spoof it to overwrite
+	 * the network-wide option.
+	 *
+	 * @since 2.11
+	 * @return bool
+	 */
+	static public function is_network_admin_ajax_request() {
+		return ! empty( $_POST['fl_network_admin'] ) && current_user_can( 'manage_network_options' );
+	}
+
+	/**
+	 * Returns module slugs that fl_builder_enabled_modules filters force on even when nothing is saved, so the settings UI can show them as locked.
+	 *
+	 * @since 2.11.2
+	 * @return array
+	 */
+	static public function get_locked_modules(): array {
+		return array_values( (array) apply_filters( 'fl_builder_enabled_modules', array() ) );
+	}
+
+	/**
 	 * Adds an error message to be rendered.
 	 *
 	 * @since 1.0
@@ -800,11 +825,6 @@ final class FLBuilderAdminSettings {
 
 			if ( isset( $_POST['fl-modules'] ) && is_array( $_POST['fl-modules'] ) ) {
 				$modules = array_map( 'sanitize_text_field', $_POST['fl-modules'] );
-			}
-
-			if ( empty( $modules ) ) {
-				self::add_error( __( 'Error! You must have at least one module enabled.', 'fl-builder' ) );
-				return;
 			}
 
 			FLBuilderModel::update_admin_settings_option( '_fl_builder_enabled_modules', $modules, true );
@@ -867,12 +887,6 @@ final class FLBuilderAdminSettings {
 	 */
 	static private function save_enabled_icons() {
 		if ( isset( $_POST['fl-icons-nonce'] ) && wp_verify_nonce( $_POST['fl-icons-nonce'], 'icons' ) ) {
-
-			// Make sure we have at least one enabled icon set.
-			if ( ! isset( $_POST['fl-enabled-icons'] ) && empty( $_POST['fl-new-icon-set'] ) ) {
-				self::add_error( __( 'Error! You must have at least one icon set enabled.', 'fl-builder' ) );
-				return;
-			}
 
 			$enabled_icons = array();
 
@@ -1064,8 +1078,8 @@ final class FLBuilderAdminSettings {
 	 * @access private
 	 * @return void
 	 */
-	static private function update_enabled_icons( $enabled_icons = array() ) {
-		FLBuilderModel::update_admin_settings_option( '_fl_builder_enabled_icons', $enabled_icons, true, true );
+	static private function update_enabled_icons( $enabled_icons = array(), $is_network_admin_request = null ) {
+		FLBuilderModel::update_admin_settings_option( '_fl_builder_enabled_icons', $enabled_icons, true, true, $is_network_admin_request );
 	}
 
 	/**

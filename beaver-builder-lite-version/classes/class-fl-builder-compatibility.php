@@ -71,6 +71,11 @@ final class FLBuilderCompatibility {
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'fix_wpd_plugins' ), 11 );
 		add_action( 'wp_head', array( __CLASS__, 'fix_cookiebot' ), -9999 );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'fix_espresso_decaf' ), 3 );
+		// Must run after the theme registers its filters but before
+		// FLBuilderAJAX::run (`wp` at 10) renders and dies. init() runs at
+		// plugin load, before themes load, so priority 1 would be too early.
+		add_action( 'wp', array( __CLASS__, 'fix_themefy_lazy' ), 5 );
+		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'fix_horizontal_slider_scroll' ), 100 );
 
 		// Filters
 		add_filter( 'fl_builder_is_post_editable', array( __CLASS__, 'bp_pages_support' ), 11, 2 );
@@ -1516,6 +1521,49 @@ final class FLBuilderCompatibility {
 			wp_dequeue_script( 'jquery-validate' );
 			$js_url = FLBuilder::plugin_url() . 'js/';
 			wp_enqueue_script( 'jquery-validate', $js_url . 'libs/jquery.validate.min.js', array( 'jquery' ), FL_BUILDER_VERSION );
+		}
+	}
+
+	/**
+	 * Fixes issues 4712 and 3972.
+	 *
+	 * Themify breaks the video module in two separate ways. Its
+	 * wp_*_shortcode_library filters replace core's video markup with a lazy
+	 * placeholder, which leaves the module's Select button dead (4712). It
+	 * also rewrites the finished page through an output buffer, wrapping
+	 * every <video> in a .tf_lazy placeholder, moving poster to data-poster
+	 * and forcing preload="none". That placeholder is only revealed by
+	 * Themify's own lazy script, which never runs inside the builder iframe,
+	 * so the module previews as an empty 0-height box (3972). Themify uses
+	 * themify_enable_lazyload in its own plugin-compat shims.
+	 *
+	 * Themify registers its filters on `wp`, and FLBuilderAJAX::run() is on
+	 * `wp` at 10 where it renders and then dies, so this has to run between
+	 * the two or it never fires on builder AJAX requests (see init()).
+	 *
+	 * @since 2.10
+	 */
+	public static function fix_themefy_lazy() {
+		if ( isset( $_GET['fl_builder'] ) ) {
+			remove_filter( 'wp_audio_shortcode_library', array( 'Themify_Enqueue_Assets', 'media_shortcode_library' ), 100, 1 );
+			remove_filter( 'wp_video_shortcode_library', array( 'Themify_Enqueue_Assets', 'media_shortcode_library' ), 10, 1 );
+			add_filter( 'themify_enable_lazyload', '__return_false' );
+		}
+	}
+
+	/**
+	 * Fixes issue 5404.
+	 *
+	 * The "Horizontal Slider with Scroll" plugin loads libs.js on the front end,
+	 * which conflicts with our color picker and stops its fields from rendering.
+	 * The script isn't needed inside the builder, so dequeue it there. The
+	 * plugin enqueues at priority 99, so this must run after that (see init()).
+	 *
+	 * @since 2.11
+	 */
+	public static function fix_horizontal_slider_scroll() {
+		if ( defined( 'HSS_NAME' ) && isset( $_GET['fl_builder'] ) ) {
+			wp_dequeue_script( HSS_NAME . 'libs' );
 		}
 	}
 }

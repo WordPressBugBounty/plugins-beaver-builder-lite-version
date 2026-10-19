@@ -147,6 +147,10 @@ final class FLBuilderUpdate {
 			self::v_211();
 		}
 
+		if ( version_compare( $saved_version, '2.11.2', '<' ) ) {
+			self::v_2112();
+		}
+
 		// Clear all asset cache.
 		FLBuilderModel::delete_asset_cache_for_all_posts();
 
@@ -167,6 +171,10 @@ final class FLBuilderUpdate {
 		// Network update to 1.10 or greater.
 		if ( version_compare( $saved_version, '1.10', '<' ) ) {
 			self::v_1_10( true );
+		}
+
+		if ( version_compare( $saved_version, '2.11.2', '<' ) ) {
+			self::v_2112( true );
 		}
 
 		// Get all blog ids.
@@ -722,6 +730,49 @@ final class FLBuilderUpdate {
 			$settings->{$property} = '';
 		}
 		update_option( '_fl_builder_styles', $settings );
+	}
+
+	/**
+	 * Prior to this fix, get_enabled_icons() treated a saved empty array the
+	 * same as "unset" and silently fell back to all icon sets enabled, while
+	 * ajax_icon_set_toggle() (unlike the module/post-type toggles) had no
+	 * guard against saving that empty state. So a site that unchecked every
+	 * icon set one at a time could have `_fl_builder_enabled_icons` stored as
+	 * `[]`, or as `[ 'font-awesome' ]` (the legacy key get_enabled_icons()
+	 * strips before its fallback check), masked as "all enabled" by the bug.
+	 * Now that empty is a valid, honored state, reset any such existing value
+	 * back to unset so it resolves to the real default instead of "every icon
+	 * disabled" the moment this ships. See issue 5604.
+	 *
+	 * Guarded by a one-shot marker rather than relying solely on the version
+	 * gate in run()/run_multisite(), so a future release numbering mistake
+	 * can't cause this to silently re-run and wipe a deliberately empty
+	 * selection a second time.
+	 *
+	 * @since 2.11.2
+	 */
+	static private function v_2112( $network = false ) {
+		$marker = '_fl_builder_2112_icons_migrated';
+
+		if ( $network ? get_site_option( $marker ) : get_option( $marker ) ) {
+			return;
+		}
+
+		$current = $network ? get_site_option( '_fl_builder_enabled_icons' ) : get_option( '_fl_builder_enabled_icons' );
+
+		if ( is_array( $current ) && empty( array_diff( $current, array( 'font-awesome' ) ) ) ) {
+			if ( $network ) {
+				delete_site_option( '_fl_builder_enabled_icons' );
+			} else {
+				delete_option( '_fl_builder_enabled_icons' );
+			}
+		}
+
+		if ( $network ) {
+			update_site_option( $marker, true );
+		} else {
+			update_option( $marker, true );
+		}
 	}
 }
 

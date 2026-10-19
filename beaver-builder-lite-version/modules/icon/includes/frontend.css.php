@@ -134,7 +134,7 @@ endif;
 <?php
 // Background and border colors
 FLBuilderCSS::responsive_rule( array(
-	'enabled'      => ! empty( $settings->bg_color ),
+	'enabled'      => 'not_empty',
 	'settings'     => $settings,
 	'setting_name' => 'bg_color',
 	'selector'     => array(
@@ -186,7 +186,7 @@ endif;
 ?>
 <?php
 FLBuilderCSS::responsive_rule( array(
-	'enabled'      => ! empty( $settings->bg_hover_color ),
+	'enabled'      => 'not_empty',
 	'settings'     => $settings,
 	'setting_name' => 'bg_hover_color',
 	'selector'     => array(

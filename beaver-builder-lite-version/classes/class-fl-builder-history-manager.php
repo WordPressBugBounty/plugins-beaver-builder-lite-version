@@ -6,6 +6,12 @@
 final class FLBuilderHistoryManager {
 
 	/**
+	 * Format version for stored history states. Bumping this flushes every
+	 * layout's saved states once, on the next builder load.
+	 */
+	const HISTORY_VERSION = 2;
+
+	/**
 	 * Initialize hooks.
 	 */
 	static public function init() {
@@ -227,6 +233,7 @@ final class FLBuilderHistoryManager {
 	 */
 	static public function init_states() {
 		if ( self::get_states_max() > 0 && ! isset( $_GET['nohistory'] ) ) {
+			self::flush_outdated_states();
 			if ( empty( self::get_states_data() ) ) {
 				self::save_current_state( 'draft_created' );
 			}
@@ -258,12 +265,24 @@ final class FLBuilderHistoryManager {
 	 * Saves layout data for a single state.
 	 */
 	static public function set_state( $state, $position ) {
+		global $wpdb;
+
 		$history_post_id = self::get_history_post_id();
 		$key             = "_fl_builder_history_state_{$position}";
 		$state           = FLBuilderModel::slash_settings( $state );
-		$raw_data        = get_metadata( 'post', $history_post_id, $key );
 
-		if ( ! is_array( $raw_data ) || 0 === count( $raw_data ) ) {
+		// This guard must read the truth from the database, not the meta cache.
+		// renumber_states() renames state rows with raw SQL, so the cache can
+		// misreport whether a row exists, and update_metadata() unslashes object
+		// meta twice when it falls back to add_metadata() for a missing row,
+		// which silently strips every backslash from the layout.
+		$exists = (bool) $wpdb->get_var( $wpdb->prepare(
+			"SELECT meta_id FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = %s LIMIT 1",
+			$history_post_id,
+			$key
+		) );
+
+		if ( ! $exists ) {
 			add_metadata( 'post', $history_post_id, $key, $state );
 		} else {
 			update_metadata( 'post', $history_post_id, $key, $state );
@@ -289,6 +308,9 @@ final class FLBuilderHistoryManager {
 		$history_post_id = self::get_history_post_id();
 		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->postmeta} WHERE meta_key LIKE %s AND post_id = %d", '%_fl_builder_history_state%', $history_post_id ) );
 
+		// Raw SQL bypasses the metadata API, so the cache must be flushed by hand.
+		wp_cache_delete( $history_post_id, 'post_meta' );
+
 		self::set_position( 0 );
 		self::delete_states_data();
 	}
@@ -305,6 +327,34 @@ final class FLBuilderHistoryManager {
 		if ( metadata_exists( 'post', $layout_post_id, '_fl_builder_history_position' ) ) {
 			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->postmeta} WHERE meta_key LIKE %s AND post_id = %d", '%_fl_builder_history%', $layout_post_id ) );
 		}
+	}
+
+	/**
+	 * Deletes history states saved before the current HISTORY_VERSION.
+	 *
+	 * Builds prior to the #5466 fix could write states with every backslash
+	 * stripped out of the layout, and stripped backslashes leave no signature
+	 * in plain text, so damaged states can't be detected after the fact.
+	 * Restoring one overwrites the draft irreversibly, so pre-fix states are
+	 * flushed once per layout instead of being left in place. This follows the
+	 * delete_legacy_states() precedent of a one-time lazy cleanup on load.
+	 */
+	static private function flush_outdated_states() {
+		$history_post_id = self::get_history_post_id();
+		$version         = get_post_meta( $history_post_id, '_fl_builder_history_version', true );
+
+		// get_post_meta() hands the stored int back as a string, so cast before comparing.
+		if ( self::HISTORY_VERSION === (int) $version ) {
+			return;
+		}
+
+		// Deleted unconditionally: state rows can outlive an empty states-data
+		// array, and those orphans are still reachable by position, so gating
+		// this on get_states_data() would leave them restorable. The delete is
+		// raw SQL and a cheap no-op when nothing matches.
+		self::delete_states();
+
+		update_post_meta( $history_post_id, '_fl_builder_history_version', self::HISTORY_VERSION );
 	}
 
 	/**
@@ -339,6 +389,9 @@ final class FLBuilderHistoryManager {
 				[ '%d', '%d' ]
 			);
 		}
+
+		// Raw SQL bypasses the metadata API, so the cache must be flushed by hand.
+		wp_cache_delete( $history_post_id, 'post_meta' );
 	}
 
 	/**

@@ -86,7 +86,7 @@
 				itemHeight  = itemWidth * this.itemHeight,
 				direction   = this.isRTL ? 'right' : 'left';
 
-			// Browser bug fix. One column images are streched otherwise.
+			// Browser bug fix. One column images are stretched otherwise.
 			if ( 1 === numCols ) {
 				itemWidth -= 0.5;
 			}

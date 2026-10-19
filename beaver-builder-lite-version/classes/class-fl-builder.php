@@ -101,8 +101,9 @@ final class FLBuilder {
 		add_filter( 'mce_buttons_2', __CLASS__ . '::editor_buttons_2' );
 		add_filter( 'mce_external_plugins', __CLASS__ . '::editor_external_plugins', 9999 );
 		add_filter( 'tiny_mce_before_init', __CLASS__ . '::editor_font_sizes' );
-		add_filter( 'after_wp_tiny_mce', __CLASS__ . '::mce_content_events' );
 		add_filter( 'the_content', __CLASS__ . '::render_content' );
+		add_filter( 'fl_builder_render_module_content', 'FLBuilderModuleUtils::strip_stale_link_notices' );
+		add_filter( 'fl_builder_render_module_html_content', 'FLBuilderModuleUtils::strip_stale_link_notices' );
 		add_filter( 'wp_handle_upload_prefilter', __CLASS__ . '::wp_handle_upload_prefilter_filter' );
 		add_filter( 'wp_link_query_args', __CLASS__ . '::wp_link_query_args_filter' );
 		add_filter( 'fl_builder_load_modules_paths', __CLASS__ . '::load_module_paths', 9999 );
@@ -129,6 +130,13 @@ final class FLBuilder {
 
 		$enabled_modules = FLBuilderModel::get_enabled_modules();
 
+		// A saved empty array now means the admin explicitly disabled every
+		// module (#5604) instead of being unrepresentable. Deliberately don't
+		// honor that here: this loader gates which module *classes* get
+		// registered, so an all-disabled site would otherwise be unable to
+		// render modules already placed in published layouts. Loading
+		// everything is the safe failure mode; the admin-facing "none
+		// enabled" state still applies everywhere else (builder panel, etc).
 		if ( is_array( $enabled_modules ) && empty( $enabled_modules ) ) {
 			return $paths;
 		}
@@ -533,35 +541,6 @@ final class FLBuilder {
 		return $plugins;
 	}
 
-	/**
-	 * Inserts a new tab text note for screen readers inside the text editor content whenever a link has a target attribute.
-	 *
-	 * @since 2.11
-	 * @return void
-	 */
-	static public function mce_content_events() {
-		if ( ! FLBuilderModel::is_builder_active() ) {
-			return;
-		}
-		?>
-		<script>
-			(($) => {
-				$(document).on('tinymce-editor-init', (_, editor) => {
-					editor.on('change', () => {
-						editor.dom.select('a').forEach(link => {
-							if ( $(link).is('[target]') && ! editor.dom.select('span.sr-only', link).length ) {
-								editor.dom.add(link, 'span', { class: 'sr-only' }, '(opens in new tab)');
-							}
-							else if ( ! $(link).is('[target]') && editor.dom.select('span.sr-only', link).length ) {
-								editor.dom.remove(editor.dom.select('span.sr-only', link));
-							}
-						});
-					});
-				});
-			})(jQuery);
-		</script>
-		<?php
-	}
 	/**
 	 * Alias method for backwards compatibility with previous versions
 	 * of the builder that used this method to register.
@@ -2254,7 +2233,10 @@ final class FLBuilder {
 	/**
 	 * Neutralizes shortcodes in a module's rendered output when the module does
 	 * not own its content (renders_shortcodes = false). Hooked to both module
-	 * content filters so it covers the live-page and AJAX render paths.
+	 * content filters so it covers the live-page and AJAX render paths. A
+	 * module instance can opt back in via its own render_shortcodes setting
+	 * (e.g. the Pattern module's per-instance checkbox), scoping the tradeoff
+	 * to that one node instead of the module type as a whole.
 	 *
 	 * @since 2.11
 	 * @param string $content The rendered module HTML.
@@ -2262,7 +2244,9 @@ final class FLBuilder {
 	 * @return string
 	 */
 	static public function escape_foreign_module_shortcodes( $content, $module ) {
-		if ( isset( $module->renders_shortcodes ) && ! $module->renders_shortcodes ) {
+		$instance_opts_in = isset( $module->settings->render_shortcodes ) && 'yes' === $module->settings->render_shortcodes;
+
+		if ( isset( $module->renders_shortcodes ) && ! $module->renders_shortcodes && ! $instance_opts_in ) {
 			$content = self::escape_foreign_shortcodes( $content );
 		}
 		return $content;
@@ -5095,6 +5079,14 @@ final class FLBuilder {
 		if ( class_exists( 'FLBuilderUserTemplates' ) ) {
 			FLBuilderUserTemplates::render_node_settings( $node_id );
 		}
+	}
+
+	/**
+	 * @since 2.11
+	 * @deprecated 2.12
+	 */
+	static public function mce_content_events() {
+		_deprecated_function( __METHOD__, '2.12' );
 	}
 
 	/**

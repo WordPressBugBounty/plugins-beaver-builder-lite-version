@@ -49,7 +49,7 @@ if ( '{FL_BUILDER_NAME}' !== $plugin_data['Name'] && ! in_array( $plugin_name, $
 		);
 	}
 }
-// themer installed but no licence?
+// themer installed but no license?
 if ( ! $themer && defined( 'FL_THEME_BUILDER_VERSION' ) ) {
 	echo( '<div class="notice notice-error"><p><strong>Beaver Themer updates issue!</strong></p><p>Updates for Beaver Themer will not work as you appear to have Beaver Themer activated but it is not in your available downloads</p></div>' );
 }

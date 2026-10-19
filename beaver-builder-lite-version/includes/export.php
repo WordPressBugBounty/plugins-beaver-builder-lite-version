@@ -56,7 +56,21 @@ function fl_export_wp( $post_ids = array() ) {
 	function wxr_cdata( $str ) {
 		// phpcs:ignore WordPress.WP.DeprecatedFunctions.seems_utf8Found -- fallback for WP < 6.9
 		if ( ! ( function_exists( 'wp_is_valid_utf8' ) ? wp_is_valid_utf8( $str ) : seems_utf8( $str ) ) ) {
-			$str = utf8_encode( $str );
+			// utf8_encode() is deprecated in PHP 8.2; prefer mbstring, then iconv,
+			// both of which WordPress treats as optional, so keep a final fallback.
+			if ( function_exists( 'mb_convert_encoding' ) ) {
+				$str = mb_convert_encoding( $str, 'UTF-8', 'ISO-8859-1' );
+			} elseif ( function_exists( 'iconv' ) ) {
+				// iconv() returns false on a library fault; keep the original string
+				// rather than letting str_replace() coerce false to an empty CDATA.
+				$converted = iconv( 'ISO-8859-1', 'UTF-8//IGNORE', $str );
+				if ( false !== $converted ) {
+					$str = $converted;
+				}
+			} else {
+				// phpcs:ignore PHPCompatibility.FunctionUse.RemovedFunctions.utf8_encodeDeprecated -- last resort when neither mbstring nor iconv is present; deprecated, not removed until PHP 9.
+				$str = utf8_encode( $str );
+			}
 		}
 		// $str = ent2ncr(esc_html($str));
 		$str = '<![CDATA[' . str_replace( ']]>', ']]]]><![CDATA[>', $str ) . ']]>';
@@ -177,9 +191,9 @@ function fl_export_wp( $post_ids = array() ) {
 	 *
 	 * @global wpdb $wpdb WordPress database abstraction object.
 	 *
-	 * @param array $post_ids Array of post IDs to filter the query by. Optional.
+	 * @param array|null $post_ids Array of post IDs to filter the query by. Optional.
 	 */
-	function wxr_authors_list( array $post_ids = null ) {
+	function wxr_authors_list( ?array $post_ids = null ) {
 		global $wpdb;
 
 		if ( ! empty( $post_ids ) ) {

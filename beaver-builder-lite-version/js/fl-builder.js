@@ -436,7 +436,7 @@
 		_initSanityChecks: function() {
 			if ( FLBuilderConfig.uploadPath && typeof FLBuilderLayout === 'undefined' ) {
 				url = '<a href="' + FLBuilderConfig.uploadUrl + '">wp-admin -> Settings -> Media</a>';
-				FLBuilder.alert( '<strong>Critcal Error</strong><p style="font-size:15px;">Please go to ' + url + ' and make sure uploads folder settings is blank</p>');
+				FLBuilder.alert( '<strong>Critical Error</strong><p style="font-size:15px;">Please go to ' + url + ' and make sure uploads folder settings is blank</p>');
 				$('.fl-builder-alert-close', window.parent.document).hide()
 			}
 		},
@@ -854,11 +854,21 @@
 		{
 			/* Links */
 			if ( ! $( 'body' ).hasClass( 'wp-admin' ) ) {
-				var $excludedLinks = $('.fl-builder-bar a, .fl-builder--content-library-panel a, .fl-page-nav .nav a'); // links in ui shouldn't be disabled.
+				var $excludedLinks = $( FLBuilder._uiLinkSelector ); // links in ui shouldn't be disabled.
 				$('a').not($excludedLinks).on('click', FLBuilder._preventDefault);
 				$('.fl-page-nav .nav a').on('click', FLBuilder._headerLinkClicked);
 				$('body').on( 'click', '.fl-builder-content a', FLBuilder._preventDefault);
 				$('body').on( 'mouseup', 'button.fl-builder-button', this._buttonMouseUp.bind(this) );
+
+				// Neither bind above reliably catches a link that is rendered after the
+				// editing session starts. The direct bind only sees anchors that exist
+				// at init, and the delegated one resolves its match by walking up from
+				// the clicked node — which fails when that node leaves the document
+				// mid-dispatch, as it does when the inline editor sets up TinyMCE on the
+				// module being clicked. Nothing then cancels the click and the browser
+				// navigates this frame to the link, taking the builder with it. Doing it
+				// in the capture phase happens before any of that. (#5698)
+				document.addEventListener( 'click', FLBuilder._preventLinkNavigation, true );
 			}
 
 			/* Heartbeat */
@@ -1001,6 +1011,7 @@
 			$('a').off('click', FLBuilder._preventDefault);
 			$('.fl-page-nav .nav a').off('click', FLBuilder._headerLinkClicked);
 			$('body').undelegate('.fl-builder-content a', 'click', FLBuilder._preventDefault);
+			document.removeEventListener( 'click', FLBuilder._preventLinkNavigation, true );
 		},
 
 		/**
@@ -1012,6 +1023,7 @@
 			$('a').on('click', FLBuilder._preventDefault);
 			$('.fl-page-nav .nav a').on('click', FLBuilder._headerLinkClicked);
 			$('body').on( 'click', '.fl-builder-content a', FLBuilder._preventDefault);
+			document.addEventListener( 'click', FLBuilder._preventLinkNavigation, true );
 		},
 
 		/**
@@ -1024,6 +1036,41 @@
 		 */
 		_preventDefault: function( e )
 		{
+			e.preventDefault();
+		},
+
+		/**
+		 * Links that belong to the builder UI and keep working while editing.
+		 *
+		 * @since 3.0
+		 * @access private
+		 * @property {String} _uiLinkSelector
+		 */
+		_uiLinkSelector: '.fl-builder-bar a, .fl-builder--content-library-panel a, .fl-page-nav .nav a',
+
+		/**
+		 * Stops a click on a link in the layout from navigating the frame the
+		 * builder is running in. Bound in the capture phase, so it runs before
+		 * any handler on the link itself and before the click can be routed by
+		 * a delegated handler, which is what makes it hold for links rendered
+		 * after the editing session started. UI links are left alone, matching
+		 * the exclusions used by the binds in _bindEvents.
+		 *
+		 * @since 3.0
+		 * @access private
+		 * @method _preventLinkNavigation
+		 * @param {Object} e The event object.
+		 */
+		_preventLinkNavigation: function( e )
+		{
+			var link = e.target && e.target.closest ? e.target.closest( 'a' ) : null;
+
+			if ( ! link || ! link.getAttribute( 'href' ) ) {
+				return;
+			} else if ( link.matches( FLBuilder._uiLinkSelector ) ) {
+				return;
+			}
+
 			e.preventDefault();
 		},
 
@@ -1952,13 +1999,7 @@
 		_saveLayoutSettingsClicked: function()
 		{
 			var form     = $( this ).closest( '.fl-builder-settings' ),
-				data     = form.serializeArray(),
-				settings = {},
-				i        = 0;
-
-			for( ; i < data.length; i++) {
-				settings[ data[ i ].name ] = data[ i ].value;
-			}
+				settings = FLBuilder._getSettings( form );
 
 			FLBuilder.showAjaxLoader();
 			FLBuilder._lightbox.close();
@@ -2284,7 +2325,7 @@
 		},
 
 		/**
-		 * Applys a template to the current layout by either appending
+		 * Applies a template to the current layout by either appending
 		 * it or replacing the current layout with it.
 		 *
 		 * @since 1.1.9
@@ -7267,7 +7308,8 @@
 				var $field = $( this ),
 					name   = $field.attr( 'name' ),
 					$vals  = $field.siblings( '.as-values' ),
-					val    = $vals.length ? $vals.val() : $field.val();
+					// Until autoSuggest initializes there is no .as-values sibling, so fall back to the stored value in data-value.
+					val    = $vals.length ? $vals.val() : FLBuilder._getStoredSuggestValue( $field );
 				if ( name ) {
 					currentSuggestNames.push( name );
 					val = $.grep( ( val || '' ).split( ',' ), function( n ) { return n !== ''; } ).join( ',' );
@@ -7309,6 +7351,39 @@
 		_getSettingsJSONForHTML: function( settings )
 		{
 			return JSON.stringify( settings ).replace( /\'/g, '&#39;' ).replace( '<wbr \/>', '<wbr>' );
+		},
+
+		/**
+		 * Returns an uninitialized suggest field's stored value from data-value.
+		 * Lookup JSON lands there uninitialized only when init never ran on this
+		 * form (a same-named field in another form, or an _initAutoSuggestField
+		 * throw); it is reduced to its ids, and anything unrecognized is kept as
+		 * stored rather than cleared.
+		 *
+		 * @since TBD
+		 * @param {Object} $field The .fl-suggest-field input.
+		 * @return {String} The stored value.
+		 */
+		_getStoredSuggestValue: function( $field )
+		{
+			var stored = $field.attr( 'data-value' ) || '',
+				items  = null;
+
+			if ( 0 !== stored.indexOf( '[' ) ) {
+				return stored;
+			}
+			try {
+				items = JSON.parse( stored );
+			} catch ( e ) {
+				console.error( 'FLBuilder: unparsable suggest field data-value, keeping it as stored.', stored, e );
+				return stored;
+			}
+
+			var isLookup = Array.isArray( items ) && items.every( function( item ) {
+				return item && undefined !== item.value;
+			} );
+
+			return isLookup ? $.map( items, function( item ) { return item.value; } ).join( ',' ) : stored;
 		},
 
 		/**
@@ -8362,7 +8437,7 @@
 		 * @since 2.9
 		 * @access private
 		 * @method _updateRepeaterFormState
-		 * @param HTMLElement table - A table element with mulitple fields
+		 * @param HTMLElement table - A table element with multiple fields
 		 */
 		_updateRepeaterFormState( table ) {
 			const { getSnapshot, setCurrentForm } = FL.Builder.settingsForms.state
@@ -9434,7 +9509,7 @@
 		},
 
 		/**
-		 * Callback for when a single/multiple audo is selected.
+		 * Callback for when a single/multiple audio is selected.
 		 *
 		 * @since 1.0
 		 * @access private
@@ -10402,7 +10477,7 @@
 		 * Renders the correct weights list for a respective font.
 		 *
 		 * @since  1.6.3
-		 * @acces  private
+		 * @access  private
 		 * @method _getFontWeights
 		 * @param  {Object} currentFont The font field element.
 		 */

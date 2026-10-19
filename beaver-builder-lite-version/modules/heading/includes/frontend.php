@@ -14,7 +14,6 @@ $attrs = [
 	<?php endif; ?>
 		<?php echo $settings->heading; ?>
 	<?php if ( ! empty( $settings->link ) ) : ?>
-		<?php echo FLBuilderModuleUtils::get_link_notice( $settings, 'link' ); ?>
 	</a>
 	<?php endif; ?>
 </<?php echo esc_attr( $settings->tag ); ?>>

@@ -1242,6 +1242,13 @@ details.fl-cache-plugins-list[open] ul {
 .fl-toggle-switch input[type="checkbox"]:checked + span::after {
 	transform: translateY(-50%) translateX(16px);
 }
+/* Locked state — a module other features force on */
+.fl-toggle-switch:has(input[type="checkbox"]:disabled) {
+	cursor: not-allowed;
+}
+.fl-toggle-switch input[type="checkbox"]:disabled + span::before {
+	opacity: 0.5;
+}
 .fl-tools-sub-option {
 	padding-top: 4px;
 }
@@ -1493,7 +1500,8 @@ details.fl-cache-plugins-list[open] ul {
 	flex-shrink: 0;
 	margin-top: 1px;
 }
-.fl-themer-upsell-btn {
+/* Needs the parent + element qualifier to outrank the page-wide `body[class*="settings_page_fl-builder"] a` color. */
+.fl-themer-upsell a.fl-themer-upsell-btn {
 	display: inline-flex;
 	align-items: center;
 	gap: 4px;
@@ -1507,7 +1515,8 @@ details.fl-cache-plugins-list[open] ul {
 	text-decoration: none;
 	transition: all 0.15s ease;
 }
-.fl-themer-upsell-btn:hover {
+.fl-themer-upsell a.fl-themer-upsell-btn:hover,
+.fl-themer-upsell a.fl-themer-upsell-btn:focus {
 	background: #d4471a;
 	border-color: #b93c16;
 	color: #fff;
@@ -2514,8 +2523,9 @@ input.fl-module-search:focus {
 	grid-template-columns: 1fr;
 }
 
-/* Module usage info (shown when "Show advanced module usage" is enabled) */
-.fl-module-usage {
+/* Module usage info (shown when "Show advanced module usage" is enabled), and the locked-module note */
+.fl-module-usage,
+.fl-module-locked-note {
 	display: inline-block;
 	font-size: 11px;
 	color: #787c82;

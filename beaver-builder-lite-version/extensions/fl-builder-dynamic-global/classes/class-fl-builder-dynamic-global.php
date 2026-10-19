@@ -244,8 +244,7 @@ final class FLBuilderDynamicGlobal {
 							// Add photo _src to child node settings.
 							if ( isset( $section_field_data['type'] ) && 'photo' === $section_field_data['type'] ) {
 
-								$parts     = explode( '__', $target_node_id );
-								$image_src = '__' . $parts[0] . '__' . $target_field_name . '_src';
+								$image_src = '__' . $target_node_id . '__' . $target_field_name . '_src';
 
 								if ( isset( $dynamic_node_settings['child'][ $image_src ] ) ) {
 									$photo_src = $dynamic_node_settings['child'][ $image_src ];

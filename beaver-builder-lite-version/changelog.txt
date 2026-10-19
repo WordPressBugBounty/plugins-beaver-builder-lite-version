@@ -1,3 +1,66 @@
+<h4>2.11.1.2 - 10/08/2026</h4>
+<p><strong>Hotfix</strong></p>
+<ul>
+	<li>Search Module: Fixed AJAX search returning empty results for every visitor except the one whose page load rebuilt the layout cache (#5614)</li>
+	<li>Multisite: Fixed Network Admin settings not saving for Modules, Blocks, Post Types, Icons and Templates (#5603)</li>
+	<li>Layout Settings: Fixed saving clearing a page's Parent Page when the suggest field hasn't finished initializing (#5748)</li>
+	<li>Popup Module: Fixed the Delay trigger never firing when Show Delay is 0, its default value (#5729)</li>
+	<li>Maintenance Mode: An incomplete schedule Start or End date now shows an error instead of failing silently, and no longer wipes the stored date when another setting is saved (#5761)</li>
+	<li>Maintenance Mode: The preview link is now hidden while maintenance mode is off, with the Regenerate control kept available to revoke a previously shared link (#5641, #5762)</li>
+</ul>
+
+<h4>2.11.1.1 - 09/30/2026</h4>
+<p><strong>Hotfix</strong></p>
+<ul>
+	<li>Security: Fixed possible SQL injection in the Posts Modules autosuggest field (#5704)</li>
+	<li>Security: Fixed possible arbitrary shortcode execution in Sidebar module widget output (#5662)</li>
+	<li>Fixed a fatal error on the front end when stripping stale link notices from large modules (#5689)</li>
+	<li>Popup Module: Fixed a fatal error on sites without Beaver Themer active (#5643)</li>
+	<li>Gallery and Slideshow Modules: Fixed SmugMug feeds returning empty on servers with <code>allow_url_fopen</code> enabled (#5694)</li>
+	<li>Text Editor: Fixed clicking a linked image in the builder navigating the canvas away or opening the theme lightbox (#5698)</li>
+	<li>Translations: Translation update checks are now cached instead of running on every request (#5671)</li>
+</ul>
+
+<h4>2.11.1 - 09/17/2026</h4>
+<p><strong>Enhancements</strong></p>
+<ul>
+	<li>Maintenance Mode: Add a "Hide theme header & footer" option and a secret URL bypass for previewing the site while maintenance mode is on (#5391)</li>
+	<li>Patterns: Add an option to opt an individual Pattern instance back into shortcode rendering, for WooCommerce block checkout sub-flows that fall back to the classic checkout shortcode (#5539)</li>
+	<li>Outline Panel: Auto scroll the active item into view when a node is selected in the canvas (#5183)</li>
+</ul>
+
+<p><strong>Fixes</strong></p>
+<ul>
+	<li>Accessibility: Fixed the "(opens in new tab)" screen reader text appearing as visible text on archives, excerpts and feeds, where the builder's stylesheet is not loaded (#5609)</li>
+	<li>Fixed builder history states stripping every backslash once the undo limit is reached, which could corrupt unpublished drafts (#5466)</li>
+	<li>Layout Settings: Fixed saving silently clearing a page's Parent Page (#5587)</li>
+	<li>Copy/Paste Settings: Fixed "Import Error!" when pasting settings onto a module that had already been saved (#5588)</li>
+	<li>Fixed responsive color and size settings not rendering when the default breakpoint is left blank (#5312)</li>
+	<li>Rows: Fixed border radius not applying on the published page when multiple backgrounds are used (#5213)</li>
+	<li>Rows: Fixed background video not being horizontally centered on mobile in custom-height rows (#5388)</li>
+	<li>Fixed the row hover and selection overlay spanning the full window width on fixed-width rows (#5542)</li>
+	<li>Fixed the actions header offset on overlays for modules placed directly in the layout (#5543)</li>
+	<li>Color Picker: Fixed saved presets stored as bare hex rendering blank and applying invalid CSS (#5541)</li>
+	<li>Color Picker: Fixed theme color variables not always rendering correctly when Load Theme Colors is enabled (#4639)</li>
+	<li>Color Picker: Fixed long global color names without spaces overflowing their swatch (#5379)</li>
+	<li>Globals: Fixed global rows, columns and modules rendering the wrong content on sites where more than one saved template post shares a template ID (#5627)</li>
+	<li>Components: Fixed the Photo module size setting reverting to Full Size when the photo field is linked in a component (#5387)</li>
+	<li>Menu Module: Fixed the submenu toggle rendering an invalid <code>aria-control</code> attribute instead of <code>aria-controls</code> (#5483)</li>
+	<li>Content Slider Module: Fixed the button icon not following the selected hover color (#4739)</li>
+	<li>Module Blocks: Fixed Tabs module active-tab styling and spacing not matching between the block editor and the published page (#4684)</li>
+	<li>WooCommerce: Fixed the Product Tabs module settings panel auto-opening when editing a Themer Singular Product layout (#5449)</li>
+	<li>Licensing: Fixed a false "license expired" notice for Beaver Builder AI on license tiers that don't include it (#5526)</li>
+	<li>Admin Settings: Fixed the Beaver Themer upsell button label being invisible on the license settings page (#5546)</li>
+	<li>Code Editor: Fixed the CSS validator flagging <code>aspect-ratio</code> as an unknown property (#5291)</li>
+	<li>User Access: Fixed globals and components being editable via the Outline Panel context menu and Saved tab when global and component editing is disabled (#4538)</li>
+	<li>Performance: Fixed the Version Control extension running a transient query on every frontend page load (#5389)</li>
+	<li>Debug Mode: Fixed an undefined variable warning on sites with no builder history states, plus general improvements to the debug report (#5371)</li>
+	<li>Debug Mode: Fixed the Builder CSS/JS metabox disabling WordPress 7.0 Visual Revisions (#5195)</li>
+	<li>Fixed a <code>utf8_encode()</code> deprecation notice on PHP 8.2+ when exporting (#4891)</li>
+	<li>Fixed a conflict with the Horizontal Slider with Scroll plugin that prevented color pickers from rendering (#5404)</li>
+	<li>Fixed a conflict with Themify themes that prevented selecting a video in the Video module (#4712)</li>
+</ul>
+
 <h4>2.11.0.4 - 09/01/2026</h4>
 <p><strong>Hotfix</strong></p>
 <ul>

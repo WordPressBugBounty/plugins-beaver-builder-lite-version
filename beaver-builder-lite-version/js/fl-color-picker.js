@@ -1052,14 +1052,19 @@ var FLBuilderColorPicker;
 				alert( this.options.labels.noneColorSelected );
 				return false;
 			}
-			var color = preset.toString().replace( /^#/, '' );
+			// Stored with the leading # intact. FLBuilderModel::get_color_presets()
+			// normalizes bare hex on read, so stripping it here would leave this
+			// array — and the dupe check below — in a different format from the
+			// presets it was seeded with.
+			// _CheckValidColor above already guarantees a #, rgb, hsl or var prefix.
+			var color = preset.toString().trim();
 
 			// check if color is empty
 			if( color === '' ){
 				alert( this.options.labels.noneColorSelected );
 			// check if the color is already added
 			} else if( FLBuilderColorPresets.indexOf( color ) > -1 ){
-				alert( this.options.labels.alreadySaved.replace( '%s', '#' + color ) );
+				alert( this.options.labels.alreadySaved.replace( '%s', color ) );
 			// add color to presets, fires visual feedback and triggers an event
 			} else {
 

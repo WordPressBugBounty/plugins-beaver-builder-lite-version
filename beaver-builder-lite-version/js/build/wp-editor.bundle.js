@@ -9,6 +9,16 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
+/***/ "./src/wp/wp-editor/css-js-panel/index.js":
+/*!************************************************!*\
+  !*** ./src/wp/wp-editor/css-js-panel/index.js ***!
+  \************************************************/
+/***/ (() => {
+
+eval("{const {\n  cssJsPanel\n} = FLBuilderConfig;\nif (cssJsPanel) {\n  const {\n    PluginDocumentSettingPanel\n  } = wp.editor || wp.editPost;\n  const {\n    useEntityProp\n  } = wp.coreData;\n  const {\n    TextareaControl\n  } = wp.components;\n  const {\n    __\n  } = wp.i18n;\n  const {\n    registerPlugin\n  } = wp.plugins;\n  const CssJsPanel = () => {\n    const postType = wp.data.useSelect(select => select('core/editor').getCurrentPostType(), []);\n    const [meta, setMeta] = useEntityProp('postType', postType, 'fl_builder_css_js');\n\n    // Both hooks above run unconditionally (rules of hooks); bail out of\n    // rendering until the editor has loaded the post type into the store.\n    if (!postType) {\n      return null;\n    }\n    const css = meta ? meta.css : '';\n    const js = meta ? meta.js : '';\n    return wp.element.createElement(PluginDocumentSettingPanel, {\n      name: 'fl-builder-css-js',\n      title: __('Builder CSS/JS', 'fl-builder')\n    }, wp.element.createElement(TextareaControl, {\n      label: __('CSS', 'fl-builder'),\n      value: css,\n      onChange: value => setMeta({\n        ...(meta || {}),\n        css: value\n      }),\n      rows: 10\n    }), wp.element.createElement(TextareaControl, {\n      label: __('JS', 'fl-builder'),\n      value: js,\n      onChange: value => setMeta({\n        ...(meta || {}),\n        js: value\n      }),\n      rows: 10\n    }));\n  };\n  registerPlugin('fl-builder-css-js-panel', {\n    render: CssJsPanel\n  });\n}\n\n//# sourceURL=webpack://bb-plugin/./src/wp/wp-editor/css-js-panel/index.js?\n}");
+
+/***/ }),
+
 /***/ "./src/wp/wp-editor/index.js":
 /*!***********************************!*\
   !*** ./src/wp/wp-editor/index.js ***!
@@ -16,7 +26,7 @@
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
-eval("{__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _wordpress__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./wordpress */ \"./src/wp/wp-editor/wordpress/index.js\");\n/* harmony import */ var _store__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./store */ \"./src/wp/wp-editor/store/index.js\");\n/* harmony import */ var _store__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_store__WEBPACK_IMPORTED_MODULE_1__);\n/* harmony import */ var _layout_block__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./layout-block */ \"./src/wp/wp-editor/layout-block/index.js\");\n/* harmony import */ var _more_menu__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./more-menu */ \"./src/wp/wp-editor/more-menu/index.js\");\n\n\n\n\n\n//# sourceURL=webpack://bb-plugin/./src/wp/wp-editor/index.js?\n}");
+eval("{__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _wordpress__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./wordpress */ \"./src/wp/wp-editor/wordpress/index.js\");\n/* harmony import */ var _store__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./store */ \"./src/wp/wp-editor/store/index.js\");\n/* harmony import */ var _store__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_store__WEBPACK_IMPORTED_MODULE_1__);\n/* harmony import */ var _layout_block__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./layout-block */ \"./src/wp/wp-editor/layout-block/index.js\");\n/* harmony import */ var _more_menu__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./more-menu */ \"./src/wp/wp-editor/more-menu/index.js\");\n/* harmony import */ var _css_js_panel__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./css-js-panel */ \"./src/wp/wp-editor/css-js-panel/index.js\");\n/* harmony import */ var _css_js_panel__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_css_js_panel__WEBPACK_IMPORTED_MODULE_4__);\n\n\n\n\n\n\n//# sourceURL=webpack://bb-plugin/./src/wp/wp-editor/index.js?\n}");
 
 /***/ }),
 

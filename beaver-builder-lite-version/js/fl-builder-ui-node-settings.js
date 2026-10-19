@@ -275,12 +275,25 @@
 		 */
 		_moduleClicked: function(e)
 		{
-			// Ignore programmatic .click() calls (e.g. from block JS) while
-			// still allowing real user clicks and jQuery .trigger() events.
+			// Only treat this as a real "open settings" click if it's either
+			// a trusted native click, or a jQuery .trigger('click') aimed
+			// specifically at the settings button — the shape used by
+			// _selectNodeOverlay() (fl-builder-ui-overlays.js) to reopen
+			// settings after selecting a parent node. jQuery's .trigger()
+			// doesn't populate e.originalEvent, so it can't be distinguished
+			// from a real click by trust alone; scoping by target instead
+			// keeps that legitimate case working while rejecting synthetic
+			// clicks that module frontend JS fires on its own child elements
+			// (e.g. WooCommerce's tab-init auto-selecting its first tab,
+			// which otherwise bubbles up and auto-opens this module's
+			// settings — see beaverbuilder/beaver-builder-plugin#5449).
 			// Contain the event before bailing — without this the untrusted
 			// click keeps propagating and its default action fires (e.g. a menu
 			// link navigating), which can cascade into a browser-locking loop.
-			if ( e.originalEvent && ! e.originalEvent.isTrusted ) {
+			const isRealTrustedClick   = !! e.originalEvent && e.originalEvent.isTrusted;
+			const isBuilderReopenClick = ! e.originalEvent && $( e.target ).closest( '.fl-block-settings' ).length > 0;
+
+			if ( ! isRealTrustedClick && ! isBuilderReopenClick ) {
 				e.stopPropagation();
 				e.preventDefault();
 				return;

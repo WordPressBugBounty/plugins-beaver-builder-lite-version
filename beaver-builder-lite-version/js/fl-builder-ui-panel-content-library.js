@@ -677,7 +677,7 @@
         templateName: 'fl-content-panel-category-selector',
 
         /**
-        * Template function retreived by wp.template()
+        * Template function retrieved by wp.template()
         */
         template: null,
 

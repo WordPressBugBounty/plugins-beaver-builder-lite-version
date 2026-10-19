@@ -138,13 +138,29 @@ class FLControls {
 		return $colors;
 	}
 
+	/**
+	 * Adds the leading # to a bare hex value so it is a valid CSS color.
+	 *
+	 * The canonical implementation now lives on FLBuilderColor so the color
+	 * presets model can reach it without depending on this class. Kept here
+	 * because it is a public static that third-party code may call.
+	 *
+	 * @param string $value A color value with or without the # sign.
+	 * @return string
+	 */
 	static public function normalize_color_value( $value ) {
+		return FLBuilderColor::normalize_color_value( $value );
+	}
 
-		if ( FLBuilderUtils::ctype_xdigit( ltrim( trim( $value ), '#' ) ) ) {
-			return '#' . ltrim( trim( $value ), '#' );
-		}
-
-		return $value;
+	/**
+	 * Normalizes every value in a list of color presets.
+	 *
+	 * @since 2.11
+	 * @param array $presets
+	 * @return array
+	 */
+	static public function normalize_color_presets( $presets ) {
+		return array_map( array( 'FLBuilderColor', 'normalize_color_value' ), (array) $presets );
 	}
 
 	/**
@@ -163,7 +179,7 @@ class FLControls {
 		}
 
 		if ( isset( $params['replacePresets'] ) ) {
-			$presets = $params['replacePresets'];
+			$presets = self::normalize_color_presets( (array) $params['replacePresets'] );
 
 			if ( update_option( '_fl_builder_color_presets', $presets ) ) {
 				return new WP_REST_Response( [
@@ -172,8 +188,13 @@ class FLControls {
 			}
 		}
 
-		// Dedupe the merged arrays
-		$new_presets = array_unique( array_merge( $color_presets, $params['addPresets'] ) );
+		// Both sides are normalized before the merge so a bare-hex preset already
+		// in the option dedupes against the #-prefixed value the picker sends. As
+		// a side effect this migrates the stored option a preset at a time.
+		$new_presets = array_values( array_unique( array_merge(
+			self::normalize_color_presets( $color_presets ),
+			self::normalize_color_presets( (array) $params['addPresets'] )
+		) ) );
 
 		update_option( '_fl_builder_color_presets', $new_presets );
 

@@ -16,6 +16,27 @@ final class FLBuilderColor {
 	}
 
 	/**
+	 * Adds the leading # to a bare hex value so it is a valid CSS color.
+	 *
+	 * The legacy color picker stripped the # before saving presets, so bare hex
+	 * is the historical storage format on long-running installs. Anything that
+	 * isn't hex — var(), rgb(), rgba(), hsl(), named colors, empty strings — is
+	 * returned untouched.
+	 *
+	 * @since 2.11
+	 * @param string $value A color value with or without the # sign.
+	 * @return string
+	 */
+	static public function normalize_color_value( $value ) {
+
+		if ( self::is_hex_value( $value ) ) {
+			return '#' . ltrim( trim( $value ), '#' );
+		}
+
+		return $value;
+	}
+
+	/**
 	 * Converts a hex string into an array of RGB values.
 	 *
 	 * @since 1.0

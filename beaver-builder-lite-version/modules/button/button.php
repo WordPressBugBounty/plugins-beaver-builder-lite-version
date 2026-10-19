@@ -400,8 +400,7 @@ class FLButtonModule extends FLBuilderModule {
 		$icon    = ! empty( $this->settings->icon ) ? sprintf( '<i %s></i>', $this->get_icon_attributes() ) : '';
 		$text    = ! empty( $this->settings->text ) ? sprintf( '<span class="fl-button-text">%s</span>', $this->settings->text ) : '';
 		$content = 'after' === $this->settings->icon_position ? $text . $icon : $icon . $text;
-		$notice  = 'a' === $this->get_button_tag() ? FLBuilderModuleUtils::get_link_notice( $this->settings, 'link' ) : '';
-		return $content . $notice;
+		return $content;
 	}
 
 	/**

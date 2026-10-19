@@ -43,7 +43,6 @@ FLBuilder::print_schema( ' itemscope itemtype="https://schema.org/ImageObject"' 
 		<?php endif; ?>
 			<img class="<?php echo $classes; ?>" src="<?php echo $src; ?>" alt="<?php echo $alt; ?>" <?php echo $attrs; ?> />
 		<?php if ( ! empty( $link ) ) : ?>
-			<?php echo FLBuilderModuleUtils::get_link_notice( $settings, 'link_url' ); ?>
 		</a>
 		<?php endif; ?>
 		<?php if ( 'hover' === $settings->show_caption ) : ?>

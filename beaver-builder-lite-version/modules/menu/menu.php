@@ -1720,7 +1720,7 @@ class FL_Menu_Module_Walker extends Walker_Nav_Menu {
 		$item_id = apply_filters( 'fl_builder_menu_item_id', 'menu-item-' . $item->ID, $item, $depth );
 		$output .= $indent . '<li id="' . $item_id . '"' . $class_names . '>';
 
-		$aria['aria-control'] = 'sub-menu-' . $this->parent_id;
+		$aria['aria-controls'] = 'sub-menu-' . $this->parent_id;
 		if ( false === strpos( $args->menu_class, 'fl-menu-expanded' ) ) {
 			$aria['aria-expanded'] = 'false';
 		}

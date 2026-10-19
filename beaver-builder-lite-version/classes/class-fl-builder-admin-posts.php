@@ -22,6 +22,10 @@ final class FLBuilderAdminPosts {
 			add_action( 'save_post', array( __CLASS__, 'save_meta' ) );
 		}
 
+		// Registered unconditionally: REST requests (block-editor saves) run with
+		// is_admin() === false, so the feature gate lives inside register_rest_field().
+		add_action( 'rest_api_init', array( __CLASS__, 'register_rest_field' ) );
+
 		/* Filters */
 		add_filter( 'redirect_post_location', __CLASS__ . '::redirect_post_location' );
 		add_filter( 'page_row_actions', __CLASS__ . '::render_row_actions_link' );
@@ -38,6 +42,12 @@ final class FLBuilderAdminPosts {
 		$post_types = array( 'post', 'page' );
 
 		if ( in_array( $post_type, FLBuilderModel::get_post_types() ) && ( current_user_can( 'delete_others_posts' ) || FLBuilderModel::user_has_unfiltered_html() ) ) {
+
+			// Skip for post types that support the block editor — the PluginDocumentSettingPanel is used instead.
+			if ( self::post_type_supports_block_editor( $post_type ) ) {
+				return;
+			}
+
 				add_meta_box(
 					'fl_css_js',
 					__( 'Builder CSS/JS', 'fl-builder' ),
@@ -47,6 +57,88 @@ final class FLBuilderAdminPosts {
 					'high'
 				);
 		}
+	}
+
+	/**
+	 * Registers the fl_builder_css_js REST field on Builder post types.
+	 *
+	 * @since 2.9
+	 * @return void
+	 */
+	public static function register_rest_field() {
+
+		// Feature gate (shared with the block-editor panel flag). Not gated on
+		// is_admin() because REST requests run with is_admin() === false.
+		if ( ! FLBuilderWPBlocks::css_js_panel_enabled() ) {
+			return;
+		}
+
+		foreach ( FLBuilderModel::get_post_types() as $post_type ) {
+			register_rest_field(
+				$post_type,
+				'fl_builder_css_js',
+				array(
+					'get_callback'    => array( __CLASS__, 'rest_get_css_js' ),
+					'update_callback' => array( __CLASS__, 'rest_update_css_js' ),
+					'schema'          => array(
+						'type'                 => 'object',
+						'properties'           => array(
+							'css' => array( 'type' => 'string' ),
+							'js'  => array( 'type' => 'string' ),
+						),
+						'additionalProperties' => false,
+					),
+				)
+			);
+		}
+	}
+
+	/**
+	 * REST read callback for fl_builder_css_js.
+	 *
+	 * @since 2.9
+	 * @param array $post Array of post data.
+	 * @return array|null
+	 */
+	public static function rest_get_css_js( $post ) {
+		if ( ! current_user_can( 'delete_others_posts' ) && ! FLBuilderModel::user_has_unfiltered_html() ) {
+			return null;
+		}
+
+		$data = get_post_meta( $post['id'], '_fl_builder_data_settings', true );
+
+		return array(
+			'css' => isset( $data->css ) ? $data->css : '',
+			'js'  => isset( $data->js ) ? $data->js : '',
+		);
+	}
+
+	/**
+	 * REST write callback for fl_builder_css_js.
+	 *
+	 * @since 2.9
+	 * @param array   $value   The incoming css/js values.
+	 * @param WP_Post $post    The post object.
+	 * @return bool|WP_Error
+	 */
+	public static function rest_update_css_js( $value, $post ) {
+		if ( ! current_user_can( 'delete_others_posts' ) && ! FLBuilderModel::user_has_unfiltered_html() ) {
+			return new WP_Error( 'rest_forbidden', __( 'Sorry, you are not allowed to edit this field.', 'fl-builder' ), array( 'status' => 403 ) );
+		}
+
+		$data = get_post_meta( $post->ID, '_fl_builder_data_settings', true );
+
+		if ( ! is_object( $data ) ) {
+			$data = new StdClass();
+		}
+
+		$data->css = isset( $value['css'] ) ? $value['css'] : '';
+		$data->js  = isset( $value['js'] ) ? $value['js'] : '';
+
+		update_post_meta( $post->ID, '_fl_builder_data_settings', $data );
+		update_post_meta( $post->ID, '_fl_builder_draft_settings', $data );
+
+		return true;
 	}
 
 	/**

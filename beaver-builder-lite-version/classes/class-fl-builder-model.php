@@ -3702,8 +3702,9 @@ final class FLBuilderModel {
 	static public function get_enabled_modules() {
 		$setting = self::get_admin_settings_option( '_fl_builder_enabled_modules', true );
 
-		if ( ! $setting ) {
-			// Fallback to the defaults if no saved setting.
+		if ( ! is_array( $setting ) ) {
+			// Fallback to the defaults if no saved setting. A saved empty array means
+			// every module was explicitly disabled and must not fall back (#5604).
 			$setting = self::get_default_enabled_modules();
 		} elseif ( in_array( 'all', $setting ) ) {
 			// Redefine $setting in case new modules have been installed since the last save.
@@ -6079,10 +6080,21 @@ final class FLBuilderModel {
 
 			if ( ! empty( $template_ids_to_fetch ) ) {
 				$template_ids_to_fetch = array_keys( $template_ids_to_fetch );
-				$tpl_posts             = get_posts( array(
+
+				// A template ID can be held by more than one template post after an
+				// import, migration or staging sync, and this query matches posts
+				// rather than IDs. Capping it at the ID count let duplicates of one
+				// ID consume every slot and starve another ID out of the result set,
+				// which then cached false and made its global nodes read the host
+				// page's layout data instead of the template's.
+				$tpl_posts = get_posts( array(
 					'post_type'      => 'fl-builder-template',
 					'post_status'    => 'any',
-					'posts_per_page' => count( $template_ids_to_fetch ),
+					'posts_per_page' => -1,
+					'orderby'        => array(
+						'date' => 'DESC',
+						'ID'   => 'DESC',
+					),
 					'meta_query'     => array(
 						array(
 							'key'     => '_fl_builder_template_id',
@@ -6095,7 +6107,17 @@ final class FLBuilderModel {
 				$resolved_post_ids = array();
 				foreach ( $tpl_posts as $tpl_post ) {
 					$tid = get_post_meta( $tpl_post->ID, '_fl_builder_template_id', true );
-					if ( $tid ) {
+
+					// First write wins so a duplicated template ID resolves to the same
+					// post get_node_template_post_id() would pick. Both queries order by
+					// date then ID descending, so the first row here is that method's
+					// $posts[0]; assigning on every iteration kept the last row instead,
+					// leaving the two paths disagreeing about the winner. The ID
+					// tiebreak is load-bearing: post_date is second-granularity, and an
+					// import loop creating duplicates within one second would otherwise
+					// leave the winner to MySQL, which can differ between the two
+					// queries and between requests.
+					if ( $tid && ! isset( self::$node_template_post_ids[ $tid ] ) ) {
 						$resolved                             = apply_filters( 'fl_builder_node_template_post_id', $tpl_post->ID );
 						self::$node_template_post_ids[ $tid ] = $resolved;
 						$resolved_post_ids[]                  = $resolved;
@@ -7300,10 +7322,18 @@ final class FLBuilderModel {
 			return self::$node_template_post_ids[ $template_id ];
 		} else {
 
+			// Ordered by date then ID descending so a template ID held by more than
+			// one template post resolves to the same winner every request, and to the
+			// same one clean_layout_data()'s batch prime picks. Date alone is
+			// second-granularity, which an import can tie.
 			$posts = get_posts( array(
 				'post_type'      => 'fl-builder-template',
 				'post_status'    => 'any',
 				'posts_per_page' => 1,
+				'orderby'        => array(
+					'date' => 'DESC',
+					'ID'   => 'DESC',
+				),
 				'meta_key'       => '_fl_builder_template_id',
 				'meta_value'     => $template_id,
 			) );
@@ -8494,7 +8524,16 @@ final class FLBuilderModel {
 		/**
 		 * Array of saved color presets from the builder global settings.
 		 */
-		return apply_filters( 'fl_builder_color_presets', $settings );
+		$presets = apply_filters( 'fl_builder_color_presets', $settings );
+
+		if ( ! is_array( $presets ) ) {
+			return $presets;
+		}
+
+		// Normalized after the filter, not before: the filter never documented a
+		// format and the legacy picker accepted bare hex, so third-party presets
+		// need the same treatment as the ones read from the option.
+		return array_map( array( 'FLBuilderColor', 'normalize_color_value' ), $presets );
 	}
 
 	/**
@@ -8613,12 +8652,22 @@ final class FLBuilderModel {
 		 * font-awesome should not be a key in this array, if it is it can cause issues.
 		 */
 		if ( is_array( $value ) ) {
-			$key = array_search( 'font-awesome', $value, true );
+			$was_only_legacy_key = array( 'font-awesome' ) === array_values( $value );
+			$key                 = array_search( 'font-awesome', $value, true );
 			if ( false !== $key ) {
 				unset( $value[ $key ] );
 			}
+			// A value that was only the legacy 'font-awesome' key predates the
+			// explicit-empty-means-all-off behavior (#5604) and never represented
+			// a real selection — fall back to defaults rather than treating the
+			// now-stripped-empty result as "all off".
+			if ( $was_only_legacy_key ) {
+				$value = null;
+			}
 		}
-		return ! $value ? array( 'font-awesome-5-regular', 'font-awesome-5-solid', 'font-awesome-5-brands', 'foundation-icons', 'dashicons' ) : $value;
+		// Fallback to the defaults if no saved setting. A saved empty array means
+		// every icon set was explicitly disabled and must not fall back (#5604).
+		return ! is_array( $value ) ? array( 'font-awesome-5-regular', 'font-awesome-5-solid', 'font-awesome-5-brands', 'foundation-icons', 'dashicons' ) : $value;
 	}
 
 	/**
@@ -8851,14 +8900,20 @@ final class FLBuilderModel {
 	 * @param string $key The option key.
 	 * @param mixed $value The value to update.
 	 * @param bool $network_override Whether to allow the network admin setting to be overridden on subsites.
+	 * @param bool $autoload Whether the option should be autoloaded.
+	 * @param bool|null $is_network_admin_request Overrides is_network_admin() when known by the caller (e.g.
+	 * admin-ajax.php requests, where is_network_admin() is always false since WP_NETWORK_ADMIN is only set by
+	 * wp-admin/network/admin.php's bootstrap). Defaults to null, which preserves the is_network_admin() check.
 	 * @return mixed
 	 */
-	static public function update_admin_settings_option( $key, $value, $network_override = true, $autoload = false ) {
+	static public function update_admin_settings_option( $key, $value, $network_override = true, $autoload = false, $is_network_admin_request = null ) {
 		// Invalidate per-request cache for both override variants of this key.
 		unset( self::$admin_settings_option_cache[ $key . '_0' ] );
 		unset( self::$admin_settings_option_cache[ $key . '_1' ] );
 
-		if ( is_network_admin() ) {
+		$is_network_admin = null !== $is_network_admin_request ? $is_network_admin_request : is_network_admin();
+
+		if ( $is_network_admin ) {
 			// Update the site-wide option since we're in the network admin.
 			update_site_option( $key, $value );
 		} elseif ( $network_override && FLBuilderAdminSettings::multisite_support() && ! isset( $_POST['fl-override-ms'] ) ) {

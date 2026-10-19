@@ -139,6 +139,7 @@ final class FLBuilderMaintenanceMode {
 		update_option( '_fl_builder_maintenance_enabled', ! empty( $_POST['enabled'] ) ? '1' : '' );
 		update_option( '_fl_builder_maintenance_layout_id', absint( $_POST['layout_id'] ?? 0 ) );
 		update_option( '_fl_builder_maintenance_503_enabled', ! empty( $_POST['status_503'] ) ? '1' : '' );
+		update_option( '_fl_builder_maintenance_hide_chrome', ! empty( $_POST['hide_chrome'] ) ? '1' : '' );
 		update_option( '_fl_builder_maintenance_schedule_enabled', ! empty( $_POST['schedule_enabled'] ) ? '1' : '' );
 
 		$bypass_roles = array();
@@ -159,7 +160,8 @@ final class FLBuilderMaintenanceMode {
 	 * Whether the current front-end request should be replaced with the maintenance layout.
 	 *
 	 * Returns false for admin requests, the Beaver Builder editor/preview, bypass-role
-	 * users, and when maintenance mode is off. The builder check matters because the
+	 * users, visitors holding a valid secret-URL preview cookie, and when maintenance
+	 * mode is off. The builder check matters because the
 	 * editor loads on the front end via ?fl_builder (so is_admin() is false); without it
 	 * an editing user who isn't in a bypass role would land on the maintenance layout
 	 * instead of the builder UI. is_builder_active() already gates on edit capability.
@@ -178,7 +180,7 @@ final class FLBuilderMaintenanceMode {
 		if ( FLBuilderModel::is_builder_active() ) {
 			return false;
 		}
-		if ( self::current_user_can_bypass() ) {
+		if ( self::current_user_can_bypass() || FLBuilderMaintenanceBypass::has_valid_bypass_cookie() ) {
 			return false;
 		}
 		return true;
@@ -269,6 +271,17 @@ final class FLBuilderMaintenanceMode {
 		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$post = $wp_query->post;
 		setup_postdata( $post );
+
+		// When "hide theme header & footer" is on, render the layout in a bare
+		// document instead of the theme template, so no theme chrome appears. This
+		// is theme-agnostic (works for classic and block themes alike) because it
+		// never loads a theme template. Relies on the query override + setup_postdata
+		// above so the_content/body_class have the maintenance post in context.
+		if ( get_option( '_fl_builder_maintenance_hide_chrome' ) ) {
+			include FL_BUILDER_MAINTENANCE_MODE_DIR . 'includes/maintenance-no-chrome-template.php';
+			wp_reset_postdata();
+			exit;
+		}
 
 		// Block/FSE themes use HTML block templates, not PHP files, so locate_template()
 		// always returns empty for them. Return without exiting so WordPress's own block

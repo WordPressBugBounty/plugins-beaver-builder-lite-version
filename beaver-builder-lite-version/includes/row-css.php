@@ -472,19 +472,11 @@ FLBuilderCSS::rule( array(
 ) );
 
 // Border
-if ( 'multiple' === $settings->bg_type ) {
-	FLBuilderCSS::border_field_rule( array(
-		'settings'     => $settings,
-		'setting_name' => 'border',
-		'selector'     => ".fl-node-$id",
-	) );
-} else {
-	FLBuilderCSS::border_field_rule( array(
-		'settings'     => $settings,
-		'setting_name' => 'border',
-		'selector'     => ".fl-node-$id > .fl-row-content-wrap",
-	) );
-}
+FLBuilderCSS::border_field_rule( array(
+	'settings'     => $settings,
+	'setting_name' => 'border',
+	'selector'     => ".fl-node-$id > .fl-row-content-wrap",
+) );
 
 // Min Height
 FLBuilderCSS::responsive_rule( array(

@@ -12,7 +12,7 @@ $enabled_blocks = FLBuilderModuleBlocks::get_enabled_block_editor_modules();
 
 		<?php if ( FLBuilderAdminSettings::multisite_support() && ! is_network_admin() ) : ?>
 		<label>
-			<input class="fl-override-ms-cb" type="checkbox" name="fl-override-ms" value="1" <?php echo ( get_option( '_fl_builder_enabled_blocks' ) ) ? 'checked="checked"' : ''; ?> />
+			<input class="fl-override-ms-cb" type="checkbox" name="fl-override-ms" value="1" <?php echo ( false !== get_option( '_fl_builder_enabled_blocks' ) ) ? 'checked="checked"' : ''; ?> />
 			<?php _e( 'Override network settings?', 'fl-builder' ); ?>
 		</label>
 		<?php endif; ?>

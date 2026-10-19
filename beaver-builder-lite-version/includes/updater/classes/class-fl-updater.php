@@ -536,8 +536,19 @@ final class FLUpdater {
 				}
 			}
 		} else { // plugins.php
-			// Tier-downgrade warning keeps the legacy banner — separate problem from renewal.
+			// Only the active-but-wrong-tier state gets the upgrade notice: its copy
+			// asserts the subscription is active, and its CTA sends people to the
+			// store to upgrade. A site with no license or a lapsed one needs the
+			// renewal notice below instead, which already tells those two apart and
+			// offers the matching action (enter a key / renew). check_downloads()
+			// reads $subscription->downloads, which is only present on a real
+			// subscription response, so it is empty in both of those states.
+			if ( 'Beaver Builder AI' === $plugin_data['Name'] && ! empty( $subscription->active ) && $check_downloads ) {
+				return self::render_ai_upgrade_notice();
+			}
+
 			if ( $check_downloads ) {
+				// Tier-downgrade warning keeps the legacy banner — separate problem from renewal.
 				$message .= '<span style="display:block;padding:10px 20px;margin:10px 0; background: #d54e21; color: #fff;">';
 				$message .= $check_downloads;
 				$message .= '</span>';
@@ -559,7 +570,6 @@ final class FLUpdater {
 	 * @return string
 	 */
 	static private function render_renewal_notice( $plugin_data, $subscription, $license ) {
-		$is_admin     = current_user_can( 'manage_options' );
 		$has_license  = ! empty( $license );
 		$settings_url = admin_url( 'options-general.php?page=fl-builder-settings#license' );
 
@@ -620,6 +630,57 @@ final class FLUpdater {
 		// translators: %s: product name (Beaver Builder or Beaver Themer).
 		$forward_note = sprintf( __( 'Not your license? Contact whoever set up %s to renew it.', 'fl-builder' ), $product );
 
+		$secondary_link_text = $has_license ? __( 'License settings', 'fl-builder' ) : '';
+
+		return self::render_notice_box( $headline, $lede, $bullets, $cta_text, $cta_url, $cta_external, $forward_note, $secondary_link_text, $settings_url );
+	}
+
+	/**
+	 * Renders the notice shown on plugins.php when a Beaver Builder
+	 * subscription is active but its tier doesn't include Beaver Builder AI.
+	 *
+	 * @since 2.12
+	 * @return string
+	 */
+	static private function render_ai_upgrade_notice() {
+		$store_url = FLBuilderModel::get_store_url( '', array(
+			'utm_medium'   => 'bb',
+			'utm_source'   => 'plugins-admin-page',
+			'utm_campaign' => 'upgrade',
+		) );
+
+		$headline     = __( "Beaver Builder AI isn't included on your plan", 'fl-builder' );
+		$lede         = __( "Your Beaver Builder subscription is active, but it doesn't include Beaver Builder AI. Upgrade your plan to unlock AI generation, ongoing updates, and support.", 'fl-builder' );
+		$bullets      = array(
+			__( 'AI-powered module, layout, and design system creation', 'fl-builder' ),
+			__( 'Blocks for the WordPress Block Editor, with static HTML export', 'fl-builder' ),
+			__( 'Ongoing updates and real-human support', 'fl-builder' ),
+		);
+		$forward_note = __( 'Not your subscription? Contact whoever manages your Beaver Builder plan to upgrade it.', 'fl-builder' );
+
+		return self::render_notice_box( $headline, $lede, $bullets, __( 'Upgrade Plan', 'fl-builder' ), $store_url, true, $forward_note );
+	}
+
+	/**
+	 * Renders the shared notice box (icon, headline, lede, optional bullet
+	 * list, CTA button, optional secondary link) used for both the renewal
+	 * notice and the AI tier-upgrade notice on plugins.php.
+	 *
+	 * @since 2.12
+	 * @param string $headline
+	 * @param string $lede
+	 * @param array  $bullets
+	 * @param string $cta_text
+	 * @param string $cta_url
+	 * @param bool   $cta_external
+	 * @param string $forward_note
+	 * @param string $secondary_link_text
+	 * @param string $secondary_link_url
+	 * @return string
+	 */
+	static private function render_notice_box( $headline, $lede, $bullets, $cta_text, $cta_url, $cta_external, $forward_note, $secondary_link_text = '', $secondary_link_url = '' ) {
+		$is_admin = current_user_can( 'manage_options' );
+
 		// All-span structure: WP wraps this hook's output in a <p>, so we stay inside it
 		// and use display:block spans. Avoids the orphan </p> that browsers turn into an
 		// empty <p></p> — and WP's `.update-message p::before` would stamp a refresh icon
@@ -644,7 +705,7 @@ final class FLUpdater {
 
 		ob_start();
 		?>
-		<span class="bb-renewal-notice" data-bb-notice="renewal" style="<?php echo esc_attr( $styles['wrap'] ); ?>">
+		<span class="bb-updater-notice" style="<?php echo esc_attr( $styles['wrap'] ); ?>">
 			<span style="<?php echo esc_attr( $styles['headline_row'] ); ?>">
 				<span class="dashicons dashicons-warning" aria-hidden="true" style="<?php echo esc_attr( $styles['headline_ico'] ); ?>"></span>
 				<span style="<?php echo esc_attr( $styles['headline'] ); ?>"><?php echo esc_html( $headline ); ?></span>
@@ -665,9 +726,9 @@ final class FLUpdater {
 					<a href="<?php echo esc_url( $cta_url ); ?>"<?php echo $cta_external ? ' target="_blank" rel="noopener"' : ''; ?> style="<?php echo esc_attr( $styles['button'] ); ?>">
 						<?php echo esc_html( $cta_text ); ?>
 					</a>
-					<?php if ( $has_license ) : ?>
-						<a href="<?php echo esc_url( $settings_url ); ?>" style="<?php echo esc_attr( $styles['link'] ); ?>">
-							<?php esc_html_e( 'License settings', 'fl-builder' ); ?>
+					<?php if ( ! empty( $secondary_link_text ) ) : ?>
+						<a href="<?php echo esc_url( $secondary_link_url ); ?>" style="<?php echo esc_attr( $styles['link'] ); ?>">
+							<?php echo esc_html( $secondary_link_text ); ?>
 						</a>
 					<?php endif; ?>
 				<?php else : ?>
@@ -715,6 +776,9 @@ final class FLUpdater {
 				case 'Beaver Themer':
 					$show_warning = true;
 					break;
+				case 'Beaver Builder AI':
+					$show_warning = true;
+					break;
 			}
 
 			if ( ! $version ) {
@@ -732,6 +796,10 @@ final class FLUpdater {
 
 				if ( 'Beaver Themer' === $plugin_name ) {
 					$out = __( 'Updates for Themer will not work as you do not have a valid subscription for this plugin.', 'fl-builder' );
+				}
+
+				if ( 'Beaver Builder AI' === $plugin_name ) {
+					$out = __( 'Updates for Beaver Builder AI will not work as you do not have a valid subscription for this plugin.', 'fl-builder' );
 				}
 			}
 		}

@@ -52,7 +52,7 @@ if ( FLBuilder::is_module_disable_enabled() ) {
 
 		<?php if ( FLBuilderAdminSettings::multisite_support() && ! is_network_admin() ) : ?>
 		<label>
-			<input class="fl-override-ms-cb" type="checkbox" name="fl-override-ms" value="1" <?php echo ( get_option( '_fl_builder_enabled_modules' ) ) ? 'checked="checked"' : ''; ?> />
+			<input class="fl-override-ms-cb" type="checkbox" name="fl-override-ms" value="1" <?php echo ( false !== get_option( '_fl_builder_enabled_modules' ) ) ? 'checked="checked"' : ''; ?> />
 			<?php _e( 'Override network settings?', 'fl-builder' ); ?>
 		</label>
 		<?php endif; ?>
@@ -68,6 +68,7 @@ if ( FLBuilder::is_module_disable_enabled() ) {
 			$checked                 = in_array( 'all', $enabled_modules ) ? 'checked' : '';
 			$deprecated_modules_html = array();
 			$usage_enabled           = FLBuilder::is_module_disable_enabled();
+			$locked_modules          = FLBuilderAdminSettings::get_locked_modules();
 
 			?>
 			<div class="fl-modules-controls">
@@ -156,6 +157,7 @@ if ( FLBuilder::is_module_disable_enabled() ) {
 					<?php
 					foreach ( $active_modules as $module ) :
 						$checked    = in_array( $module->slug, $enabled_modules ) ? 'checked' : '';
+						$is_locked  = in_array( $module->slug, $locked_modules, true );
 						$text       = '';
 						$usage_attr = '';
 						if ( $usage_enabled ) {
@@ -173,10 +175,18 @@ if ( FLBuilder::is_module_disable_enabled() ) {
 						}
 						?>
 				<p<?php echo $usage_attr; ?>>
-					<label class="fl-toggle-switch">
-						<input class="fl-module-cb" type="checkbox" name="fl-modules[]" value="<?php echo $module->slug; ?>" <?php echo $checked; ?> />
+					<label class="fl-toggle-switch"<?php echo $is_locked ? ' title="' . esc_attr__( 'Other features depend on this module, so it cannot be disabled.', 'fl-builder' ) . '"' : ''; ?>>
+						<?php if ( $is_locked ) : ?>
+							<?php // A different class keeps the All/group toggles in fl-builder-admin-settings.js from flipping it. ?>
+							<input class="fl-module-locked-cb" type="checkbox" value="<?php echo esc_attr( $module->slug ); ?>" checked disabled />
+						<?php else : ?>
+							<input class="fl-module-cb" type="checkbox" name="fl-modules[]" value="<?php echo $module->slug; ?>" <?php echo $checked; ?> />
+						<?php endif; ?>
 						<span>
 							<?php echo esc_html( $module->name ); ?>
+							<?php if ( $is_locked ) : ?>
+								<span class="fl-module-locked-note"><?php esc_html_e( 'Always enabled', 'fl-builder' ); ?></span>
+							<?php endif; ?>
 							<?php if ( $usage_enabled ) : ?>
 								<span class="fl-module-usage <?php echo ( 'Not used' === $text ) ? 'fl-module-not-used' : ''; ?>"><?php echo esc_html( $text ); ?></span>
 							<?php endif; ?>

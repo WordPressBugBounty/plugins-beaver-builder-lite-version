@@ -25,6 +25,7 @@ class FLBuilderTranslations {
 
 		add_filter( 'pre_set_site_transient_update_plugins', array( __CLASS__, 'inject_translation_updates' ) );
 		add_filter( 'translations_api', array( __CLASS__, 'filter_translations_api' ), 10, 3 );
+		add_action( 'fl_builder_cache_cleared', array( __CLASS__, 'clear_cache' ) );
 	}
 
 	/**
@@ -143,10 +144,33 @@ class FLBuilderTranslations {
 	 * Fetch available translations from our API for a given plugin version.
 	 * Returns false on a network/API error, or an array (possibly empty).
 	 *
+	 * Cached as a site transient keyed by version + wanted locales, for
+	 * 12 hours on success or 1 hour on a failed/errored fetch (shorter so an
+	 * API outage recovers faster once it's back, without retrying on every
+	 * call in the meantime). Without this, pre_set_site_transient_update_plugins
+	 * firing repeatedly per request (or per site, across a fleet) turns into a
+	 * live HTTP call on every wp_update_plugins() run, far more often than the
+	 * API needs to actually be hit. Cleared early via clear_cache() on fl_builder_cache_cleared.
+	 *
 	 * @param string $version Plugin version.
 	 * @return array|false
 	 */
 	private static function fetch_translations( $version ) {
+		$locales = self::wanted_locales();
+		sort( $locales ); // Deterministic cache key regardless of filesystem enumeration order.
+
+		$cache_key = 'fl_builder_translations_' . md5( 'bb-plugin|' . $version . '|' . implode( ',', $locales ) );
+		$cached    = get_site_transient( $cache_key );
+
+		if ( 'error' === $cached ) {
+			return false;
+		}
+		if ( false !== $cached ) {
+			return $cached;
+		}
+
+		self::remember_cache_key( $cache_key );
+
 		$url      = add_query_arg( array(
 			'slug'    => 'bb-plugin',
 			'version' => $version,
@@ -154,15 +178,52 @@ class FLBuilderTranslations {
 		$response = wp_remote_get( $url, array( 'timeout' => 10 ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions
 
 		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
+			set_site_transient( $cache_key, 'error', HOUR_IN_SECONDS );
 			return false;
 		}
 
 		$body = json_decode( wp_remote_retrieve_body( $response ), true );
 
 		if ( ! isset( $body['translations'] ) || ! is_array( $body['translations'] ) ) {
+			set_site_transient( $cache_key, 'error', HOUR_IN_SECONDS );
 			return false;
 		}
 
+		set_site_transient( $cache_key, $body['translations'], 12 * HOUR_IN_SECONDS );
+
 		return $body['translations'];
+	}
+
+	/**
+	 * Track a cache key so clear_cache() can find it later without having to
+	 * reconstruct it (the key varies by version + locale-set, so there's
+	 * no single fixed key to delete the way e.g. FLBuilderFonts's Google Fonts
+	 * cache does).
+	 *
+	 * @param string $key
+	 * @return void
+	 */
+	private static function remember_cache_key( $key ) {
+		$keys = get_site_option( 'fl_builder_translations_cache_keys', array() );
+
+		if ( ! in_array( $key, $keys, true ) ) {
+			$keys[] = $key;
+			update_site_option( 'fl_builder_translations_cache_keys', $keys );
+		}
+	}
+
+	/**
+	 * Clear every cached translation fetch. Hooked to fl_builder_cache_cleared
+	 * so Tools > Clear Cache and WP-CLI's cache-clear command also refresh
+	 * translation data instead of waiting out the transient TTL.
+	 *
+	 * @return void
+	 */
+	public static function clear_cache() {
+		foreach ( get_site_option( 'fl_builder_translations_cache_keys', array() ) as $key ) {
+			delete_site_transient( $key );
+		}
+
+		delete_site_option( 'fl_builder_translations_cache_keys' );
 	}
 }

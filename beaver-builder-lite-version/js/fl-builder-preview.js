@@ -2862,7 +2862,7 @@
 				property 	= preview.property,
 				unit     	= this._getPreviewCSSUnit( preview, field, e ),
 				input    	= $( e.target ),
-				subVals     = preview.substitute_values, /* substitute the css value for a staticly-defined alternative */
+				subVals     = preview.substitute_values, /* substitute the css value for a statically-defined alternative */
 				rawVal    	= input.val(),
 				value       = subVals && Object.keys( subVals ).includes( rawVal ) ? subVals[rawVal] : rawVal,
 				responsive 	= input.closest( '.fl-field-responsive-setting' ).length ? true : false,

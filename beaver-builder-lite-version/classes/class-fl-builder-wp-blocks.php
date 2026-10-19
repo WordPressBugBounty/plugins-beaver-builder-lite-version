@@ -36,6 +36,16 @@ final class FLBuilderWPBlocks {
 	}
 
 	/**
+	 * Whether the block-editor CSS/JS panel (and its REST field) is enabled.
+	 *
+	 * @since 2.9
+	 * @return bool
+	 */
+	static public function css_js_panel_enabled() {
+		return ( defined( 'FL_ENABLE_META_CSS_EDIT' ) && FL_ENABLE_META_CSS_EDIT ) || (bool) get_transient( 'fl_debug_mode' );
+	}
+
+	/**
 	 * Enqueues scripts and styles for the block editor.
 	 *
 	 * @since 2.1
@@ -58,12 +68,12 @@ final class FLBuilderWPBlocks {
 		wp_enqueue_script(
 			'fl-builder-wp-editor',
 			FLBuilder::plugin_url() . 'js/build/wp-editor.bundle' . $min . '.js',
-			array( 'wp-edit-post' ),
+			array( 'wp-edit-post', 'wp-plugins', 'wp-core-data' ),
 			FL_BUILDER_VERSION
 		);
 
 		wp_localize_script( 'fl-builder-wp-editor', 'FLBuilderConfig', array(
-			'builder' => array(
+			'builder'    => array(
 				'access'       => FLBuilderUserAccess::current_user_can( 'builder_access' ),
 				'enabled'      => FLBuilderModel::is_builder_enabled( $post->ID ),
 				'nonce'        => wp_create_nonce( 'fl_ajax_update' ),
@@ -74,10 +84,11 @@ final class FLBuilderWPBlocks {
 				'showui'       => apply_filters( 'fl_builder_render_admin_edit_ui', true ),
 				'pagenow'      => $pagenow,
 			),
-			'post'    => array(
+			'cssJsPanel' => self::css_js_panel_enabled(),
+			'post'       => array(
 				'id' => $post->ID,
 			),
-			'strings' => array(
+			'strings'    => array(
 				/* translators: 1: branded builder name: 2: post type name */
 				'active'      => sprintf( _x( '%1$s is currently active for this %2$s.', '%1$s branded builder name. %2$s post type name.', 'fl-builder' ), $branding, strtolower( $post_type_name ) ),
 				/* translators: %s: post type name */
@@ -92,11 +103,11 @@ final class FLBuilderWPBlocks {
 				'view'        => sprintf( _x( 'View %s', '%s post type name.', 'fl-builder' ), $post_type_name ),
 				'warning'     => __( 'Switching to the native WordPress editor will disable your Beaver Builder layout until it is enabled again. Any edits made in the WordPress editor will not be converted to your Page Builder layout. Do you want to continue?', 'fl-builder' ),
 			),
-			'urls'    => array(
+			'urls'       => array(
 				'edit' => FLBuilderModel::get_edit_url( $post->ID ),
 				'view' => get_permalink( $post->ID ),
 			),
-			'wp'      => array(
+			'wp'         => array(
 				'version' => $wp_version,
 			),
 		) );

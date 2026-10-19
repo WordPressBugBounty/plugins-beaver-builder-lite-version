@@ -35,6 +35,9 @@
 			// Init row shape layer height.
 			FLBuilderLayout._initRowShapeLayerHeight();
 
+			// Init the new tab notice on links opening in a new tab.
+			FLBuilderLayout._initLinkNotices();
+
 			// Only init if the builder isn't active.
 			if ( 0 === $('.fl-builder-edit').length ) {
 
@@ -978,8 +981,8 @@
 				if ( ! isRowFullHeight ) {
 					if ( newHeight < wrapHeight ) {
 						newHeight = wrapHeight;
-						newLeft   = -((newWidth - wrapWidth) / 2);
 						newWidth  = vidHeight ? Math.round(vidWidth * wrapHeight/vidHeight) : newWidth;
+						newLeft   = -((newWidth - wrapWidth) / 2);
 					}
 					else {
 						newTop = -((newHeight - wrapHeight)/2);
@@ -1117,6 +1120,36 @@
 				}
 				catch( e ) {}
 			}
+		},
+
+		/**
+		 * Adds a visually-hidden "(opens in new tab)" notice to links
+		 * inside a builder layout that target a new tab, and removes it
+		 * from ones that don't. Runs on the live DOM only, across every
+		 * module, so the notice is never part of any saved content. Covers
+		 * both real anchors (`target` attribute) and non-anchor elements
+		 * like the Box module's `role="link"` div, which carries the same
+		 * intent via a `data-link-target` attribute instead.
+		 *
+		 * @since 2.12
+		 * @access private
+		 * @method _initLinkNotices
+		 */
+		_initLinkNotices: function()
+		{
+			$( '.fl-builder-content a[target], .fl-builder-content [role="link"][data-link-target]' ).each( function() {
+				var link   = $( this ),
+					notice = link.children( 'span.fl-new-tab-notice' ),
+					target = link.attr( 'target' ) || link.attr( 'data-link-target' );
+
+				if ( '_blank' === target ) {
+					if ( 0 === notice.length ) {
+						link.append( '<span class="fl-new-tab-notice sr-only">' + FLBuilderLayoutConfig.i18n.opensInNewTab + '</span>' );
+					}
+				} else if ( notice.length > 0 ) {
+					notice.remove();
+				}
+			});
 		},
 
 		/**

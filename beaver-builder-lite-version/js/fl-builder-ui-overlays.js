@@ -933,12 +933,17 @@
 		_getOverlayPositionData: function( node ) {
 			const nodeId = node.attr( 'data-node' );
 
-			// Get the node's content wrapper.
-			let content = node.find( '> .fl-node-content' );
+			// Get the node's content wrapper. A row's .fl-node-content is a
+			// grandchild, so it has to be matched by its own selector — and the
+			// wrap is where row spacing lands. Measuring the .fl-row itself
+			// instead would pick up the auto margins that center a fixed-width
+			// row and stretch the overlay to the full window width.
+			let content = node.hasClass( 'fl-row' )
+				? node.find( '> .fl-row-content-wrap' )
+				: node.find( '> .fl-node-content' );
+
 			if ( content.length === 0 ) {
 				content = node;
-			} else if ( node.hasClass( 'fl-row' ) ) {
-				content = node.find( '> .fl-row-content-wrap' );
 			}
 
 			// Get the node's bounding rectangle and offset.
@@ -968,7 +973,7 @@
 			// Otherwise, push the overlay up to account for child overlays.
 			// Exclude the pop-up module since it is only a placeholder.
 			const isRow = node.hasClass( 'fl-row' );
-			const isRootModule = node.hasClass( 'fl-module:not(.fl-popup-wrapper)' ) && node.parent().is( FLBuilder._contentClass );
+			const isRootModule = node.is( '.fl-module:not(.fl-popup-wrapper)' ) && node.parent().is( FLBuilder._contentClass );
 			const actions = $( `[data-node=${ nodeId }] .fl-block-overlay-actions` );
 			
 			if ( actions.length && ( isRow || isRootModule ) ) {

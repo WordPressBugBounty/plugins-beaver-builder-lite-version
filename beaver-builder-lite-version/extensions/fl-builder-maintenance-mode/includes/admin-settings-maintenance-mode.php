@@ -1,6 +1,7 @@
 <?php
 $enabled          = get_option( '_fl_builder_maintenance_enabled' );
 $status_503       = get_option( '_fl_builder_maintenance_503_enabled', '1' );
+$hide_chrome      = get_option( '_fl_builder_maintenance_hide_chrome' );
 $layout_id        = (int) get_option( '_fl_builder_maintenance_layout_id', 0 );
 $bypass_roles     = FLBuilderMaintenanceMode::get_bypass_roles();
 $schedule_enabled = get_option( '_fl_builder_maintenance_schedule_enabled' );
@@ -10,6 +11,7 @@ $all_roles        = wp_roles()->get_names();
 $timezone_string  = wp_timezone_string();
 $is_active        = FLBuilderMaintenanceMode::is_enabled();
 $is_scheduled     = FLBuilderMaintenanceMode::is_scheduled();
+$has_bypass_key   = '' !== (string) get_option( FLBuilderMaintenanceBypass::OPTION, '' );
 
 if ( $is_active ) {
 	$badge_class = 'fl-tools-badge-active';
@@ -58,6 +60,13 @@ $layout_groups = array(
 					</label>
 				</div>
 				<p id="fl-maintenance-503-info" class="fl-maintenance-info-text" hidden><?php esc_html_e( 'When switched on, a &ldquo;503 temporarily unavailable&rdquo; signal is sent to Google and other search engines. This tells them the site will be back soon, so they hold onto your existing rankings and don&rsquo;t replace your pages with the maintenance page in search results. Leave it on unless you have a specific reason not to.', 'fl-builder' ); ?></p>
+				<div class="fl-maintenance-item">
+					<label class="fl-toggle-switch">
+						<input type="checkbox" class="fl-maintenance-hide-chrome-toggle" value="1" <?php checked( $hide_chrome, '1' ); ?> />
+						<span><?php esc_html_e( 'Hide theme header &amp; footer', 'fl-builder' ); ?><span class="fl-maintenance-info-btn" role="button" tabindex="0" aria-expanded="false" aria-controls="fl-maintenance-hide-chrome-info"><span class="dashicons dashicons-info-outline"></span></span></span>
+					</label>
+				</div>
+				<p id="fl-maintenance-hide-chrome-info" class="fl-maintenance-info-text" hidden><?php esc_html_e( 'Hides your theme&rsquo;s header and footer on the maintenance page so only your selected layout shows. Works with any theme.', 'fl-builder' ); ?></p>
 				<div class="fl-maintenance-field">
 					<label for="fl-maintenance-layout-id"><?php esc_html_e( 'Maintenance Layout', 'fl-builder' ); ?></label>
 					<p class="description">
@@ -82,6 +91,36 @@ $layout_groups = array(
 						<?php endforeach; ?>
 					</select>
 				</div>
+				<?php
+				// Show the link only when the bypass can actually do something: right now
+				// (is_enabled()) or once a pending window opens (is_scheduled()). Anything
+				// else and handle_bypass() bails, so the link would be inert -- including
+				// the case where the toggle is still on but a scheduled window has already
+				// ended. The raw option is a separate term because is_scheduled() never
+				// reads it. Keeping the field behind the gate also means get_preview_url()
+				// never mints the secret token on sites that never turn maintenance on.
+				// A token that already exists stays revocable in the elseif below, since a
+				// link shared earlier revives when maintenance is switched back on.
+				if ( $enabled && ( $is_active || $is_scheduled ) ) :
+					?>
+				<div class="fl-maintenance-field">
+					<label for="fl-maintenance-preview-url"><?php esc_html_e( 'Preview Link', 'fl-builder' ); ?></label>
+					<p class="description"><?php esc_html_e( 'Share this link so someone without a login can preview the live site during maintenance. Regenerating it disables any link you shared before.', 'fl-builder' ); ?></p>
+					<div class="fl-maintenance-preview-link-row">
+						<input type="text" id="fl-maintenance-preview-url" readonly value="<?php echo esc_url( FLBuilderMaintenanceBypass::get_preview_url() ); ?>" />
+						<button type="button" class="button fl-maintenance-icon-btn fl-maintenance-copy-link" aria-label="<?php esc_attr_e( 'Copy link', 'fl-builder' ); ?>" title="<?php esc_attr_e( 'Copy link', 'fl-builder' ); ?>"><span class="dashicons dashicons-admin-page"></span></button>
+						<button type="button" class="button fl-maintenance-icon-btn fl-maintenance-regenerate-link" aria-label="<?php esc_attr_e( 'Regenerate link', 'fl-builder' ); ?>" title="<?php esc_attr_e( 'Regenerate link', 'fl-builder' ); ?>"><span class="dashicons dashicons-update"></span></button>
+					</div>
+				</div>
+				<?php elseif ( $has_bypass_key ) : ?>
+				<div class="fl-maintenance-field">
+					<label><?php esc_html_e( 'Preview Link', 'fl-builder' ); ?></label>
+					<p class="description"><?php esc_html_e( 'Regenerating the link stops any link you shared earlier from working.', 'fl-builder' ); ?></p>
+					<div class="fl-maintenance-preview-link-row">
+						<button type="button" class="button fl-maintenance-icon-btn fl-maintenance-regenerate-link" aria-label="<?php esc_attr_e( 'Regenerate link', 'fl-builder' ); ?>" title="<?php esc_attr_e( 'Regenerate link', 'fl-builder' ); ?>"><span class="dashicons dashicons-update"></span></button>
+					</div>
+				</div>
+				<?php endif; ?>
 			</div>
 		</div>
 

@@ -649,7 +649,7 @@ for ( $i = 0; $i < count( $settings->items ); $i++ ) :
 
 	// Border Hover
 	FLBuilderCSS::responsive_rule( array(
-		'enabled'      => ! empty( $settings->items[ $i ]->button_item_border_hover_color ),
+		'enabled'      => 'not_empty',
 		'settings'     => $settings->items[ $i ],
 		'setting_name' => 'button_item_border_hover_color', // As in $settings->align.
 		'selector'     => "$button_group_button_id .fl-button:is(a, button):hover",

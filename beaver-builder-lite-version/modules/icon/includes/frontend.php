@@ -32,9 +32,6 @@ $text_link_class = empty( $settings->link ) ? 'fl-icon-text-link' : 'fl-icon-tex
 		<?php if ( isset( $settings->sr_text ) && '' !== $settings->sr_text ) : ?>
 		<span class="sr-only"><?php echo $settings->sr_text; ?></span>
 		<?php endif; ?>
-		<?php if ( empty( $settings->text ) ) : ?>
-			<?php echo FLBuilderModuleUtils::get_link_notice( $settings, 'link' ); ?>
-		<?php endif; ?>
 		<?php if ( ! empty( $settings->link ) ) : ?>
 		</a>
 		<?php endif; ?>
@@ -46,7 +43,6 @@ $text_link_class = empty( $settings->link ) ? 'fl-icon-text-link' : 'fl-icon-tex
 			<?php endif; ?>
 			<?php echo $settings->text; ?>
 			<?php if ( ! empty( $settings->link ) ) : ?>
-				<?php echo FLBuilderModuleUtils::get_link_notice( $settings, 'link' ); ?>
 			</a>
 			<?php endif; ?>
 		</div>

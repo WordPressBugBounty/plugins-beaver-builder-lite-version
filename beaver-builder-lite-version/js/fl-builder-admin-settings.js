@@ -515,12 +515,22 @@
 		 */
 		_moduleAllCheckboxClicked: function()
 		{
-			if($(this).is(':checked')) {
-				$('.fl-module-cb:visible').prop('checked', true);
-			} else {
-				$('.fl-module-cb:visible').prop('checked', false);
-			}
-			FLBuilderAdminSettings._moduleToggleSave($(this), 'all', $(this).is(':checked'));
+			var $cb      = $(this);
+			var enabled  = $cb.is(':checked');
+			var $modules = $('.fl-module-cb:visible');
+			var previous = $modules.map(function() { return $(this).is(':checked'); }).get();
+
+			$modules.prop('checked', enabled);
+
+			FLBuilderAdminSettings._moduleToggleSave($cb, 'all', enabled, false, function() {
+				// The server rejected the change (e.g. "must have at least one
+				// module enabled") — revert the optimistic UI update.
+				$modules.each(function(i) {
+					$(this).prop('checked', previous[i]);
+				});
+				$cb.prop('checked', ! enabled);
+				FLBuilderAdminSettings._updateGroupToggles();
+			});
 			FLBuilderAdminSettings._updateGroupToggles();
 		},
 
@@ -534,6 +544,8 @@
 		 */
 		_moduleCheckboxClicked: function()
 		{
+			var $cb     = $(this);
+			var enabled = $cb.is(':checked');
 			var allChecked = true;
 
 			$('.fl-module-cb:visible').each(function() {
@@ -550,7 +562,11 @@
 				$('.fl-module-all-cb:visible').prop('checked', false);
 			}
 
-			FLBuilderAdminSettings._moduleToggleSave($(this), $(this).val(), $(this).is(':checked'));
+			FLBuilderAdminSettings._moduleToggleSave($cb, $cb.val(), enabled, false, function() {
+				// The server rejected the change — revert the optimistic UI update.
+				$cb.prop('checked', ! enabled);
+				FLBuilderAdminSettings._updateGroupToggles();
+			});
 			FLBuilderAdminSettings._updateGroupToggles();
 		},
 
@@ -561,7 +577,7 @@
 		 * @access private
 		 * @method _moduleToggleSave
 		 */
-		_moduleToggleSave: function(el, module, enabled, silent)
+		_moduleToggleSave: function(el, module, enabled, silent, onError)
 		{
 			var isBlocks    = el.closest('#fl-blocks-form').length > 0;
 			var isPostTypes = el.closest('#fl-post-types-form').length > 0;
@@ -578,12 +594,25 @@
 				nonce  = $('#fl-modules-nonce').val();
 			}
 
-			return $.post(ajaxurl, {
-				action:   action,
-				module:   module,
-				enabled:  enabled,
-				_wpnonce: nonce
-			}, function(response) {
+			var data = {
+				action:           action,
+				module:           module,
+				enabled:          enabled,
+				_wpnonce:         nonce,
+				fl_network_admin: ( window.FLBuilderAdminSettingsConfig && FLBuilderAdminSettingsConfig.isNetworkAdmin ) ? 1 : 0
+			};
+
+			// Only send the override flag when checked — the server treats its
+			// mere presence (isset) as "override," so it must be omitted, not
+			// sent as falsy, when the site is deferring to the network setting.
+			if ( el.closest('.fl-settings-form').find('.fl-override-ms-cb').is(':checked') ) {
+				data['fl-override-ms'] = 1;
+			}
+
+			return $.post(ajaxurl, data, function(response) {
+				if (!response.success && onError) {
+					onError();
+				}
 				if (silent) return;
 				if (response.success) {
 					new Notify({
@@ -904,13 +933,21 @@
 		 */
 		_templateVisibilityChanged: function()
 		{
-			var value = $( this ).val();
+			var $select = $( this );
+			var value   = $select.val();
 
-			$.post( ajaxurl, {
-				action:   'fl_template_visibility_save',
-				value:    value,
-				_wpnonce: $( '#fl-templates-nonce' ).val()
-			}, function( response ) {
+			var data = {
+				action:           'fl_template_visibility_save',
+				value:            value,
+				_wpnonce:         $( '#fl-templates-nonce' ).val(),
+				fl_network_admin: ( window.FLBuilderAdminSettingsConfig && FLBuilderAdminSettingsConfig.isNetworkAdmin ) ? 1 : 0
+			};
+
+			if ( $select.closest( '.fl-settings-form' ).find( '.fl-override-ms-cb' ).is( ':checked' ) ) {
+				data['fl-override-ms'] = 1;
+			}
+
+			$.post( ajaxurl, data, function( response ) {
 				if ( response.success ) {
 					new Notify({
 						status: 'success',
@@ -1174,12 +1211,19 @@
 
 			$label.addClass( 'fl-toggle-switch-saving' );
 
-			$.post( ajaxurl, {
-				action:   'fl_icon_set_toggle',
-				icon_set: iconSet,
-				enabled:  enabled,
-				_wpnonce: nonce
-			}, function( response ) {
+			var data = {
+				action:           'fl_icon_set_toggle',
+				icon_set:         iconSet,
+				enabled:          enabled,
+				_wpnonce:         nonce,
+				fl_network_admin: ( window.FLBuilderAdminSettingsConfig && FLBuilderAdminSettingsConfig.isNetworkAdmin ) ? 1 : 0
+			};
+
+			if ( $cb.closest( '.fl-settings-form' ).find( '.fl-override-ms-cb' ).is( ':checked' ) ) {
+				data['fl-override-ms'] = 1;
+			}
+
+			$.post( ajaxurl, data, function( response ) {
 				$label.removeClass( 'fl-toggle-switch-saving' );
 				if ( response.success ) {
 					$label.addClass( 'fl-toggle-switch-saved' );

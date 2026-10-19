@@ -87,11 +87,15 @@ class FLBuilderBoxModule extends FLBuilderModule {
 		if ( 1 === $this->version ) {
 			return FLBuilderModuleUtils::get_link_attributes( $this->settings, 'link', array(), false );
 		}
-		// Newer versions render a div with link attributes and JS click handlers
+		// Newer versions render a div with link attributes and JS click handlers.
+		// data-link-target lets FLBuilderLayout._initLinkNotices() add the
+		// screen-reader "opens in new tab" notice to this non-anchor element,
+		// the same way it does for a real anchor's target attribute.
 		return array(
-			'tabindex'  => '0',
-			'role'      => 'link',
-			'data-link' => esc_url( do_shortcode( $link ) ),
+			'tabindex'         => '0',
+			'role'             => 'link',
+			'data-link'        => esc_url( do_shortcode( $link ) ),
+			'data-link-target' => esc_attr( $this->settings->link_target ?? '' ),
 		);
 	}
 

@@ -597,6 +597,7 @@ body div.fl-color-picker-toolbar .picker-input-wrap > input {
 .fl-controls-swatch-group.fl-appearance-swatch > button > div {
   color: inherit !important;
   text-align: left;
+  overflow-wrap: anywhere;
 }
 .colorscale {
   background: black;

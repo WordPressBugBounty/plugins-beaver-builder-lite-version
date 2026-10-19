@@ -1073,7 +1073,8 @@ if ( isset( $settings->menu_search ) && 'show' == $settings->menu_search && true
 		'setting_name' => 'search_icon_size',
 		'selector'     => ".fl-node-$id .fl-menu-search-item .fl-button:is(a, button), .fl-node-$id .fl-menu-search-item a.fl-button:visited",
 		'prop'         => 'font-size',
-		'enabled'      => ! empty( $settings->search_icon_size ),
+		// Evaluate per breakpoint so a responsive-only size (e.g. mobile set, desktop blank) still renders.
+		'enabled'      => 'not_empty',
 	) );
 
 	FLBuilderCSS::rule( array(
