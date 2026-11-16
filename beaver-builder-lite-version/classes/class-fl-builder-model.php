@@ -252,10 +252,13 @@ final class FLBuilderModel {
 		preg_match( '/(https?)/', get_bloginfo( 'url' ), $matches );
 
 		$scheme = ( isset( $matches[1] ) ) ? $matches[1] : false;
-		$url    = set_url_scheme( get_permalink( $post->ID ), $scheme );
-		$url    = add_query_arg( 'fl_builder', '', $url );
+		$url    = '';
 
-		if ( FLBuilderUIIFrame::is_enabled() ) {
+		if ( $post instanceof WP_Post ) {
+			$url = add_query_arg( 'fl_builder', '', set_url_scheme( get_permalink( $post->ID ), $scheme ) );
+		}
+
+		if ( $url && FLBuilderUIIFrame::is_enabled() ) {
 			if ( $include_ui ) {
 				$url = add_query_arg( 'fl_builder_ui', '', $url );
 			} else {
@@ -807,13 +810,45 @@ final class FLBuilderModel {
 	}
 
 	/**
-	 * Returns if this is a draft layout preview or not.
+	 * Returns if this is a draft layout preview the current user is allowed to see.
 	 *
 	 * @since 2.1
 	 * @return bool
 	 */
 	static public function is_builder_draft_preview() {
-		return is_user_logged_in() && isset( $_GET['fl_builder_preview'] );
+		$requested = isset( $_GET['fl_builder_preview'] ) && is_user_logged_in();
+
+		if ( ! $requested || ! self::current_user_can_edit_queried_post() ) {
+			return false;
+		}
+
+		// Node status is one value per request, so a layout embedded in the page (shortcode, Themer, global) needs its own check;
+		// with no post ID there is no layout to read.
+		$rendering = self::get_post_id();
+
+		return ! $rendering || current_user_can( 'edit_post', $rendering );
+	}
+
+	/**
+	 * Checks the current user can edit the main query's post, which is false before the query runs.
+	 *
+	 * @since 2.12
+	 * @return bool
+	 */
+	static private function current_user_can_edit_queried_post(): bool {
+		global $wp_the_query;
+
+		if ( ! $wp_the_query instanceof WP_Query ) {
+			return false;
+		}
+
+		$queried = $wp_the_query->get_queried_object();
+
+		if ( ! $queried instanceof WP_Post ) {
+			return false;
+		}
+
+		return current_user_can( 'edit_post', $queried->ID );
 	}
 
 	/**
@@ -1042,9 +1077,23 @@ final class FLBuilderModel {
 
 		if ( $active || $preview ) {
 			return md5( FLBuilderModel::uniqid() );
-		} else {
-			return $path ? md5( file_get_contents( $path ) ) : md5( get_post_modified_time( 'U', false, $post_id ) );
 		}
+
+		// No path: version from the post's modified time.
+		if ( ! $path ) {
+			return md5( get_post_modified_time( 'U', false, $post_id ) );
+		}
+
+		// A cached asset can vanish between the caller's file_exists() check and this
+		// read under concurrent cache purges on a network filesystem. Fall back to the
+		// post modified time for a meaningful version instead of hashing empty content.
+		if ( ! fl_builder_filesystem()->file_exists( $path ) ) {
+			return md5( get_post_modified_time( 'U', false, $post_id ) );
+		}
+
+		// Read via the wrapper (silenced file_get_contents) so a mid-request removal
+		// cannot emit a PHP warning even if the check above races.
+		return md5( fl_builder_filesystem()->file_get_contents( $path ) );
 	}
 
 
@@ -5482,28 +5531,6 @@ final class FLBuilderModel {
 				}
 			} elseif ( 'link' === $fields[ $name ]['type'] ) {
 				$settings->$name = FLBuilderUtils::esc_attr( $value );
-			} elseif ( 'container_element' === $name ) {
-				$clean = false;
-				/**
-				 * Allowed HTML element options for the node container element setting.
-				 */
-				$allowed = apply_filters( 'fl_builder_node_container_element_options', array(
-					'div'     => '&lt;div&gt;',
-					'section' => '&lt;section&gt;',
-					'article' => '&lt;article&gt;',
-					'aside'   => '&lt;aside&gt;',
-					'main'    => '&lt;main&gt;',
-					'header'  => '&lt;header&gt;',
-					'footer'  => '&lt;footer&gt;',
-				) );
-				foreach ( $allowed as $el => $txt ) {
-					if ( $value === $el ) {
-						$clean = true;
-					}
-				}
-				if ( ! $clean ) {
-					$settings->$name = 'div';
-				}
 			}
 		}
 
@@ -6854,7 +6881,7 @@ final class FLBuilderModel {
 				$cats = array();
 			}
 
-			if ( 0 === count( $cats ) || is_wp_error( $cats ) ) {
+			if ( is_wp_error( $cats ) || 0 === count( $cats ) ) {
 				$template['category']                        = array(
 					'uncategorized' => __( 'Uncategorized', 'fl-builder' ),
 				);
@@ -6949,6 +6976,12 @@ final class FLBuilderModel {
 	 * @return array
 	 */
 	static public function apply_user_template( $template = null, $append = false ) {
+		$is_template_id = $template && 'blank' !== $template && ! is_object( $template );
+
+		// Refuse before the draft is cleared below; the selector only offers published user templates.
+		if ( $is_template_id && ! self::is_published_user_template( absint( $template ) ) ) {
+			return self::refused_user_template();
+		}
 
 		$data = array();
 		if ( $template ) {
@@ -7019,6 +7052,32 @@ final class FLBuilderModel {
 			'layout'     => FLBuilderAJAXLayout::render(),
 			'config'     => FLBuilderUISettingsForms::get_node_js_config(),
 			'newNodes'   => $data,
+		);
+	}
+
+	/**
+	 * Checks that a post ID is a published user template, the same set
+	 * get_user_templates() offers in the template selector.
+	 *
+	 * @since 2.11.2.1
+	 * @param int $post_id
+	 * @return bool
+	 */
+	static public function is_published_user_template( int $post_id ): bool {
+		$post = $post_id ? get_post( $post_id ) : null;
+
+		return $post && 'fl-builder-template' === $post->post_type && 'publish' === $post->post_status;
+	}
+
+	/**
+	 * Builds the response for a user template request that was refused.
+	 *
+	 * @since 2.11.2.1
+	 * @return array
+	 */
+	static public function refused_user_template(): array {
+		return array(
+			'error' => __( 'That template could not be loaded.', 'fl-builder' ),
 		);
 	}
 

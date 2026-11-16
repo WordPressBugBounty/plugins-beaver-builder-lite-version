@@ -71,6 +71,21 @@ final class FLBuilderCustomAttributes {
 	private static $matched = array();
 
 	/**
+	 * List of carousel based modules.
+	 *
+	 * @since 2.11
+	 * @access private
+	 * @var array $CAROUSELS
+	 */
+	private const CAROUSELS = array(
+		'content-slider',
+		'post-carousel',
+		'testimonials',
+		'post-slider',
+		'slideshow',
+	);
+
+	/**
 	 * List of void self-closing elements.
 	 *
 	 * @since 2.11
@@ -94,6 +109,30 @@ final class FLBuilderCustomAttributes {
 	);
 
 	/**
+	 * Handles carousel based modules accessibility attributes for the wrapper element.
+	 *
+	 * @since 2.11
+	 * @access private
+	 * @method handle_carousel_attributes
+	 * @param object $node
+	 * @param array $attributes
+	 * @return array
+	 */
+	private static function handle_carousel_attributes( object $node, array $attributes ): array {
+		$labeled = isset( $attributes['aria-label'] ) || isset( $attributes['aria-labelledby'] );
+		if ( 'module' !== $node->type || ! in_array( $node->slug, self::CAROUSELS ) || ! $labeled ) {
+			return $attributes;
+		}
+		if ( ! isset( $attributes['role'] ) && 'section' !== $node->settings->container_element ) {
+			$attributes['role'] = 'region';
+		}
+		if ( isset( $attributes['role'] ) && in_array( $attributes['role'], array( 'region', 'group' ) ) ) {
+			$attributes['aria-roledescription'] = $attributes['aria-roledescription'] ?? __( 'carousel', 'fl-builder' );
+		}
+		return $attributes;
+	}
+
+	/**
 	 * Adds accessibility attributes if not set & applicable to the node wrapper.
 	 *
 	 * @since 2.11
@@ -103,28 +142,12 @@ final class FLBuilderCustomAttributes {
 	 * @param array $defaults
 	 * @return array
 	 */
-	public static function wrapper_custom_attributes( $node, $defaults ) {
+	public static function wrapper_custom_attributes( object $node, array $defaults ): array {
 		$attributes = array_merge( $defaults, self::extract_custom_attributes( $node->settings->custom_attributes ) );
 		if ( isset( $attributes['role'] ) ) {
 			$attributes['role'] = strtolower( $attributes['role'] );
 		}
-		if ( 'module' === $node->type ) {
-			$applicable = array(
-				'content-slider',
-				'post-carousel',
-				'testimonials',
-				'post-slider',
-				'slideshow',
-			);
-			if ( ! isset( $attributes['role'] ) && in_array( $node->slug, $applicable ) && 'section' !== $node->settings->container_element ) {
-				$attributes['role'] = 'region';
-			}
-			if ( isset( $attributes['aria-label'] ) ) {
-				$attributes['aria-roledescription'] = $attributes['aria-roledescription'] ?? $node->name;
-			} else {
-				$attributes['aria-label'] = $node->name;
-			}
-		}
+		$attributes = self::handle_carousel_attributes( $node, $attributes );
 		return $attributes;
 	}
 
@@ -138,7 +161,7 @@ final class FLBuilderCustomAttributes {
 	 * @param string $target
 	 * @return array
 	 */
-	private static function extract_custom_attributes( $attributes, $target = 'wrapper' ) {
+	private static function extract_custom_attributes( array $attributes, string $target = 'wrapper' ): array {
 		$extracts = array();
 		foreach ( $attributes as $attribute ) {
 			// Skip invalid attribute keys for HTML attribute naming conventions
@@ -165,11 +188,11 @@ final class FLBuilderCustomAttributes {
 	 * @since 2.11
 	 * @access public
 	 * @method inject_custom_attributes
-	 * @param object $attributes
+	 * @param array $attributes
 	 * @param string $html
 	 * @return string
 	 */
-	public static function inject_custom_attributes( $attributes, $html ) {
+	public static function inject_custom_attributes( array $attributes, string $html ): string {
 		$attributes = self::extract_custom_attributes( $attributes, 'custom' );
 		self::$html = $html;
 		if ( ! empty( $attributes ) ) {
@@ -191,7 +214,7 @@ final class FLBuilderCustomAttributes {
 	 * @param object $attribute
 	 * @return void
 	 */
-	private static function iterate_html_tags( $attribute ) {
+	private static function iterate_html_tags( object $attribute ): void {
 		while ( self::$processor->next_token() ) {
 			// Only process HTML tags
 			if ( '#tag' !== self::$processor->get_token_type() ) {
@@ -211,7 +234,7 @@ final class FLBuilderCustomAttributes {
 	 * @method process_closing_tags
 	 * @return void
 	 */
-	private static function process_closing_tags() {
+	private static function process_closing_tags(): void {
 		// Check if the current cleared tag was a matching tag
 		if ( ! empty( self::$matched ) && count( self::$nested ) === self::$matched[ count( self::$matched ) - 1 ] ) {
 			array_pop( self::$matched );
@@ -236,7 +259,7 @@ final class FLBuilderCustomAttributes {
 	 * @method child_combinator_offset
 	 * @return integer
 	 */
-	private static function child_combinator_offset() {
+	private static function child_combinator_offset(): int {
 		// No offset if the current position is a child combinator
 		if ( '>' === self::$selector[ self::$position ] ) {
 			return 0;
@@ -258,7 +281,7 @@ final class FLBuilderCustomAttributes {
 	 * @param object $attribute
 	 * @return void
 	 */
-	private static function process_opening_tags( $attribute ) {
+	private static function process_opening_tags( object $attribute ): void {
 		// Only keep track of non-void tags
 		if ( ! in_array( self::$tag, self::VOID ) ) {
 			self::$nested[] = self::$tag;
@@ -279,7 +302,7 @@ final class FLBuilderCustomAttributes {
 	 * @method match_selector_position
 	 * @return bool
 	 */
-	private static function match_selector_position() {
+	private static function match_selector_position(): bool {
 		$selector = self::$selector[ self::$position ];
 		// In case of special symbols
 		if ( in_array( $selector, [ '*', '>' ] ) ) {
@@ -289,7 +312,7 @@ final class FLBuilderCustomAttributes {
 			return strtolower( $selector ) === self::$tag;
 		} else {
 			// Match TAG if present
-			preg_match( '/^([a-zA-Z]*)?/', $selector, $match );
+			preg_match( '/^([a-zA-Z][a-zA-Z0-9-]*)?/', $selector, $match );
 			if ( ! empty( $match[1] ) && strtolower( $match[1] ) !== self::$tag ) {
 				return false;
 			}
@@ -317,7 +340,7 @@ final class FLBuilderCustomAttributes {
 	 * @method match_child_combinator
 	 * @return bool
 	 */
-	private static function match_child_combinator() {
+	private static function match_child_combinator(): bool {
 		// Check if the previous matched selector is a child combinator
 		if ( 1 < self::$position && '>' === self::$selector[ self::$position - 1 ] ) {
 			// Ensure the current tag is a direct child of the last matched tag
@@ -340,7 +363,7 @@ final class FLBuilderCustomAttributes {
 	 * @param string $symbol
 	 * @return bool
 	 */
-	private static function handle_special_symbols( $symbol ) {
+	private static function handle_special_symbols( string $symbol ): bool {
 		if ( '*' === $symbol ) {
 			// Always match if the selector is a wildcard
 			return true;
@@ -361,7 +384,7 @@ final class FLBuilderCustomAttributes {
 	 * @param object $attribute
 	 * @return void
 	 */
-	private static function apply_tag_attribute( $attribute ) {
+	private static function apply_tag_attribute( object $attribute ): void {
 		// The target tag is found when the last position of the selector is reached or matched in a nested level
 		if ( count( self::$selector ) - 1 === self::$position && count( self::$nested ) === self::$matched[ count( self::$matched ) - 1 ] ) {
 			self::$processor->set_attribute( $attribute->key, $attribute->value );

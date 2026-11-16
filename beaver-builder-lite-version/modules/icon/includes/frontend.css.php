@@ -6,6 +6,34 @@ $size_value['large']      = empty( $settings->size_large ) ? $size_value[''] : $
 $size_value['medium']     = empty( $settings->size_medium ) ? $size_value['large'] : $settings->size_medium;
 $size_value['responsive'] = empty( $settings->size_responsive ) ? $size_value['medium'] : $settings->size_responsive;
 
+// The line-height/width rules below size the background box that renders around
+// the icon (via border-radius: 100% on .fl-icon i) whenever a bg color is set.
+// The old per-breakpoint gate fired only when a bg color was set explicitly at
+// that breakpoint, so a bg color set once at desktop left tablet/mobile with
+// the desktop line-height/width around a smaller icon.
+//
+// Track two things across breakpoints:
+//   - $bg_at_breakpoint[$device]: bg or bg-hover color explicitly set here.
+//   - $has_bg_at_or_before[$device]: any bg/bg-hover set at or before this
+//     breakpoint in the responsive cascade order '' → large → medium → responsive.
+//
+// Emit the size rules when the bg is explicit at this breakpoint (matches old
+// behavior) OR when it cascades in from above AND this breakpoint has its own
+// size setting (mirrors the font-size gate below). The combined form fixes the
+// reported bug (bg at desktop, sizes cascading) without emitting invisible-box
+// sizing at breakpoints where the bg isn't visible.
+$bg_at_breakpoint    = array();
+$has_bg_at_or_before = array();
+$cumulative_has_bg   = false;
+foreach ( array( '', 'large', 'medium', 'responsive' ) as $bg_device ) {
+	$bg_k  = empty( $bg_device ) ? 'bg_color' : "bg_color_{$bg_device}";
+	$bgh_k = empty( $bg_device ) ? 'bg_hover_color' : "bg_hover_color_{$bg_device}";
+
+	$bg_at_breakpoint[ $bg_device ] = ! empty( $settings->{$bg_k} ) || ! empty( $settings->{$bgh_k} );
+	$cumulative_has_bg              = $cumulative_has_bg || $bg_at_breakpoint[ $bg_device ];
+	$has_bg_at_or_before[ $bg_device ] = $cumulative_has_bg;
+}
+
 // Responsive rules.
 foreach ( array( '', 'large', 'medium', 'responsive' ) as $device ) {
 
@@ -35,10 +63,15 @@ foreach ( array( '', 'large', 'medium', 'responsive' ) as $device ) {
 		),
 	) );
 
-	$bg_key       = empty( $device ) ? 'bg_color' : "bg_color_{$device}";
-	$bg_hover_key = empty( $device ) ? 'bg_hover_color' : "bg_hover_color_{$device}";
+	// Emit when this breakpoint has its own bg color (matches the old gate,
+	// so tablet/mobile-only bg configs still emit a sized circle at their own
+	// breakpoint), or when a bg cascades in from a higher-precedence breakpoint
+	// AND this breakpoint sets its own size (which is what the bug case needs —
+	// bg at desktop with a smaller tablet size gets a tablet-scoped rule).
+	$emit_bg_size = $bg_at_breakpoint[ $device ]
+		|| ( $has_bg_at_or_before[ $device ] && ! empty( $settings->{ $key } ) );
 
-	if ( $settings->{$bg_key} || $settings->{$bg_hover_key} ) {
+	if ( $emit_bg_size ) {
 		FLBuilderCSS::rule( array(
 			'media'    => $device,
 			'selector' => ".fl-node-$id .fl-icon i",

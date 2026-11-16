@@ -105,7 +105,7 @@ FLBuilder::register_settings_form('module_advanced', array(
 					'type'     => 'select',
 					'label'    => __( 'Container Element', 'fl-builder' ),
 					'default'  => 'div',
-					'sanitize' => array( 'FLBuilderUtils::esc_tags', 'div' ),
+					'sanitize' => array( 'FLBuilderUtils::esc_container_element', 'div' ),
 					/**
 					 * Filter to add/remove container types.
 					 * @see fl_builder_node_container_element_options
@@ -172,13 +172,13 @@ FLBuilder::register_settings_form('module_advanced', array(
 					'type'    => 'raw',
 					'label'   => __( 'Export', 'fl-builder' ),
 					'preview' => 'none',
-					'content' => '<button style="margin-right:10px" class="fl-builder-button fl-builder-button-small module-export-all" title="Copy Settings">Copy Settings</button><button class="fl-builder-button fl-builder-button-small module-export-style" title="Copy Styles">Copy Styles</button>',
+					'content' => '<button style="margin-right:10px" class="fl-builder-button fl-builder-button-small module-export-all" title="' . esc_attr__( 'Copy Settings', 'fl-builder' ) . '">' . esc_html__( 'Copy Settings', 'fl-builder' ) . '</button><button class="fl-builder-button fl-builder-button-small module-export-style" title="' . esc_attr__( 'Copy Styles', 'fl-builder' ) . '">' . esc_html__( 'Copy Styles', 'fl-builder' ) . '</button>',
 				),
 				'import' => array(
 					'type'    => 'raw',
 					'label'   => __( 'Import', 'fl-builder' ),
 					'preview' => 'none',
-					'content' => '<div class="module-import-wrap"><input type="text" class="module-import-input" placeholder="Paste settings or styles here..." /><button class="fl-builder-button fl-builder-button-small module-import-apply">Import</button></div><div class="module-import-error"></div>',
+					'content' => '<div class="module-import-wrap"><input type="text" class="module-import-input" placeholder="' . esc_attr__( 'Paste settings or styles here...', 'fl-builder' ) . '" /><button class="fl-builder-button fl-builder-button-small module-import-apply">' . esc_html__( 'Import', 'fl-builder' ) . '</button></div><div class="module-import-error"></div>',
 				),
 			),
 		),

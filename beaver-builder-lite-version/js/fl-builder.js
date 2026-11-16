@@ -11002,7 +11002,7 @@
 			var field = $( this ),
 				label = field.find( '.fl-field-label label' ),
 				wrap = field.find( '.fl-field-control-wrapper' ),
-				icon = '<i class="fl-dimension-field-link fl-tip dashicons dashicons-admin-links" title="Link Values"></i>';
+				icon = '<i class="fl-dimension-field-link fl-tip dashicons dashicons-admin-links" title="' + FLBuilderStrings.linkValues + '"></i>';
 
 			label.append( icon );
 			wrap.prepend( icon );

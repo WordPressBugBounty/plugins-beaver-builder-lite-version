@@ -161,8 +161,15 @@ class FLPhotoModule extends FLBuilderModule {
 			// Crop the photo.
 			$editor->resize( $new_width, $new_height, true );
 
-			// Save the photo.
-			$editor->save( $cropped_path['path'] );
+			// Save the photo. FLBuilderPhotoCrop writes to a temp file then moves it into
+			// place so a concurrent reader of the cache directory never sees a partially
+			// written file. Returning false on failure makes get_src() fall back to the
+			// uncropped URL rather than handing out a URL to a file that was never written.
+			$saved = FLBuilderPhotoCrop::save( $editor, $cropped_path['path'] );
+
+			if ( is_wp_error( $saved ) ) {
+				return false;
+			}
 
 			/**
 			 * Let third party media plugins hook in.

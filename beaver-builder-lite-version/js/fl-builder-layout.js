@@ -1484,6 +1484,16 @@
 			}
 
 			$( nestedCols ).each( function(index, col ){
+				// A column whose ancestor is hidden at the current breakpoint
+				// (row/column visibility settings) measures 0 even though its
+				// width is fine — jQuery only unhides the element itself when
+				// measuring, not its ancestors. Writing emptyColWidth there
+				// collapses a column that was never empty, and the inline style
+				// outlives the responsive preview. Only measure what's rendered.
+				if ( ! col.getClientRects().length ) {
+					return;
+				}
+
 				if ( $( col ).width() <= 0 ) {
 					$( col ).css( 'width', FLBuilderLayoutConfig.emptyColWidth );
 				}

@@ -7,7 +7,7 @@ $(() => {
 	event.stopPropagation();
 	const link = event.currentTarget.dataset.link;
 	const target = '<?php echo $settings->link_target; ?>';
-	const download = <?php echo ( 'yes' === $settings->link_download ) ? 'true' : 'false'; ?>;
+	const download = <?php echo ( 'yes' === ( $settings->link_download ?? '' ) ) ? 'true' : 'false'; ?>;
 	const attributes = '<?php echo FLBuilderModuleUtils::get_link_relationship( $settings, 'link' ); ?>';
 	if ( download ) {
 		const anchor = document.createElement('a');

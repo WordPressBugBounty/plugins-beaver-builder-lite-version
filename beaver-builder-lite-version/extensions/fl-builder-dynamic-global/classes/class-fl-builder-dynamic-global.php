@@ -1261,7 +1261,27 @@ final class FLBuilderDynamicGlobal {
 			return $node->settings;
 		}
 
-		// Handle merging settings to save.
+		self::merge_field_settings_for_save( $node, $save, $settings );
+
+		if ( isset( $settings->connections ) ) {
+			self::merge_connections_for_save( $node, $save, $settings->connections );
+		}
+
+		$node->settings->dynamic_node_settings = $save;
+
+		return $node->settings;
+	}
+
+	/**
+	 * Merge incoming field settings onto the root node and into the override blob.
+	 *
+	 * @since 2.12
+	 * @param object $node
+	 * @param object $save
+	 * @param object $settings
+	 * @return void
+	 */
+	static private function merge_field_settings_for_save( $node, $save, $settings ): void {
 		foreach ( $settings as $key => $value ) {
 			if ( 'dynamic_node_settings' === $key || 'connections' === $key ) {
 				continue;
@@ -1291,39 +1311,56 @@ final class FLBuilderDynamicGlobal {
 				$save->child->{ $node_id }->{ $field_name } = $value;
 			}
 		}
+	}
 
-		// Handle merging field connections.
-		if ( isset( $settings->connections ) ) {
-			foreach ( $settings->connections as $key => $value ) {
-				if ( '__' !== substr( $key, 0, 2 ) ) {
-					// Merge connections for the root node.
-					if ( ! isset( $node->settings->connections ) ) {
-						$node->settings->connections = [];
-					}
-					if ( ! isset( $save->root->{ $node->node }->connections ) ) {
-						$save->root->{ $node->node }->connections = [];
-					}
-
-					$node->settings->connections[ $key ]              = $value;
-					$save->root->{ $node->node }->connections[ $key ] = $value;
-				} else {
-					// Merge connections for a child node.
-					$parsed_key = self::parse_dynamic_child_key( $key );
-					$node_id    = $parsed_key['node_id'];
-					$field_name = $parsed_key['field_name'];
-
-					if ( ! isset( $save->child->{ $node_id }->connections ) ) {
-						$save->child->{ $node_id }->connections = [];
-					}
-
-					$save->child->{ $node_id }->connections[ $field_name ] = $value;
+	/**
+	 * Merge incoming field connections onto the root node and into the override blob.
+	 *
+	 * @since 2.12
+	 * @param object       $node
+	 * @param object       $save
+	 * @param array|object $connections
+	 * @return void
+	 */
+	static private function merge_connections_for_save( $node, $save, $connections ): void {
+		foreach ( $connections as $key => $value ) {
+			if ( '__' !== substr( $key, 0, 2 ) ) {
+				if ( ! isset( $save->root->{ $node->node } ) ) {
+					$save->root->{ $node->node } = new StdClass();
 				}
+
+				$root_slot                   = $save->root->{ $node->node };
+				$node->settings->connections = self::set_connection( $node->settings->connections ?? null, $key, $value );
+				$root_slot->connections      = self::set_connection( $root_slot->connections ?? null, $key, $value );
+				continue;
 			}
+
+			$parsed_key = self::parse_dynamic_child_key( $key );
+			$node_id    = $parsed_key['node_id'];
+
+			if ( ! isset( $save->child->{ $node_id } ) ) {
+				$save->child->{ $node_id } = new StdClass();
+			}
+
+			$child_slot              = $save->child->{ $node_id };
+			$child_slot->connections = self::set_connection( $child_slot->connections ?? null, $parsed_key['field_name'], $value );
 		}
+	}
 
-		$node->settings->dynamic_node_settings = $save;
+	/**
+	 * Set a field connection, normalizing an object-shaped container to an array.
+	 *
+	 * @since 2.12
+	 * @param array|object|null $connections The existing connections, in whatever shape they were stored.
+	 * @param string            $key         The connection key.
+	 * @param mixed             $value       The connection value.
+	 * @return array
+	 */
+	static private function set_connection( $connections, string $key, $value ): array {
+		$connections         = (array) $connections;
+		$connections[ $key ] = $value;
 
-		return $node->settings;
+		return $connections;
 	}
 
 	/**
@@ -1386,11 +1423,10 @@ final class FLBuilderDynamicGlobal {
 			return null;
 		}
 
-		if ( ! isset( $settings->dynamic_node_settings->child->{ $node_id }->connections[ $field_name ] ) ) {
-			return null;
-		}
+		// Stored connections may be object-shaped; cast locally since this runs at render.
+		$connections = (array) $settings->dynamic_node_settings->child->{ $node_id }->connections;
 
-		return $settings->dynamic_node_settings->child->{ $node_id }->connections[ $field_name ];
+		return $connections[ $field_name ] ?? null;
 	}
 
 	/**

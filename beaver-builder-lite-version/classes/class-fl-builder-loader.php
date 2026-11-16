@@ -48,7 +48,7 @@ if ( ! class_exists( 'FLBuilderLoader' ) ) {
 		 * @return void
 		 */
 		static private function define_constants() {
-			define( 'FL_BUILDER_VERSION', '2.11.1.2' );
+			define( 'FL_BUILDER_VERSION', '2.11.2.2' );
 			define( 'FL_BUILDER_FILE', trailingslashit( dirname( __DIR__, 1 ) ) . 'fl-builder.php' );
 			define( 'FL_BUILDER_DIR', plugin_dir_path( FL_BUILDER_FILE ) );
 			define( 'FL_BUILDER_URL', esc_url( plugins_url( '/', FL_BUILDER_FILE ) ) );
@@ -104,6 +104,7 @@ if ( ! class_exists( 'FLBuilderLoader' ) ) {
 			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-custom-attributes.php';
 			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-module-utils.php';
 			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-photo.php';
+			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-photo-crop.php';
 			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-revisions.php';
 			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-services.php';
 			require_once FL_BUILDER_DIR . 'classes/class-fl-builder-settings-compat.php';

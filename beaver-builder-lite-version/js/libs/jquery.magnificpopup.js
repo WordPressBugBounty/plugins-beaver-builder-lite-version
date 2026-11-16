@@ -870,7 +870,11 @@ $.magnificPopup = {
 		// Info about options is in docs:
 		// http://dimsemenov.com/plugins/magnific-popup/documentation.html#options
 
-		disableOn: 0,
+		// Suppress every lightbox while the builder is active.
+		// It is deliberately a function for rerunning inside _openClick on every click.
+		disableOn: function() {
+			return 0 === $('.fl-builder-edit').length;
+		},
 
 		key: null,
 

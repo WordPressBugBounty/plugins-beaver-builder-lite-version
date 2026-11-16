@@ -92,7 +92,16 @@ class FLBuilderUISettingsForms {
 		global $wp_the_query;
 		global $post;
 
-		$post_id      = $wp_the_query->post ? $wp_the_query->post->ID : $post->ID;
+		if ( ! FLBuilderModel::is_builder_active() && ! FLBuilderModuleBlocks::is_block_editor() ) {
+			return;
+		}
+
+		$post_id = $wp_the_query->post ? $wp_the_query->post->ID : ( $post ? $post->ID : 0 );
+
+		if ( ! $post_id ) {
+			return;
+		}
+
 		$block_editor = FLBuilderModuleBlocks::is_block_editor();
 
 		$script_url = add_query_arg( array(

@@ -64,16 +64,43 @@ class FL_Filesystem {
 		$result = $wp_filesystem->put_contents( $temp_path, $contents, FS_CHMOD_FILE );
 
 		if ( ! $result ) {
-			return false;
+			// Could not stage a temp file; try writing the final path directly.
+			return $this->write_direct( $wp_filesystem, $path, $contents );
 		}
 
-		// Atomic rename (overwrites existing).
-		// Note: If rename fails, WP_Filesystem falls back to copy+delete (still safe, just slower).
+		// Atomic rename (overwrites existing). rename() can fail on network
+		// filesystems (e.g. Pantheon) under concurrency; fall back to a direct
+		// write so the cache still persists instead of never converging.
 		$moved = $wp_filesystem->move( $temp_path, $path, true );
 
 		if ( ! $moved ) {
-			// Clean up temp file if move failed entirely.
 			$wp_filesystem->delete( $temp_path );
+			return $this->write_direct( $wp_filesystem, $path, $contents );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Write directly to the final path as a fallback for file_put_contents_atomic()
+	 * when the atomic temp+rename cannot complete (e.g. rename() fails on a network
+	 * filesystem). Removes any truncated remnant on failure so callers re-render
+	 * cleanly instead of serving a partial file.
+	 *
+	 * @since 2.11
+	 * @param object $wp_filesystem The WP_Filesystem instance.
+	 * @param string $path          Destination path.
+	 * @param string $contents      File contents.
+	 * @return bool True on success, false if the direct write also failed.
+	 */
+	private function write_direct( $wp_filesystem, $path, $contents ) {
+
+		$written = $wp_filesystem->put_contents( $path, $contents, FS_CHMOD_FILE );
+
+		if ( ! $written ) {
+			// put_contents opens with 'wb' (truncates on open); a partial write can
+			// leave a truncated file. Delete it so the enqueue guard re-renders.
+			$wp_filesystem->delete( $path );
 			return false;
 		}
 
@@ -118,6 +145,16 @@ class FL_Filesystem {
 
 		$wp_filesystem = $this->get_filesystem();
 		return $wp_filesystem->move( $old_path, $new_path );
+	}
+
+	/**
+	 * copy using wp_filesystem.
+	 * @since 2.11
+	 */
+	public function copy( $old_path, $new_path ) {
+
+		$wp_filesystem = $this->get_filesystem();
+		return $wp_filesystem->copy( $old_path, $new_path, true );
 	}
 
 	/**

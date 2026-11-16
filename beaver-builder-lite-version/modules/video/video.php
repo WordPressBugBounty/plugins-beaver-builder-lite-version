@@ -135,7 +135,15 @@ class FLVideoModule extends FLBuilderModule {
 
 			$video_embed = '';
 			if ( ! empty( $this->settings->embed_code ) ) {
-				$video_embed = $wp_embed->autoembed( do_shortcode( $this->settings->embed_code ) );
+				$embed_code = do_shortcode( $this->settings->embed_code );
+				// Check if there are one or more iframes in the embed code and use them as the final code to embed.
+				if ( preg_match_all( '/<iframe\b[^>]*>(.*?)<\/iframe>/is', $embed_code, $matches ) ) {
+					// Drop inline styles some providers add for their own wrapper markup (e.g. position:absolute),
+					// which break fitVids' size detection once that wrapper is discarded.
+					$video_embed = preg_replace( '/\sstyle="[^"]*"/i', '', implode( '', $matches[0] ) );
+				} else {
+					$video_embed = $wp_embed->autoembed( $embed_code );
+				}
 			} elseif ( ! isset( $this->settings->connections ) ) {
 				$video_embed = sprintf( '%s', __( 'Video embed code not specified.', 'fl-builder' ) );
 			}

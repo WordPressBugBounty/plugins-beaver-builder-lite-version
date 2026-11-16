@@ -684,8 +684,11 @@ FLBuilder::register_module('FLButtonModule', array(
 						'label'      => __( 'Typography', 'fl-builder' ),
 						'responsive' => true,
 						'preview'    => array(
-							'type'     => 'css',
-							'selector' => '.fl-button:is(a, button)',
+							'type'      => 'css',
+							'selector'  => '.fl-button:is(a, button)',
+							// Saved typography CSS is qualified with `.fl-page .fl-builder-content`,
+							// out-specifying the preview rule; force important so live preview wins.
+							'important' => true,
 						),
 					),
 				),

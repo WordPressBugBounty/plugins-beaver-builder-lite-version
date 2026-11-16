@@ -993,7 +993,7 @@ $row_settings = array(
 							 * Default HTML element used as the row container when none is explicitly set.
 							 */
 							'default'  => apply_filters( 'fl_builder_row_container_element_default', 'div' ),
-							'sanitize' => array( 'FLBuilderUtils::esc_tags', apply_filters( 'fl_builder_row_container_element_default', 'div' ) ),
+							'sanitize' => array( 'FLBuilderUtils::esc_container_element', apply_filters( 'fl_builder_row_container_element_default', 'div' ) ),
 							/**
 							 * Filter to add/remove container types.
 							 * @see fl_builder_node_container_element_options
@@ -1060,13 +1060,13 @@ $row_settings = array(
 							'type'    => 'raw',
 							'label'   => __( 'Export', 'fl-builder' ),
 							'preview' => 'none',
-							'content' => '<button style="margin-right:10px" class="fl-builder-button fl-builder-button-small row-export-all" title="Copy Settings">Copy Settings</button><button class="fl-builder-button fl-builder-button-small row-export-style" title="Copy Styles">Copy Styles</button>',
+							'content' => '<button style="margin-right:10px" class="fl-builder-button fl-builder-button-small row-export-all" title="' . esc_attr__( 'Copy Settings', 'fl-builder' ) . '">' . esc_html__( 'Copy Settings', 'fl-builder' ) . '</button><button class="fl-builder-button fl-builder-button-small row-export-style" title="' . esc_attr__( 'Copy Styles', 'fl-builder' ) . '">' . esc_html__( 'Copy Styles', 'fl-builder' ) . '</button>',
 						),
 						'import' => array(
 							'type'    => 'raw',
 							'label'   => __( 'Import', 'fl-builder' ),
 							'preview' => 'none',
-							'content' => '<div class="row-import-wrap"><input type="text" class="row-import-input" placeholder="Paste settings or styles here..." /><button class="fl-builder-button fl-builder-button-small row-import-apply">Import</button></div><div class="row-import-error"></div>',
+							'content' => '<div class="row-import-wrap"><input type="text" class="row-import-input" placeholder="' . esc_attr__( 'Paste settings or styles here...', 'fl-builder' ) . '" /><button class="fl-builder-button fl-builder-button-small row-import-apply">' . esc_html__( 'Import', 'fl-builder' ) . '</button></div><div class="row-import-error"></div>',
 						),
 					),
 				),

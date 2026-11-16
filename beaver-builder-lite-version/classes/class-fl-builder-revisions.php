@@ -139,6 +139,12 @@ final class FLBuilderRevisions {
 	 * @return array
 	 */
 	static public function render_preview( $revision_id ) {
+		$revision_id = absint( $revision_id );
+
+		if ( ! self::is_revision_of_current_post( $revision_id ) ) {
+			return self::refused();
+		}
+
 		FLBuilderModel::set_post_id( $revision_id );
 
 		return FLBuilderAJAXLayout::render();
@@ -152,6 +158,12 @@ final class FLBuilderRevisions {
 	 * @return array
 	 */
 	static public function restore( $revision_id ) {
+		$revision_id = absint( $revision_id );
+
+		if ( ! self::is_revision_of_current_post( $revision_id ) ) {
+			return self::refused();
+		}
+
 		$data = FLBuilderModel::get_layout_data( 'published', $revision_id );
 
 		FLBuilderModel::update_layout_data( $data );
@@ -161,6 +173,39 @@ final class FLBuilderRevisions {
 			'layout'   => FLBuilderAJAXLayout::render(),
 			'config'   => FLBuilderUISettingsForms::get_node_js_config(),
 			'settings' => $settings,
+		);
+	}
+
+	/**
+	 * Checks that an ID is a non-autosave revision of the post being edited
+	 * that the current user can read, the same set get_config() lists.
+	 *
+	 * @since 2.11.2.1
+	 * @param int $revision_id
+	 * @return bool
+	 */
+	static private function is_revision_of_current_post( int $revision_id ): bool {
+		$post_id = (int) FLBuilderModel::get_post_id();
+
+		if ( ! $revision_id || ! $post_id ) {
+			return false;
+		}
+
+		$parent_id   = (int) wp_is_post_revision( $revision_id );
+		$is_autosave = (bool) wp_is_post_autosave( $revision_id );
+
+		return $parent_id === $post_id && ! $is_autosave && current_user_can( 'read_post', $revision_id );
+	}
+
+	/**
+	 * Builds the response for a revision request that was refused.
+	 *
+	 * @since 2.11.2.1
+	 * @return array
+	 */
+	static private function refused(): array {
+		return array(
+			'error' => __( 'That revision could not be loaded.', 'fl-builder' ),
 		);
 	}
 

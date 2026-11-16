@@ -1,3 +1,52 @@
+<h4>2.11.2.2 (Lite Only) - 11/16/2026</h4>
+<p><strong>Hotfix</strong></p>
+<ul>
+	<li>Security: Fixed unpublished layout drafts being visible to any logged-in user through ?fl_builder_preview. Draft previews now require permission to edit the page (#5888)</li>
+</ul>
+
+<h4>2.11.2.1 - 11/05/2026</h4>
+<p><strong>Hotfix</strong></p>
+<ul>
+	<li>Security: Fixed revision preview and restore accepting any post ID, which could expose another post's layout (#5838)</li>
+	<li>Security: Fixed applying a saved template accepting any post ID, which could expose another post's layout. Props to Aaron - WellKnown for reporting. (#5903)</li>
+	<li>Security: Fixed the <code>[fl_builder_insert_layout]</code> shortcode rendering non-public content to users who can't edit it. Props to Aaron - WellKnown for reporting. (#5904)</li>
+	<li>Fixed a fatal error when a module template reassigns <code>$module</code>, such as the Ultimate Addons Business Reviews module (#5923)</li>
+	<li>Debug Mode: Fixed the module debug attribute reporting every module as overridden, with a full file path, on Windows (#5907)</li>
+</ul>
+
+<h4>2.11.2 - 10/29/2026</h4>
+<p><strong>Enhancements</strong></p>
+<ul>
+	<li>Debug Mode: Show each module's version and whether it's overridden, with the path to the override file (#4524)</li>
+	<li>License Settings: Beaver Builder AI now has install, activate and re-install handling in the Available Downloads list (#5525)</li>
+</ul>
+<p><strong>Fixes</strong></p>
+<ul>
+	<li>Components: Fixed Save As on a child node while editing a component creating an empty template and deleting the node from the component (#5835)</li>
+	<li>Components: Fixed a fatal error when saving a component instance with stored field connections (#5793)</li>
+	<li>Subscribe Form: Fixed the Constant Contact list dropdown emptying about 24 hours after connecting because the access token was never refreshed (#5811)</li>
+	<li>Accessibility: Fixed modules outputting a prohibited <code>aria-label</code> on front-end markup that overrode real accessible names (#5615)</li>
+	<li>Accessibility: Fixed the Search module outputting a malformed closing tag (#5164)</li>
+	<li>Responsive Editing: Fixed multiple columns being set to 0% width when returning to desktop mode (#5702)</li>
+	<li>Custom Attributes: Fixed custom targets not working with heading tag selectors such as <code>h2</code> (#5757)</li>
+	<li>Fixed tags added with the <code>fl_builder_node_container_element_options</code> filter falling back to <code>div</code> when they aren't in the allowed tags list (#5517)</li>
+	<li>Fixed a PHP 8 fatal error in <code>get_user_templates()</code> when a <code>WP_Error</code> is returned (#5661)</li>
+	<li>Field Connections: Fixed an undefined property <code>$post_type</code> warning when the main query post isn't a <code>WP_Post</code> (#5630)</li>
+	<li>Fixed an "Attempt to read property ID on null" warning when the main query returns no posts (#5523)</li>
+	<li>Fixed asset cache writes failing silently on network filesystems such as Pantheon (#5421)</li>
+	<li>Box Module: Fixed an undefined property warning for the <code>link_download</code> setting (#5611)</li>
+	<li>Popup Module: Fixed the popup position resetting to top left on the published page (#5563)</li>
+	<li>Photo Module: Fixed the lightbox opening on top of the settings panel in the builder (#5550)</li>
+	<li>Photo Module: Fixed cropped image writes not being atomic, which could serve a truncated file (#5510)</li>
+	<li>Icon Module: Fixed the icon background not shrinking with responsive icon sizes (#5555)</li>
+	<li>Button Module: Fixed the font family not updating in the live preview (#5412)</li>
+	<li>Video Module: Fixed extra space below embedded Vimeo videos (#5111)</li>
+	<li>Posts Module: Fixed Load More pagination failing because of unstable node IDs (#4901)</li>
+	<li>Content Slider and Testimonials Modules: Fixed swiping with a single slide on mobile devices (#920)</li>
+	<li>UI: Fixed unfocused select text being too dark to read in dark mode (#5556)</li>
+	<li>Translations: Fixed untranslatable strings in the Export/Import settings fields and the Outline panel context menu (#5488)</li>
+</ul>
+
 <h4>2.11.1.2 - 10/08/2026</h4>
 <p><strong>Hotfix</strong></p>
 <ul>

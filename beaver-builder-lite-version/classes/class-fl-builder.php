@@ -2009,7 +2009,7 @@ final class FLBuilder {
 				// Render the builder content.
 				FLBuilder::render_content_by_id( $query_post->ID );
 
-			} else {
+			} elseif ( self::can_view_post_content( $query_post->ID ) ) {
 
 				// Render the WP editor content if the builder isn't enabled.
 				echo apply_filters( 'the_content', $query_post->post_content );
@@ -2020,6 +2020,20 @@ final class FLBuilder {
 		if ( $site_id && is_multisite() ) {
 			restore_current_blog();
 		}
+	}
+
+	/**
+	 * Whether the current user may see the editor content of a post rendered by render_query().
+	 *
+	 * @since 2.11.2.1
+	 * @param int $post_id The ID of the post to check.
+	 * @return bool
+	 */
+	static private function can_view_post_content( int $post_id ): bool {
+		$is_viewable = FLBuilderUtils::is_post_publicly_viewable( $post_id );
+
+		// Not read_post: it maps to the primitive read cap for published posts of any type.
+		return $is_viewable || current_user_can( 'edit_post', $post_id );
 	}
 
 	/**
@@ -3351,6 +3365,22 @@ final class FLBuilder {
 		// Allow the module itself to filter its own classes.
 		$attrs['class'] = $module->filter_classes( $attrs['class'] );
 
+		// Debug mode: expose module version and override status.
+		if ( $module->node && self::is_debug() ) {
+			// Core module dirs keep Windows backslashes from FL_BUILDER_DIR, so compare normalized paths.
+			$module_dir  = wp_normalize_path( $module->dir );
+			$abspath     = wp_normalize_path( ABSPATH );
+			$default_dir = trailingslashit( wp_normalize_path( FL_BUILDER_DIR ) . 'modules/' . $module->slug );
+			$overridden  = $module_dir !== $default_dir;
+
+			$debug   = array();
+			$debug[] = 'version:' . ( null === $module->version ? 0 : (int) $module->version );
+			$debug[] = 'overridden:' . ( $overridden ? '1' : '0' );
+			$debug[] = 'path:' . str_replace( $abspath, '', $module_dir );
+
+			$attrs['data-debug'] = esc_attr( implode( '|', $debug ) );
+		}
+
 		// filter node attrs first to make sure specific node has highest priority
 		/**
 		 * HTML attributes array for a module node before the type-specific fl_builder_module_attributes filter.
@@ -4220,6 +4250,11 @@ final class FLBuilder {
 	 * @return string The module CSS margins string.
 	 */
 	static public function render_module_margins( $module ) {
+		// Popup modules place themselves and should not have spacing applied to avoid conflicts
+		if ( isset( $module->slug ) && 'popup' === $module->slug ) {
+			return '';
+		}
+
 		return self::render_node_spacing( $module, 'margin' );
 	}
 
@@ -4231,6 +4266,11 @@ final class FLBuilder {
 	 * @return string The module CSS margins string.
 	 */
 	static public function render_responsive_module_margins( $module ) {
+		// Popup modules place themselves and should not have spacing applied to avoid conflicts
+		if ( isset( $module->slug ) && 'popup' === $module->slug ) {
+			return '';
+		}
+
 		$global_settings = FLBuilderModel::get_global_settings();
 		$settings        = $module->settings;
 		$margins         = '';

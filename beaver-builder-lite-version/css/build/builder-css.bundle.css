@@ -7661,6 +7661,7 @@ body.fl-builder-ui-skin--dark .fl-builder-bar .fl-builder-bar-content,
 
 .fl-builder-ui-skin--dark .fl-builder-settings-fields select {
   background-image: url(../../img/svg/select-arrow-down-alt2-light.svg) !important;
+  color: #a7b1bb !important;
 }
 
 .fl-builder-ui-skin--dark .fl-lightbox .select2-selection__rendered {

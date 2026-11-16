@@ -584,7 +584,7 @@ FLBuilder::register_settings_form('col', array(
 						'container_element' => array(
 							'type'     => 'select',
 							'label'    => __( 'Container Element', 'fl-builder' ),
-							'sanitize' => array( 'FLBuilderUtils::esc_tags', 'div' ),
+							'sanitize' => array( 'FLBuilderUtils::esc_container_element', 'div' ),
 							'default'  => 'div',
 							/**
 							 * Filter to add/remove container types.
@@ -652,13 +652,13 @@ FLBuilder::register_settings_form('col', array(
 							'type'    => 'raw',
 							'label'   => __( 'Export', 'fl-builder' ),
 							'preview' => 'none',
-							'content' => '<button style="margin-right:10px" class="fl-builder-button fl-builder-button-small col-export-all" title="Copy Settings">Copy Settings</button><button class="fl-builder-button fl-builder-button-small col-export-style" title="Copy Styles">Copy Styles</button>',
+							'content' => '<button style="margin-right:10px" class="fl-builder-button fl-builder-button-small col-export-all" title="' . esc_attr__( 'Copy Settings', 'fl-builder' ) . '">' . esc_html__( 'Copy Settings', 'fl-builder' ) . '</button><button class="fl-builder-button fl-builder-button-small col-export-style" title="' . esc_attr__( 'Copy Styles', 'fl-builder' ) . '">' . esc_html__( 'Copy Styles', 'fl-builder' ) . '</button>',
 						),
 						'import' => array(
 							'type'    => 'raw',
 							'label'   => __( 'Import', 'fl-builder' ),
 							'preview' => 'none',
-							'content' => '<div class="col-import-wrap"><input type="text" class="col-import-input" placeholder="Paste settings or styles here..." /><button class="fl-builder-button fl-builder-button-small col-import-apply">Import</button></div><div class="col-import-error"></div>',
+							'content' => '<div class="col-import-wrap"><input type="text" class="col-import-input" placeholder="' . esc_attr__( 'Paste settings or styles here...', 'fl-builder' ) . '" /><button class="fl-builder-button fl-builder-button-small col-import-apply">' . esc_html__( 'Import', 'fl-builder' ) . '</button></div><div class="col-import-error"></div>',
 						),
 					),
 				),

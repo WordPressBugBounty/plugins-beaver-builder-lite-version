@@ -1,5 +1,8 @@
 <?php
 
+// Module templates share this scope and some reassign $module (UABB Business Reviews), so restore it if they leave a non-module.
+$rendering_module = $module;
+
 ob_start();
 
 if ( is_callable( $module->render ?? null ) ) {
@@ -14,6 +17,10 @@ if ( is_callable( $module->render ?? null ) ) {
 }
 
 $output = ob_get_clean();
+
+if ( ! $module instanceof FLBuilderModule ) {
+	$module = $rendering_module;
+}
 
 // All container based nodes should only stick to wrapper custom attributes.
 if ( ! in_array( $module->slug, array( 'row', 'col', 'box', 'loop' ), true ) ) {

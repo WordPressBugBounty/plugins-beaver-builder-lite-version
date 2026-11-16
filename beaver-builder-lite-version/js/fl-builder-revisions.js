@@ -188,6 +188,16 @@
 		 */
 		previewRenderComplete: function( response )
 		{
+			var data = FLBuilder._jsonParse( response );
+
+			// The server refuses IDs that aren't revisions of this post (e.g. a stale list); exit so the draft and overlays come back.
+			if ( data.error ) {
+				FLBuilder.hideAjaxLoader();
+				FLBuilder.alert( data.error );
+				this.exitPreview();
+				return;
+			}
+
 			FLBuilder._renderLayout( response, function() {
 				FLBuilder._destroyOverlayEvents();
 				FLBuilder._removeAllOverlays();
@@ -239,6 +249,15 @@
 		 */
 		restoreComplete: function( response ) {
 			var data = FLBuilder._jsonParse( response );
+
+			// Refused (see previewRenderComplete): put the current draft back on the canvas.
+			if ( data.error ) {
+				FLBuilder.hideAjaxLoader();
+				FLBuilder.alert( data.error );
+				FLBuilder._updateLayout();
+				return;
+			}
+
 			FLBuilder._renderLayout( data.layout );
 			FLBuilder.triggerHook( 'didRestoreRevisionComplete', data.config );
 

@@ -489,6 +489,41 @@ final class FLBuilderUtils {
 	}
 
 	/**
+	 * Sanitizes a row/column/module container_element setting against the
+	 * fl_builder_node_container_element_options filter, falling back to
+	 * allowed_tags() so tags that were valid before this filter existed
+	 * (e.g. saved programmatically) don't get reset on next save. The
+	 * fallback default is validated the same way as the submitted value,
+	 * since callers may pass a filtered value (e.g. row's
+	 * fl_builder_row_container_element_default) as the default, and it is
+	 * echoed unescaped at render.
+	 *
+	 * @since 2.11
+	 * @param string $setting The submitted tag name.
+	 * @param string $default_tag The tag to fall back to if invalid.
+	 * @return string
+	 */
+	public static function esc_container_element( $setting, $default_tag = 'div' ) {
+		$allowed = apply_filters( 'fl_builder_node_container_element_options', array(
+			'div'     => '&lt;div&gt;',
+			'section' => '&lt;section&gt;',
+			'article' => '&lt;article&gt;',
+			'aside'   => '&lt;aside&gt;',
+			'main'    => '&lt;main&gt;',
+			'header'  => '&lt;header&gt;',
+			'footer'  => '&lt;footer&gt;',
+		) );
+		$tags = array_unique( array_merge( array_keys( $allowed ), self::allowed_tags() ) );
+		if ( in_array( $setting, $tags, true ) && preg_match( '/^[a-z][a-z0-9-]*$/', $setting ) ) {
+			return $setting;
+		}
+		if ( in_array( $default_tag, $tags, true ) && preg_match( '/^[a-z][a-z0-9-]*$/', $default_tag ) ) {
+			return $default_tag;
+		}
+		return 'div';
+	}
+
+	/**
 	 * Returns the column width when set to blank or zero and allows it to be overridden.
 	 *
 	 * @since 2.8.2

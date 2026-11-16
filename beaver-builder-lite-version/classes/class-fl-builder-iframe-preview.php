@@ -24,7 +24,8 @@ final class FLBuilderIframePreview {
 	 * @return void
 	 */
 	static public function hook() {
-		if ( ! FLBuilderModel::is_builder_draft_preview() ) {
+		// The request half of is_builder_draft_preview(); its capability check needs the main query, so it runs in filter_node_status().
+		if ( ! isset( $_GET['fl_builder_preview'] ) || ! is_user_logged_in() ) {
 			return;
 		}
 
@@ -33,14 +34,14 @@ final class FLBuilderIframePreview {
 	}
 
 	/**
-	 * Forces draft node status for layout previews.
+	 * Forces draft node status for layout previews the current user can edit.
 	 *
 	 * @since 2.0.6
 	 * @param string $status
 	 * @return string
 	 */
 	static public function filter_node_status( $status ) {
-		return 'draft';
+		return FLBuilderModel::is_builder_draft_preview() ? 'draft' : $status;
 	}
 }
 

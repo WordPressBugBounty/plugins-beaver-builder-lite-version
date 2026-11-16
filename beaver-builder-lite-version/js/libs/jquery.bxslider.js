@@ -300,7 +300,7 @@
           if (++count === total) { callback(); }
         }).each(function() {
           setTimeout(() => {
-            if (this.complete || this.src == '') { $(this).trigger('load'); }
+            if (this.complete || this.src === '') { $(this).trigger('load'); }
           },0);
         });
       });
@@ -347,8 +347,8 @@
       if (slider.settings.pager) { updatePagerActive(slider.settings.startSlide); }
       // check for any updates to the controls (like hideControlOnEnd updates)
       if (slider.settings.controls || ( slider.settings.nextSelector && slider.settings.prevSelector )) { updateDirectionControls(); }
-      // if touchEnabled is true, setup the touch events
-      if ('ontouchstart' in window) { initTouch(); }
+      // Set up the touch events if touch is enabled and more than one slide
+      if (slider.settings.touchEnabled && slider.children.length > 1 && 'ontouchstart' in window) { initTouch(); }
       // if keyboardEnabled is true, setup the keyboard events
       if (slider.settings.keyboardEnabled && !slider.settings.ticker) {
         slider.viewport.closest('.fl-module').keydown(keyPress).focusin(isOutFocus);
@@ -905,7 +905,7 @@
     var updateAutoControls = function(state) {
       // if autoControlsCombine is true, replace the current control with the new state
       if (slider.settings.autoControlsCombine) {
-        var focused = slider.controls.autoEl.has($(document.activeElement)).length == 1;
+        var focused = slider.controls.autoEl.has($(document.activeElement)).length === 1;
         slider.controls.autoEl.html(slider.controls[state]);
         if(focused) {
           slider.controls[state].find('a, button').focus();

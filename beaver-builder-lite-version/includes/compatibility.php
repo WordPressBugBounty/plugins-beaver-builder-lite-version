@@ -110,7 +110,7 @@ function fl_theme_builder_archive_post_grid( $layouts ) {
 		FLBuilderLoop::$loop_counter = 0;
 
 		$post_grid['post_count']  = $query_post_grid->post_count;
-		$post_grid['page_exists'] = $query_post_grid->max_num_pages >= $current_paged;
+		$post_grid['page_exists'] = $wp_the_query->max_num_pages >= $current_paged || $query_post_grid->max_num_pages >= $current_paged;
 		break;
 	}
 
